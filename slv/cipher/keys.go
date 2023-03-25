@@ -3,7 +3,6 @@ package cipher
 import (
 	"crypto/rand"
 	"crypto/sha1"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -11,12 +10,11 @@ import (
 	"golang.org/x/crypto/nacl/box"
 )
 
-var error_decryption = errors.New("Something went wrong while attempting to decrypt!")
-
 const (
-	pub_key_prefix  = "slv_pubkey_"
-	priv_key_prefix = "slv_privkey_"
-	secret_prefix   = "slv_secret_"
+	pub_key_prefix       = "slv_pubkey_"
+	priv_key_prefix      = "slv_privkey_"
+	secret_prefix        = "slv_secret_"
+	encrypted_key_prefix = "slv_enckey_"
 )
 
 func checksum(data []byte) string {
