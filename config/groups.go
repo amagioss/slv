@@ -3,8 +3,8 @@ package config
 import (
 	"os"
 
-	"github.com/shibme/slv/slv/access"
-	"github.com/shibme/slv/slv/commons"
+	"github.com/shibme/slv/access"
+	"github.com/shibme/slv/commons"
 )
 
 type GroupConfig struct {

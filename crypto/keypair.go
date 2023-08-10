@@ -3,6 +3,7 @@ package crypto
 import (
 	"crypto/rand"
 	"crypto/sha1"
+	"encoding/json"
 
 	"golang.org/x/crypto/nacl/box"
 	"gopkg.in/yaml.v3"
@@ -68,17 +69,31 @@ type PublicKey struct {
 	encrypter *Encrypter
 }
 
+func (publicKey PublicKey) MarshalYAML() (interface{}, error) {
+	return publicKey.String(), nil
+
+}
+
 func (publicKey *PublicKey) UnmarshalYAML(value *yaml.Node) (err error) {
 	var slvPublicKey string
 	err = value.Decode(&slvPublicKey)
 	if err == nil {
-		publicKey.FromString(slvPublicKey)
+		return publicKey.FromString(slvPublicKey)
 	}
 	return
 }
 
-func (publicKey PublicKey) MarshalYAML() (interface{}, error) {
-	return publicKey.String(), nil
+func (publicKey PublicKey) MarshalJSON() ([]byte, error) {
+	return json.Marshal(publicKey.String())
+}
+
+func (publicKey *PublicKey) UnmarshalJSON(data []byte) (err error) {
+	var pubKeyStr string
+	err = json.Unmarshal(data, &pubKeyStr)
+	if err == nil {
+		return publicKey.FromString(pubKeyStr)
+	}
+	return
 }
 
 func (publicKey *PublicKey) GetEncrypter() (encrypter *Encrypter, err error) {

@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/shibme/slv/slv/crypto"
-	"github.com/shibme/slv/slv/vault"
+	"github.com/shibme/slv/crypto"
+	"github.com/shibme/slv/vault"
 )
 
 type Project struct {

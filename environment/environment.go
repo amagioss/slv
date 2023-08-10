@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/shibme/slv/slv/commons"
-	"github.com/shibme/slv/slv/crypto"
+	"github.com/shibme/slv/commons"
+	"github.com/shibme/slv/crypto"
+	"gopkg.in/yaml.v3"
 )
 
 type EnvType string
@@ -73,22 +74,29 @@ func (env *Environment) Tags() (tags []string) {
 	return env.data.Tags
 }
 
-func EnvFromSLVFormat(slvFormatEnv string) (env Environment, err error) {
-	if !strings.HasPrefix(slvFormatEnv, slvFormatEnvironmentPrefix) {
+func FromEnvDef(envDef string) (env Environment, err error) {
+	if !strings.HasPrefix(envDef, envDefPrefix) {
 		return
 	}
-	serializedEnvString := strings.TrimPrefix(slvFormatEnv, slvFormatEnvironmentPrefix)
-	data := commons.Decode(serializedEnvString)
-	err = commons.Deserialize(data, &env)
+	serializedEnvString := strings.TrimPrefix(envDef, envDefPrefix)
+	err = commons.Deserialize(serializedEnvString, &env.data)
 	return
 }
 
-func (env *Environment) ToSLVFormat() (string, error) {
+func (env *Environment) ToEnvDef() (string, error) {
 	data, err := commons.Serialize(env.data)
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s%s", slvFormatEnvironmentPrefix, commons.Encode(data)), nil
+	return fmt.Sprintf("%s%s", envDefPrefix, data), nil
+}
+
+func (env Environment) MarshalYAML() (interface{}, error) {
+	return env.data, nil
+}
+
+func (env *Environment) UnmarshalYAML(value *yaml.Node) (err error) {
+	return value.Decode(&env.data)
 }
 
 func (env *Environment) Search(query string) bool {

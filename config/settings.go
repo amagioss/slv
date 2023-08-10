@@ -1,7 +1,9 @@
 package config
 
 import (
-	"github.com/shibme/slv/slv/commons"
+	"os"
+
+	"github.com/shibme/slv/commons"
 )
 
 type Settings struct {
@@ -21,8 +23,10 @@ type SettingsData struct {
 func initSettings(path string) (settings *Settings, err error) {
 	settings = &Settings{}
 	settings.path = path
-	if err = commons.ReadFromYAML(settings.path, settings.data); err != nil {
-		return nil, ErrProcessingSettings
+	if _, err := os.Stat(settings.path); err == nil {
+		if err = commons.ReadFromYAML(settings.path, settings.data); err != nil {
+			return nil, ErrProcessingSettingsManifest
+		}
 	} else if err = settings.newSettingsData(); err != nil {
 		return nil, err
 	}
@@ -43,7 +47,7 @@ func (settings *Settings) newSettingsData() error {
 func (settings *Settings) Commit() error {
 	if settings.pendingChanges {
 		if commons.WriteToYAML(settings.path, &settings.data) != nil {
-			return ErrProcessingSettings
+			return ErrProcessingSettingsManifest
 		}
 		settings.pendingChanges = false
 	}

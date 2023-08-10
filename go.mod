@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/spf13/cobra v1.7.0
-	golang.org/x/crypto v0.7.0
+	golang.org/x/crypto v0.12.0
 )
 
 require (
@@ -14,6 +14,6 @@ require (
 )
 
 require (
-	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 )

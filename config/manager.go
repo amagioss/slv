@@ -4,19 +4,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/shibme/slv/slv/commons"
+	"github.com/shibme/slv/commons"
 )
 
 type configManager struct {
-	dir           string
-	prefsFile     string
-	preferences   ConfigPreferences
-	configList    map[string]struct{}
-	currentConfig *Config
+	dir       string
+	prefsFile string
+	pref      Pref
+	list      map[string]struct{}
+	current   *Config
 }
 
-type ConfigPreferences struct {
-	CurrentConfigName string `yaml:"current"`
+type Pref struct {
+	Current string `yaml:"current"`
 }
 
 var confManager *configManager = nil
@@ -44,7 +44,7 @@ func initConfigManager() (err error) {
 	// Create the config preferences file if it doesn't exist
 	preferencesFileInfo, err := os.Stat(confMgr.prefsFile)
 	if err != nil {
-		confMgr.preferences = ConfigPreferences{}
+		confMgr.pref = Pref{}
 		err = confMgr.savePreferences()
 		if err != nil {
 			return ErrConfigManagerInitialization
@@ -52,7 +52,7 @@ func initConfigManager() (err error) {
 	} else if preferencesFileInfo.IsDir() {
 		return ErrConfigManagerInitialization
 	} else {
-		err = commons.ReadFromYAML(confMgr.prefsFile, &confMgr.preferences)
+		err = commons.ReadFromYAML(confMgr.prefsFile, &confMgr.pref)
 		if err != nil {
 			return ErrConfigManagerInitialization
 		}
@@ -68,11 +68,11 @@ func initConfigManager() (err error) {
 	if err != nil {
 		return ErrOpeningConfigManagerDir
 	}
-	confMgr.configList = make(map[string]struct{})
+	confMgr.list = make(map[string]struct{})
 	for _, fileInfo := range fileInfoList {
 		if fileInfo.IsDir() {
 			if f, err := os.Stat(filepath.Join(confMgr.dir, fileInfo.Name(), configFileName)); err == nil && !f.IsDir() {
-				confMgr.configList[fileInfo.Name()] = struct{}{}
+				confMgr.list[fileInfo.Name()] = struct{}{}
 			}
 		}
 	}
@@ -81,31 +81,31 @@ func initConfigManager() (err error) {
 }
 
 func (confMgr *configManager) savePreferences() error {
-	if commons.WriteToYAML(confMgr.prefsFile, confMgr.preferences) != nil {
+	if commons.WriteToYAML(confMgr.prefsFile, confMgr.pref) != nil {
 		return ErrSavingConfigManagerPreferences
 	}
 	return nil
 }
 
-func GetAllConfigNames() (configNames []string, err error) {
+func List() (configNames []string, err error) {
 	if err = initConfigManager(); err != nil {
 		return nil, err
 	}
-	configNames = make([]string, 0, len(confManager.configList))
-	for configName := range confManager.configList {
+	configNames = make([]string, 0, len(confManager.list))
+	for configName := range confManager.list {
 		configNames = append(configNames, configName)
 	}
 	return
 }
 
-func GetConfig(configName string) (config *Config, err error) {
+func getConfig(configName string) (config *Config, err error) {
 	if err = initConfigManager(); err != nil {
 		return nil, err
 	}
 	if config = comfigMap[configName]; config != nil {
 		return
 	}
-	if _, exists := confManager.configList[configName]; !exists {
+	if _, exists := confManager.list[configName]; !exists {
 		return nil, ErrConfigNotFound
 	}
 	if config, err = confManager.initConfig(configName); err != nil {
@@ -115,44 +115,56 @@ func GetConfig(configName string) (config *Config, err error) {
 	return
 }
 
-func SetCurrentConfig(configName string) (config *Config, err error) {
-	config, err = GetConfig(configName)
-	if err == nil {
-		confManager.preferences.CurrentConfigName = configName
-		confManager.currentConfig = config
-		err = confManager.savePreferences()
-		if err != nil {
-			return nil, err
-		}
+func Set(configName string) error {
+	if err := initConfigManager(); err != nil {
+		return err
 	}
-	return
+	if _, exists := confManager.list[configName]; !exists {
+		return ErrConfigNotFound
+	}
+	confManager.pref.Current = configName
+	return confManager.savePreferences()
+}
+
+func GetCurrentConfigName() (currentConfigName string, err error) {
+	if err = initConfigManager(); err != nil {
+		return "", err
+	}
+	if confManager.pref.Current != "" {
+		return confManager.pref.Current, nil
+	} else {
+		return "", ErrNoCurrentConfigFound
+	}
 }
 
 func GetCurrentConfig() (config *Config, err error) {
 	if err = initConfigManager(); err != nil {
 		return nil, err
 	}
-	if confManager.currentConfig != nil {
-		return confManager.currentConfig, nil
+	if confManager.current != nil {
+		return confManager.current, nil
 	}
-	if confManager.preferences.CurrentConfigName == "" {
+	if confManager.pref.Current == "" {
 		return nil, ErrNoCurrentConfigFound
 	}
-	return GetConfig(confManager.preferences.CurrentConfigName)
+	return getConfig(confManager.pref.Current)
 }
 
-func NewConfig(configName string) (config *Config, err error) {
-	if err = initConfigManager(); err != nil {
-		return nil, err
+func New(configName string) error {
+	if err := initConfigManager(); err != nil {
+		return err
 	}
-	if _, exists := confManager.configList[configName]; exists {
-		return nil, ErrManifestExistsAlready
+	if _, exists := confManager.list[configName]; exists {
+		return ErrConfigExistsAlready
 	}
-	if config, err = confManager.initConfig(configName); err != nil {
-		return nil, ErrConfigInitialization
+	if _, err := confManager.initConfig(configName); err != nil {
+		return err
 	}
-	confManager.configList[configName] = struct{}{}
-	return
+	confManager.list[configName] = struct{}{}
+	if confManager.pref.Current == "" {
+		return Set(configName)
+	}
+	return nil
 }
 
 func (configManager *configManager) initConfig(configName string) (config *Config, err error) {
@@ -179,13 +191,13 @@ func (configManager *configManager) initConfig(configName string) (config *Confi
 		if configFileInfo.IsDir() {
 			return nil, ErrConfigInitialization
 		} else {
-			if commons.ReadFromYAML(config.configFile, &config.configInfo) != nil {
+			if commons.ReadFromYAML(config.configFile, &config.data) != nil {
 				return nil, ErrConfigInitialization
 			}
 		}
 	} else {
-		config.configInfo = ConfigInfo{}
-		if commons.WriteToYAML(config.configFile, &config.configInfo) != nil {
+		config.data = &ConfigData{}
+		if commons.WriteToYAML(config.configFile, &config.data) != nil {
 			return nil, ErrConfigInitialization
 		}
 	}
@@ -197,10 +209,10 @@ func (configManager *configManager) initConfig(configName string) (config *Confi
 	}
 
 	// Attempting to initialize environments manifest
-	environmentConfigFile := filepath.Join(config.dataDir, environmentConfigFileName)
-	if config.environmentConfig, err = initEnvironmentConfig(environmentConfigFile); err != nil {
-		return nil, err
-	}
+	// environmentConfigFile := filepath.Join(config.dataDir, environmentConfigFileName)
+	// if config.envConfig, err = initEnvironmentConfig(environmentConfigFile); err != nil {
+	// 	return nil, err
+	// }
 
 	// Attempting to initialize groups manifest
 	groupConfigFile := filepath.Join(config.dataDir, groupConfigFileName)
@@ -209,3 +221,12 @@ func (configManager *configManager) initConfig(configName string) (config *Confi
 	}
 	return
 }
+
+// func AddEnvToConfig(configName, envDef string) error {
+// 	cfg, err := getConfig(configName)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	envConf := cfg.GetEnvConfig()
+// 	envConf.AddEnvironment(envDef)
+// }

@@ -8,14 +8,14 @@ import (
 const (
 	// Config Manager constants
 	configManagerDirName             = "configs"
-	configManagerPreferencesFileName = ".preferences.slv"
+	configManagerPreferencesFileName = ".preferences.yml"
 
 	// Config constants
-	configFileName            = ".config.slv"
+	configFileName            = ".config.yml"
 	configDataDirName         = "data"
-	settingsFileName          = "settings.slv"
-	environmentConfigFileName = "environments.slv"
-	groupConfigFileName       = "groups.slv"
+	settingsFileName          = "settings.yml"
+	environmentConfigFileName = "environments.yml"
+	groupConfigFileName       = "groups.yml"
 
 	// Settings constants
 	defaultSyncInterval = 86400
@@ -25,10 +25,10 @@ var ErrConfigManagerInitialization = errors.New("error in initializing config ma
 var ErrSavingConfigManagerPreferences = errors.New("error in saving config manager preferences")
 var ErrOpeningConfigManagerDir = errors.New("error in opening manifest config directory")
 var ErrNoCurrentConfigFound = errors.New("current manifest not set")
-var ErrManifestExistsAlready = errors.New("manifest exists already")
-var ErrConfigNotFound = errors.New("manifest not found")
+var ErrConfigExistsAlready = errors.New("config exists already")
+var ErrConfigNotFound = errors.New("config not found")
 var ErrConfigInitialization = errors.New("unable to initialize config")
-var ErrProcessingSettings = errors.New("error in processing settings")
+var ErrProcessingSettingsManifest = errors.New("error in processing settings manifest")
 var ErrProcessingEnvironmentsManifest = errors.New("error in processing environments manifest")
 var ErrProcessingGroupsManifest = errors.New("error in processing groups manifest")
 var ErrEnvironmentNotFound = errors.New("no such environment exists")

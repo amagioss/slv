@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/shibme/slv/slv/commons"
+	"github.com/shibme/slv/commons"
 	"gopkg.in/yaml.v3"
 )
 

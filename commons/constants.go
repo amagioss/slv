@@ -31,8 +31,12 @@ func getAppDataDirPath() (slvAppDataRoot string) {
 	return
 }
 
-var appDataDir = getAppDataDirPath()
+var appDataDir *string
 
 func AppDataDir() string {
-	return appDataDir
+	if appDataDir == nil {
+		slvAppDataRoot := getAppDataDirPath()
+		appDataDir = &slvAppDataRoot
+	}
+	return *appDataDir
 }

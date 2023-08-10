@@ -22,20 +22,25 @@ func jsonDeserialize(dataBytes []byte, data interface{}) (err error) {
 	return nil
 }
 
-func Serialize(data interface{}) (serialized []byte, err error) {
-	serialized, err = jsonSerialize(data)
+func Serialize(data interface{}) (string, error) {
+	serialized, err := jsonSerialize(data)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return Compress(serialized)
+	serialized, err = Compress(serialized)
+	if err != nil {
+		return "", err
+	}
+	return Encode(serialized), nil
 }
 
-func Deserialize(serialized []byte, data interface{}) (err error) {
-	serialized, err = Decompress(serialized)
+func Deserialize(serialized string, data interface{}) (err error) {
+	serializedBytes := Decode(serialized)
+	serializedBytes, err = Decompress(serializedBytes)
 	if err != nil {
 		return err
 	}
-	return jsonDeserialize(serialized, &data)
+	return jsonDeserialize(serializedBytes, &data)
 }
 
 func Encode(data []byte) (encoded string) {

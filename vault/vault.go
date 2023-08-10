@@ -5,8 +5,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/shibme/slv/slv/commons"
-	"github.com/shibme/slv/slv/crypto"
+	"github.com/shibme/slv/commons"
+	"github.com/shibme/slv/crypto"
 )
 
 type Secrets struct {
@@ -33,19 +33,12 @@ type Vault struct {
 	unlockedBy     *string
 }
 
-func vaultExists(path string) bool {
-	if f, err := os.Stat(path); err == nil && !f.IsDir() {
-		return true
-	}
-	return false
-}
-
 // Returns new vault instance. The vault name should end with .slv
 func New(vaultFile string, shareWithPublicKeys ...crypto.PublicKey) (vault *Vault, err error) {
 	if !strings.HasSuffix(vaultFile, vaultFileExtension) {
 		return nil, ErrInvalidVaultFileName
 	}
-	if vaultExists(vaultFile) {
+	if commons.FileExists(vaultFile) {
 		return nil, ErrVaultExists
 	}
 	vault = &Vault{
@@ -84,7 +77,7 @@ func Read(vaultFile string) (vault *Vault, err error) {
 	if !strings.HasSuffix(vaultFile, vaultFileExtension) {
 		return nil, ErrInvalidVaultFileName
 	}
-	if !vaultExists(vaultFile) {
+	if !commons.FileExists(vaultFile) {
 		return nil, ErrVaultNotFound
 	}
 	vault = &Vault{
