@@ -115,58 +115,6 @@ func getConfig(configName string) (config *Config, err error) {
 	return
 }
 
-func Set(configName string) error {
-	if err := initConfigManager(); err != nil {
-		return err
-	}
-	if _, exists := confManager.list[configName]; !exists {
-		return ErrConfigNotFound
-	}
-	confManager.pref.Current = configName
-	return confManager.savePreferences()
-}
-
-func GetCurrentConfigName() (currentConfigName string, err error) {
-	if err = initConfigManager(); err != nil {
-		return "", err
-	}
-	if confManager.pref.Current != "" {
-		return confManager.pref.Current, nil
-	} else {
-		return "", ErrNoCurrentConfigFound
-	}
-}
-
-func GetCurrentConfig() (config *Config, err error) {
-	if err = initConfigManager(); err != nil {
-		return nil, err
-	}
-	if confManager.current != nil {
-		return confManager.current, nil
-	}
-	if confManager.pref.Current == "" {
-		return nil, ErrNoCurrentConfigFound
-	}
-	return getConfig(confManager.pref.Current)
-}
-
-func New(configName string) error {
-	if err := initConfigManager(); err != nil {
-		return err
-	}
-	if _, exists := confManager.list[configName]; exists {
-		return ErrConfigExistsAlready
-	}
-	if _, err := confManager.initConfig(configName); err != nil {
-		return err
-	}
-	confManager.list[configName] = struct{}{}
-	if confManager.pref.Current == "" {
-		return Set(configName)
-	}
-	return nil
-}
-
 func (configManager *configManager) initConfig(configName string) (config *Config, err error) {
 	config = &Config{}
 	config.configManager = configManager
@@ -203,10 +151,10 @@ func (configManager *configManager) initConfig(configName string) (config *Confi
 	}
 
 	// Attempting to initialize settings
-	settingsFile := filepath.Join(config.dataDir, settingsFileName)
-	if config.settings, err = initSettings(settingsFile); err != nil {
-		return nil, err
-	}
+	// settingsFile := filepath.Join(config.dataDir, settingsFileName)
+	// if config.settings, err = initSettings(settingsFile); err != nil {
+	// 	return nil, err
+	// }
 
 	// Attempting to initialize environments manifest
 	// environmentConfigFile := filepath.Join(config.dataDir, environmentConfigFileName)
@@ -215,10 +163,10 @@ func (configManager *configManager) initConfig(configName string) (config *Confi
 	// }
 
 	// Attempting to initialize groups manifest
-	groupConfigFile := filepath.Join(config.dataDir, groupConfigFileName)
-	if config.groupConfig, err = initGroupConfig(groupConfigFile); err != nil {
-		return nil, err
-	}
+	// groupConfigFile := filepath.Join(config.dataDir, groupConfigFileName)
+	// if config.groupConfig, err = initGroupConfig(groupConfigFile); err != nil {
+	// 	return nil, err
+	// }
 	return
 }
 

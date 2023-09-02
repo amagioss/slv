@@ -10,18 +10,18 @@ import (
 )
 
 type Secrets struct {
-	Direct map[string]crypto.SealedData `yaml:"direct"`
+	Direct map[string]crypto.SealedData `yaml:"direct,omitempty"`
 }
 
 type Meta struct {
-	Version   string             `yaml:"svl_version"`
-	PublicKey crypto.PublicKey   `yaml:"public_key"`
-	KeyWraps  []crypto.SealedKey `yaml:"sealed_keys"`
+	Version   string             `yaml:"svl_version,omitempty"`
+	PublicKey crypto.PublicKey   `yaml:"public_key,omitempty"`
+	KeyWraps  []crypto.SealedKey `yaml:"sealed_keys,omitempty"`
 }
 
 type VaultData struct {
-	Secrets Secrets `yaml:"secrets"`
-	Meta    Meta    `yaml:"meta"`
+	Secrets Secrets `yaml:"secrets,omitempty"`
+	Meta    Meta    `yaml:"meta,omitempty"`
 }
 
 type Vault struct {

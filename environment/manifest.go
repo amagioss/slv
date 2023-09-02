@@ -5,28 +5,38 @@ import (
 
 	"github.com/shibme/slv/commons"
 	"github.com/shibme/slv/crypto"
+	"gopkg.in/yaml.v3"
 )
 
 type EnvManifest struct {
-	path string
-	data *EnvManifestData
+	path *string
+	*manifest
 }
 
-type EnvManifestData struct {
+type manifest struct {
 	Version      string                  `yaml:"version"`
-	Root         *Root                   `yaml:"root"`
-	Environments map[string]*Environment `yaml:"environments"`
+	Root         *Root                   `yaml:"root,omitempty"`
+	Environments map[string]*Environment `yaml:"environments,omitempty"`
+}
+
+func (envManifest EnvManifest) MarshalYAML() (interface{}, error) {
+	return envManifest.manifest, nil
+}
+
+func (envManifest *EnvManifest) UnmarshalYAML(value *yaml.Node) (err error) {
+	return value.Decode(&envManifest.manifest)
 }
 
 func NewManifest(path string) (envManifest *EnvManifest, err error) {
 	if commons.FileExists(path) {
 		return nil, ErrManifestExistsAlready
 	}
-	envManifest = &EnvManifest{}
-	envManifest.path = path
-	envManifest.data = &EnvManifestData{}
-	envManifest.data.Version = commons.Version
-	envManifest.data.Environments = make(map[string]*Environment)
+	envManifest = &EnvManifest{
+		path: &path,
+		manifest: &manifest{
+			Version: commons.Version,
+		},
+	}
 	err = envManifest.commit()
 	if err != nil {
 		envManifest = nil
@@ -38,36 +48,37 @@ func GetManifest(path string) (envManifest *EnvManifest, err error) {
 	if !commons.FileExists(path) {
 		return nil, ErrManifestNotFound
 	}
-	envManifestData := &EnvManifestData{}
-	if err = commons.ReadFromYAML(path, envManifestData); err != nil {
+	envManifest = &EnvManifest{}
+	if err = commons.ReadFromYAML(path, envManifest); err != nil {
 		return nil, err
 	}
-	envManifest = &EnvManifest{}
-	envManifest.path = path
-	envManifest.data = envManifestData
+	envManifest.path = &path
 	return
 }
 
 func (envManifest *EnvManifest) commit() error {
-	if commons.WriteToYAML(envManifest.path, &envManifest.data) != nil {
+	if commons.WriteToYAML(*envManifest.path, envManifest) != nil {
 		return ErrWritingManifest
 	}
 	return nil
 }
 
-func (envManifest *EnvManifest) HasRoot() bool {
-	return envManifest.data.Root != nil
+func (envManifest *EnvManifest) RootPublicKey() *crypto.PublicKey {
+	if envManifest.Root != nil {
+		return &envManifest.Root.PublicKey
+	}
+	return nil
 }
 
 func (envManifest *EnvManifest) InitRoot() (*crypto.PrivateKey, error) {
-	if envManifest.HasRoot() {
+	if envManifest.Root != nil {
 		return nil, ErrManifestRootExistsAlready
 	}
 	root, rootPrivateKey, err := newRoot()
 	if err != nil {
 		return nil, err
 	}
-	envManifest.data.Root = root
+	envManifest.Root = root
 	err = envManifest.commit()
 	if err != nil {
 		return nil, err
@@ -75,24 +86,26 @@ func (envManifest *EnvManifest) InitRoot() (*crypto.PrivateKey, error) {
 	return rootPrivateKey, nil
 }
 
-func (envConfig *EnvManifest) ListEnv() (environments []*Environment) {
-	for _, environment := range envConfig.data.Environments {
-		environments = append(environments, environment)
+func (envManifest *EnvManifest) ListEnv() (environments []*Environment) {
+	if envManifest.Environments != nil {
+		for _, environment := range envManifest.Environments {
+			environments = append(environments, environment)
+		}
 	}
 	return
 }
 
-func (envConfig *EnvManifest) GetEnv(id string) (environment *Environment, err error) {
-	if environment, ok := envConfig.data.Environments[id]; ok {
+func (envManifest *EnvManifest) GetEnv(id string) (environment *Environment, err error) {
+	if environment, ok := envManifest.Environments[id]; ok {
 		return environment, nil
 	}
 	return nil, ErrEnvironmentNotFound
 }
 
 // Lists environments that match a given query by searching for parts of name, email and tags
-func (envConfig *EnvManifest) SearchEnv(query string) (environments []*Environment) {
+func (envManifest *EnvManifest) SearchEnv(query string) (environments []*Environment) {
 	query = strings.ToLower(query)
-	for _, env := range envConfig.data.Environments {
+	for _, env := range envManifest.Environments {
 		if env.Search(query) {
 			environments = append(environments, env)
 		}
@@ -100,16 +113,19 @@ func (envConfig *EnvManifest) SearchEnv(query string) (environments []*Environme
 	return
 }
 
-func (envConfig *EnvManifest) updateEnvironment(env *Environment) error {
-	envConfig.data.Environments[env.Id()] = env
-	return envConfig.commit()
+func (envManifest *EnvManifest) updateEnvironment(env *Environment) error {
+	if envManifest.Environments == nil {
+		envManifest.Environments = make(map[string]*Environment)
+	}
+	envManifest.Environments[env.Id()] = env
+	return envManifest.commit()
 }
 
-func (envConfig *EnvManifest) AddEnv(envString string) (err error) {
+func (envManifest *EnvManifest) AddEnv(envString string) (err error) {
 	environment, err := FromEnvDef(envString)
 	if err != nil {
 		return
 	}
-	envConfig.updateEnvironment(&environment)
+	envManifest.updateEnvironment(&environment)
 	return
 }

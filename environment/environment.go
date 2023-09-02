@@ -1,6 +1,7 @@
 package environment
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -12,11 +13,10 @@ import (
 type EnvType string
 
 type Environment struct {
-	data       EnvData
-	searchData map[string]struct{}
+	*environment
 }
 
-type EnvData struct {
+type environment struct {
 	PublicKey crypto.PublicKey `yaml:"public_key"`
 	Name      string           `yaml:"name"`
 	Email     string           `yaml:"email"`
@@ -32,46 +32,29 @@ func New(name, email string, envType EnvType) (env *Environment, privateKey *cry
 	if !envType.isValid() {
 		return nil, nil, ErrInvalidEnvironmentType
 	}
-	env = &Environment{}
 	kp, err := crypto.NewKeyPair(EnvironmentKey)
 	if err != nil {
 		return nil, nil, err
 	}
 	privateKey = new(crypto.PrivateKey)
+	env = &Environment{
+		environment: &environment{
+			PublicKey: kp.PublicKey(),
+			Name:      name,
+			Email:     email,
+			EnvType:   envType,
+		},
+	}
 	*privateKey = kp.PrivateKey()
-	env.data.PublicKey = kp.PublicKey()
-	env.data.Name = name
-	env.data.Email = email
-	env.data.EnvType = envType
-	return env, privateKey, nil
+	return
 }
 
 func (env *Environment) Id() string {
-	return env.PublicKey().String()
-}
-
-func (env *Environment) PublicKey() crypto.PublicKey {
-	return env.data.PublicKey
-}
-
-func (env *Environment) Type() EnvType {
-	return env.data.EnvType
-}
-
-func (env *Environment) Name() string {
-	return env.data.Name
-}
-
-func (env *Environment) Email() string {
-	return env.data.Email
+	return env.PublicKey.String()
 }
 
 func (env *Environment) AddTags(tags ...string) {
-	env.data.Tags = append(env.data.Tags, tags...)
-}
-
-func (env *Environment) Tags() (tags []string) {
-	return env.data.Tags
+	env.Tags = append(env.Tags, tags...)
 }
 
 func FromEnvDef(envDef string) (env Environment, err error) {
@@ -79,12 +62,12 @@ func FromEnvDef(envDef string) (env Environment, err error) {
 		return
 	}
 	serializedEnvString := strings.TrimPrefix(envDef, envDefPrefix)
-	err = commons.Deserialize(serializedEnvString, &env.data)
+	err = commons.Deserialize(serializedEnvString, &env)
 	return
 }
 
 func (env *Environment) ToEnvDef() (string, error) {
-	data, err := commons.Serialize(env.data)
+	data, err := commons.Serialize(env)
 	if err != nil {
 		return "", err
 	}
@@ -92,26 +75,22 @@ func (env *Environment) ToEnvDef() (string, error) {
 }
 
 func (env Environment) MarshalYAML() (interface{}, error) {
-	return env.data, nil
+	return env.environment, nil
 }
 
 func (env *Environment) UnmarshalYAML(value *yaml.Node) (err error) {
-	return value.Decode(&env.data)
+	return value.Decode(&env.environment)
+}
+
+func (env *Environment) UnmarshalJSON(data []byte) (err error) {
+	var environment *environment = new(environment)
+	err = json.Unmarshal(data, environment)
+	if err == nil {
+		env.environment = environment
+	}
+	return
 }
 
 func (env *Environment) Search(query string) bool {
-	if env.searchData == nil || len(env.searchData) == 0 {
-		env.searchData = make(map[string]struct{})
-		env.searchData[strings.ToLower(env.data.Name)] = struct{}{}
-		env.searchData[strings.ToLower(env.data.Email)] = struct{}{}
-		for _, tag := range env.data.Tags {
-			env.searchData[strings.ToLower(tag)] = struct{}{}
-		}
-	}
-	for searchStr := range env.searchData {
-		if strings.Contains(searchStr, query) {
-			return true
-		}
-	}
-	return false
+	return commons.SearchStruct(env, query)
 }

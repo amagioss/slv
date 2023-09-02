@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/shibme/slv/environment"
+	"github.com/shibme/slv/settings"
 )
 
 type Config struct {
@@ -12,9 +13,8 @@ type Config struct {
 	configFile    string
 	dataDir       string
 	data          *ConfigData
-	settings      *Settings
+	settings      *settings.Settings
 	envManifest   *environment.EnvManifest
-	groupConfig   *GroupConfig
 }
 
 type ConfigData struct {
