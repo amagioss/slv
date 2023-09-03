@@ -1,4 +1,4 @@
-package config
+package configmanager
 
 func New(configName string) error {
 	if err := initConfigManager(); err != nil {

@@ -29,7 +29,7 @@ func (envManifest *EnvManifest) UnmarshalYAML(value *yaml.Node) (err error) {
 
 func NewManifest(path string) (envManifest *EnvManifest, err error) {
 	if commons.FileExists(path) {
-		return nil, ErrManifestExistsAlready
+		return nil, ErrManifestPathExistsAlready
 	}
 	envManifest = &EnvManifest{
 		path: &path,

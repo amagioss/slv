@@ -11,6 +11,11 @@ func FileExists(path string) bool {
 	return err == nil && !f.IsDir()
 }
 
+func DirExists(path string) bool {
+	f, err := os.Stat(path)
+	return err == nil && f.IsDir()
+}
+
 func SearchStruct(s interface{}, query string) bool {
 	query = strings.ToLower(query)
 	v := reflect.ValueOf(s)

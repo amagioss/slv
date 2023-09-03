@@ -17,7 +17,7 @@ type Settings struct {
 }
 
 type manifest struct {
-	Version           string `yaml:"slv_version"`
+	Version           string `yaml:"version,omitempty"`
 	AllowChanges      bool   `yaml:"allow_changes"`
 	AllowCreateEnv    bool   `yaml:"allow_create_env"`
 	AllowCreateGroup  bool   `yaml:"allow_create_group"`
@@ -36,7 +36,7 @@ func (settings *Settings) UnmarshalYAML(value *yaml.Node) (err error) {
 
 func NewManifest(path string) (settings *Settings, err error) {
 	if commons.FileExists(path) {
-		return nil, ErrManifestExistsAlready
+		return nil, ErrManifestPathExistsAlready
 	}
 	settings = &Settings{
 		path: &path,
