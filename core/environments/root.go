@@ -1,6 +1,6 @@
-package environment
+package environments
 
-import "github.com/shibme/slv/crypto"
+import "github.com/shibme/slv/core/crypto"
 
 type Root struct {
 	PublicKey        crypto.PublicKey `yaml:"public_key"`

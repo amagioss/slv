@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/shibme/slv/commons"
+	"github.com/shibme/slv/core/commons"
 )
 
 type configManager struct {

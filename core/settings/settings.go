@@ -1,14 +1,14 @@
 package settings
 
 import (
-	"github.com/shibme/slv/commons"
+	"github.com/shibme/slv/core/commons"
 	"gopkg.in/yaml.v3"
 )
 
 // import (
 // 	"os"
 
-// 	"github.com/shibme/slv/commons"
+// 	"github.com/shibme/slv/core/commons"
 // )
 
 type Settings struct {

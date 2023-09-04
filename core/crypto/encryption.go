@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 
-	"github.com/shibme/slv/commons"
+	"github.com/shibme/slv/core/commons"
 	"golang.org/x/crypto/nacl/box"
 )
 

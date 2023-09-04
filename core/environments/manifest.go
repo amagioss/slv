@@ -1,10 +1,10 @@
-package environment
+package environments
 
 import (
 	"strings"
 
-	"github.com/shibme/slv/commons"
-	"github.com/shibme/slv/crypto"
+	"github.com/shibme/slv/core/commons"
+	"github.com/shibme/slv/core/crypto"
 	"gopkg.in/yaml.v3"
 )
 

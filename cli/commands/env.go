@@ -5,13 +5,16 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/shibme/slv/configs"
-	"github.com/shibme/slv/environment"
+	"github.com/shibme/slv/core/configs"
+	"github.com/shibme/slv/core/environments"
 	"github.com/spf13/cobra"
 )
 
-func EnvCommand() *cobra.Command {
-	env := &cobra.Command{
+func envCommand() *cobra.Command {
+	if envCmd != nil {
+		return envCmd
+	}
+	envCmd = &cobra.Command{
 		Use:   "env",
 		Short: "Environment operations",
 		Long:  `Environment operations in SLV`,
@@ -19,14 +22,17 @@ func EnvCommand() *cobra.Command {
 			cmd.Help()
 		},
 	}
-	env.AddCommand(newEnvCommand())
-	env.AddCommand(listConfigEnvs())
-	env.AddCommand(addEnvToConfig())
-	return env
+	envCmd.AddCommand(envNewCommand())
+	envCmd.AddCommand(envListCommand())
+	envCmd.AddCommand(envAddCommand())
+	return envCmd
 }
 
-func newEnvCommand() *cobra.Command {
-	envCreate := &cobra.Command{
+func envNewCommand() *cobra.Command {
+	if envNewCmd != nil {
+		return envNewCmd
+	}
+	envNewCmd = &cobra.Command{
 		Use:   "new",
 		Short: "Creates a service environment",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -37,7 +43,7 @@ func newEnvCommand() *cobra.Command {
 				PrintErrorAndExit(err)
 				os.Exit(1)
 			}
-			env, privKey, _ := environment.New(name, email, environment.SERVICE)
+			env, privKey, _ := environments.New(name, email, environments.SERVICE)
 			env.AddTags(tags...)
 			envDef, err := env.ToEnvDef()
 			if err != nil {
@@ -55,20 +61,19 @@ func newEnvCommand() *cobra.Command {
 			os.Exit(0)
 		},
 	}
-
-	// Adding the flags
-	envCreate.Flags().StringP("name", "n", "", "Name of the environment")
-	envCreate.Flags().StringP("email", "e", "", "Email for the environment")
-	envCreate.Flags().StringSliceP("tags", "t", []string{}, "Tags for the environment")
-
-	// Marking the flags as required
-	envCreate.MarkFlagRequired("name")
-	envCreate.MarkFlagRequired("email")
-	return envCreate
+	envNewCmd.Flags().StringP("name", "n", "", "Name of the environment")
+	envNewCmd.Flags().StringP("email", "e", "", "Email for the environment")
+	envNewCmd.Flags().StringSliceP("tags", "t", []string{}, "Tags for the environment")
+	envNewCmd.MarkFlagRequired("name")
+	envNewCmd.MarkFlagRequired("email")
+	return envNewCmd
 }
 
-func addEnvToConfig() *cobra.Command {
-	addEnv := &cobra.Command{
+func envAddCommand() *cobra.Command {
+	if envAddCmd != nil {
+		return envAddCmd
+	}
+	envAddCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Adds an environment to a config",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -90,18 +95,17 @@ func addEnvToConfig() *cobra.Command {
 			}
 		},
 	}
-
-	// Adding the flags
-	addEnv.Flags().StringP("envdef", "e", "", "Environment defintion to be added")
-	addEnv.Flags().StringP("config", "c", "", "Name of the config to add the environment to")
-
-	// Marking the flags as required
-	addEnv.MarkFlagRequired("envdef")
-	return addEnv
+	envAddCmd.Flags().StringP("config", "c", "", "Name of the config to add the environment to")
+	envAddCmd.Flags().StringP("envdef", "e", "", "Environment defintion to be added")
+	envAddCmd.MarkFlagRequired("envdef")
+	return envAddCmd
 }
 
-func listConfigEnvs() *cobra.Command {
-	listEnv := &cobra.Command{
+func envListCommand() *cobra.Command {
+	if envListCmd != nil {
+		return envListCmd
+	}
+	envListCmd = &cobra.Command{
 		Use:   "list",
 		Short: "Lists environments from config",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -121,7 +125,7 @@ func listConfigEnvs() *cobra.Command {
 				PrintErrorAndExit(err)
 			}
 			query := cmd.Flag("search").Value.String()
-			var envs []*environment.Environment
+			var envs []*environments.Environment
 			if query != "" {
 				envs = envManifest.SearchEnv(query)
 			} else {
@@ -141,10 +145,7 @@ func listConfigEnvs() *cobra.Command {
 
 		},
 	}
-
-	// Adding the flags
-	listEnv.Flags().StringP("config", "c", "", "Environment defintion to be added")
-	listEnv.Flags().StringP("search", "s", "", "Search query to lookup envionments")
-
-	return listEnv
+	envListCmd.Flags().StringP("config", "c", "", "Environment defintion to be added")
+	envListCmd.Flags().StringP("search", "s", "", "Search query to lookup envionments")
+	return envListCmd
 }

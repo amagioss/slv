@@ -1,9 +1,9 @@
-package environment
+package environments
 
 import (
 	"errors"
 
-	"github.com/shibme/slv/crypto"
+	"github.com/shibme/slv/core/crypto"
 )
 
 const (

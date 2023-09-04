@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/shibme/slv/commons"
-	"github.com/shibme/slv/environment"
-	"github.com/shibme/slv/settings"
+	"github.com/shibme/slv/core/commons"
+	"github.com/shibme/slv/core/environments"
+	"github.com/shibme/slv/core/settings"
 	"gopkg.in/yaml.v3"
 )
 
@@ -15,7 +15,7 @@ type Config struct {
 	dir         *string
 	path        *string
 	settings    *settings.Settings
-	envManifest *environment.EnvManifest
+	envManifest *environments.EnvManifest
 	*config
 }
 
@@ -96,11 +96,11 @@ func (config *Config) GetSettings() (*settings.Settings, error) {
 	return config.settings, nil
 }
 
-func (config *Config) GetEnvManifest() (*environment.EnvManifest, error) {
+func (config *Config) GetEnvManifest() (*environments.EnvManifest, error) {
 	if config.envManifest == nil {
-		envManifest, err := environment.GetManifest(filepath.Join(*config.dir, environmentConfigFileName))
+		envManifest, err := environments.GetManifest(filepath.Join(*config.dir, environmentConfigFileName))
 		if err != nil {
-			envManifest, err = environment.NewManifest(filepath.Join(*config.dir, environmentConfigFileName))
+			envManifest, err = environments.NewManifest(filepath.Join(*config.dir, environmentConfigFileName))
 			if err != nil {
 				return nil, err
 			}

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/shibme/slv/commons"
+	"github.com/shibme/slv/core/commons"
 )
 
 type KeyType byte

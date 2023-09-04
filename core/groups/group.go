@@ -1,4 +1,4 @@
-package group
+package groups
 
 type Group struct {
 	Id          string   `yaml:"id"`

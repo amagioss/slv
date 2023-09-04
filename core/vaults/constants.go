@@ -3,7 +3,7 @@ package vaults
 import (
 	"errors"
 
-	"github.com/shibme/slv/crypto"
+	"github.com/shibme/slv/core/crypto"
 )
 
 const (

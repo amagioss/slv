@@ -1,4 +1,4 @@
-package group
+package groups
 
 type GroupManifest struct {
 	path string

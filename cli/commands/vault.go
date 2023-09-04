@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shibme/slv/crypto"
-	"github.com/shibme/slv/vaults"
+	"github.com/shibme/slv/core/crypto"
+	"github.com/shibme/slv/core/vaults"
 	"github.com/spf13/cobra"
 )
 
-func VaultCommand() *cobra.Command {
-	env := &cobra.Command{
+func vaultCommand() *cobra.Command {
+	if vaultCmd != nil {
+		return vaultCmd
+	}
+	vaultCmd = &cobra.Command{
 		Use:   "vault",
 		Short: "Vault operations",
 		Long:  `Vault operations in SLV`,
@@ -18,13 +21,15 @@ func VaultCommand() *cobra.Command {
 			cmd.Help()
 		},
 	}
-	env.AddCommand(newVaultCommand())
-	env.AddCommand(SecretsCommand())
-	return env
+	vaultCmd.AddCommand(vaultNewCommand())
+	return vaultCmd
 }
 
-func newVaultCommand() *cobra.Command {
-	newVaultCmd := &cobra.Command{
+func vaultNewCommand() *cobra.Command {
+	if vaultNewCmd != nil {
+		return vaultNewCmd
+	}
+	vaultNewCmd = &cobra.Command{
 		Use:   "new",
 		Short: "Creates a new vault",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -49,13 +54,9 @@ func newVaultCommand() *cobra.Command {
 			os.Exit(0)
 		},
 	}
-
-	// Adding the flags
-	newVaultCmd.Flags().StringP("file", "f", "", "Name of the environment")
-	newVaultCmd.Flags().StringSliceP("public-keys", "k", []string{}, "Public keys of environments or groups that can access the vault")
-
-	// Marking the flags as required
-	newVaultCmd.MarkFlagRequired("file")
-	newVaultCmd.MarkFlagRequired("public-keys")
-	return newVaultCmd
+	vaultNewCmd.Flags().StringP("file", "f", "", "Name of the environment")
+	vaultNewCmd.Flags().StringSliceP("public-keys", "k", []string{}, "Public keys of environments or groups that can access the vault")
+	vaultNewCmd.MarkFlagRequired("file")
+	vaultNewCmd.MarkFlagRequired("public-keys")
+	return vaultNewCmd
 }

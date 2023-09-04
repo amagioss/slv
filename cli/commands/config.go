@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shibme/slv/configs"
+	"github.com/shibme/slv/core/configs"
 	"github.com/spf13/cobra"
 )
 
-func ConfigCommand() *cobra.Command {
-	configCmd := &cobra.Command{
+func configCommand() *cobra.Command {
+	if configCmd != nil {
+		return configCmd
+	}
+	configCmd = &cobra.Command{
 		Use:   "config",
 		Short: "Manage configs",
 		Long:  `Manage configs in SLV`,
@@ -17,16 +20,17 @@ func ConfigCommand() *cobra.Command {
 			cmd.Help()
 		},
 	}
-	configCmd.AddCommand(createConfigCommand())
-	configCmd.AddCommand(setDefaultConfigCommand())
-	// configCmd.AddCommand(deleteConfigCommand())
-	configCmd.AddCommand(listConfigCommand())
-	configCmd.AddCommand(configEnvCmd())
+	configCmd.AddCommand(configNewCommand())
+	configCmd.AddCommand(configSetCommand())
+	configCmd.AddCommand(configListCommand())
 	return configCmd
 }
 
-func createConfigCommand() *cobra.Command {
-	configCreate := &cobra.Command{
+func configNewCommand() *cobra.Command {
+	if configNewCmd != nil {
+		return configNewCmd
+	}
+	configNewCmd = &cobra.Command{
 		Use:   "new",
 		Short: "Create a new config",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -41,17 +45,16 @@ func createConfigCommand() *cobra.Command {
 			}
 		},
 	}
-
-	// Adding the flags
-	configCreate.Flags().StringP("name", "n", "", "Name for the config")
-
-	// Marking the flags as required
-	configCreate.MarkFlagRequired("name")
-	return configCreate
+	configNewCmd.Flags().StringP("name", "n", "", "Name for the config")
+	configNewCmd.MarkFlagRequired("name")
+	return configNewCmd
 }
 
-func listConfigCommand() *cobra.Command {
-	configList := &cobra.Command{
+func configListCommand() *cobra.Command {
+	if configListCmd != nil {
+		return configListCmd
+	}
+	configListCmd = &cobra.Command{
 		Use:   "list",
 		Short: "Lists all configs",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -71,11 +74,14 @@ func listConfigCommand() *cobra.Command {
 			}
 		},
 	}
-	return configList
+	return configListCmd
 }
 
-func setDefaultConfigCommand() *cobra.Command {
-	command := &cobra.Command{
+func configSetCommand() *cobra.Command {
+	if configSetCmd != nil {
+		return configSetCmd
+	}
+	configSetCmd = &cobra.Command{
 		Use:     "default",
 		Aliases: []string{"set-default"},
 		Short:   "Set a config as default config",
@@ -97,25 +103,7 @@ func setDefaultConfigCommand() *cobra.Command {
 			os.Exit(1)
 		},
 	}
-
-	// Adding the flags
-	command.Flags().StringP("name", "n", "", "Name of the config to be set as default")
-
-	// Marking the flags as required
-	command.MarkFlagRequired("name")
-	return command
-}
-
-func configEnvCmd() *cobra.Command {
-	env := &cobra.Command{
-		Use:   "env",
-		Short: "Managing environments",
-		Long:  `Manage environments in an SLV Config`,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-	env.AddCommand(addEnvToConfig())
-	env.AddCommand(listConfigEnvs())
-	return env
+	configSetCmd.Flags().StringP("name", "n", "", "Name of the config to be set as default")
+	configSetCmd.MarkFlagRequired("name")
+	return configSetCmd
 }

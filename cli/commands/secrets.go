@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shibme/slv/crypto"
-	"github.com/shibme/slv/vaults"
+	"github.com/shibme/slv/core/crypto"
+	"github.com/shibme/slv/core/vaults"
 	"github.com/spf13/cobra"
 )
 
-func SecretsCommand() *cobra.Command {
-	env := &cobra.Command{
+func secretCommand() *cobra.Command {
+	if secretCmd != nil {
+		return secretCmd
+	}
+	secretCmd = &cobra.Command{
 		Use:     "secret",
 		Aliases: []string{"secrets"},
 		Short:   "Working with secrets",
@@ -19,13 +22,16 @@ func SecretsCommand() *cobra.Command {
 			cmd.Help()
 		},
 	}
-	env.AddCommand(addDirectSecretToVault())
-	env.AddCommand(getDirectSecretFromVault())
-	return env
+	secretCmd.AddCommand(secretAddCommand())
+	secretCmd.AddCommand(secretGetCommand())
+	return secretCmd
 }
 
-func addDirectSecretToVault() *cobra.Command {
-	addSecretCmd := &cobra.Command{
+func secretAddCommand() *cobra.Command {
+	if secretAddCmd != nil {
+		return secretAddCmd
+	}
+	secretAddCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Adds a secret to the vault",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -44,21 +50,20 @@ func addDirectSecretToVault() *cobra.Command {
 			os.Exit(0)
 		},
 	}
-
-	// Adding the flags
-	addSecretCmd.Flags().StringP("vault-file", "f", "", "Path to the vault file")
-	addSecretCmd.Flags().StringP("name", "n", "", "Name of the secret")
-	addSecretCmd.Flags().StringP("value", "v", "", "Value of the secret")
-
-	// Marking the flags as required
-	addSecretCmd.MarkFlagRequired("vault-file")
-	addSecretCmd.MarkFlagRequired("name")
-	addSecretCmd.MarkFlagRequired("value")
-	return addSecretCmd
+	secretAddCmd.Flags().StringP("vault-file", "f", "", "Path to the vault file")
+	secretAddCmd.Flags().StringP("name", "n", "", "Name of the secret")
+	secretAddCmd.Flags().StringP("value", "v", "", "Value of the secret")
+	secretAddCmd.MarkFlagRequired("vault-file")
+	secretAddCmd.MarkFlagRequired("name")
+	secretAddCmd.MarkFlagRequired("value")
+	return secretAddCmd
 }
 
-func getDirectSecretFromVault() *cobra.Command {
-	addSecretCmd := &cobra.Command{
+func secretGetCommand() *cobra.Command {
+	if secretGetCmd != nil {
+		return secretGetCmd
+	}
+	secretGetCmd = &cobra.Command{
 		Use:   "get",
 		Short: "Gets a secret from the vault",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -90,11 +95,11 @@ func getDirectSecretFromVault() *cobra.Command {
 	}
 
 	// Adding the flags
-	addSecretCmd.Flags().StringP("vault-file", "f", "", "Path to the vault file")
-	addSecretCmd.Flags().StringP("name", "n", "", "Name of the secret")
+	secretGetCmd.Flags().StringP("vault-file", "f", "", "Path to the vault file")
+	secretGetCmd.Flags().StringP("name", "n", "", "Name of the secret")
 
 	// Marking the flags as required
-	addSecretCmd.MarkFlagRequired("vault-file")
-	addSecretCmd.MarkFlagRequired("name")
-	return addSecretCmd
+	secretGetCmd.MarkFlagRequired("vault-file")
+	secretGetCmd.MarkFlagRequired("name")
+	return secretGetCmd
 }
