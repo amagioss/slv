@@ -56,6 +56,19 @@ type PrivateKey struct {
 	decrypter *Decrypter
 }
 
+func PrivateKeyFromString(slvPrivateKeyString string) (*PrivateKey, error) {
+	key, err := keyFromString(slvPrivateKeyString)
+	if err == nil {
+		if key.public {
+			return nil, ErrInvalidKeyFormat
+		}
+		return &PrivateKey{
+			key: key,
+		}, nil
+	}
+	return nil, err
+}
+
 func (privateKey *PrivateKey) GetDecrypter() Decrypter {
 	if privateKey.decrypter == nil {
 		privateKey.decrypter = new(Decrypter)
@@ -72,6 +85,9 @@ type PublicKey struct {
 func PublicKeyFromString(slvPublicKeyString string) (*PublicKey, error) {
 	key, err := keyFromString(slvPublicKeyString)
 	if err == nil {
+		if !key.public {
+			return nil, ErrInvalidKeyFormat
+		}
 		return &PublicKey{
 			key: key,
 		}, nil
