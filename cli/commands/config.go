@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/shibme/slv/core/configs"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +38,7 @@ func configNewCommand() *cobra.Command {
 			name, _ := cmd.Flags().GetString("name")
 			err := configs.New(name)
 			if err == nil {
-				fmt.Println("Created config: ", green, name)
+				fmt.Println("Created config: ", color.GreenString(name))
 				os.Exit(0)
 			} else {
 				fmt.Fprintln(os.Stderr, err.Error())
@@ -66,7 +67,7 @@ func configListCommand() *cobra.Command {
 				defaultConfigName, _ := configs.GetDefaultConfigName()
 				for _, configName := range configNames {
 					if configName == defaultConfigName {
-						fmt.Println(green + configName + reset + " [*]")
+						fmt.Println(color.GreenString(configName), "[*]")
 					} else {
 						fmt.Println(configName)
 					}
@@ -95,7 +96,7 @@ func configSetCommand() *cobra.Command {
 			for _, configName := range configNames {
 				if configName == name {
 					configs.SetDefault(name)
-					fmt.Printf("Successfully set %s%s%s as default config\n", green, name, reset)
+					fmt.Printf("Successfully set %s as default config\n", color.GreenString(name))
 					os.Exit(0)
 				}
 			}

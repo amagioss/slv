@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/shibme/slv/core/crypto"
 	"github.com/shibme/slv/core/vaults"
 	"github.com/spf13/cobra"
@@ -46,7 +47,7 @@ func secretAddCommand() *cobra.Command {
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			fmt.Println("Added secret: ", green, secretName, reset, " to vault: ", green, vaultFile)
+			fmt.Println("Added secret: ", color.GreenString(secretName), " to vault: ", color.GreenString(vaultFile))
 			os.Exit(0)
 		},
 	}
