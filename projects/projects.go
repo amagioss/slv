@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	"github.com/shibme/slv/crypto"
-	"github.com/shibme/slv/vault"
+	"github.com/shibme/slv/vaults"
 )
 
 type Project struct {
 	projectRoot string
-	vaults      map[string]*vault.Vault
+	vaults      map[string]*vaults.Vault
 }
 
 func isProjectConfigDir(dir string) bool {
@@ -59,7 +59,7 @@ func NewProjectFor(dir string) (*Project, error) {
 	}
 	return &Project{
 		projectRoot: dir,
-		vaults:      make(map[string]*vault.Vault),
+		vaults:      make(map[string]*vaults.Vault),
 	}, nil
 }
 
@@ -74,7 +74,7 @@ func GetProjectFor(dir string) (project *Project, err error) {
 	if err == nil {
 		project = &Project{
 			projectRoot: projectRoot,
-			vaults:      make(map[string]*vault.Vault),
+			vaults:      make(map[string]*vaults.Vault),
 		}
 	}
 	return
@@ -96,13 +96,13 @@ func validateProjectVaultName(vaultName string) (err error) {
 	return
 }
 
-func (project *Project) NewVault(vaultName string, publicKeys ...crypto.PublicKey) (v *vault.Vault, err error) {
+func (project *Project) NewVault(vaultName string, publicKeys ...crypto.PublicKey) (v *vaults.Vault, err error) {
 	if err = validateProjectVaultName(vaultName); err != nil {
 		return
 	}
 	simplifiedVaultName := strings.ToLower(vaultName)
 	vaultPath := filepath.Join(project.projectRoot, slvDirName, vaultsDirName, simplifiedVaultName+vaultFileExtension)
-	v, err = vault.New(vaultPath, publicKeys...)
+	v, err = vaults.New(vaultPath, publicKeys...)
 	if err == nil {
 		project.vaults[vaultName] = v
 		project.vaults[simplifiedVaultName] = v
@@ -110,7 +110,7 @@ func (project *Project) NewVault(vaultName string, publicKeys ...crypto.PublicKe
 	return
 }
 
-func (project *Project) GetVault(vaultName string) (v *vault.Vault, err error) {
+func (project *Project) GetVault(vaultName string) (v *vaults.Vault, err error) {
 	v = project.vaults[vaultName]
 	if v == nil {
 		simplifiedVaultName := strings.ToLower(vaultName)
@@ -120,7 +120,7 @@ func (project *Project) GetVault(vaultName string) (v *vault.Vault, err error) {
 				return
 			}
 			vaultPath := filepath.Join(project.projectRoot, slvDirName, vaultsDirName, simplifiedVaultName+vaultFileExtension)
-			v, err = vault.Read(vaultPath)
+			v, err = vaults.Get(vaultPath)
 			if err == nil {
 				project.vaults[vaultName] = v
 				project.vaults[simplifiedVaultName] = v
@@ -130,7 +130,7 @@ func (project *Project) GetVault(vaultName string) (v *vault.Vault, err error) {
 	return
 }
 
-func (project *Project) ListVaults() []*vault.Vault {
+func (project *Project) ListVaults() []*vaults.Vault {
 	//TODO: Add logic
-	return []*vault.Vault{}
+	return []*vaults.Vault{}
 }

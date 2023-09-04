@@ -18,8 +18,10 @@ var slvCmd = &cobra.Command{
 }
 
 func CLI() {
-	slvCmd.AddCommand(commands.EnvCmd())
+	slvCmd.AddCommand(commands.EnvCommand())
 	slvCmd.AddCommand(commands.ConfigCommand())
+	slvCmd.AddCommand(commands.VaultCommand())
+	slvCmd.AddCommand(commands.SecretsCommand())
 	if err := slvCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

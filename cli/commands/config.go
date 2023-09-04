@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shibme/slv/config"
+	"github.com/shibme/slv/configs"
 	"github.com/spf13/cobra"
 )
 
@@ -18,9 +18,10 @@ func ConfigCommand() *cobra.Command {
 		},
 	}
 	configCmd.AddCommand(createConfigCommand())
-	configCmd.AddCommand(setConfigCommand())
+	configCmd.AddCommand(setDefaultConfigCommand())
 	// configCmd.AddCommand(deleteConfigCommand())
 	configCmd.AddCommand(listConfigCommand())
+	configCmd.AddCommand(configEnvCmd())
 	return configCmd
 }
 
@@ -30,7 +31,7 @@ func createConfigCommand() *cobra.Command {
 		Short: "Create a new config",
 		Run: func(cmd *cobra.Command, args []string) {
 			name, _ := cmd.Flags().GetString("name")
-			err := config.New(name)
+			err := configs.New(name)
 			if err == nil {
 				fmt.Println("Created config: ", green, name)
 				os.Exit(0)
@@ -54,18 +55,14 @@ func listConfigCommand() *cobra.Command {
 		Use:   "list",
 		Short: "Lists all configs",
 		Run: func(cmd *cobra.Command, args []string) {
-			configNames, err := config.List()
+			configNames, err := configs.List()
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			} else {
-				currentConfigName, err := config.GetCurrentConfigName()
-				if err != nil {
-					PrintErrorAndExit(err)
-					os.Exit(1)
-				}
+				defaultConfigName, _ := configs.GetDefaultConfigName()
 				for _, configName := range configNames {
-					if configName == currentConfigName {
+					if configName == defaultConfigName {
 						fmt.Println(green + configName + reset + " [*]")
 					} else {
 						fmt.Println(configName)
@@ -77,12 +74,13 @@ func listConfigCommand() *cobra.Command {
 	return configList
 }
 
-func setConfigCommand() *cobra.Command {
+func setDefaultConfigCommand() *cobra.Command {
 	command := &cobra.Command{
-		Use:   "set",
-		Short: "Set a config as current config",
+		Use:     "default",
+		Aliases: []string{"set-default"},
+		Short:   "Set a config as default config",
 		Run: func(cmd *cobra.Command, args []string) {
-			configNames, err := config.List()
+			configNames, err := configs.List()
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
@@ -90,8 +88,8 @@ func setConfigCommand() *cobra.Command {
 			name, _ := cmd.Flags().GetString("name")
 			for _, configName := range configNames {
 				if configName == name {
-					config.Set(name)
-					fmt.Printf("Set %s as current config\n", name)
+					configs.SetDefault(name)
+					fmt.Printf("Successfully set %s%s%s as default config\n", green, name, reset)
 					os.Exit(0)
 				}
 			}
@@ -101,35 +99,23 @@ func setConfigCommand() *cobra.Command {
 	}
 
 	// Adding the flags
-	command.Flags().StringP("name", "n", "", "Name of the config to be set as current")
+	command.Flags().StringP("name", "n", "", "Name of the config to be set as default")
 
 	// Marking the flags as required
 	command.MarkFlagRequired("name")
 	return command
 }
 
-func addEnvToConfigCommand() *cobra.Command {
-	addEnv := &cobra.Command{
-		Use:     "addenv",
-		Short:   "Adds an environment to a config",
-		Aliases: []string{"envadd"},
+func configEnvCmd() *cobra.Command {
+	env := &cobra.Command{
+		Use:   "env",
+		Short: "Managing environments",
+		Long:  `Manage environments in an SLV Config`,
 		Run: func(cmd *cobra.Command, args []string) {
-			name, _ := cmd.Flags().GetString("env")
-			err := config.New(name)
-			if err == nil {
-				fmt.Println("Created config: ", green, name)
-				os.Exit(0)
-			} else {
-				fmt.Fprintln(os.Stderr, err.Error())
-				os.Exit(1)
-			}
+			cmd.Help()
 		},
 	}
-
-	// Adding the flags
-	addEnv.Flags().StringP("env", "e", "", "Environment defintion to be added")
-
-	// Marking the flags as required
-	addEnv.MarkFlagRequired("env")
-	return addEnv
+	env.AddCommand(addEnvToConfig())
+	env.AddCommand(listConfigEnvs())
+	return env
 }

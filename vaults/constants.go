@@ -1,4 +1,4 @@
-package vault
+package vaults
 
 import (
 	"errors"
@@ -21,3 +21,4 @@ var ErrVaultNotFound = errors.New("vault not found")
 var ErrVaultCannotBeSharedWithVault = errors.New("vault cannot be shared with another vault")
 var ErrVaultAlreadySharedWithKey = errors.New("vault already shared with the given key")
 var ErrVaultSecretNotFound = errors.New("no secret found for the given name")
+var ErrMissingVaultPublicKey = errors.New("missing vault public key")

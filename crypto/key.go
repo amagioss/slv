@@ -66,8 +66,7 @@ func isValidKey(k key) bool {
 	return checksumFromId == checksumFromKey
 }
 
-func (k *key) FromString(keyString string) (err error) {
-	err = ErrInvalidKeyFormat
+func keyFromString(keyString string) (*key, error) {
 	var public bool
 	var trimmedKeyString string
 	if strings.HasPrefix(keyString, privateKeyPrefix) {
@@ -77,31 +76,32 @@ func (k *key) FromString(keyString string) (err error) {
 		public = true
 		trimmedKeyString = strings.TrimPrefix(keyString, publicKeyPrefix)
 	} else {
-		return
+		return nil, ErrInvalidKeyFormat
 	}
 	sliced := strings.Split(trimmedKeyString, "_")
 	if len(sliced) != 2 {
-		return
+		return nil, ErrInvalidKeyFormat
 	}
 	idPart := commons.Decode(sliced[0])
 	keyPart := commons.Decode(sliced[1])
 	if len(idPart) != 8 || len(keyPart) != 34 {
-		return
+		return nil, ErrInvalidKeyFormat
 	}
+	k := new(key)
 	if keyPart[1] == 0 && !public {
 		k.public = false
 	} else if keyPart[1] == 1 && public {
 		k.public = true
 	} else {
-		return
+		return nil, ErrInvalidKeyFormat
 	}
 	k.keyType = KeyType(keyPart[0])
 	k.id = [8]byte(idPart)
 	k.keyData = [32]byte(keyPart[2:])
 	if !isValidKey(*k) {
-		return
+		return nil, ErrInvalidKeyFormat
 	}
-	return nil
+	return k, nil
 }
 
 func (k *key) toBytes() []byte {

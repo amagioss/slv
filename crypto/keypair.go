@@ -32,7 +32,7 @@ func NewKeyPair(keyType KeyType) (keyPair *KeyPair, err error) {
 	id := [8]byte(append(pubSumBytes[len(pubSumBytes)-4:], privSumBytes[len(privSumBytes)-4:]...))
 	keyPair = &KeyPair{
 		publicKey: &PublicKey{
-			key: key{
+			key: &key{
 				id:      id,
 				public:  true,
 				keyType: keyType,
@@ -40,7 +40,7 @@ func NewKeyPair(keyType KeyType) (keyPair *KeyPair, err error) {
 			},
 		},
 		privateKey: &PrivateKey{
-			key: key{
+			key: &key{
 				id:      id,
 				public:  false,
 				keyType: keyType,
@@ -52,7 +52,7 @@ func NewKeyPair(keyType KeyType) (keyPair *KeyPair, err error) {
 }
 
 type PrivateKey struct {
-	key
+	*key
 	decrypter *Decrypter
 }
 
@@ -65,8 +65,18 @@ func (privateKey *PrivateKey) GetDecrypter() Decrypter {
 }
 
 type PublicKey struct {
-	key
+	*key
 	encrypter *Encrypter
+}
+
+func PublicKeyFromString(slvPublicKeyString string) (*PublicKey, error) {
+	key, err := keyFromString(slvPublicKeyString)
+	if err == nil {
+		return &PublicKey{
+			key: key,
+		}, nil
+	}
+	return nil, err
 }
 
 func (publicKey PublicKey) MarshalYAML() (interface{}, error) {
@@ -75,10 +85,10 @@ func (publicKey PublicKey) MarshalYAML() (interface{}, error) {
 }
 
 func (publicKey *PublicKey) UnmarshalYAML(value *yaml.Node) (err error) {
-	var slvPublicKey string
-	err = value.Decode(&slvPublicKey)
+	var pubKeyStr string
+	err = value.Decode(&pubKeyStr)
 	if err == nil {
-		return publicKey.FromString(slvPublicKey)
+		publicKey.key, err = keyFromString(pubKeyStr)
 	}
 	return
 }
@@ -91,7 +101,7 @@ func (publicKey *PublicKey) UnmarshalJSON(data []byte) (err error) {
 	var pubKeyStr string
 	err = json.Unmarshal(data, &pubKeyStr)
 	if err == nil {
-		return publicKey.FromString(pubKeyStr)
+		publicKey.key, err = keyFromString(pubKeyStr)
 	}
 	return
 }

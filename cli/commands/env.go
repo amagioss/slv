@@ -5,24 +5,27 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/shibme/slv/configs"
 	"github.com/shibme/slv/environment"
 	"github.com/spf13/cobra"
 )
 
-func EnvCmd() *cobra.Command {
+func EnvCommand() *cobra.Command {
 	env := &cobra.Command{
 		Use:   "env",
-		Short: "Managing environments",
-		Long:  `Manage environments in SLV`,
+		Short: "Environment operations",
+		Long:  `Environment operations in SLV`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
 		},
 	}
-	env.AddCommand(NewEnvCommand())
+	env.AddCommand(newEnvCommand())
+	env.AddCommand(listConfigEnvs())
+	env.AddCommand(addEnvToConfig())
 	return env
 }
 
-func NewEnvCommand() *cobra.Command {
+func newEnvCommand() *cobra.Command {
 	envCreate := &cobra.Command{
 		Use:   "new",
 		Short: "Creates a service environment",
@@ -62,4 +65,86 @@ func NewEnvCommand() *cobra.Command {
 	envCreate.MarkFlagRequired("name")
 	envCreate.MarkFlagRequired("email")
 	return envCreate
+}
+
+func addEnvToConfig() *cobra.Command {
+	addEnv := &cobra.Command{
+		Use:   "add",
+		Short: "Adds an environment to a config",
+		Run: func(cmd *cobra.Command, args []string) {
+			envdef := cmd.Flag("envdef").Value.String()
+			configName := cmd.Flag("config").Value.String()
+			var cfg *configs.Config
+			var err error
+			if configName != "" {
+				cfg, err = configs.GetConfig(configName)
+			} else {
+				cfg, err = configs.GetDefaultConfig()
+			}
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			err = cfg.AddEnv(envdef)
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+		},
+	}
+
+	// Adding the flags
+	addEnv.Flags().StringP("envdef", "e", "", "Environment defintion to be added")
+	addEnv.Flags().StringP("config", "c", "", "Name of the config to add the environment to")
+
+	// Marking the flags as required
+	addEnv.MarkFlagRequired("envdef")
+	return addEnv
+}
+
+func listConfigEnvs() *cobra.Command {
+	listEnv := &cobra.Command{
+		Use:   "list",
+		Short: "Lists environments from config",
+		Run: func(cmd *cobra.Command, args []string) {
+			configName := cmd.Flag("config").Value.String()
+			var cfg *configs.Config
+			var err error
+			if configName != "" {
+				cfg, err = configs.GetConfig(configName)
+			} else {
+				cfg, err = configs.GetDefaultConfig()
+			}
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			envManifest, err := cfg.GetEnvManifest()
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			query := cmd.Flag("search").Value.String()
+			var envs []*environment.Environment
+			if query != "" {
+				envs = envManifest.SearchEnv(query)
+			} else {
+				envs = envManifest.ListEnv()
+			}
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+			for _, env := range envs {
+				fmt.Fprintln(w, env.Id()+":")
+				fmt.Fprintln(w, "Public Key:\t", env.PublicKey)
+				fmt.Fprintln(w, "Name:\t", env.Name)
+				fmt.Fprintln(w, "Email:\t", env.Email)
+				fmt.Fprintln(w, "Tags:\t", env.Tags)
+				fmt.Fprintln(w)
+			}
+			w.Flush()
+			os.Exit(0)
+
+		},
+	}
+
+	// Adding the flags
+	listEnv.Flags().StringP("config", "c", "", "Environment defintion to be added")
+	listEnv.Flags().StringP("search", "s", "", "Search query to lookup envionments")
+
+	return listEnv
 }

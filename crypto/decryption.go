@@ -46,7 +46,7 @@ func (decrypter *Decrypter) DecryptKey(sealedKey SealedKey) (privateKey PrivateK
 	if err == nil {
 		var key *key
 		key, err = keyFromBytes(decryptedBytes)
-		privateKey.key = *key
+		privateKey.key = key
 	}
 	return
 }

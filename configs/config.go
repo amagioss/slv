@@ -1,4 +1,4 @@
-package config
+package configs
 
 import (
 	"os"
@@ -16,10 +16,10 @@ type Config struct {
 	path        *string
 	settings    *settings.Settings
 	envManifest *environment.EnvManifest
-	*manifest
+	*config
 }
 
-type manifest struct {
+type config struct {
 	Version string `yaml:"version,omitempty"`
 	Repo    struct {
 		URI    string `yaml:"uri"`
@@ -31,11 +31,11 @@ type manifest struct {
 }
 
 func (config Config) MarshalYAML() (interface{}, error) {
-	return config.manifest, nil
+	return config.config, nil
 }
 
 func (config *Config) UnmarshalYAML(value *yaml.Node) (err error) {
-	return value.Decode(&config.manifest)
+	return value.Decode(&config.config)
 }
 
 func (config *Config) commit() error {
@@ -45,7 +45,7 @@ func (config *Config) commit() error {
 	return nil
 }
 
-func NewConfig(dir string) (*Config, error) {
+func newConfigForPath(dir string) (*Config, error) {
 	if commons.DirExists(dir) {
 		return nil, ErrConfigPathExistsAlready
 	}
@@ -57,7 +57,7 @@ func NewConfig(dir string) (*Config, error) {
 	config := &Config{
 		dir:  &dir,
 		path: &path,
-		manifest: &manifest{
+		config: &config{
 			Version: commons.Version,
 		},
 	}
@@ -68,7 +68,7 @@ func NewConfig(dir string) (*Config, error) {
 	return config, nil
 }
 
-func GetConfig(dir string) (*Config, error) {
+func getConfigForPath(dir string) (*Config, error) {
 	if !commons.DirExists(dir) {
 		return nil, ErrConfigPathDoesNotExist
 	}
@@ -108,6 +108,15 @@ func (config *Config) GetEnvManifest() (*environment.EnvManifest, error) {
 		config.envManifest = envManifest
 	}
 	return config.envManifest, nil
+}
+
+func (config *Config) AddEnv(envDef string) error {
+	envManifest, err := config.GetEnvManifest()
+	if err != nil {
+		return err
+	}
+	envManifest.AddEnv(envDef)
+	return nil
 }
 
 func (config *Config) Sync() {
