@@ -20,6 +20,7 @@ var envListCmd *cobra.Command
 // Vault Commands
 var vaultCmd *cobra.Command
 var vaultNewCmd *cobra.Command
+var vaultShareCmd *cobra.Command
 
 // Secret Commands
 var secretCmd *cobra.Command

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"os"
+
 	"github.com/shibme/slv/cli/commands"
 )
 
 func main() {
 	if err := commands.SlvCommand().Execute(); err != nil {
-		commands.PrintErrorAndExit(err)
+		os.Exit(1)
 	}
 }

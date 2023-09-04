@@ -68,10 +68,7 @@ func secretGetCommand() *cobra.Command {
 		Use:   "get",
 		Short: "Gets a secret from the vault",
 		Run: func(cmd *cobra.Command, args []string) {
-			envPrivateKeyString := os.Getenv("SLV_ENV_SECRET_KEY")
-			if envPrivateKeyString == "" {
-				PrintErrorMessageAndExit("secret key not set in SLV_ENV_SECRET_KEY")
-			}
+			envPrivateKeyString := getEnvSecretKey()
 			envPrivateKey, err := crypto.PrivateKeyFromString(envPrivateKeyString)
 			if err != nil {
 				PrintErrorAndExit(err)
@@ -94,12 +91,8 @@ func secretGetCommand() *cobra.Command {
 			os.Exit(0)
 		},
 	}
-
-	// Adding the flags
 	secretGetCmd.Flags().StringP("vault-file", "f", "", "Path to the vault file")
 	secretGetCmd.Flags().StringP("name", "n", "", "Name of the secret")
-
-	// Marking the flags as required
 	secretGetCmd.MarkFlagRequired("vault-file")
 	secretGetCmd.MarkFlagRequired("name")
 	return secretGetCmd

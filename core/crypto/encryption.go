@@ -16,9 +16,6 @@ type Encrypter struct {
 
 func (encrypter *Encrypter) nonce() (nonce [24]byte, err error) {
 	_, err = rand.Read(nonce[0:24])
-	if err != nil {
-		return
-	}
 	return
 }
 

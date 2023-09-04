@@ -23,6 +23,7 @@ func vaultCommand() *cobra.Command {
 		},
 	}
 	vaultCmd.AddCommand(vaultNewCommand())
+	vaultCmd.AddCommand(vaultShareCommand())
 	return vaultCmd
 }
 
@@ -60,4 +61,55 @@ func vaultNewCommand() *cobra.Command {
 	vaultNewCmd.MarkFlagRequired("file")
 	vaultNewCmd.MarkFlagRequired("public-keys")
 	return vaultNewCmd
+}
+
+func vaultShareCommand() *cobra.Command {
+	if vaultShareCmd != nil {
+		return vaultShareCmd
+	}
+	vaultShareCmd = &cobra.Command{
+		Use:   "share",
+		Short: "Shares a vault with another environment or group",
+		Run: func(cmd *cobra.Command, args []string) {
+			envPrivateKeyString := getEnvSecretKey()
+			envPrivateKey, err := crypto.PrivateKeyFromString(envPrivateKeyString)
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			vaultFile := cmd.Flag("file").Value.String()
+			publicKeyStrings, err := cmd.Flags().GetStringSlice("public-keys")
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			var publicKeys []crypto.PublicKey
+			for _, publicKeyString := range publicKeyStrings {
+				publicKey, err := crypto.PublicKeyFromString(publicKeyString)
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
+				publicKeys = append(publicKeys, *publicKey)
+			}
+			vault, err := vaults.Get(vaultFile)
+			if err == nil {
+				err = vault.Unlock(*envPrivateKey)
+				if err == nil {
+					for _, pubKey := range publicKeys {
+						if err = vault.ShareAccessToKey(pubKey); err != nil {
+							break
+						}
+					}
+					if err == nil {
+						fmt.Println("Shared vault:", color.GreenString(vaultFile))
+						os.Exit(0)
+					}
+				}
+			}
+			PrintErrorAndExit(err)
+		},
+	}
+	vaultNewCmd.Flags().StringP("file", "f", "", "Name of the environment")
+	vaultNewCmd.Flags().StringSliceP("public-keys", "k", []string{}, "Public keys of environments or groups that can access the vault")
+	vaultNewCmd.MarkFlagRequired("file")
+	vaultNewCmd.MarkFlagRequired("public-keys")
+	return vaultShareCmd
 }

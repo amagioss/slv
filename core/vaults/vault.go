@@ -11,7 +11,8 @@ import (
 )
 
 type secrets struct {
-	Direct map[string]crypto.SealedData `yaml:"direct,omitempty"`
+	Direct     map[string]crypto.SealedData `yaml:"direct,omitempty"`
+	Referenced map[string]crypto.SealedData `yaml:"referenced,omitempty"`
 }
 
 type meta struct {
@@ -212,7 +213,38 @@ func (vlt *Vault) GetDirectSecret(secretName string) (secretValue string, err er
 	}
 	encryptedData, ok := vlt.vault.Secrets.Direct[secretName]
 	if !ok {
-		return secretValue, ErrVaultSecretNotFound
+		return "", ErrVaultSecretNotFound
+	}
+	decrypter := vlt.privateKey.GetDecrypter()
+	return decrypter.DecrypToString(encryptedData)
+}
+
+func (vlt *Vault) AddReferencedSecret(secretValue string) (secretReference string, err error) {
+	err = vlt.initEncrypter()
+	if err == nil {
+		var cipherData crypto.SealedData
+		cipherData, err = vlt.encrypter.EncryptString(secretValue)
+		if err == nil {
+			if vlt.vault.Secrets.Referenced == nil {
+				vlt.vault.Secrets.Referenced = make(map[string]crypto.SealedData)
+			}
+			secretReference, err = crypto.SecretRefString()
+			if err == nil {
+				vlt.vault.Secrets.Referenced[secretReference] = cipherData
+				vlt.commit()
+			}
+		}
+	}
+	return
+}
+
+func (vlt *Vault) GetReferencedSecret(secretReference string) (secretValue string, err error) {
+	if vlt.IsLocked() {
+		return secretValue, ErrVaultLocked
+	}
+	encryptedData, ok := vlt.vault.Secrets.Referenced[secretReference]
+	if !ok {
+		return "", ErrVaultSecretNotFound
 	}
 	decrypter := vlt.privateKey.GetDecrypter()
 	return decrypter.DecrypToString(encryptedData)
