@@ -9,6 +9,9 @@ import (
 const (
 	vaultFileExtension                = ".vault.slv"
 	VaultKey           crypto.KeyType = 'V'
+	maxRefNameAttempts                = 10
+
+	referencedSecretPreviewVal = "SLV_SS_ENCRYPTED_VALUE"
 )
 
 var ErrInvalidVaultFileName = errors.New("invalid vault file name")
@@ -22,3 +25,4 @@ var ErrVaultCannotBeSharedWithVault = errors.New("vault cannot be shared with an
 var ErrVaultAlreadySharedWithKey = errors.New("vault already shared with the given key")
 var ErrVaultSecretNotFound = errors.New("no secret found for the given name")
 var ErrMissingVaultPublicKey = errors.New("missing vault public key")
+var ErrMaximumReferenceAttemptsReached = errors.New("maximum reference attempts reached")

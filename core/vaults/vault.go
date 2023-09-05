@@ -11,8 +11,8 @@ import (
 )
 
 type secrets struct {
-	Direct     map[string]crypto.SealedData `yaml:"direct,omitempty"`
-	Referenced map[string]crypto.SealedData `yaml:"referenced,omitempty"`
+	Direct     map[string]*crypto.SealedData `yaml:"direct,omitempty"`
+	Referenced map[string]*crypto.SealedData `yaml:"referenced,omitempty"`
 }
 
 type meta struct {
@@ -66,7 +66,7 @@ func New(vaultFile string, publicKeys ...crypto.PublicKey) (vlt *Vault, err erro
 	vaultPublicKey := vaultKeyPair.PublicKey()
 	vlt.vault = &vault{
 		Secrets: secrets{
-			Direct: make(map[string]crypto.SealedData),
+			Direct: make(map[string]*crypto.SealedData),
 		},
 		Meta: meta{
 			Version:   commons.Version,
@@ -190,9 +190,9 @@ func (vlt *Vault) AddDirectSecret(secretName string, secretValue string) (err er
 		cipherData, err = vlt.encrypter.EncryptString(secretValue)
 		if err == nil {
 			if vlt.vault.Secrets.Direct == nil {
-				vlt.vault.Secrets.Direct = make(map[string]crypto.SealedData)
+				vlt.vault.Secrets.Direct = make(map[string]*crypto.SealedData)
 			}
-			vlt.vault.Secrets.Direct[secretName] = cipherData
+			vlt.vault.Secrets.Direct[secretName] = &cipherData
 			vlt.commit()
 		}
 	}
@@ -216,7 +216,7 @@ func (vlt *Vault) GetDirectSecret(secretName string) (secretValue string, err er
 		return "", ErrVaultSecretNotFound
 	}
 	decrypter := vlt.privateKey.GetDecrypter()
-	return decrypter.DecrypToString(encryptedData)
+	return decrypter.DecrypToString(*encryptedData)
 }
 
 func (vlt *Vault) AddReferencedSecret(secretValue string) (secretReference string, err error) {
@@ -226,11 +226,19 @@ func (vlt *Vault) AddReferencedSecret(secretValue string) (secretReference strin
 		cipherData, err = vlt.encrypter.EncryptString(secretValue)
 		if err == nil {
 			if vlt.vault.Secrets.Referenced == nil {
-				vlt.vault.Secrets.Referenced = make(map[string]crypto.SealedData)
+				vlt.vault.Secrets.Referenced = make(map[string]*crypto.SealedData)
 			}
 			secretReference, err = crypto.SecretRefString()
+			attempts := 0
+			for err == nil && vlt.Secrets.Referenced[secretReference] != nil && attempts < maxRefNameAttempts {
+				secretReference, err = crypto.SecretRefString()
+				attempts++
+			}
+			if err == nil && attempts >= maxRefNameAttempts {
+				err = ErrMaximumReferenceAttemptsReached
+			}
 			if err == nil {
-				vlt.vault.Secrets.Referenced[secretReference] = cipherData
+				vlt.vault.Secrets.Referenced[secretReference] = &cipherData
 				vlt.commit()
 			}
 		}
@@ -247,5 +255,5 @@ func (vlt *Vault) GetReferencedSecret(secretReference string) (secretValue strin
 		return "", ErrVaultSecretNotFound
 	}
 	decrypter := vlt.privateKey.GetDecrypter()
-	return decrypter.DecrypToString(encryptedData)
+	return decrypter.DecrypToString(*encryptedData)
 }

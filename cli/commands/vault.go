@@ -56,7 +56,7 @@ func vaultNewCommand() *cobra.Command {
 			os.Exit(0)
 		},
 	}
-	vaultNewCmd.Flags().StringP("file", "f", "", "Name of the environment")
+	vaultNewCmd.Flags().StringP("file", "f", "", "Path to the vault file [should end with .vault.slv]")
 	vaultNewCmd.Flags().StringSliceP("public-keys", "k", []string{}, "Public keys of environments or groups that can access the vault")
 	vaultNewCmd.MarkFlagRequired("file")
 	vaultNewCmd.MarkFlagRequired("public-keys")
@@ -107,9 +107,9 @@ func vaultShareCommand() *cobra.Command {
 			PrintErrorAndExit(err)
 		},
 	}
-	vaultNewCmd.Flags().StringP("file", "f", "", "Name of the environment")
-	vaultNewCmd.Flags().StringSliceP("public-keys", "k", []string{}, "Public keys of environments or groups that can access the vault")
-	vaultNewCmd.MarkFlagRequired("file")
-	vaultNewCmd.MarkFlagRequired("public-keys")
+	vaultShareCmd.Flags().StringP("file", "f", "", "Path to the vault file [should end with .vault.slv]")
+	vaultShareCmd.Flags().StringSliceP("public-keys", "k", []string{}, "Public keys of environments or groups that can access the vault")
+	vaultShareCmd.MarkFlagRequired("file")
+	vaultShareCmd.MarkFlagRequired("public-keys")
 	return vaultShareCmd
 }
