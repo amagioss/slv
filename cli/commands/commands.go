@@ -26,3 +26,5 @@ var vaultShareCmd *cobra.Command
 var secretCmd *cobra.Command
 var secretAddCmd *cobra.Command
 var secretGetCmd *cobra.Command
+var secretRefCmd *cobra.Command
+var secretDerefCmd *cobra.Command

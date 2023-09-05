@@ -1,10 +1,13 @@
 package vaults
 
 import (
+	"crypto/rand"
+	"io"
 	"os"
 	"path"
 	"strings"
 
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/shibme/slv/core/commons"
 	"github.com/shibme/slv/core/crypto"
 	"gopkg.in/yaml.v3"
@@ -140,8 +143,8 @@ func (vlt *Vault) Unlock(privateKey crypto.PrivateKey) (err error) {
 	return ErrVaultNotAccessible
 }
 
-func (vlt *Vault) commit() {
-	commons.WriteToYAML(vlt.path, *vlt.vault)
+func (vlt *Vault) commit() error {
+	return commons.WriteToYAML(vlt.path, *vlt.vault)
 }
 
 func (vlt *Vault) GetVersion() string {
@@ -170,7 +173,7 @@ func (vlt *Vault) share(targetPublicKey crypto.PublicKey, checkForAccess bool) (
 	encryptedKey, err := encrypter.EncryptKey(*vlt.privateKey)
 	if err == nil {
 		vlt.vault.Meta.KeyWraps = append(vlt.vault.Meta.KeyWraps, &encryptedKey)
-		vlt.commit()
+		err = vlt.commit()
 	}
 	return
 }
@@ -193,7 +196,7 @@ func (vlt *Vault) AddDirectSecret(secretName string, secretValue string) (err er
 				vlt.vault.Secrets.Direct = make(map[string]*crypto.SealedData)
 			}
 			vlt.vault.Secrets.Direct[secretName] = &cipherData
-			vlt.commit()
+			err = vlt.commit()
 		}
 	}
 	return
@@ -219,7 +222,21 @@ func (vlt *Vault) GetDirectSecret(secretName string) (secretValue string, err er
 	return decrypter.DecrypToString(*encryptedData)
 }
 
-func (vlt *Vault) AddReferencedSecret(secretValue string) (secretReference string, err error) {
+func (vlt *Vault) DeleteDirecetSecret(secretName string) error {
+	delete(vlt.vault.Secrets.Direct, secretName)
+	return vlt.commit()
+}
+
+func randomStr(bytecount uint8) (string, error) {
+	randBytes := make([]byte, bytecount)
+	if _, err := io.ReadFull(rand.Reader, randBytes); err != nil {
+		return "", err
+	}
+	randomString := base58.Encode(randBytes)
+	return secretRefPrefix + randomString, nil
+}
+
+func (vlt *Vault) addReferencedSecret(secretValue string) (secretReference string, err error) {
 	err = vlt.initEncrypter()
 	if err == nil {
 		var cipherData crypto.SealedData
@@ -228,10 +245,10 @@ func (vlt *Vault) AddReferencedSecret(secretValue string) (secretReference strin
 			if vlt.vault.Secrets.Referenced == nil {
 				vlt.vault.Secrets.Referenced = make(map[string]*crypto.SealedData)
 			}
-			secretReference, err = crypto.SecretRefString()
+			secretReference, err = randomStr(16)
 			attempts := 0
 			for err == nil && vlt.Secrets.Referenced[secretReference] != nil && attempts < maxRefNameAttempts {
-				secretReference, err = crypto.SecretRefString()
+				secretReference, err = randomStr(16)
 				attempts++
 			}
 			if err == nil && attempts >= maxRefNameAttempts {
@@ -239,14 +256,14 @@ func (vlt *Vault) AddReferencedSecret(secretValue string) (secretReference strin
 			}
 			if err == nil {
 				vlt.vault.Secrets.Referenced[secretReference] = &cipherData
-				vlt.commit()
+				err = vlt.commit()
 			}
 		}
 	}
 	return
 }
 
-func (vlt *Vault) GetReferencedSecret(secretReference string) (secretValue string, err error) {
+func (vlt *Vault) getReferencedSecret(secretReference string) (secretValue string, err error) {
 	if vlt.IsLocked() {
 		return secretValue, ErrVaultLocked
 	}
@@ -256,4 +273,8 @@ func (vlt *Vault) GetReferencedSecret(secretReference string) (secretValue strin
 	}
 	decrypter := vlt.privateKey.GetDecrypter()
 	return decrypter.DecrypToString(*encryptedData)
+}
+
+func (vlt *Vault) deleteReferencedSecret(secretReference string) {
+	delete(vlt.vault.Secrets.Referenced, secretReference)
 }

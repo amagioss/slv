@@ -8,7 +8,6 @@ const (
 	sealedKeyPrefix           = "SLV_WK_" // WK = Wrapped Key
 	sealedDataPrefix          = "SLV_SS_" // SS = Sealed Secret
 	passphraseProtectedPrefix = "SLV_PP_" // PP = Password Protected
-	secretRefPrefix           = "SLV_SR_" // RS = Secret Reference
 )
 
 var ErrGeneratingKeyPair = errors.New("error generating a new key pair")

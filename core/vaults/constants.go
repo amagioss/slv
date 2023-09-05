@@ -6,12 +6,18 @@ import (
 	"github.com/shibme/slv/core/crypto"
 )
 
-const (
-	vaultFileExtension                = ".vault.slv"
-	VaultKey           crypto.KeyType = 'V'
-	maxRefNameAttempts                = 10
+type refActionType string
 
-	referencedSecretPreviewVal = "SLV_SS_ENCRYPTED_VALUE"
+const (
+	vaultFileExtension                        = ".vault.slv"
+	VaultKey                   crypto.KeyType = 'V'
+	maxRefNameAttempts                        = 10
+	secretRefPrefix                           = "SLV_SR_" // RS = Secret Reference
+	referencedSecretPreviewVal                = "SLV_SS_ENCRYPTED_VALUE"
+
+	refActionTypeReference   refActionType = "reference"
+	refActionTypeDereference refActionType = "dereference"
+	refActionTypePreview     refActionType = "preview"
 )
 
 var ErrInvalidVaultFileName = errors.New("invalid vault file name")
@@ -26,3 +32,6 @@ var ErrVaultAlreadySharedWithKey = errors.New("vault already shared with the giv
 var ErrVaultSecretNotFound = errors.New("no secret found for the given name")
 var ErrMissingVaultPublicKey = errors.New("missing vault public key")
 var ErrMaximumReferenceAttemptsReached = errors.New("maximum reference attempts reached")
+var ErrFailedToUpdateSecretReferences = errors.New("failed to update secret references")
+var ErrInvalidReferenceFileFormat = errors.New("invalid reference file - only yaml and json are supported")
+var ErrInvalidRefActionType = errors.New("invalid reference action type")

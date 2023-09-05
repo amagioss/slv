@@ -6,6 +6,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/shibme/slv/core/crypto"
+	"github.com/shibme/slv/core/keyreader"
 	"github.com/shibme/slv/core/vaults"
 	"github.com/spf13/cobra"
 )
@@ -71,8 +72,11 @@ func vaultShareCommand() *cobra.Command {
 		Use:   "share",
 		Short: "Shares a vault with another environment or group",
 		Run: func(cmd *cobra.Command, args []string) {
-			envPrivateKeyString := getEnvSecretKey()
-			envPrivateKey, err := crypto.PrivateKeyFromString(envPrivateKeyString)
+			var envPrivateKey *crypto.PrivateKey
+			envPrivateKeyString, err := keyreader.GetFromEnvar()
+			if err == nil {
+				envPrivateKey, err = crypto.PrivateKeyFromString(envPrivateKeyString)
+			}
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
