@@ -3,32 +3,25 @@ package environments
 import "github.com/shibme/slv/core/crypto"
 
 type Root struct {
-	PublicKey        crypto.PublicKey `yaml:"public_key"`
-	SealedPrivateKey crypto.SealedKey `yaml:"sealed_key"`
+	PublicKey  crypto.PublicKey  `yaml:"publicKey"`
+	WrappedKey crypto.WrappedKey `yaml:"wrappedKey"`
 }
 
-func newRoot() (root *Root, rootKey *crypto.PrivateKey, err error) {
-	root = &Root{}
-	var rootKeyPair, sealingKeyPair *crypto.KeyPair
-	rootKeyPair, err = crypto.NewKeyPair(RootKey)
+func newRoot() (*Root, *crypto.SecretKey, error) {
+	rootPKey, rootSKey, err := crypto.NewKeyPair(RootKey)
 	if err != nil {
 		return nil, nil, err
 	}
-	sealingKeyPair, err = crypto.NewKeyPair(RootKey)
+	sealingPKey, sealingSKey, err := crypto.NewKeyPair(RootKey)
 	if err != nil {
 		return nil, nil, err
 	}
-	sealingPublicKey := sealingKeyPair.PublicKey()
-	encrypter, err := sealingPublicKey.GetEncrypter()
+	rootWrappedKey, err := sealingPKey.EncryptKey(*rootSKey)
 	if err != nil {
 		return nil, nil, err
 	}
-	root.SealedPrivateKey, err = encrypter.EncryptKey(rootKeyPair.PrivateKey())
-	if err != nil {
-		return nil, nil, err
-	}
-	root.PublicKey = rootKeyPair.PublicKey()
-	rootPrivKey := rootKeyPair.PrivateKey()
-	rootKey = &rootPrivKey
-	return
+	return &Root{
+		PublicKey:  *rootPKey,
+		WrappedKey: *rootWrappedKey,
+	}, sealingSKey, nil
 }

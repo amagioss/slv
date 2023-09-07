@@ -17,7 +17,7 @@ type Environment struct {
 }
 
 type environment struct {
-	PublicKey crypto.PublicKey `yaml:"public_key"`
+	PublicKey crypto.PublicKey `yaml:"publicKey"`
 	Name      string           `yaml:"name"`
 	Email     string           `yaml:"email"`
 	EnvType   EnvType          `yaml:"type"`
@@ -28,25 +28,22 @@ func (eType *EnvType) isValid() bool {
 	return *eType == SERVICE || *eType == USER || *eType == ROOT
 }
 
-func New(name, email string, envType EnvType) (env *Environment, privateKey *crypto.PrivateKey, err error) {
+func New(name, email string, envType EnvType) (*Environment, *crypto.SecretKey, error) {
 	if !envType.isValid() {
 		return nil, nil, ErrInvalidEnvironmentType
 	}
-	kp, err := crypto.NewKeyPair(EnvironmentKey)
+	pKey, sKey, err := crypto.NewKeyPair(EnvironmentKey)
 	if err != nil {
 		return nil, nil, err
 	}
-	privateKey = new(crypto.PrivateKey)
-	env = &Environment{
+	return &Environment{
 		environment: &environment{
-			PublicKey: kp.PublicKey(),
+			PublicKey: *pKey,
 			Name:      name,
 			Email:     email,
 			EnvType:   envType,
 		},
-	}
-	*privateKey = kp.PrivateKey()
-	return
+	}, sKey, nil
 }
 
 func (env *Environment) Id() string {

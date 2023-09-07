@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/shibme/slv/core/commons"
+	"github.com/shibme/slv/core/crypto"
 	"github.com/shibme/slv/core/environments"
 	"github.com/shibme/slv/core/settings"
 	"gopkg.in/yaml.v3"
@@ -117,6 +118,14 @@ func (config *Config) AddEnv(envDef string) error {
 	}
 	envManifest.AddEnv(envDef)
 	return nil
+}
+
+func (config *Config) InitRoot() (*crypto.SecretKey, error) {
+	envManifest, err := config.GetEnvManifest()
+	if err != nil {
+		return nil, err
+	}
+	return envManifest.InitRoot()
 }
 
 func (config *Config) Sync() {

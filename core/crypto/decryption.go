@@ -1,52 +1,45 @@
 package crypto
 
 import (
+	"bytes"
+
 	"github.com/shibme/slv/core/commons"
 	"golang.org/x/crypto/nacl/box"
 )
 
-type Decrypter struct {
-	privateKey *PrivateKey
-}
-
-func (decrypter *Decrypter) decrypt(encrypted []byte) (data []byte, err error) {
-	ephemeralPublicKey := [32]byte(encrypted[0:32])
-	nonce := [24]byte(encrypted[32:56])
-	encryptedBytes := encrypted[56:]
-	decryptedData, success := box.Open(nil, encryptedBytes, &nonce, &ephemeralPublicKey, &decrypter.privateKey.keyData)
+func (secretKey *SecretKey) decrypt(ciphertext []byte) (data []byte, err error) {
+	ephemeralPublicKey := [32]byte(ciphertext[0:32])
+	nonce := [24]byte(ciphertext[32:56])
+	encryptedBytes := ciphertext[56:]
+	decryptedData, success := box.Open(nil, encryptedBytes, &nonce, &ephemeralPublicKey, secretKey.key)
 	if !success {
 		return nil, ErrDecryptionFailed
 	}
 	return commons.Decompress(decryptedData)
 }
 
-func (decrypter *Decrypter) Decrypt(cipheredData SealedData) (decryptedData []byte, err error) {
-	if cipheredData.encryptionKeyId != decrypter.privateKey.id {
-		return nil, ErrAccessKeyMismatch
+func (secretKey *SecretKey) DecryptSecret(sealedSecret SealedSecret) (secret []byte, err error) {
+	if !bytes.Equal(sealedSecret.keyId[:], secretKey.Id()[:]) {
+		return nil, ErrSecretKeyMismatch
 	}
-	return decrypter.decrypt(cipheredData.data)
+	if sealedSecret.keyType != secretKey.keyType {
+		return nil, ErrSecretKeyMismatch
+	}
+	return secretKey.decrypt(*sealedSecret.ciphertext)
 }
 
-func (decrypter *Decrypter) DecrypToString(cipheredData SealedData) (decryptedStr string, err error) {
-	var decryptedData []byte
-	decryptedData, err = decrypter.Decrypt(cipheredData)
-	if err == nil {
-		decryptedStr = string(decryptedData)
-	}
-	return
+func (secretKey *SecretKey) DecryptSecretString(sealedSecret SealedSecret) (string, error) {
+	data, err := secretKey.DecryptSecret(sealedSecret)
+	return string(data), err
 }
 
-func (decrypter *Decrypter) DecryptKey(sealedKey SealedKey) (privateKey PrivateKey, err error) {
-	if sealedKey.encryptionKeyId != decrypter.privateKey.id {
-		err = ErrAccessKeyMismatch
-		return
+func (secretKey *SecretKey) DecryptKey(wrappedKey WrappedKey) (*SecretKey, error) {
+	if !bytes.Equal(wrappedKey.keyId[:], secretKey.Id()[:]) {
+		return nil, ErrSecretKeyMismatch
 	}
-	var decryptedBytes []byte
-	decryptedBytes, err = decrypter.decrypt(sealedKey.data)
-	if err == nil {
-		var key *key
-		key, err = keyFromBytes(decryptedBytes)
-		privateKey.key = key
+	secretKeyBytes, err := secretKey.decrypt(*wrappedKey.ciphertext)
+	if err != nil {
+		return nil, err
 	}
-	return
+	return secretKeyFromBytes(secretKeyBytes)
 }

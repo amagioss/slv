@@ -60,7 +60,7 @@ func (vlt *Vault) updateReferencedSecretsYAML(file string, refType refActionType
 type action func(string) string
 
 func (vlt *Vault) refSecret(targetStr string) string {
-	ref, err := vlt.addReferencedSecret(targetStr)
+	ref, err := vlt.addReferencedSecret(targetStr, "")
 	if err != nil {
 		return ""
 	}
@@ -68,7 +68,7 @@ func (vlt *Vault) refSecret(targetStr string) string {
 }
 
 func (vlt *Vault) derefSecret(targetStr string) string {
-	if strings.HasPrefix(targetStr, secretRefPrefix) {
+	if strings.HasPrefix(targetStr, autoReferencedPrefix) {
 		decrypted, err := vlt.getReferencedSecret(targetStr)
 		vlt.deleteReferencedSecret(targetStr)
 		if err != nil {
@@ -80,7 +80,7 @@ func (vlt *Vault) derefSecret(targetStr string) string {
 }
 
 func (vlt *Vault) previewStr(targetStr string) string {
-	return referencedSecretPreviewVal
+	return autoReferencedPreviewValue
 }
 
 func (vlt *Vault) yamlTraverser(data *map[string]interface{}, act action) error {

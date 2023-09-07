@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	envDefPrefix                  = "SLV_ED_" // Environment Definition
+	envDefPrefix                  = "SLV_EDS_" // Environment Definition Serialized
 	EnvironmentKey crypto.KeyType = 'E'
 	RootKey        crypto.KeyType = 'R'
 	USER           EnvType        = "user"

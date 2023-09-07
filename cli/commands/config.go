@@ -67,9 +67,9 @@ func configListCommand() *cobra.Command {
 				defaultConfigName, _ := configs.GetDefaultConfigName()
 				for _, configName := range configNames {
 					if configName == defaultConfigName {
-						fmt.Println(color.GreenString(configName), "[*]")
+						fmt.Println("*", color.GreenString(configName))
 					} else {
-						fmt.Println(configName)
+						fmt.Println(" ", configName)
 					}
 				}
 			}

@@ -12,8 +12,10 @@ const (
 	vaultFileExtension                        = ".vault.slv"
 	VaultKey                   crypto.KeyType = 'V'
 	maxRefNameAttempts                        = 10
-	secretRefPrefix                           = "SLV_SR_" // RS = Secret Reference
-	referencedSecretPreviewVal                = "SLV_SS_ENCRYPTED_VALUE"
+	directReferencedPrefix                    = "SLV_DR_" // DR = Direct Referenced
+	autoReferencedPrefix                      = "SLV_AR_" // AR = Auto Referenced
+	autoReferenceLength                       = 16
+	autoReferencedPreviewValue                = autoReferencedPrefix + "ENCRYPTED_VALUE"
 
 	refActionTypeReference   refActionType = "reference"
 	refActionTypeDereference refActionType = "dereference"

@@ -16,6 +16,7 @@ var envCmd *cobra.Command
 var envNewCmd *cobra.Command
 var envAddCmd *cobra.Command
 var envListCmd *cobra.Command
+var envRootInitCmd *cobra.Command
 
 // Vault Commands
 var vaultCmd *cobra.Command

@@ -71,10 +71,10 @@ func secretGetCommand() *cobra.Command {
 		Use:   "get",
 		Short: "Gets a secret from the vault",
 		Run: func(cmd *cobra.Command, args []string) {
-			var envPrivateKey *crypto.PrivateKey
-			envPrivateKeyString, err := keyreader.GetFromEnvar()
+			var envSecretKey *crypto.SecretKey
+			envSecretKeyString, err := keyreader.GetFromEnvar()
 			if err == nil {
-				envPrivateKey, err = crypto.PrivateKeyFromString(envPrivateKeyString)
+				envSecretKey, err = crypto.SecretKeyFromString(envSecretKeyString)
 			}
 			if err != nil {
 				PrintErrorAndExit(err)
@@ -85,7 +85,7 @@ func secretGetCommand() *cobra.Command {
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			err = vault.Unlock(*envPrivateKey)
+			err = vault.Unlock(*envSecretKey)
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
@@ -147,10 +147,10 @@ func secretDerefCommand() *cobra.Command {
 		Use:   "deref",
 		Short: "Dereferences and updates secrets from a vault to a given yaml or json file",
 		Run: func(cmd *cobra.Command, args []string) {
-			var envPrivateKey *crypto.PrivateKey
+			var envSecretKey *crypto.SecretKey
 			envPrivateKeyString, err := keyreader.GetFromEnvar()
 			if err == nil {
-				envPrivateKey, err = crypto.PrivateKeyFromString(envPrivateKeyString)
+				envSecretKey, err = crypto.SecretKeyFromString(envPrivateKeyString)
 			}
 			if err != nil {
 				PrintErrorAndExit(err)
@@ -161,7 +161,7 @@ func secretDerefCommand() *cobra.Command {
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			err = vault.Unlock(*envPrivateKey)
+			err = vault.Unlock(*envSecretKey)
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
@@ -175,7 +175,6 @@ func secretDerefCommand() *cobra.Command {
 	}
 	secretDerefCmd.Flags().StringP("vault-file", "v", "", "Path to the vault file")
 	secretDerefCmd.Flags().StringP("file", "f", "", "Path to the yaml or json file")
-	secretDerefCmd.Flags().BoolP("preview", "p", false, "Enable preview mode")
 	secretDerefCmd.MarkFlagRequired("vault-file")
 	secretDerefCmd.MarkFlagRequired("file")
 	return secretDerefCmd

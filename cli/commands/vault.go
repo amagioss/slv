@@ -49,7 +49,7 @@ func vaultNewCommand() *cobra.Command {
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
-			_, err = vaults.New(vaultFile, publicKeys...)
+			_, err = vaults.New(vaultFile, 0, publicKeys...)
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
@@ -72,10 +72,10 @@ func vaultShareCommand() *cobra.Command {
 		Use:   "share",
 		Short: "Shares a vault with another environment or group",
 		Run: func(cmd *cobra.Command, args []string) {
-			var envPrivateKey *crypto.PrivateKey
-			envPrivateKeyString, err := keyreader.GetFromEnvar()
+			var envSecretKey *crypto.SecretKey
+			envSecretKeyString, err := keyreader.GetFromEnvar()
 			if err == nil {
-				envPrivateKey, err = crypto.PrivateKeyFromString(envPrivateKeyString)
+				envSecretKey, err = crypto.SecretKeyFromString(envSecretKeyString)
 			}
 			if err != nil {
 				PrintErrorAndExit(err)
@@ -95,7 +95,7 @@ func vaultShareCommand() *cobra.Command {
 			}
 			vault, err := vaults.Get(vaultFile)
 			if err == nil {
-				err = vault.Unlock(*envPrivateKey)
+				err = vault.Unlock(*envSecretKey)
 				if err == nil {
 					for _, pubKey := range publicKeys {
 						if err = vault.ShareAccessToKey(pubKey); err != nil {

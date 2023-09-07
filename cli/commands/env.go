@@ -25,6 +25,7 @@ func envCommand() *cobra.Command {
 	envCmd.AddCommand(envNewCommand())
 	envCmd.AddCommand(envListCommand())
 	envCmd.AddCommand(envAddCommand())
+	envCmd.AddCommand(envRootInitCommand())
 	return envCmd
 }
 
@@ -58,14 +59,30 @@ func envNewCommand() *cobra.Command {
 			fmt.Fprintln(w, "Tags:\t", env.Tags)
 			fmt.Fprintln(w, "Environment Definition:\t", envDef)
 			w.Flush()
+
+			// Adding env to a specified config
+			configName := cmd.Flag("add-to-config").Value.String()
+			var cfg *configs.Config
+			if configName != "" {
+				cfg, err = configs.GetConfig(configName)
+			} else {
+				cfg, err = configs.GetDefaultConfig()
+			}
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			err = cfg.AddEnv(envDef)
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
 			os.Exit(0)
 		},
 	}
 	envNewCmd.Flags().StringP("name", "n", "", "Name of the environment")
 	envNewCmd.Flags().StringP("email", "e", "", "Email for the environment")
 	envNewCmd.Flags().StringSliceP("tags", "t", []string{}, "Tags for the environment")
+	envNewCmd.Flags().StringP("add-to-config", "c", "", "Config to add the environment to")
 	envNewCmd.MarkFlagRequired("name")
-	envNewCmd.MarkFlagRequired("email")
 	return envNewCmd
 }
 
@@ -99,6 +116,36 @@ func envAddCommand() *cobra.Command {
 	envAddCmd.Flags().StringP("envdef", "e", "", "Environment defintion to be added")
 	envAddCmd.MarkFlagRequired("envdef")
 	return envAddCmd
+}
+
+func envRootInitCommand() *cobra.Command {
+	if envRootInitCmd != nil {
+		return envRootInitCmd
+	}
+	envRootInitCmd = &cobra.Command{
+		Use:   "initroot",
+		Short: "Initializes the root environment in a config",
+		Run: func(cmd *cobra.Command, args []string) {
+			configName := cmd.Flag("config").Value.String()
+			var cfg *configs.Config
+			var err error
+			if configName != "" {
+				cfg, err = configs.GetConfig(configName)
+			} else {
+				cfg, err = configs.GetDefaultConfig()
+			}
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			privKey, err := cfg.InitRoot()
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			fmt.Println("Root environment initialized with private key:", privKey)
+		},
+	}
+	envRootInitCmd.Flags().StringP("config", "c", "", "Name of the config to initialize root environment")
+	return envRootInitCmd
 }
 
 func envListCommand() *cobra.Command {

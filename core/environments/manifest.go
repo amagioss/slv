@@ -70,11 +70,11 @@ func (envManifest *EnvManifest) RootPublicKey() *crypto.PublicKey {
 	return nil
 }
 
-func (envManifest *EnvManifest) InitRoot() (*crypto.PrivateKey, error) {
+func (envManifest *EnvManifest) InitRoot() (*crypto.SecretKey, error) {
 	if envManifest.Root != nil {
 		return nil, ErrManifestRootExistsAlready
 	}
-	root, rootPrivateKey, err := newRoot()
+	root, rootSecretKey, err := newRoot()
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (envManifest *EnvManifest) InitRoot() (*crypto.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	return rootPrivateKey, nil
+	return rootSecretKey, nil
 }
 
 func (envManifest *EnvManifest) ListEnv() (environments []*Environment) {
