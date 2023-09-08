@@ -17,7 +17,7 @@ func SlvCommand() *cobra.Command {
 		},
 	}
 	slvCmd.AddCommand(envCommand())
-	slvCmd.AddCommand(configCommand())
+	slvCmd.AddCommand(profileCommand())
 	slvCmd.AddCommand(vaultCommand())
 	slvCmd.AddCommand(secretCommand())
 	return slvCmd

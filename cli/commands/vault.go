@@ -49,7 +49,12 @@ func vaultNewCommand() *cobra.Command {
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
-			_, err = vaults.New(vaultFile, 0, publicKeys...)
+			enableHash, _ := cmd.Flags().GetBool("enable-hash")
+			var hashLength uint32 = 0
+			if enableHash {
+				hashLength = 4
+			}
+			_, err = vaults.New(vaultFile, hashLength, publicKeys...)
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
@@ -59,6 +64,7 @@ func vaultNewCommand() *cobra.Command {
 	}
 	vaultNewCmd.Flags().StringP("file", "f", "", "Path to the vault file [should end with .vault.slv]")
 	vaultNewCmd.Flags().StringSliceP("public-keys", "k", []string{}, "Public keys of environments or groups that can access the vault")
+	vaultNewCmd.Flags().BoolP("enable-hash", "p", false, "Enable preview mode")
 	vaultNewCmd.MarkFlagRequired("file")
 	vaultNewCmd.MarkFlagRequired("public-keys")
 	return vaultNewCmd

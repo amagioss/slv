@@ -6,10 +6,10 @@ import "github.com/spf13/cobra"
 var slvCmd *cobra.Command
 
 // Config Commands
-var configCmd *cobra.Command
-var configNewCmd *cobra.Command
-var configListCmd *cobra.Command
-var configSetCmd *cobra.Command
+var profileCmd *cobra.Command
+var profileNewCmd *cobra.Command
+var profileListCmd *cobra.Command
+var profileSetCmd *cobra.Command
 
 // Environment Commands
 var envCmd *cobra.Command
