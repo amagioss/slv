@@ -15,6 +15,7 @@ const (
 	keyLength       = 32
 	publicKeyLength = keyIdLength + keyLength + 1
 	secretKeyLength = publicKeyLength + keyLength
+	nonceLength     = 24
 
 	secretHashTime      = 3
 	secretHashMemory    = 16 * 1024

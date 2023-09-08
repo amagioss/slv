@@ -8,7 +8,7 @@ import (
 	"golang.org/x/crypto/nacl/box"
 )
 
-func nonce() (nonce [24]byte, err error) {
+func nonce() (nonce [nonceLength]byte, err error) {
 	_, err = rand.Read(nonce[:])
 	return
 }
@@ -16,7 +16,7 @@ func nonce() (nonce [24]byte, err error) {
 func (publicKey *PublicKey) getEncrypter() (*encrypter, error) {
 	if publicKey.encrypter == nil {
 		if ephPubKey, ephPrivKey, err := box.GenerateKey(rand.Reader); err == nil {
-			var sharedKey *[32]byte = new([32]byte)
+			sharedKey := new([keyLength]byte)
 			box.Precompute(sharedKey, publicKey.key, ephPrivKey)
 			publicKey.encrypter = &encrypter{
 				encryptionKeyId:    publicKey.Id(),
@@ -66,7 +66,8 @@ func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength uint32) (sea
 			if hashLength > secretHashMaxLength {
 				hashLength = secretHashMaxLength
 			}
-			*sealedSecret.hash = publicKey.getHashForSecret(secret, hashLength)
+			hash := publicKey.getHashForSecret(secret, hashLength)
+			sealedSecret.hash = &hash
 		}
 	}
 	return

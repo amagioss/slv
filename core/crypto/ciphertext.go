@@ -60,8 +60,24 @@ type SealedSecret struct {
 	*ciphered
 }
 
+func (sealedSecret SealedSecret) String() string {
+	return sealedSecret.toString(sealedSecretAbbrev)
+}
+
+func (sealedSecret *SealedSecret) FromString(sealedSecretStr string) (err error) {
+	var ciphered *ciphered
+	if ciphered, err = cipheredFromString(sealedSecretStr, sealedSecretAbbrev); err == nil {
+		sealedSecret.ciphered = ciphered
+	}
+	return
+}
+
 func (sealedSecret *ciphered) GetHash() string {
 	return commons.Encode(*sealedSecret.hash)
+}
+
+func (sealedSecret SealedSecret) MarshalYAML() (interface{}, error) {
+	return sealedSecret.String(), nil
 }
 
 func (sealedSecret *SealedSecret) UnmarshalYAML(value *yaml.Node) (err error) {
@@ -75,12 +91,16 @@ func (sealedSecret *SealedSecret) UnmarshalYAML(value *yaml.Node) (err error) {
 	return
 }
 
-func (sealedSecret SealedSecret) MarshalYAML() (interface{}, error) {
-	return sealedSecret.toString(sealedSecretAbbrev), nil
-}
-
 type WrappedKey struct {
 	*ciphered
+}
+
+func (wrappedKey WrappedKey) String() string {
+	return wrappedKey.toString(wrappedKeyAbbrev)
+}
+
+func (wrappedKey WrappedKey) MarshalYAML() (interface{}, error) {
+	return wrappedKey.String(), nil
 }
 
 func (wrappedKey *WrappedKey) UnmarshalYAML(value *yaml.Node) (err error) {
@@ -92,8 +112,4 @@ func (wrappedKey *WrappedKey) UnmarshalYAML(value *yaml.Node) (err error) {
 		}
 	}
 	return
-}
-
-func (wrappedKey WrappedKey) MarshalYAML() (interface{}, error) {
-	return wrappedKey.toString(wrappedKeyAbbrev), nil
 }

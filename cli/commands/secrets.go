@@ -148,9 +148,9 @@ func secretDerefCommand() *cobra.Command {
 		Short: "Dereferences and updates secrets from a vault to a given yaml or json file",
 		Run: func(cmd *cobra.Command, args []string) {
 			var envSecretKey *crypto.SecretKey
-			envPrivateKeyString, err := keyreader.GetFromEnvar()
+			envSecretKeyString, err := keyreader.GetFromEnvar()
 			if err == nil {
-				envSecretKey, err = crypto.SecretKeyFromString(envPrivateKeyString)
+				envSecretKey, err = crypto.SecretKeyFromString(envSecretKeyString)
 			}
 			if err != nil {
 				PrintErrorAndExit(err)

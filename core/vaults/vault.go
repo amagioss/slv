@@ -18,9 +18,9 @@ type secrets struct {
 
 type config struct {
 	Version    string               `yaml:"version,omitempty"`
-	PublicKey  *crypto.PublicKey    `yaml:"publicKey,required"`
+	PublicKey  *crypto.PublicKey    `yaml:"publicKey"`
 	HashLength *uint32              `yaml:"hashLength,omitempty"`
-	KeyWraps   []*crypto.WrappedKey `yaml:"wrappedKeys,required"`
+	KeyWraps   []*crypto.WrappedKey `yaml:"wrappedKeys"`
 }
 
 type vault struct {
@@ -113,10 +113,11 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) (err error) {
 	if err != nil || (!vlt.IsLocked() && *vlt.unlockedBy == secretKey.PublicKey.String()) {
 		return
 	}
-	for _, privateKeyWrapping := range vlt.vault.Config.KeyWraps {
-		decryptedKey, err := secretKey.DecryptKey(*privateKeyWrapping)
+	for _, secretKeyWrapping := range vlt.vault.Config.KeyWraps {
+		decryptedKey, err := secretKey.DecryptKey(*secretKeyWrapping)
 		if err == nil {
 			vlt.secretKey = decryptedKey
+			vlt.unlockedBy = new(string)
 			*vlt.unlockedBy = secretKey.PublicKey.String()
 			return nil
 		}

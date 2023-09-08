@@ -22,8 +22,8 @@ func (secretKey *SecretKey) DecryptSecret(sealedSecret SealedSecret) (secret []b
 	if !bytes.Equal(sealedSecret.keyId[:], secretKey.Id()[:]) {
 		return nil, ErrSecretKeyMismatch
 	}
-	if sealedSecret.keyType != secretKey.keyType {
-		return nil, ErrSecretKeyMismatch
+	if *sealedSecret.keyType != *secretKey.keyType {
+		return nil, ErrSecretKeyTypeMismatch
 	}
 	return secretKey.decrypt(*sealedSecret.ciphertext)
 }
@@ -38,8 +38,11 @@ func (secretKey *SecretKey) DecryptKey(wrappedKey WrappedKey) (*SecretKey, error
 		return nil, ErrSecretKeyMismatch
 	}
 	secretKeyBytes, err := secretKey.decrypt(*wrappedKey.ciphertext)
-	if err != nil {
-		return nil, err
+	if err == nil {
+		var sKey SecretKey
+		if err = sKey.fromBytes(secretKeyBytes); err == nil {
+			return &sKey, nil
+		}
 	}
-	return secretKeyFromBytes(secretKeyBytes)
+	return nil, err
 }

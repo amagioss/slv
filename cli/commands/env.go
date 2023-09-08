@@ -141,7 +141,7 @@ func envRootInitCommand() *cobra.Command {
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			fmt.Println("Root environment initialized with private key:", privKey)
+			fmt.Println("Root environment initialized with secret key:", privKey)
 		},
 	}
 	envRootInitCmd.Flags().StringP("config", "c", "", "Name of the config to initialize root environment")

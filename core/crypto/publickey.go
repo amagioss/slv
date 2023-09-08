@@ -20,7 +20,7 @@ type PublicKey struct {
 }
 
 func (publicKey *PublicKey) Id() *[keyIdLength]byte {
-	if publicKey.keyType == nil || publicKey.key == nil {
+	if publicKey.key == nil {
 		return nil
 	}
 	sum := sha1.Sum(publicKey.key[:])
@@ -29,29 +29,23 @@ func (publicKey *PublicKey) Id() *[keyIdLength]byte {
 }
 
 func (publicKey *PublicKey) toBytes() []byte {
-	bytes := append(publicKey.Id()[:], publicKey.key[:]...)
-	return append([]byte{byte(*publicKey.keyType)}, bytes...)
+	return append([]byte{byte(*publicKey.keyType)}, append(publicKey.Id()[:], publicKey.key[:]...)...)
 }
 
-func publicKeyFromBytes(publicKeyBytes []byte) (*PublicKey, error) {
+func (publicKey *PublicKey) fromBytes(publicKeyBytes []byte) error {
 	if len(publicKeyBytes) != publicKeyLength {
-		return nil, ErrInvalidKeyFormat
+		return ErrInvalidKeyFormat
 	}
 	keyType := KeyType(publicKeyBytes[0])
-	sumFromBytes := publicKeyBytes[1 : keyIdLength+1]
-	key := new([keyLength]byte)
-	copy(key[:], publicKeyBytes[len(publicKeyBytes)-keyLength:])
-	publicKey := &PublicKey{
-		keyType: &keyType,
-		key:     key,
+	keyBytes := publicKeyBytes[1:]
+	keyIdFromBytes := keyBytes[:keyIdLength]
+	key := [keyLength]byte(keyBytes[keyIdLength:])
+	publicKey.keyType = &keyType
+	publicKey.key = &key
+	if !bytes.Equal(keyIdFromBytes[:], publicKey.Id()[:]) {
+		return ErrInvalidKeyFormat
 	}
-	if !bytes.Equal(sumFromBytes, publicKey.Id()[:]) {
-		return nil, ErrInvalidKeyFormat
-	}
-	return &PublicKey{
-		keyType: &keyType,
-		key:     key,
-	}, nil
+	return nil
 }
 
 func (publicKey PublicKey) Type() KeyType {
@@ -59,21 +53,29 @@ func (publicKey PublicKey) Type() KeyType {
 }
 
 func (publicKey PublicKey) String() string {
-	return fmt.Sprintf("%s_%s%s_%s", commons.SLV, publicKey.keyType,
+	return fmt.Sprintf("%s_%s%s_%s", commons.SLV, string(*publicKey.keyType),
 		publicKeyAbbrev, commons.Encode(publicKey.toBytes()))
 }
 
-func PublicKeyFromString(publicKeyStr string) (publicKey *PublicKey, err error) {
+func (publicKey *PublicKey) fromString(publicKeyStr string) (err error) {
 	sliced := strings.Split(publicKeyStr, "_")
 	if len(sliced) != 3 || sliced[0] != commons.SLV {
-		return nil, ErrInvalidKeyFormat
+		return ErrInvalidKeyFormat
 	}
-	if publicKey, err = publicKeyFromBytes(commons.Decode(sliced[2])); err != nil {
-		return nil, err
+	if err = publicKey.fromBytes(commons.Decode(sliced[2])); err != nil {
+		return err
 	}
-	if len(sliced[1]) != 3 || strings.HasPrefix(sliced[1], string(*publicKey.keyType)) ||
-		strings.HasSuffix(sliced[1], publicKeyAbbrev) {
-		return nil, ErrInvalidKeyFormat
+	if len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*publicKey.keyType)) ||
+		!strings.HasSuffix(sliced[1], publicKeyAbbrev) {
+		return ErrInvalidKeyFormat
+	}
+	return
+}
+
+func PublicKeyFromString(publicKeyStr string) (publicKey *PublicKey, err error) {
+	var pKey PublicKey
+	if err = pKey.fromString(publicKeyStr); err == nil {
+		publicKey = &pKey
 	}
 	return
 }
@@ -86,7 +88,7 @@ func (publicKey *PublicKey) UnmarshalYAML(value *yaml.Node) (err error) {
 	var pubKeyStr string
 	err = value.Decode(&pubKeyStr)
 	if err == nil {
-		publicKey, err = PublicKeyFromString(pubKeyStr)
+		publicKey.fromString(pubKeyStr)
 	}
 	return
 }
@@ -99,7 +101,7 @@ func (publicKey *PublicKey) UnmarshalJSON(data []byte) (err error) {
 	var pubKeyStr string
 	err = json.Unmarshal(data, &pubKeyStr)
 	if err == nil {
-		publicKey, err = PublicKeyFromString(pubKeyStr)
+		publicKey.fromString(pubKeyStr)
 	}
 	return
 }
