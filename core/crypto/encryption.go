@@ -19,7 +19,7 @@ func (publicKey *PublicKey) getEncrypter() (*encrypter, error) {
 			sharedKey := new([keyLength]byte)
 			box.Precompute(sharedKey, publicKey.key, ephPrivKey)
 			publicKey.encrypter = &encrypter{
-				encryptionKeyId:    publicKey.Id(),
+				encryptionKeyId:    publicKey.ShortId(),
 				ephemeralPublicKey: ephPubKey,
 				sharedKey:          sharedKey,
 			}
@@ -52,28 +52,28 @@ func (publicKey *PublicKey) getHashForSecret(secret []byte, hashLength uint32) [
 	return argon2.IDKey(secret, nil, secretHashTime, secretHashMemory, secretHashThreads, hashLength)
 }
 
-func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength uint32) (sealedSecret *SealedSecret, err error) {
+func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint32) (sealedSecret *SealedSecret, err error) {
 	ciphertext, err := publicKey.encrypt(secret)
 	if err == nil {
 		sealedSecret = &SealedSecret{
 			ciphered: &ciphered{
 				ciphertext: &ciphertext,
-				keyId:      publicKey.Id(),
+				keyId:      publicKey.ShortId(),
 				keyType:    publicKey.keyType,
 			},
 		}
-		if hashLength > 0 {
-			if hashLength > secretHashMaxLength {
-				hashLength = secretHashMaxLength
+		if hashLength != nil && *hashLength > 0 {
+			if *hashLength > secretHashMaxLength {
+				*hashLength = secretHashMaxLength
 			}
-			hash := publicKey.getHashForSecret(secret, hashLength)
+			hash := publicKey.getHashForSecret(secret, *hashLength)
 			sealedSecret.hash = &hash
 		}
 	}
 	return
 }
 
-func (publicKey *PublicKey) EncryptSecretString(str string, hashLength uint32) (sealedSecret *SealedSecret, err error) {
+func (publicKey *PublicKey) EncryptSecretString(str string, hashLength *uint32) (sealedSecret *SealedSecret, err error) {
 	return publicKey.EncryptSecret([]byte(str), hashLength)
 }
 
@@ -83,7 +83,7 @@ func (publicKey *PublicKey) EncryptKey(secretKey SecretKey) (wrappedKey *Wrapped
 		wrappedKey = &WrappedKey{
 			ciphered: &ciphered{
 				ciphertext: &encrypted,
-				keyId:      publicKey.Id(),
+				keyId:      publicKey.ShortId(),
 				keyType:    publicKey.keyType,
 			},
 		}

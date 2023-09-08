@@ -8,18 +8,14 @@ import (
 )
 
 func (vlt *Vault) ReferenceSecrets(file string, previewOnly bool) (string, error) {
-	if previewOnly {
-		return vlt.updateReferencedSecretsYAML(file, refActionTypePreview)
-	} else {
-		return vlt.updateReferencedSecretsYAML(file, refActionTypeReference)
-	}
+	return vlt.updateReferencedSecretsYAML(file, refActionReference, previewOnly)
 }
 
-func (vlt *Vault) DereferenceSecrets(file string) (string, error) {
-	return vlt.updateReferencedSecretsYAML(file, refActionTypeDereference)
+func (vlt *Vault) DereferenceSecrets(file string, previewOnly bool) (string, error) {
+	return vlt.updateReferencedSecretsYAML(file, refActionDereference, previewOnly)
 }
 
-func (vlt *Vault) updateReferencedSecretsYAML(file string, refType refActionType) (string, error) {
+func (vlt *Vault) updateReferencedSecretsYAML(file string, actionType secretRefrencingAction, previewOnly bool) (string, error) {
 	if !strings.HasSuffix(file, ".yaml") && !strings.HasSuffix(file, ".yml") {
 		return "", ErrInvalidReferenceFileFormat
 	}
@@ -32,14 +28,16 @@ func (vlt *Vault) updateReferencedSecretsYAML(file string, refType refActionType
 	if err != nil {
 		return "", err
 	}
-	var act action
-	switch refType {
-	case refActionTypeReference:
-		act = vlt.refSecret
-	case refActionTypeDereference:
+	var act referenceAction
+	switch actionType {
+	case refActionReference:
+		if previewOnly {
+			act = vlt.refSecretPreview
+		} else {
+			act = vlt.refSecret
+		}
+	case refActionDereference:
 		act = vlt.derefSecret
-	case refActionTypePreview:
-		act = vlt.previewStr
 	default:
 		return "", ErrInvalidRefActionType
 	}
@@ -47,7 +45,7 @@ func (vlt *Vault) updateReferencedSecretsYAML(file string, refType refActionType
 	if err == nil {
 		updatedYaml, err := yaml.Marshal(yMap)
 		if err == nil {
-			if refType != refActionTypePreview {
+			if !previewOnly {
 				err = os.WriteFile(file, updatedYaml, 0644)
 				vlt.commit()
 			}
@@ -57,33 +55,29 @@ func (vlt *Vault) updateReferencedSecretsYAML(file string, refType refActionType
 	return "", err
 }
 
-type action func(string) string
+type referenceAction func(string) (string, error)
 
-func (vlt *Vault) refSecret(targetStr string) string {
-	ref, err := vlt.addReferencedSecret(targetStr, "")
-	if err != nil {
-		return ""
-	}
-	return ref
+func (vlt *Vault) refSecret(targetStr string) (string, error) {
+	return vlt.addReferencedSecret("", targetStr)
 }
 
-func (vlt *Vault) derefSecret(targetStr string) string {
-	if strings.HasPrefix(targetStr, autoReferencedPrefix) {
+func (vlt *Vault) refSecretPreview(targetStr string) (string, error) {
+	return autoReferencedPreviewValue, nil
+}
+
+func (vlt *Vault) derefSecret(targetStr string) (string, error) {
+	if strings.HasPrefix(targetStr, autoReferencedPrefix+vlt.Config.PublicKey.Id()) {
 		decrypted, err := vlt.getReferencedSecret(targetStr)
-		vlt.deleteReferencedSecret(targetStr)
 		if err != nil {
-			return ""
+			return "", err
 		}
-		return decrypted
+		vlt.deleteReferencedSecret(targetStr)
+		return decrypted, nil
 	}
-	return targetStr
+	return targetStr, nil
 }
 
-func (vlt *Vault) previewStr(targetStr string) string {
-	return autoReferencedPreviewValue
-}
-
-func (vlt *Vault) yamlTraverser(data *map[string]interface{}, act action) error {
+func (vlt *Vault) yamlTraverser(data *map[string]interface{}, act referenceAction) error {
 	for key, value := range *data {
 		switch v := value.(type) {
 		case map[string]interface{}:
@@ -99,9 +93,9 @@ func (vlt *Vault) yamlTraverser(data *map[string]interface{}, act action) error 
 				}
 			}
 		case string:
-			newValue := act(v)
-			if newValue == "" {
-				return ErrFailedToUpdateSecretReferences
+			newValue, err := act(v)
+			if err != nil {
+				return err
 			}
 			(*data)[key] = newValue
 		}

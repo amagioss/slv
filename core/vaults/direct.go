@@ -4,11 +4,7 @@ import "github.com/shibme/slv/core/crypto"
 
 func (vlt *Vault) AddDirectSecret(secretName string, secretValue string) (err error) {
 	var sealedSecret *crypto.SealedSecret
-	var hashLength uint32 = 0
-	if vlt.Config.HashLength != nil {
-		hashLength = *vlt.Config.HashLength
-	}
-	sealedSecret, err = vlt.Config.PublicKey.EncryptSecretString(secretValue, hashLength)
+	sealedSecret, err = vlt.Config.PublicKey.EncryptSecretString(secretValue, vlt.Config.HashLength)
 	if err == nil {
 		if vlt.vault.Secrets.Direct == nil {
 			vlt.vault.Secrets.Direct = make(map[string]*crypto.SealedSecret)

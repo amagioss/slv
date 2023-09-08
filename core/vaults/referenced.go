@@ -13,18 +13,26 @@ func randomStr(bytecount uint8) (string, error) {
 	if _, err := io.ReadFull(rand.Reader, randBytes); err != nil {
 		return "", err
 	}
-	randomString := commons.Encode(randBytes)
-	return autoReferencedPrefix + randomString, nil
+	return commons.Encode(randBytes), nil
+}
+
+func (vlt *Vault) getReferenceName(nodePath string) (string, error) {
+	// return autoReferencedPrefix + vlt.Config.PublicKey.String() + "_" + commons.Encode([]byte(nodePath))
+	randomStr, err := randomStr(autoReferenceLength)
+	if err != nil {
+		return "", err
+	}
+	return autoReferencedPrefix + vlt.Config.PublicKey.Id() + "_" + randomStr, nil
 }
 
 func (vlt *Vault) addReferencedSecret(nodePath, secret string) (secretRef string, err error) {
 	var sealedSecret *crypto.SealedSecret
-	sealedSecret, err = vlt.secretKey.EncryptSecretString(secret, *vlt.Config.HashLength)
+	sealedSecret, err = vlt.Config.PublicKey.EncryptSecretString(secret, vlt.Config.HashLength)
 	if err == nil {
 		if vlt.vault.Secrets.Referenced == nil {
 			vlt.vault.Secrets.Referenced = make(map[string]*crypto.SealedSecret)
 		}
-		secretRef, err = randomStr(autoReferenceLength)
+		secretRef, err = vlt.getReferenceName(nodePath)
 		attempts := 0
 		for err == nil && vlt.Secrets.Referenced[secretRef] != nil && attempts < maxRefNameAttempts {
 			secretRef, err = randomStr(autoReferenceLength)

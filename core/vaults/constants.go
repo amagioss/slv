@@ -6,20 +6,19 @@ import (
 	"github.com/shibme/slv/core/crypto"
 )
 
-type refActionType string
+type secretRefrencingAction string
 
 const (
 	vaultFileExtension                        = ".vault.slv"
 	VaultKey                   crypto.KeyType = 'V'
 	maxRefNameAttempts                        = 10
-	directReferencedPrefix                    = "SLV_DR_" // DR = Direct Referenced
-	autoReferencedPrefix                      = "SLV_AR_" // AR = Auto Referenced
+	directReferencedPrefix                    = "SLV_DRS_" // DR = Direct Referenced Secret
+	autoReferencedPrefix                      = "SLV_ARS_" // AR = Auto Referenced Secret
 	autoReferenceLength                       = 16
-	autoReferencedPreviewValue                = autoReferencedPrefix + "ENCRYPTED_VALUE"
+	autoReferencedPreviewValue                = autoReferencedPrefix + "REFERENCEKEYTOBEFILLEDFROMVAULT"
 
-	refActionTypeReference   refActionType = "reference"
-	refActionTypeDereference refActionType = "dereference"
-	refActionTypePreview     refActionType = "preview"
+	refActionReference   secretRefrencingAction = "reference"
+	refActionDereference secretRefrencingAction = "dereference"
 )
 
 var ErrInvalidVaultFileName = errors.New("invalid vault file name")

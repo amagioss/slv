@@ -8,9 +8,10 @@ import (
 )
 
 func (secretKey *SecretKey) decrypt(ciphertext []byte) (data []byte, err error) {
-	ephemeralPublicKey := [32]byte(ciphertext[0:32])
-	nonce := [24]byte(ciphertext[32:56])
-	encryptedBytes := ciphertext[56:]
+	ephemeralPublicKey := [keyLength]byte(ciphertext[:keyLength])
+	ciphertext = ciphertext[keyLength:]
+	nonce := [nonceLength]byte(ciphertext[:nonceLength])
+	encryptedBytes := ciphertext[nonceLength:]
 	decryptedData, success := box.Open(nil, encryptedBytes, &nonce, &ephemeralPublicKey, secretKey.key)
 	if !success {
 		return nil, ErrDecryptionFailed
@@ -19,7 +20,7 @@ func (secretKey *SecretKey) decrypt(ciphertext []byte) (data []byte, err error) 
 }
 
 func (secretKey *SecretKey) DecryptSecret(sealedSecret SealedSecret) (secret []byte, err error) {
-	if !bytes.Equal(sealedSecret.keyId[:], secretKey.Id()[:]) {
+	if !bytes.Equal(sealedSecret.keyId[:], secretKey.ShortId()[:]) {
 		return nil, ErrSecretKeyMismatch
 	}
 	if *sealedSecret.keyType != *secretKey.keyType {
@@ -34,7 +35,7 @@ func (secretKey *SecretKey) DecryptSecretString(sealedSecret SealedSecret) (stri
 }
 
 func (secretKey *SecretKey) DecryptKey(wrappedKey WrappedKey) (*SecretKey, error) {
-	if !bytes.Equal(wrappedKey.keyId[:], secretKey.Id()[:]) {
+	if !bytes.Equal(wrappedKey.keyId[:], secretKey.ShortId()[:]) {
 		return nil, ErrSecretKeyMismatch
 	}
 	secretKeyBytes, err := secretKey.decrypt(*wrappedKey.ciphertext)

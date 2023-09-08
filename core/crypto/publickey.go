@@ -1,7 +1,6 @@
 package crypto
 
 import (
-	"bytes"
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
@@ -19,7 +18,11 @@ type PublicKey struct {
 	encrypter *encrypter
 }
 
-func (publicKey *PublicKey) Id() *[keyIdLength]byte {
+func (publicKey *PublicKey) Id() string {
+	return commons.Encode(publicKey.toBytes())
+}
+
+func (publicKey *PublicKey) ShortId() *[keyIdLength]byte {
 	if publicKey.key == nil {
 		return nil
 	}
@@ -29,7 +32,7 @@ func (publicKey *PublicKey) Id() *[keyIdLength]byte {
 }
 
 func (publicKey *PublicKey) toBytes() []byte {
-	return append([]byte{byte(*publicKey.keyType)}, append(publicKey.Id()[:], publicKey.key[:]...)...)
+	return append([]byte{byte(*publicKey.keyType)}, publicKey.key[:]...)
 }
 
 func (publicKey *PublicKey) fromBytes(publicKeyBytes []byte) error {
@@ -37,14 +40,9 @@ func (publicKey *PublicKey) fromBytes(publicKeyBytes []byte) error {
 		return ErrInvalidKeyFormat
 	}
 	keyType := KeyType(publicKeyBytes[0])
-	keyBytes := publicKeyBytes[1:]
-	keyIdFromBytes := keyBytes[:keyIdLength]
-	key := [keyLength]byte(keyBytes[keyIdLength:])
+	key := [keyLength]byte(publicKeyBytes[1:])
 	publicKey.keyType = &keyType
 	publicKey.key = &key
-	if !bytes.Equal(keyIdFromBytes[:], publicKey.Id()[:]) {
-		return ErrInvalidKeyFormat
-	}
 	return nil
 }
 
@@ -54,7 +52,7 @@ func (publicKey PublicKey) Type() KeyType {
 
 func (publicKey PublicKey) String() string {
 	return fmt.Sprintf("%s_%s%s_%s", commons.SLV, string(*publicKey.keyType),
-		publicKeyAbbrev, commons.Encode(publicKey.toBytes()))
+		publicKeyAbbrev, publicKey.Id())
 }
 
 func (publicKey *PublicKey) fromString(publicKeyStr string) (err error) {

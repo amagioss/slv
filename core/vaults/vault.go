@@ -143,7 +143,7 @@ func (vlt *Vault) share(targetPublicKey crypto.PublicKey, checkForAccess bool) (
 	}
 	if checkForAccess {
 		for _, keyWrappings := range vlt.vault.Config.KeyWraps {
-			if bytes.Equal(keyWrappings.GetKeyId()[:], targetPublicKey.Id()[:]) {
+			if bytes.Equal(keyWrappings.GetKeyId()[:], targetPublicKey.ShortId()[:]) {
 				return ErrVaultAlreadySharedWithKey
 			}
 		}

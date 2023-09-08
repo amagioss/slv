@@ -13,7 +13,7 @@ const (
 
 	keyIdLength     = 8
 	keyLength       = 32
-	publicKeyLength = keyIdLength + keyLength + 1
+	publicKeyLength = keyLength + 1
 	secretKeyLength = publicKeyLength + keyLength
 	nonceLength     = 24
 

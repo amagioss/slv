@@ -165,16 +165,22 @@ func secretDerefCommand() *cobra.Command {
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			_, err = vault.DereferenceSecrets(file)
+			preview, _ := cmd.Flags().GetBool("preview")
+			result, err := vault.DereferenceSecrets(file, preview)
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			fmt.Println("Dereferenced ", color.GreenString(file), "with the vault", color.GreenString(vaultFile))
+			if preview {
+				fmt.Println(result)
+			} else {
+				fmt.Println("Dereferenced ", color.GreenString(file), "with the vault", color.GreenString(vaultFile))
+			}
 			os.Exit(0)
 		},
 	}
 	secretDerefCmd.Flags().StringP("vault-file", "v", "", "Path to the vault file")
 	secretDerefCmd.Flags().StringP("file", "f", "", "Path to the yaml or json file")
+	secretDerefCmd.Flags().BoolP("preview", "p", false, "Enable preview mode")
 	secretDerefCmd.MarkFlagRequired("vault-file")
 	secretDerefCmd.MarkFlagRequired("file")
 	return secretDerefCmd
