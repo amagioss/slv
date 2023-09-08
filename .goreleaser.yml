@@ -9,7 +9,7 @@ builds:
     goarch:
       - amd64
       - arm64
-    ldflags: "-X main.Version={{.Version}}"
+    ldflags: "-X github.com/shibme/slv/cli/commands.Version={{.Version}}"
 archives:
   - format: zip
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
