@@ -24,7 +24,7 @@ func envCommand() *cobra.Command {
 	}
 	envCmd.AddCommand(envNewCommand())
 	envCmd.AddCommand(envListCommand())
-	envCmd.AddCommand(envRootInitCommand())
+	envCmd.AddCommand(envUserRegisterCommand())
 	return envCmd
 }
 
@@ -43,7 +43,7 @@ func envNewCommand() *cobra.Command {
 				PrintErrorAndExit(err)
 				os.Exit(1)
 			}
-			env, privKey, _ := environments.New(name, email, environments.SERVICE)
+			env, secretKey, _ := environments.New(name, email, environments.SERVICE)
 			env.AddTags(tags...)
 			envDef, err := env.ToEnvDef()
 			if err != nil {
@@ -51,11 +51,13 @@ func envNewCommand() *cobra.Command {
 				os.Exit(1)
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-			fmt.Fprintln(w, "Secret Key:\t", privKey)
+			fmt.Fprintln(w, "Secret Key:\t", secretKey)
+			fmt.Fprintln(w)
 			fmt.Fprintln(w, "Public Key:\t", env.PublicKey)
 			fmt.Fprintln(w, "Name:\t", env.Name)
 			fmt.Fprintln(w, "Email:\t", env.Email)
 			fmt.Fprintln(w, "Tags:\t", env.Tags)
+			fmt.Fprintln(w)
 			fmt.Fprintln(w, "Environment Definition:\t", envDef)
 			w.Flush()
 
@@ -81,37 +83,6 @@ func envNewCommand() *cobra.Command {
 	envNewCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
 	envNewCmd.MarkFlagRequired(envNameFlag.name)
 	return envNewCmd
-}
-
-func envRootInitCommand() *cobra.Command {
-	if envRootInitCmd != nil {
-		return envRootInitCmd
-	}
-	envRootInitCmd = &cobra.Command{
-		Use:     "initroot",
-		Aliases: []string{"rootinit", "init-root", "root-init"},
-		Short:   "Initializes the root environment in a profile",
-		Run: func(cmd *cobra.Command, args []string) {
-			profileName := cmd.Flag(profileNameFlag.name).Value.String()
-			var cfg *profiles.Profile
-			var err error
-			if profileName != "" {
-				cfg, err = profiles.GetProfile(profileName)
-			} else {
-				cfg, err = profiles.GetDefaultProfile()
-			}
-			if err != nil {
-				PrintErrorAndExit(err)
-			}
-			privKey, err := cfg.InitRoot()
-			if err != nil {
-				PrintErrorAndExit(err)
-			}
-			fmt.Println("Root environment initialized with secret key:", privKey)
-		},
-	}
-	envRootInitCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
-	return envRootInitCmd
 }
 
 func envListCommand() *cobra.Command {
@@ -161,4 +132,61 @@ func envListCommand() *cobra.Command {
 	envListCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
 	envListCmd.Flags().StringP(envSearchFlag.name, envSearchFlag.shorthand, "", envSearchFlag.usage)
 	return envListCmd
+}
+
+func envUserRegisterCommand() *cobra.Command {
+	if envUserRegisterCmd != nil {
+		return envUserRegisterCmd
+	}
+	envUserRegisterCmd = &cobra.Command{
+		Use:   "new",
+		Short: "Creates an environment for user and registers it locally",
+		Run: func(cmd *cobra.Command, args []string) {
+			name, _ := cmd.Flags().GetString(envNameFlag.name)
+			email, _ := cmd.Flags().GetString(envEmailFlag.name)
+			tags, err := cmd.Flags().GetStringSlice(envTagsFlag.name)
+			if err != nil {
+				PrintErrorAndExit(err)
+				os.Exit(1)
+			}
+			env, secretKey, _ := environments.New(name, email, environments.USER)
+			env.AddTags(tags...)
+			envDef, err := env.ToEnvDef()
+			if err != nil {
+				PrintErrorAndExit(err)
+				os.Exit(1)
+			}
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+			fmt.Fprintln(w, "Secret Key:\t", secretKey)
+			fmt.Fprintln(w)
+			fmt.Fprintln(w, "Public Key:\t", env.PublicKey)
+			fmt.Fprintln(w, "Name:\t", env.Name)
+			fmt.Fprintln(w, "Email:\t", env.Email)
+			fmt.Fprintln(w, "Tags:\t", env.Tags)
+			fmt.Fprintln(w)
+			fmt.Fprintln(w, "Environment Definition:\t", envDef)
+			w.Flush()
+
+			// Adding env to a specified profile
+			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
+			var cfg *profiles.Profile
+			if addToProfileFlag {
+				cfg, err = profiles.GetDefaultProfile()
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
+				err = cfg.AddEnv(envDef)
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
+			}
+			os.Exit(0)
+		},
+	}
+	envUserRegisterCmd.Flags().StringP(envNameFlag.name, envNameFlag.shorthand, "", envNameFlag.usage)
+	envUserRegisterCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
+	envUserRegisterCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
+	envUserRegisterCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
+	envUserRegisterCmd.MarkFlagRequired(envNameFlag.name)
+	return envUserRegisterCmd
 }

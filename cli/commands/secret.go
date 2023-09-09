@@ -6,7 +6,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/shibme/slv/core/crypto"
-	"github.com/shibme/slv/core/keyreader"
+	"github.com/shibme/slv/core/keystore"
 	"github.com/shibme/slv/core/vaults"
 	"github.com/spf13/cobra"
 )
@@ -73,7 +73,7 @@ func secretGetCommand() *cobra.Command {
 		Short:   "Gets a secret from the vault",
 		Run: func(cmd *cobra.Command, args []string) {
 			var envSecretKey *crypto.SecretKey
-			envSecretKeyString, err := keyreader.GetFromEnvar()
+			envSecretKeyString, err := keystore.GetSecretKeyFromEnvar()
 			if err == nil {
 				envSecretKey, err = crypto.SecretKeyFromString(envSecretKeyString)
 			}
@@ -150,7 +150,7 @@ func secretDerefCommand() *cobra.Command {
 		Short: "Dereferences and updates secrets from a vault to a given yaml or json file",
 		Run: func(cmd *cobra.Command, args []string) {
 			var envSecretKey *crypto.SecretKey
-			envSecretKeyString, err := keyreader.GetFromEnvar()
+			envSecretKeyString, err := keystore.GetSecretKeyFromEnvar()
 			if err == nil {
 				envSecretKey, err = crypto.SecretKeyFromString(envSecretKeyString)
 			}

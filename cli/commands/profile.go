@@ -25,6 +25,7 @@ func profileCommand() *cobra.Command {
 	profileCmd.AddCommand(profileDefaultCommand())
 	profileCmd.AddCommand(profileListCommand())
 	profileCmd.AddCommand(profileAddEnvCommand())
+	profileCmd.AddCommand(profileInitRootCommand())
 	return profileCmd
 }
 
@@ -146,4 +147,35 @@ func profileAddEnvCommand() *cobra.Command {
 	envAddCmd.Flags().StringSliceP(profileEnvDefFlag.name, profileEnvDefFlag.shorthand, []string{}, profileEnvDefFlag.usage)
 	envAddCmd.MarkFlagRequired(profileEnvDefFlag.name)
 	return envAddCmd
+}
+
+func profileInitRootCommand() *cobra.Command {
+	if profileInitRootCmd != nil {
+		return profileInitRootCmd
+	}
+	profileInitRootCmd = &cobra.Command{
+		Use:     "initroot",
+		Aliases: []string{"rootinit", "init-root", "root-init"},
+		Short:   "Initializes the root environment in a profile",
+		Run: func(cmd *cobra.Command, args []string) {
+			profileName := cmd.Flag(profileNameFlag.name).Value.String()
+			var cfg *profiles.Profile
+			var err error
+			if profileName != "" {
+				cfg, err = profiles.GetProfile(profileName)
+			} else {
+				cfg, err = profiles.GetDefaultProfile()
+			}
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			secretKey, err := cfg.InitRoot()
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			fmt.Println("Root environment initialized with secret key:", secretKey)
+		},
+	}
+	profileInitRootCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
+	return profileInitRootCmd
 }

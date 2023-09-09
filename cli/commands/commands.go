@@ -10,13 +10,14 @@ var profileCmd *cobra.Command
 var profileNewCmd *cobra.Command
 var profileListCmd *cobra.Command
 var profileSetCmd *cobra.Command
+var profileInitRootCmd *cobra.Command
 
 // Environment Commands
 var envCmd *cobra.Command
 var envNewCmd *cobra.Command
 var envAddCmd *cobra.Command
 var envListCmd *cobra.Command
-var envRootInitCmd *cobra.Command
+var envUserRegisterCmd *cobra.Command
 
 // Vault Commands
 var vaultCmd *cobra.Command
