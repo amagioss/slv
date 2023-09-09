@@ -126,6 +126,6 @@ func (envManifest *EnvManifest) AddEnv(envString string) (err error) {
 	if err != nil {
 		return
 	}
-	envManifest.updateEnvironment(&environment)
+	envManifest.updateEnvironment(environment)
 	return
 }

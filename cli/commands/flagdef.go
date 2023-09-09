@@ -65,9 +65,8 @@ var vaultAccessPublicKeysFlag = FlagDef{
 }
 
 var vaultEnableHashingFlag = FlagDef{
-	name:      "enable-hash",
-	shorthand: "h",
-	usage:     "Enable hashing for secrets to verify secret rotation [Not recommended, though it may be resilient from attacks]",
+	name:  "enable-hash",
+	usage: "Enable hashing for secrets to verify secret rotation [Not recommended, though it may be resilient from attacks]",
 }
 
 // Secret Command Flags

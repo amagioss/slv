@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	envDefPrefix                  = "SLV_EDS_" // Environment Definition Serialized
+	envDefAbbrev                  = "EDS" // Environment Definition Serialized
 	EnvironmentKey crypto.KeyType = 'E'
 	RootKey        crypto.KeyType = 'R'
 	USER           EnvType        = "user"
@@ -15,6 +15,7 @@ const (
 	ROOT           EnvType        = "root"
 )
 
+var ErrInvalidEnvDef = errors.New("invalid environment definition")
 var ErrInvalidEnvironmentType = errors.New("invalid environment type")
 var ErrEnvironmentNotFound = errors.New("no such environment exists")
 var ErrManifestPathExistsAlready = errors.New("manifest path exists already")
