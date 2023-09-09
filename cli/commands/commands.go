@@ -5,7 +5,7 @@ import "github.com/spf13/cobra"
 // SLV Command
 var slvCmd *cobra.Command
 
-// Config Commands
+// Profile Commands
 var profileCmd *cobra.Command
 var profileNewCmd *cobra.Command
 var profileListCmd *cobra.Command

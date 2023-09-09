@@ -16,11 +16,11 @@ const (
 func getAppDataDirPath() (slvAppDataRoot string) {
 	slvAppDataRoot = os.Getenv(appDataPathEnv)
 	if slvAppDataRoot == "" {
-		configDir, err := os.UserConfigDir()
+		appDataDir, err := os.UserConfigDir()
 		if err != nil {
-			log.Fatalf("Error while getting config path: %v", err)
+			log.Fatalf("Error while getting slv app data path: %v", err)
 		}
-		slvAppDataRoot = filepath.Join(configDir, appName)
+		slvAppDataRoot = filepath.Join(appDataDir, appName)
 	}
 	if f, err := os.Stat(slvAppDataRoot); err == nil && f.IsDir() {
 		return

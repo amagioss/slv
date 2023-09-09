@@ -9,7 +9,7 @@ import (
 
 type profileManager struct {
 	dir                string
-	confList           map[string]struct{}
+	profileList        map[string]struct{}
 	defaultFile        *string
 	defaultProfileName *string
 	defaultProfile     *Profile
@@ -37,20 +37,20 @@ func initProfileManager() error {
 	}
 
 	// Populating list of all profiles
-	confManagerDir, err := os.Open(manager.dir)
+	profileManagerDir, err := os.Open(manager.dir)
 	if err != nil {
 		return ErrOpeningProfileManagementDir
 	}
-	defer confManagerDir.Close()
-	fileInfoList, err := confManagerDir.Readdir(-1)
+	defer profileManagerDir.Close()
+	fileInfoList, err := profileManagerDir.Readdir(-1)
 	if err != nil {
 		return ErrOpeningProfileManagementDir
 	}
-	manager.confList = make(map[string]struct{})
+	manager.profileList = make(map[string]struct{})
 	for _, fileInfo := range fileInfoList {
 		if fileInfo.IsDir() {
 			if f, err := os.Stat(filepath.Join(manager.dir, fileInfo.Name(), profileFileName)); err == nil && !f.IsDir() {
-				manager.confList[fileInfo.Name()] = struct{}{}
+				manager.profileList[fileInfo.Name()] = struct{}{}
 			}
 		}
 	}
@@ -63,8 +63,8 @@ func List() (profileNames []string, err error) {
 	if err = initProfileManager(); err != nil {
 		return nil, err
 	}
-	profileNames = make([]string, 0, len(profileMgr.confList))
-	for profileName := range profileMgr.confList {
+	profileNames = make([]string, 0, len(profileMgr.profileList))
+	for profileName := range profileMgr.profileList {
 		profileNames = append(profileNames, profileName)
 	}
 	return
@@ -77,7 +77,7 @@ func GetProfile(profileName string) (profile *Profile, err error) {
 	if profile = profileMap[profileName]; profile != nil {
 		return
 	}
-	if _, exists := profileMgr.confList[profileName]; !exists {
+	if _, exists := profileMgr.profileList[profileName]; !exists {
 		return nil, ErrProfileNotFound
 	}
 	if profile, err = getProfileForPath(filepath.Join(profileMgr.dir, profileName)); err != nil {
@@ -94,13 +94,13 @@ func New(profileName string) error {
 	if err := initProfileManager(); err != nil {
 		return err
 	}
-	if _, exists := profileMgr.confList[profileName]; exists {
+	if _, exists := profileMgr.profileList[profileName]; exists {
 		return ErrProfileExistsAlready
 	}
 	if _, err := newProfileForPath(filepath.Join(profileMgr.dir, profileName)); err != nil {
 		return err
 	}
-	profileMgr.confList[profileName] = struct{}{}
+	profileMgr.profileList[profileName] = struct{}{}
 	if profileMgr.defaultProfileName == nil {
 		return SetDefault(profileName)
 	}
@@ -114,7 +114,7 @@ func SetDefault(profileName string) error {
 	if err := initProfileManager(); err != nil {
 		return err
 	}
-	if _, exists := profileMgr.confList[profileName]; !exists {
+	if _, exists := profileMgr.profileList[profileName]; !exists {
 		return ErrProfileNotFound
 	}
 	if profileMgr.defaultFile == nil {

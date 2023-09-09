@@ -13,7 +13,6 @@ func SlvCommand() *cobra.Command {
 	slvCmd = &cobra.Command{
 		Use:   "slv",
 		Short: "SLV is a tool to encrypt secrets locally",
-		Long:  `SLV is a tool for storing and managing secrets in an encrypted format.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			version, _ := cmd.Flags().GetBool("version")
 			if version {
@@ -23,7 +22,7 @@ func SlvCommand() *cobra.Command {
 			}
 		},
 	}
-	slvCmd.Flags().BoolP("version", "v", false, "Enable preview mode")
+	slvCmd.Flags().BoolP("version", "v", false, "Shows version")
 	slvCmd.AddCommand(envCommand())
 	slvCmd.AddCommand(profileCommand())
 	slvCmd.AddCommand(vaultCommand())

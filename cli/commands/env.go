@@ -24,7 +24,6 @@ func envCommand() *cobra.Command {
 	}
 	envCmd.AddCommand(envNewCommand())
 	envCmd.AddCommand(envListCommand())
-	envCmd.AddCommand(envAddCommand())
 	envCmd.AddCommand(envRootInitCommand())
 	return envCmd
 }
@@ -37,9 +36,9 @@ func envNewCommand() *cobra.Command {
 		Use:   "new",
 		Short: "Creates a service environment",
 		Run: func(cmd *cobra.Command, args []string) {
-			name, _ := cmd.Flags().GetString("name")
-			email, _ := cmd.Flags().GetString("email")
-			tags, err := cmd.Flags().GetStringSlice("tags")
+			name, _ := cmd.Flags().GetString(envNameFlag.name)
+			email, _ := cmd.Flags().GetString(envEmailFlag.name)
+			tags, err := cmd.Flags().GetStringSlice(envTagsFlag.name)
 			if err != nil {
 				PrintErrorAndExit(err)
 				os.Exit(1)
@@ -61,61 +60,27 @@ func envNewCommand() *cobra.Command {
 			w.Flush()
 
 			// Adding env to a specified profile
-			profileName := cmd.Flag("add-to-profile").Value.String()
+			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
 			var cfg *profiles.Profile
-			if profileName != "" {
-				cfg, err = profiles.GetProfile(profileName)
-			} else {
+			if addToProfileFlag {
 				cfg, err = profiles.GetDefaultProfile()
-			}
-			if err != nil {
-				PrintErrorAndExit(err)
-			}
-			err = cfg.AddEnv(envDef)
-			if err != nil {
-				PrintErrorAndExit(err)
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
+				err = cfg.AddEnv(envDef)
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
 			}
 			os.Exit(0)
 		},
 	}
-	envNewCmd.Flags().StringP("name", "n", "", "Name of the environment")
-	envNewCmd.Flags().StringP("email", "e", "", "Email for the environment")
-	envNewCmd.Flags().StringSliceP("tags", "t", []string{}, "Tags for the environment")
-	envNewCmd.Flags().StringP("add-to-profile", "c", "", "Profile to add the environment to")
-	envNewCmd.MarkFlagRequired("name")
+	envNewCmd.Flags().StringP(envNameFlag.name, envNameFlag.shorthand, "", envNameFlag.usage)
+	envNewCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
+	envNewCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
+	envNewCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
+	envNewCmd.MarkFlagRequired(envNameFlag.name)
 	return envNewCmd
-}
-
-func envAddCommand() *cobra.Command {
-	if envAddCmd != nil {
-		return envAddCmd
-	}
-	envAddCmd = &cobra.Command{
-		Use:   "add",
-		Short: "Adds an environment to a profile",
-		Run: func(cmd *cobra.Command, args []string) {
-			envdef := cmd.Flag("envdef").Value.String()
-			profileName := cmd.Flag("profile").Value.String()
-			var cfg *profiles.Profile
-			var err error
-			if profileName != "" {
-				cfg, err = profiles.GetProfile(profileName)
-			} else {
-				cfg, err = profiles.GetDefaultProfile()
-			}
-			if err != nil {
-				PrintErrorAndExit(err)
-			}
-			err = cfg.AddEnv(envdef)
-			if err != nil {
-				PrintErrorAndExit(err)
-			}
-		},
-	}
-	envAddCmd.Flags().StringP("profile", "c", "", "Name of the profile to add the environment to")
-	envAddCmd.Flags().StringP("envdef", "e", "", "Environment defintion to be added")
-	envAddCmd.MarkFlagRequired("envdef")
-	return envAddCmd
 }
 
 func envRootInitCommand() *cobra.Command {
@@ -123,10 +88,11 @@ func envRootInitCommand() *cobra.Command {
 		return envRootInitCmd
 	}
 	envRootInitCmd = &cobra.Command{
-		Use:   "initroot",
-		Short: "Initializes the root environment in a profile",
+		Use:     "initroot",
+		Aliases: []string{"rootinit", "init-root", "root-init"},
+		Short:   "Initializes the root environment in a profile",
 		Run: func(cmd *cobra.Command, args []string) {
-			profileName := cmd.Flag("profile").Value.String()
+			profileName := cmd.Flag(profileNameFlag.name).Value.String()
 			var cfg *profiles.Profile
 			var err error
 			if profileName != "" {
@@ -144,7 +110,7 @@ func envRootInitCommand() *cobra.Command {
 			fmt.Println("Root environment initialized with secret key:", privKey)
 		},
 	}
-	envRootInitCmd.Flags().StringP("profile", "c", "", "Name of the profile to initialize root environment")
+	envRootInitCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
 	return envRootInitCmd
 }
 
@@ -156,7 +122,7 @@ func envListCommand() *cobra.Command {
 		Use:   "list",
 		Short: "Lists environments from profile",
 		Run: func(cmd *cobra.Command, args []string) {
-			profileName := cmd.Flag("profile").Value.String()
+			profileName := cmd.Flag(profileNameFlag.name).Value.String()
 			var cfg *profiles.Profile
 			var err error
 			if profileName != "" {
@@ -171,7 +137,7 @@ func envListCommand() *cobra.Command {
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			query := cmd.Flag("search").Value.String()
+			query := cmd.Flag(envSearchFlag.name).Value.String()
 			var envs []*environments.Environment
 			if query != "" {
 				envs = envManifest.SearchEnv(query)
@@ -192,7 +158,7 @@ func envListCommand() *cobra.Command {
 
 		},
 	}
-	envListCmd.Flags().StringP("profile", "c", "", "Environment defintion to be added")
-	envListCmd.Flags().StringP("search", "s", "", "Search query to lookup envionments")
+	envListCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
+	envListCmd.Flags().StringP(envSearchFlag.name, envSearchFlag.shorthand, "", envSearchFlag.usage)
 	return envListCmd
 }

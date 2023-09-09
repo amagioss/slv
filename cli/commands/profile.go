@@ -22,8 +22,9 @@ func profileCommand() *cobra.Command {
 		},
 	}
 	profileCmd.AddCommand(profileNewCommand())
-	profileCmd.AddCommand(profileSetCommand())
+	profileCmd.AddCommand(profileDefaultCommand())
 	profileCmd.AddCommand(profileListCommand())
+	profileCmd.AddCommand(profileAddEnvCommand())
 	return profileCmd
 }
 
@@ -33,9 +34,9 @@ func profileNewCommand() *cobra.Command {
 	}
 	profileNewCmd = &cobra.Command{
 		Use:   "new",
-		Short: "Create a new profile",
+		Short: "Creates a new profile",
 		Run: func(cmd *cobra.Command, args []string) {
-			name, _ := cmd.Flags().GetString("name")
+			name, _ := cmd.Flags().GetString(profileNameFlag.name)
 			err := profiles.New(name)
 			if err == nil {
 				fmt.Println("Created profile: ", color.GreenString(name))
@@ -46,8 +47,8 @@ func profileNewCommand() *cobra.Command {
 			}
 		},
 	}
-	profileNewCmd.Flags().StringP("name", "n", "", "Name for the profile")
-	profileNewCmd.MarkFlagRequired("name")
+	profileNewCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
+	profileNewCmd.MarkFlagRequired(profileNameFlag.name)
 	return profileNewCmd
 }
 
@@ -78,20 +79,20 @@ func profileListCommand() *cobra.Command {
 	return profileListCmd
 }
 
-func profileSetCommand() *cobra.Command {
+func profileDefaultCommand() *cobra.Command {
 	if profileSetCmd != nil {
 		return profileSetCmd
 	}
 	profileSetCmd = &cobra.Command{
 		Use:     "default",
 		Aliases: []string{"set-default"},
-		Short:   "Set a profile as default profile",
+		Short:   "Set a profile as default",
 		Run: func(cmd *cobra.Command, args []string) {
 			profileNames, err := profiles.List()
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			name, _ := cmd.Flags().GetString("name")
+			name, _ := cmd.Flags().GetString(profileNameFlag.name)
 			for _, profileName := range profileNames {
 				if profileName == name {
 					profiles.SetDefault(name)
@@ -102,7 +103,47 @@ func profileSetCommand() *cobra.Command {
 			PrintErrorAndExit(fmt.Errorf("profile %s not found", name))
 		},
 	}
-	profileSetCmd.Flags().StringP("name", "n", "", "Name of the profile to be set as default")
-	profileSetCmd.MarkFlagRequired("name")
+	profileSetCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
+	profileSetCmd.MarkFlagRequired(profileNameFlag.name)
 	return profileSetCmd
+}
+
+func profileAddEnvCommand() *cobra.Command {
+	if envAddCmd != nil {
+		return envAddCmd
+	}
+	envAddCmd = &cobra.Command{
+		Use:     "addenv",
+		Aliases: []string{"add-env", "add-environment", "add-environments", "addenvs", "envadd", "env-add", "env-adds", "env-adds"},
+		Short:   "Adds an environment to a profile",
+		Run: func(cmd *cobra.Command, args []string) {
+			envdefs, err := cmd.Flags().GetStringSlice(profileEnvDefFlag.name)
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			profileName := cmd.Flag(profileNameFlag.name).Value.String()
+			var cfg *profiles.Profile
+			if profileName != "" {
+				cfg, err = profiles.GetProfile(profileName)
+			} else {
+				cfg, err = profiles.GetDefaultProfile()
+			}
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+			for _, envdef := range envdefs {
+				err = cfg.AddEnv(envdef)
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
+			}
+			if err != nil {
+				PrintErrorAndExit(err)
+			}
+		},
+	}
+	envAddCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
+	envAddCmd.Flags().StringSliceP(profileEnvDefFlag.name, profileEnvDefFlag.shorthand, []string{}, profileEnvDefFlag.usage)
+	envAddCmd.MarkFlagRequired(profileEnvDefFlag.name)
+	return envAddCmd
 }

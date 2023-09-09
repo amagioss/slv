@@ -36,8 +36,8 @@ func vaultNewCommand() *cobra.Command {
 		Use:   "new",
 		Short: "Creates a new vault",
 		Run: func(cmd *cobra.Command, args []string) {
-			vaultFile := cmd.Flag("file").Value.String()
-			publicKeyStrings, err := cmd.Flags().GetStringSlice("public-keys")
+			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
+			publicKeyStrings, err := cmd.Flags().GetStringSlice(vaultAccessPublicKeysFlag.name)
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
@@ -49,7 +49,7 @@ func vaultNewCommand() *cobra.Command {
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
-			enableHash, _ := cmd.Flags().GetBool("enable-hash")
+			enableHash, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.name)
 			var hashLength uint32 = 0
 			if enableHash {
 				hashLength = 4
@@ -62,11 +62,11 @@ func vaultNewCommand() *cobra.Command {
 			os.Exit(0)
 		},
 	}
-	vaultNewCmd.Flags().StringP("file", "f", "", "Path to the vault file [should end with .vault.slv]")
-	vaultNewCmd.Flags().StringSliceP("public-keys", "k", []string{}, "Public keys of environments or groups that can access the vault")
-	vaultNewCmd.Flags().BoolP("enable-hash", "p", false, "Enable preview mode")
-	vaultNewCmd.MarkFlagRequired("file")
-	vaultNewCmd.MarkFlagRequired("public-keys")
+	vaultNewCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
+	vaultNewCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.name, vaultAccessPublicKeysFlag.shorthand, []string{}, vaultAccessPublicKeysFlag.usage)
+	vaultNewCmd.Flags().BoolP(vaultEnableHashingFlag.name, vaultEnableHashingFlag.shorthand, false, vaultEnableHashingFlag.usage)
+	vaultNewCmd.MarkFlagRequired(vaultFileFlag.name)
+	vaultNewCmd.MarkFlagRequired(vaultAccessPublicKeysFlag.name)
 	return vaultNewCmd
 }
 
@@ -86,8 +86,8 @@ func vaultShareCommand() *cobra.Command {
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			vaultFile := cmd.Flag("file").Value.String()
-			publicKeyStrings, err := cmd.Flags().GetStringSlice("public-keys")
+			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
+			publicKeyStrings, err := cmd.Flags().GetStringSlice(vaultAccessPublicKeysFlag.name)
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
@@ -117,9 +117,9 @@ func vaultShareCommand() *cobra.Command {
 			PrintErrorAndExit(err)
 		},
 	}
-	vaultShareCmd.Flags().StringP("file", "f", "", "Path to the vault file [should end with .vault.slv]")
-	vaultShareCmd.Flags().StringSliceP("public-keys", "k", []string{}, "Public keys of environments or groups that can access the vault")
-	vaultShareCmd.MarkFlagRequired("file")
-	vaultShareCmd.MarkFlagRequired("public-keys")
+	vaultShareCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
+	vaultShareCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.name, vaultAccessPublicKeysFlag.shorthand, []string{}, vaultAccessPublicKeysFlag.usage)
+	vaultShareCmd.MarkFlagRequired(vaultFileFlag.name)
+	vaultShareCmd.MarkFlagRequired(vaultAccessPublicKeysFlag.name)
 	return vaultShareCmd
 }
