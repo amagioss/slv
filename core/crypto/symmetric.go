@@ -11,19 +11,8 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-const (
-	pwdToKeyArgon2SaltLength uint8  = 16
-	pwdToKeyArgon2TimeCost   uint32 = 3
-	pwdToKeyArgon2MemoryCost uint32 = 16 * 1024
-	pwdToKeyArgon2Threads    uint8  = 1
-	pwdToKeyArgon2KeyLength  uint32 = 32
-
-	passwordProtectedDataAbbrev = "PPD" // PP = Password Protected Data
-	passwordProtectedKeyAbbrev  = "PPK" // PP = Password Protected Key
-)
-
 func getSymmetricKey(passphrase, salt []byte) []byte {
-	return argon2.Key(passphrase, salt, pwdToKeyArgon2TimeCost, pwdToKeyArgon2MemoryCost,
+	return argon2.IDKey(passphrase, salt, pwdToKeyArgon2TimeCost, pwdToKeyArgon2MemoryCost,
 		pwdToKeyArgon2Threads, pwdToKeyArgon2KeyLength)
 }
 
