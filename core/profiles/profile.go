@@ -111,13 +111,21 @@ func (profile *Profile) GetEnvManifest() (*environments.EnvManifest, error) {
 	return profile.envManifest, nil
 }
 
-func (profile *Profile) AddEnv(envDef string) error {
+func (profile *Profile) AddEnvDef(envDef string) error {
 	envManifest, err := profile.GetEnvManifest()
 	if err != nil {
 		return err
 	}
-	envManifest.AddEnv(envDef)
+	envManifest.AddEnvDef(envDef)
 	return nil
+}
+
+func (profile *Profile) AddEnv(env *environments.Environment) error {
+	envManifest, err := profile.GetEnvManifest()
+	if err != nil {
+		return err
+	}
+	return envManifest.AddEnv(env)
 }
 
 func (profile *Profile) InitRoot() (*crypto.SecretKey, error) {

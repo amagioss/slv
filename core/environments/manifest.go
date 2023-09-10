@@ -121,11 +121,14 @@ func (envManifest *EnvManifest) updateEnvironment(env *Environment) error {
 	return envManifest.commit()
 }
 
-func (envManifest *EnvManifest) AddEnv(envString string) (err error) {
+func (envManifest *EnvManifest) AddEnv(env *Environment) (err error) {
+	return envManifest.updateEnvironment(env)
+}
+
+func (envManifest *EnvManifest) AddEnvDef(envString string) (err error) {
 	environment, err := FromEnvDef(envString)
 	if err != nil {
 		return
 	}
-	envManifest.updateEnvironment(environment)
-	return
+	return envManifest.AddEnv(environment)
 }

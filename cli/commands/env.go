@@ -5,6 +5,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/shibme/slv/core/crypto"
 	"github.com/shibme/slv/core/environments"
 	"github.com/shibme/slv/core/profiles"
 	"github.com/spf13/cobra"
@@ -24,8 +25,23 @@ func envCommand() *cobra.Command {
 	}
 	envCmd.AddCommand(envNewCommand())
 	envCmd.AddCommand(envListCommand())
-	envCmd.AddCommand(envUserRegisterCommand())
 	return envCmd
+}
+
+func showEnv(env environments.Environment, secretKey *crypto.SecretKey) {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+	fmt.Fprintln(w, "ID (Public Key):\t", env.PublicKey)
+	fmt.Fprintln(w, "Name:\t", env.Name)
+	fmt.Fprintln(w, "Email:\t", env.Email)
+	fmt.Fprintln(w, "Tags:\t", env.Tags)
+	fmt.Fprintln(w)
+	if envDef, err := env.ToEnvDef(); err == nil {
+		fmt.Fprintln(w, "Environment Definition:\t", envDef)
+	}
+	if secretKey != nil {
+		fmt.Fprintln(w, "Secret Key:\t", secretKey)
+	}
+	w.Flush()
 }
 
 func envNewCommand() *cobra.Command {
@@ -43,33 +59,25 @@ func envNewCommand() *cobra.Command {
 				PrintErrorAndExit(err)
 				os.Exit(1)
 			}
-			env, secretKey, _ := environments.New(name, email, environments.SERVICE)
-			env.AddTags(tags...)
-			envDef, err := env.ToEnvDef()
-			if err != nil {
-				PrintErrorAndExit(err)
-				os.Exit(1)
+			userEnv, _ := cmd.Flags().GetBool(envUserFlag.name)
+			envType := environments.SERVICE
+			if userEnv {
+				envType = environments.USER
 			}
-			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-			fmt.Fprintln(w, "Secret Key:\t", secretKey)
-			fmt.Fprintln(w)
-			fmt.Fprintln(w, "Public Key:\t", env.PublicKey)
-			fmt.Fprintln(w, "Name:\t", env.Name)
-			fmt.Fprintln(w, "Email:\t", env.Email)
-			fmt.Fprintln(w, "Tags:\t", env.Tags)
-			fmt.Fprintln(w)
-			fmt.Fprintln(w, "Environment Definition:\t", envDef)
-			w.Flush()
+
+			env, secretKey, _ := environments.New(name, email, envType)
+			env.AddTags(tags...)
+			showEnv(*env, secretKey)
 
 			// Adding env to a specified profile
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
-			var cfg *profiles.Profile
+			var prof *profiles.Profile
 			if addToProfileFlag {
-				cfg, err = profiles.GetDefaultProfile()
+				prof, err = profiles.GetDefaultProfile()
 				if err != nil {
 					PrintErrorAndExit(err)
 				}
-				err = cfg.AddEnv(envDef)
+				err = prof.AddEnv(env)
 				if err != nil {
 					PrintErrorAndExit(err)
 				}
@@ -81,6 +89,7 @@ func envNewCommand() *cobra.Command {
 	envNewCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
 	envNewCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
 	envNewCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
+	envNewCmd.Flags().BoolP(envUserFlag.name, envUserFlag.shorthand, false, envUserFlag.usage)
 	envNewCmd.MarkFlagRequired(envNameFlag.name)
 	return envNewCmd
 }
@@ -94,17 +103,17 @@ func envListCommand() *cobra.Command {
 		Short: "Lists environments from profile",
 		Run: func(cmd *cobra.Command, args []string) {
 			profileName := cmd.Flag(profileNameFlag.name).Value.String()
-			var cfg *profiles.Profile
+			var prof *profiles.Profile
 			var err error
 			if profileName != "" {
-				cfg, err = profiles.GetProfile(profileName)
+				prof, err = profiles.GetProfile(profileName)
 			} else {
-				cfg, err = profiles.GetDefaultProfile()
+				prof, err = profiles.GetDefaultProfile()
 			}
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			envManifest, err := cfg.GetEnvManifest()
+			envManifest, err := prof.GetEnvManifest()
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
@@ -132,61 +141,4 @@ func envListCommand() *cobra.Command {
 	envListCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
 	envListCmd.Flags().StringP(envSearchFlag.name, envSearchFlag.shorthand, "", envSearchFlag.usage)
 	return envListCmd
-}
-
-func envUserRegisterCommand() *cobra.Command {
-	if envUserRegisterCmd != nil {
-		return envUserRegisterCmd
-	}
-	envUserRegisterCmd = &cobra.Command{
-		Use:   "new",
-		Short: "Creates an environment for user and registers it locally",
-		Run: func(cmd *cobra.Command, args []string) {
-			name, _ := cmd.Flags().GetString(envNameFlag.name)
-			email, _ := cmd.Flags().GetString(envEmailFlag.name)
-			tags, err := cmd.Flags().GetStringSlice(envTagsFlag.name)
-			if err != nil {
-				PrintErrorAndExit(err)
-				os.Exit(1)
-			}
-			env, secretKey, _ := environments.New(name, email, environments.USER)
-			env.AddTags(tags...)
-			envDef, err := env.ToEnvDef()
-			if err != nil {
-				PrintErrorAndExit(err)
-				os.Exit(1)
-			}
-			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-			fmt.Fprintln(w, "Secret Key:\t", secretKey)
-			fmt.Fprintln(w)
-			fmt.Fprintln(w, "Public Key:\t", env.PublicKey)
-			fmt.Fprintln(w, "Name:\t", env.Name)
-			fmt.Fprintln(w, "Email:\t", env.Email)
-			fmt.Fprintln(w, "Tags:\t", env.Tags)
-			fmt.Fprintln(w)
-			fmt.Fprintln(w, "Environment Definition:\t", envDef)
-			w.Flush()
-
-			// Adding env to a specified profile
-			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
-			var cfg *profiles.Profile
-			if addToProfileFlag {
-				cfg, err = profiles.GetDefaultProfile()
-				if err != nil {
-					PrintErrorAndExit(err)
-				}
-				err = cfg.AddEnv(envDef)
-				if err != nil {
-					PrintErrorAndExit(err)
-				}
-			}
-			os.Exit(0)
-		},
-	}
-	envUserRegisterCmd.Flags().StringP(envNameFlag.name, envNameFlag.shorthand, "", envNameFlag.usage)
-	envUserRegisterCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
-	envUserRegisterCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
-	envUserRegisterCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
-	envUserRegisterCmd.MarkFlagRequired(envNameFlag.name)
-	return envUserRegisterCmd
 }

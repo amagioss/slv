@@ -38,6 +38,12 @@ var envTagsFlag = FlagDef{
 	usage:     "Environment tags",
 }
 
+var envUserFlag = FlagDef{
+	name:      "user",
+	shorthand: "u",
+	usage:     "Creates a user environment and registers locally",
+}
+
 var envAddFlag = FlagDef{
 	name:      "add",
 	shorthand: "a",

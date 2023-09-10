@@ -123,17 +123,17 @@ func profileAddEnvCommand() *cobra.Command {
 				PrintErrorAndExit(err)
 			}
 			profileName := cmd.Flag(profileNameFlag.name).Value.String()
-			var cfg *profiles.Profile
+			var prof *profiles.Profile
 			if profileName != "" {
-				cfg, err = profiles.GetProfile(profileName)
+				prof, err = profiles.GetProfile(profileName)
 			} else {
-				cfg, err = profiles.GetDefaultProfile()
+				prof, err = profiles.GetDefaultProfile()
 			}
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
 			for _, envdef := range envdefs {
-				err = cfg.AddEnv(envdef)
+				err = prof.AddEnvDef(envdef)
 				if err != nil {
 					PrintErrorAndExit(err)
 				}
@@ -159,17 +159,17 @@ func profileInitRootCommand() *cobra.Command {
 		Short:   "Initializes the root environment in a profile",
 		Run: func(cmd *cobra.Command, args []string) {
 			profileName := cmd.Flag(profileNameFlag.name).Value.String()
-			var cfg *profiles.Profile
+			var prof *profiles.Profile
 			var err error
 			if profileName != "" {
-				cfg, err = profiles.GetProfile(profileName)
+				prof, err = profiles.GetProfile(profileName)
 			} else {
-				cfg, err = profiles.GetDefaultProfile()
+				prof, err = profiles.GetDefaultProfile()
 			}
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
-			secretKey, err := cfg.InitRoot()
+			secretKey, err := prof.InitRoot()
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
