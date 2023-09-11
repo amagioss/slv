@@ -5,6 +5,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/fatih/color"
 	"github.com/shibme/slv/core/crypto"
 	"github.com/shibme/slv/core/environments"
 	"github.com/shibme/slv/core/profiles"
@@ -30,16 +31,15 @@ func envCommand() *cobra.Command {
 
 func showEnv(env environments.Environment, secretKey *crypto.SecretKey) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintln(w, "ID (Public Key):\t", env.PublicKey)
+	fmt.Fprintln(w, "ID (Public Key):\t", color.YellowString(env.PublicKey.String()))
 	fmt.Fprintln(w, "Name:\t", env.Name)
 	fmt.Fprintln(w, "Email:\t", env.Email)
 	fmt.Fprintln(w, "Tags:\t", env.Tags)
-	fmt.Fprintln(w, "\t")
 	if envDef, err := env.ToEnvDef(); err == nil {
 		fmt.Fprintln(w, "Environment Definition:\t", envDef)
 	}
 	if secretKey != nil {
-		fmt.Fprintln(w, "Secret Key:\t", secretKey)
+		fmt.Fprintln(w, "Secret Key:\t", color.HiBlackString(secretKey.String()))
 	}
 	w.Flush()
 }
@@ -124,16 +124,10 @@ func envListCommand() *cobra.Command {
 			} else {
 				envs = envManifest.ListEnv()
 			}
-			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 			for _, env := range envs {
-				fmt.Fprintln(w, env.Id()+":")
-				fmt.Fprintln(w, "Public Key:\t", env.PublicKey)
-				fmt.Fprintln(w, "Name:\t", env.Name)
-				fmt.Fprintln(w, "Email:\t", env.Email)
-				fmt.Fprintln(w, "Tags:\t", env.Tags)
-				fmt.Fprintln(w)
+				showEnv(*env, nil)
+				fmt.Println()
 			}
-			w.Flush()
 			os.Exit(0)
 
 		},

@@ -8,6 +8,7 @@ import (
 
 func WriteToYAML(filePath string, data interface{}) error {
 	bytes, err := yaml.Marshal(data)
+	bytes = append([]byte(yamlNotice), bytes...)
 	if err == nil {
 		if err = os.WriteFile(filePath, bytes, 0644); err != nil {
 			return err
