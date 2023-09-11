@@ -30,7 +30,7 @@ func (publicKey *PublicKey) getEncrypter() (*encrypter, error) {
 	return publicKey.encrypter, nil
 }
 
-func (publicKey *PublicKey) encrypt(data []byte) (ciphertext []byte, err error) {
+func (publicKey *PublicKey) encrypt(data []byte) (ciphd *ciphered, err error) {
 	if publicKey.encrypter == nil {
 		if publicKey.encrypter, err = publicKey.getEncrypter(); err != nil {
 			return nil, err
@@ -40,9 +40,14 @@ func (publicKey *PublicKey) encrypt(data []byte) (ciphertext []byte, err error) 
 	if err == nil {
 		compressedData, err := commons.Compress(data)
 		if err == nil {
-			encrypted := append(publicKey.encrypter.ephemeralPublicKey[:], nonce[:]...)
-			encrypted = append(encrypted, box.SealAfterPrecomputation(nil, compressedData, &nonce, publicKey.encrypter.sharedKey)...)
-			ciphertext = encrypted
+			ciphertext := append(publicKey.encrypter.ephemeralPublicKey[:], nonce[:]...)
+			ciphertext = append(ciphertext, box.SealAfterPrecomputation(nil, compressedData, &nonce, publicKey.encrypter.sharedKey)...)
+			ciphd = &ciphered{
+				version:    publicKey.version,
+				keyType:    publicKey.keyType,
+				ciphertext: &ciphertext,
+				shortKeyId: publicKey.ShortId(),
+			}
 		}
 	}
 	return
@@ -52,15 +57,21 @@ func (publicKey *PublicKey) getHashForSecret(secret []byte, hashLength uint32) [
 	return argon2.IDKey(secret, nil, secretHashTime, secretHashMemory, secretHashThreads, hashLength)
 }
 
+func (publicKey *PublicKey) EncryptKey(secretKey SecretKey) (wrappedKey *WrappedKey, err error) {
+	ciphered, err := publicKey.encrypt(secretKey.toBytes())
+	if err == nil {
+		wrappedKey = &WrappedKey{
+			ciphered: ciphered,
+		}
+	}
+	return
+}
+
 func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint32) (sealedSecret *SealedSecret, err error) {
-	ciphertext, err := publicKey.encrypt(secret)
+	ciphered, err := publicKey.encrypt(secret)
 	if err == nil {
 		sealedSecret = &SealedSecret{
-			ciphered: &ciphered{
-				ciphertext: &ciphertext,
-				keyId:      publicKey.ShortId(),
-				keyType:    publicKey.keyType,
-			},
+			ciphered: ciphered,
 		}
 		if hashLength != nil && *hashLength > 0 {
 			if *hashLength > secretHashMaxLength {
@@ -75,18 +86,4 @@ func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint32) (se
 
 func (publicKey *PublicKey) EncryptSecretString(str string, hashLength *uint32) (sealedSecret *SealedSecret, err error) {
 	return publicKey.EncryptSecret([]byte(str), hashLength)
-}
-
-func (publicKey *PublicKey) EncryptKey(secretKey SecretKey) (wrappedKey *WrappedKey, err error) {
-	encrypted, err := publicKey.encrypt(secretKey.toBytes())
-	if err == nil {
-		wrappedKey = &WrappedKey{
-			ciphered: &ciphered{
-				ciphertext: &encrypted,
-				keyId:      publicKey.ShortId(),
-				keyType:    publicKey.keyType,
-			},
-		}
-	}
-	return
 }

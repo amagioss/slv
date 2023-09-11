@@ -17,7 +17,6 @@ func randomStr(bytecount uint8) (string, error) {
 }
 
 func (vlt *Vault) getReferenceName(nodePath string) (string, error) {
-	// return autoReferencedPrefix + vlt.Config.PublicKey.String() + "_" + commons.Encode([]byte(nodePath))
 	randomStr, err := randomStr(autoReferenceLength)
 	if err != nil {
 		return "", err
@@ -57,7 +56,8 @@ func (vlt *Vault) getReferencedSecret(secretRef string) (secret string, err erro
 	if !ok {
 		return "", ErrVaultSecretNotFound
 	}
-	return vlt.secretKey.DecryptSecretString(*encryptedData)
+	secretBytes, err := vlt.secretKey.DecryptSecret(*encryptedData)
+	return string(secretBytes), err
 }
 
 func (vlt *Vault) deleteReferencedSecret(secretReference string) {

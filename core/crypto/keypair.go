@@ -11,9 +11,11 @@ func NewKeyPair(keyType KeyType) (publicKey *PublicKey, secretKey *SecretKey, er
 	if err != nil {
 		return nil, nil, ErrGeneratingKeyPair
 	}
+	version := cryptoVersion
 	publicKey = &PublicKey{
 		key:     pubKey,
 		keyType: &keyType,
+		version: &version,
 	}
 	secretKey = &SecretKey{
 		key:       privKey,

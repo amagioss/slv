@@ -8,71 +8,79 @@ import (
 )
 
 type ciphered struct {
-	ciphertext *[]byte
-	keyId      *[keyIdLength]byte
+	version    *uint8
 	keyType    *KeyType
-	hash       *[]byte
+	ciphertext *[]byte
+	shortKeyId *[shortKeyIdLength]byte
 }
 
-func (ciph ciphered) toString(ciphertextType string) string {
-	str := commons.SLV + "_" + string(*ciph.keyType) + ciphertextType + "_" + commons.Encode(ciph.keyId[:]) + "_"
-	ciphertext := commons.Encode(append([]byte{byte(*ciph.keyType)}, *ciph.ciphertext...))
-	if ciph.hash == nil {
-		return str + ciphertext
-	} else {
-		return str + commons.Encode(*ciph.hash) + "_" + ciphertext
-	}
+func (ciph ciphered) toBytes() []byte {
+	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, ciph.shortKeyId[:]...)
+	cipheredBytes = append(cipheredBytes, *ciph.ciphertext...)
+	return cipheredBytes
 }
 
-func cipheredFromString(cipheredStr, ciphertextType string) (*ciphered, error) {
-	sliced := strings.Split(cipheredStr, "_")
-	if len(sliced) != 4 && len(sliced) != 5 {
-		return nil, ErrCiphertextFormat
+func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
+	if len(cipheredBytes) < cipherBytesMinLength {
+		return nil, ErrInvalidCiphertextFormat
 	}
-	encryptionKeyId := [keyIdLength]byte(commons.Decode(sliced[2]))
-	ciphertext := commons.Decode(sliced[len(sliced)-1])
-	var keyType KeyType = KeyType(ciphertext[0])
-	ciphertext = ciphertext[1:]
-	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(keyType)) ||
-		!strings.HasSuffix(sliced[1], ciphertextType) || len(encryptionKeyId) != keyIdLength {
-		return nil, ErrCiphertextFormat
-	}
-	ciph := &ciphered{
+	var version byte = cipheredBytes[0]
+	var keyType KeyType = KeyType(cipheredBytes[1])
+	cipheredBytes = cipheredBytes[2:]
+	encShortKeyId := [shortKeyIdLength]byte(cipheredBytes[:shortKeyIdLength])
+	ciphertext := cipheredBytes[shortKeyIdLength:]
+	return &ciphered{
+		version:    &version,
 		keyType:    &keyType,
-		keyId:      &encryptionKeyId,
+		shortKeyId: &encShortKeyId,
 		ciphertext: &ciphertext,
-	}
-	if len(sliced) == 5 {
-		hash := commons.Decode(sliced[3])
-		if len(hash) > secretHashMaxLength {
-			return nil, ErrCiphertextFormat
-		}
-		ciph.hash = &hash
-	}
-	return ciph, nil
+	}, nil
 }
 
-func (ciph *ciphered) GetKeyId() *[keyIdLength]byte {
-	return ciph.keyId
+func (ciph *ciphered) GetKeyId() *[shortKeyIdLength]byte {
+	return ciph.shortKeyId
 }
 
 type SealedSecret struct {
 	*ciphered
+	hash *[]byte
 }
 
 func (sealedSecret SealedSecret) String() string {
-	return sealedSecret.toString(sealedSecretAbbrev)
+	if sealedSecret.hash == nil {
+		return commons.SLV + "_" + string(*sealedSecret.keyType) + sealedSecretAbbrev + "_" +
+			commons.Encode(sealedSecret.toBytes())
+	} else {
+		return commons.SLV + "_" + string(*sealedSecret.keyType) + sealedSecretAbbrev + "_" +
+			commons.Encode(*sealedSecret.hash) + "_" + commons.Encode(sealedSecret.toBytes())
+	}
 }
 
 func (sealedSecret *SealedSecret) fromString(sealedSecretStr string) (err error) {
-	var ciphered *ciphered
-	if ciphered, err = cipheredFromString(sealedSecretStr, sealedSecretAbbrev); err == nil {
-		sealedSecret.ciphered = ciphered
+	sliced := strings.Split(sealedSecretStr, "_")
+	if len(sliced) != 3 && len(sliced) != 4 {
+		return ErrInvalidCiphertextFormat
 	}
+	ciphered, err := cipheredFromBytes(commons.Decode(sliced[len(sliced)-1]))
+	if err != nil {
+		return err
+	}
+	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
+		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.shortKeyId) != shortKeyIdLength {
+		return ErrInvalidCiphertextFormat
+	}
+	if len(sliced) == 4 {
+		hash := commons.Decode(sliced[2])
+		if len(hash) > secretHashMaxLength {
+			return ErrInvalidCiphertextFormat
+		}
+		sealedSecret.hash = &hash
+	}
+	sealedSecret.ciphered = ciphered
 	return
 }
 
-func (sealedSecret *ciphered) GetHash() string {
+func (sealedSecret *SealedSecret) GetHash() string {
 	return commons.Encode(*sealedSecret.hash)
 }
 
@@ -93,14 +101,24 @@ type WrappedKey struct {
 }
 
 func (wrappedKey WrappedKey) String() string {
-	return wrappedKey.toString(wrappedKeyAbbrev)
+	return commons.SLV + "_" + string(*wrappedKey.keyType) + wrappedKeyAbbrev + "_" +
+		commons.Encode(wrappedKey.toBytes())
 }
 
 func (wrappedKey *WrappedKey) fromString(wrappedKeyStr string) (err error) {
-	var ciphered *ciphered
-	if ciphered, err = cipheredFromString(wrappedKeyStr, wrappedKeyAbbrev); err == nil {
-		wrappedKey.ciphered = ciphered
+	sliced := strings.Split(wrappedKeyStr, "_")
+	if len(sliced) != 3 {
+		return ErrInvalidCiphertextFormat
 	}
+	ciphered, err := cipheredFromBytes(commons.Decode(sliced[len(sliced)-1]))
+	if err != nil {
+		return err
+	}
+	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
+		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.shortKeyId) != shortKeyIdLength {
+		return ErrInvalidCiphertextFormat
+	}
+	wrappedKey.ciphered = ciphered
 	return
 }
 

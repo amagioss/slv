@@ -16,32 +16,34 @@ type PublicKey struct {
 	key       *[keyLength]byte
 	keyType   *KeyType
 	encrypter *encrypter
+	version   *uint8
 }
 
 func (publicKey *PublicKey) Id() string {
 	return commons.Encode(publicKey.toBytes())
 }
 
-func (publicKey *PublicKey) ShortId() *[keyIdLength]byte {
+func (publicKey *PublicKey) ShortId() *[shortKeyIdLength]byte {
 	if publicKey.key == nil {
 		return nil
 	}
 	sum := sha1.Sum(publicKey.key[:])
-	keyId := [keyIdLength]byte(sum[len(sum)-keyIdLength:])
+	keyId := [shortKeyIdLength]byte(sum[len(sum)-shortKeyIdLength:])
 	return &keyId
 }
 
 func (publicKey *PublicKey) toBytes() []byte {
-	return append([]byte{byte(*publicKey.keyType)}, publicKey.key[:]...)
+	return append([]byte{*publicKey.version, byte(*publicKey.keyType)}, publicKey.key[:]...)
 }
 
 func (publicKey *PublicKey) fromBytes(publicKeyBytes []byte) error {
 	if len(publicKeyBytes) != publicKeyLength {
 		return ErrInvalidKeyFormat
 	}
-	keyType := KeyType(publicKeyBytes[0])
-	key := [keyLength]byte(publicKeyBytes[1:])
+	publicKey.version = &publicKeyBytes[0]
+	var keyType KeyType = KeyType(publicKeyBytes[1])
 	publicKey.keyType = &keyType
+	key := [keyLength]byte(publicKeyBytes[2:])
 	publicKey.key = &key
 	return nil
 }
@@ -105,7 +107,7 @@ func (publicKey *PublicKey) UnmarshalJSON(data []byte) (err error) {
 }
 
 type encrypter struct {
-	encryptionKeyId    *[keyIdLength]byte
+	encryptionKeyId    *[shortKeyIdLength]byte
 	ephemeralPublicKey *[keyLength]byte
 	sharedKey          *[keyLength]byte
 }

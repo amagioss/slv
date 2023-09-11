@@ -34,7 +34,7 @@ func showEnv(env environments.Environment, secretKey *crypto.SecretKey) {
 	fmt.Fprintln(w, "Name:\t", env.Name)
 	fmt.Fprintln(w, "Email:\t", env.Email)
 	fmt.Fprintln(w, "Tags:\t", env.Tags)
-	fmt.Fprintln(w)
+	fmt.Fprintln(w, "\t")
 	if envDef, err := env.ToEnvDef(); err == nil {
 		fmt.Fprintln(w, "Environment Definition:\t", envDef)
 	}

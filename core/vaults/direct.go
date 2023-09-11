@@ -31,7 +31,8 @@ func (vlt *Vault) GetDirectSecret(secretName string) (secretValue string, err er
 	if !ok {
 		return "", ErrVaultSecretNotFound
 	}
-	return vlt.secretKey.DecryptSecretString(*sealedSecret)
+	secretBytes, err := vlt.secretKey.DecryptSecret(*sealedSecret)
+	return string(secretBytes), err
 }
 
 func (vlt *Vault) DeleteDirecetSecret(secretName string) error {

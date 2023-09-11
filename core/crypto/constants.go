@@ -13,11 +13,14 @@ const (
 	passwordProtectedDataAbbrev = "PPD" // PP = Password Protected Data
 	passwordProtectedKeyAbbrev  = "PPK" // PP = Password Protected Key
 
-	keyIdLength     = 8
-	keyLength       = 32
-	publicKeyLength = keyLength + 1
-	secretKeyLength = publicKeyLength + keyLength
-	nonceLength     = 24
+	cryptoVersion uint8 = 0
+
+	shortKeyIdLength     = 8
+	keyLength            = 32
+	publicKeyLength      = keyLength + 2
+	secretKeyLength      = publicKeyLength + keyLength
+	nonceLength          = 24
+	cipherBytesMinLength = shortKeyIdLength + nonceLength + keyLength + 3
 
 	secretHashTime      = 12
 	secretHashMemory    = 16 * 1024
@@ -37,8 +40,9 @@ var ErrDecryptionFailed = errors.New("decryption failed")
 var ErrSealedKeyFormat = errors.New("invalid wrapped key format")
 var ErrSealedDataFormat = errors.New("invalid sealed secret format")
 var ErrSecretKeyMismatch = errors.New("given secret key cannot decrypt the data")
-var ErrSecretKeyTypeMismatch = errors.New("given key type cannot decrypt the data")
+var ErrKeyTypeMismatch = errors.New("given key type cannot decrypt the data")
+var ErrCryptoMismatch = errors.New("the cryptographic version does not match with the data")
 var ErrInvalidPassphraseEncryptedData = errors.New("invalid passphrase encrypted data")
-var ErrCiphertextFormat = errors.New("invalid ciphertext format")
+var ErrInvalidCiphertextFormat = errors.New("invalid ciphertext format")
 var ErrSymmetricCiphertextShort = errors.New("symmetric ciphertext too short")
 var ErrInvalidSymmetricCipherdataFormat = errors.New("invalid symmetric cipherdata format")
