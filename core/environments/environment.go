@@ -32,7 +32,11 @@ func New(name, email string, envType EnvType) (*Environment, *crypto.SecretKey, 
 	if !envType.isValid() {
 		return nil, nil, ErrInvalidEnvironmentType
 	}
-	pKey, sKey, err := crypto.NewKeyPair(EnvironmentKey)
+	sKey, err := crypto.NewSecretKey(EnvironmentKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	pKey, err := sKey.PublicKey()
 	if err != nil {
 		return nil, nil, err
 	}

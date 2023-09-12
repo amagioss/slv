@@ -11,11 +11,11 @@ type ciphered struct {
 	version    *uint8
 	keyType    *KeyType
 	ciphertext *[]byte
-	shortKeyId *[shortKeyIdLength]byte
+	shortKeyId *[]byte
 }
 
 func (ciph ciphered) toBytes() []byte {
-	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, ciph.shortKeyId[:]...)
+	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, *ciph.shortKeyId...)
 	cipheredBytes = append(cipheredBytes, *ciph.ciphertext...)
 	return cipheredBytes
 }
@@ -27,17 +27,17 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	var version byte = cipheredBytes[0]
 	var keyType KeyType = KeyType(cipheredBytes[1])
 	cipheredBytes = cipheredBytes[2:]
-	encShortKeyId := [shortKeyIdLength]byte(cipheredBytes[:shortKeyIdLength])
+	shortKeyId := cipheredBytes[:shortKeyIdLength]
 	ciphertext := cipheredBytes[shortKeyIdLength:]
 	return &ciphered{
 		version:    &version,
 		keyType:    &keyType,
-		shortKeyId: &encShortKeyId,
+		shortKeyId: &shortKeyId,
 		ciphertext: &ciphertext,
 	}, nil
 }
 
-func (ciph *ciphered) GetKeyId() *[shortKeyIdLength]byte {
+func (ciph *ciphered) GetKeyId() *[]byte {
 	return ciph.shortKeyId
 }
 
@@ -66,12 +66,12 @@ func (sealedSecret *SealedSecret) fromString(sealedSecretStr string) (err error)
 		return err
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
-		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.shortKeyId) != shortKeyIdLength {
+		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) || len(*ciphered.shortKeyId) != shortKeyIdLength {
 		return ErrInvalidCiphertextFormat
 	}
 	if len(sliced) == 4 {
 		hash := commons.Decode(sliced[2])
-		if len(hash) > secretHashMaxLength {
+		if len(hash) > argon2HashMaxLength {
 			return ErrInvalidCiphertextFormat
 		}
 		sealedSecret.hash = &hash

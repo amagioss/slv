@@ -14,7 +14,7 @@ type EnvManifest struct {
 }
 
 type manifest struct {
-	Version      string                  `yaml:"version"`
+	Version      uint8                   `yaml:"version"`
 	Root         *Root                   `yaml:"root,omitempty"`
 	Environments map[string]*Environment `yaml:"environments,omitempty"`
 }

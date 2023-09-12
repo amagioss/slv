@@ -8,11 +8,19 @@ type Root struct {
 }
 
 func newRoot() (*Root, *crypto.SecretKey, error) {
-	rootPKey, rootSKey, err := crypto.NewKeyPair(RootKey)
+	rootSKey, err := crypto.NewSecretKey(RootKey)
 	if err != nil {
 		return nil, nil, err
 	}
-	sealingPKey, sealingSKey, err := crypto.NewKeyPair(RootKey)
+	rootPKey, err := rootSKey.PublicKey()
+	if err != nil {
+		return nil, nil, err
+	}
+	sealingSKey, err := crypto.NewSecretKey(RootKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	sealingPKey, err := sealingSKey.PublicKey()
 	if err != nil {
 		return nil, nil, err
 	}

@@ -21,7 +21,7 @@ type Profile struct {
 }
 
 type profile struct {
-	Version string `yaml:"version,omitempty"`
+	Version uint8 `yaml:"version,omitempty"`
 	Repo    struct {
 		URI    string `yaml:"uri"`
 		Branch string `yaml:"branch,omitempty"`

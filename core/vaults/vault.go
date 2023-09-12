@@ -17,7 +17,7 @@ type secrets struct {
 }
 
 type config struct {
-	Version    string               `yaml:"version,omitempty"`
+	Version    uint8                `yaml:"version,omitempty"`
 	PublicKey  *crypto.PublicKey    `yaml:"publicKey"`
 	HashLength *uint32              `yaml:"hashLength,omitempty"`
 	KeyWraps   []*crypto.WrappedKey `yaml:"wrappedKeys"`
@@ -54,7 +54,11 @@ func New(vaultFile string, hashLength uint32, publicKeys ...crypto.PublicKey) (v
 	if os.MkdirAll(path.Dir(vaultFile), os.FileMode(0755)) != nil {
 		return nil, ErrVaultDirPathCreation
 	}
-	vaultPublicKey, vaultSecretKey, err := crypto.NewKeyPair(VaultKey)
+	vaultSecretKey, err := crypto.NewSecretKey(VaultKey)
+	if err != nil {
+		return nil, err
+	}
+	vaultPublicKey, err := vaultSecretKey.PublicKey()
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +96,7 @@ func Get(vaultFile string) (vlt *Vault, err error) {
 		path: vaultFile,
 	}
 	if err = commons.ReadFromYAML(vlt.path, &vlt.vault); err != nil {
-		return nil, ErrReadingVault
+		return nil, err
 	}
 	return vlt, nil
 }
@@ -109,16 +113,17 @@ func (vlt *Vault) UnlockedBy() (id *string) {
 	return vlt.unlockedBy
 }
 
-func (vlt *Vault) Unlock(secretKey crypto.SecretKey) (err error) {
-	if err != nil || (!vlt.IsLocked() && *vlt.unlockedBy == secretKey.PublicKey.String()) {
-		return
+func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
+	publicKey, err := secretKey.PublicKey()
+	if err != nil || (!vlt.IsLocked() && *vlt.unlockedBy == publicKey.String()) {
+		return err
 	}
 	for _, secretKeyWrapping := range vlt.vault.Config.KeyWraps {
 		decryptedKey, err := secretKey.DecryptKey(*secretKeyWrapping)
 		if err == nil {
 			vlt.secretKey = decryptedKey
 			vlt.unlockedBy = new(string)
-			*vlt.unlockedBy = secretKey.PublicKey.String()
+			*vlt.unlockedBy = publicKey.String()
 			return nil
 		}
 	}
@@ -129,7 +134,7 @@ func (vlt *Vault) commit() error {
 	return commons.WriteToYAML(vlt.path, *vlt.vault)
 }
 
-func (vlt *Vault) GetVersion() string {
+func (vlt *Vault) GetVersion() uint8 {
 	return vlt.vault.Config.Version
 }
 
@@ -143,7 +148,7 @@ func (vlt *Vault) share(targetPublicKey crypto.PublicKey, checkForAccess bool) (
 	}
 	if checkForAccess {
 		for _, keyWrappings := range vlt.vault.Config.KeyWraps {
-			if bytes.Equal(keyWrappings.GetKeyId()[:], targetPublicKey.ShortId()[:]) {
+			if bytes.Equal(*keyWrappings.GetKeyId(), *targetPublicKey.ShortId()) {
 				return ErrVaultAlreadySharedWithKey
 			}
 		}

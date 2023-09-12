@@ -17,13 +17,13 @@ type Settings struct {
 }
 
 type manifest struct {
-	Version           string `yaml:"version,omitempty"`
-	AllowChanges      bool   `yaml:"allow_changes"`
-	AllowCreateEnv    bool   `yaml:"allow_create_env"`
-	AllowCreateGroup  bool   `yaml:"allow_create_group"`
-	SyncInterval      int    `yaml:"sync_interval"`
-	AllowGroups       bool   `yaml:"allow_groups"`
-	AllowVaultSharing bool   `yaml:"allow_vault_sharing"`
+	Version           uint8 `yaml:"version,omitempty"`
+	AllowChanges      bool  `yaml:"allow_changes"`
+	AllowCreateEnv    bool  `yaml:"allow_create_env"`
+	AllowCreateGroup  bool  `yaml:"allow_create_group"`
+	SyncInterval      int   `yaml:"sync_interval"`
+	AllowGroups       bool  `yaml:"allow_groups"`
+	AllowVaultSharing bool  `yaml:"allow_vault_sharing"`
 }
 
 func (settings Settings) MarshalYAML() (interface{}, error) {
