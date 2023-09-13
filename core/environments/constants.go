@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	userNonceFile                 = ".user_nonce"
 	envDefAbbrev                  = "EDS" // Environment Definition Serialized
 	EnvironmentKey crypto.KeyType = 'E'
 	RootKey        crypto.KeyType = 'R'

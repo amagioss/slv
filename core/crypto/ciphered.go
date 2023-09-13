@@ -8,14 +8,14 @@ import (
 )
 
 type ciphered struct {
-	version    *uint8
-	keyType    *KeyType
-	ciphertext *[]byte
-	shortKeyId *[]byte
+	version     *uint8
+	keyType     *KeyType
+	ciphertext  *[]byte
+	pubKeyBytes *[]byte
 }
 
 func (ciph ciphered) toBytes() []byte {
-	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, *ciph.shortKeyId...)
+	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, *ciph.pubKeyBytes...)
 	cipheredBytes = append(cipheredBytes, *ciph.ciphertext...)
 	return cipheredBytes
 }
@@ -27,18 +27,18 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	var version byte = cipheredBytes[0]
 	var keyType KeyType = KeyType(cipheredBytes[1])
 	cipheredBytes = cipheredBytes[2:]
-	shortKeyId := cipheredBytes[:shortKeyIdLength]
-	ciphertext := cipheredBytes[shortKeyIdLength:]
+	shortKeyId := cipheredBytes[:keyBaseLength]
+	ciphertext := cipheredBytes[keyBaseLength:]
 	return &ciphered{
-		version:    &version,
-		keyType:    &keyType,
-		shortKeyId: &shortKeyId,
-		ciphertext: &ciphertext,
+		version:     &version,
+		keyType:     &keyType,
+		pubKeyBytes: &shortKeyId,
+		ciphertext:  &ciphertext,
 	}, nil
 }
 
 func (ciph *ciphered) GetKeyId() *[]byte {
-	return ciph.shortKeyId
+	return ciph.pubKeyBytes
 }
 
 type SealedSecret struct {
@@ -66,7 +66,7 @@ func (sealedSecret *SealedSecret) fromString(sealedSecretStr string) (err error)
 		return err
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
-		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) || len(*ciphered.shortKeyId) != shortKeyIdLength {
+		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) || len(*ciphered.pubKeyBytes) != keyBaseLength {
 		return ErrInvalidCiphertextFormat
 	}
 	if len(sliced) == 4 {
@@ -115,7 +115,7 @@ func (wrappedKey *WrappedKey) fromString(wrappedKeyStr string) (err error) {
 		return err
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
-		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.shortKeyId) != shortKeyIdLength {
+		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.pubKeyBytes) != keyBaseLength {
 		return ErrInvalidCiphertextFormat
 	}
 	wrappedKey.ciphered = ciphered

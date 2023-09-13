@@ -59,13 +59,13 @@ func envNewCommand() *cobra.Command {
 				PrintErrorAndExit(err)
 				os.Exit(1)
 			}
-			userEnv, _ := cmd.Flags().GetBool(envUserFlag.name)
+			userEnv, _ := cmd.Flags().GetBool(envSelfFlag.name)
 			envType := environments.SERVICE
 			if userEnv {
 				envType = environments.USER
 			}
 
-			env, secretKey, _ := environments.New(name, email, envType)
+			env, secretKey, _ := environments.NewEnvironment(name, email, envType)
 			env.AddTags(tags...)
 			showEnv(*env, secretKey)
 
@@ -85,11 +85,12 @@ func envNewCommand() *cobra.Command {
 			os.Exit(0)
 		},
 	}
+
 	envNewCmd.Flags().StringP(envNameFlag.name, envNameFlag.shorthand, "", envNameFlag.usage)
 	envNewCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
 	envNewCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
 	envNewCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
-	envNewCmd.Flags().BoolP(envUserFlag.name, envUserFlag.shorthand, false, envUserFlag.usage)
+	envNewCmd.Flags().BoolP(envSelfFlag.name, envSelfFlag.shorthand, false, envSelfFlag.usage)
 	envNewCmd.MarkFlagRequired(envNameFlag.name)
 	return envNewCmd
 }

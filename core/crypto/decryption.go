@@ -17,7 +17,7 @@ func (secretKey *SecretKey) decrypt(ciphered *ciphered) (data []byte, err error)
 	if *ciphered.keyType != *secretKey.keyType {
 		return nil, ErrKeyTypeMismatch
 	}
-	if !bytes.Equal(*ciphered.shortKeyId, *secretKey.ShortId()) {
+	if !bytes.Equal(*ciphered.pubKeyBytes, secretKey.Id()) {
 		return nil, ErrSecretKeyMismatch
 	}
 	if ciphered.version == nil || *ciphered.version != *secretKey.version {

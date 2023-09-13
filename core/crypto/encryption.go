@@ -54,11 +54,12 @@ func (publicKey *PublicKey) encrypt(data []byte) (ciphd *ciphered, err error) {
 	if err == nil {
 		ciphertext := append(*publicKey.encrypter.ephpublicKey, nonce...)
 		ciphertext = append(ciphertext, encrypted...)
+		pubKeyBytes := publicKey.Id()
 		ciphd = &ciphered{
-			version:    publicKey.version,
-			keyType:    publicKey.keyType,
-			ciphertext: &ciphertext,
-			shortKeyId: publicKey.ShortId(),
+			version:     publicKey.version,
+			keyType:     publicKey.keyType,
+			ciphertext:  &ciphertext,
+			pubKeyBytes: &pubKeyBytes,
 		}
 	}
 	return

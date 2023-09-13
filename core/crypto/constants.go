@@ -16,9 +16,8 @@ const (
 	passwordProtectedKeyAbbrev  = "PPK" // PP = Password Protected Key
 
 	minimumPasswordLength = 8
-	shortKeyIdLength      = 4
 	keyBaseLength         = curve25519.ScalarSize + 3
-	cipherBytesMinLength  = chacha20poly1305.NonceSize + curve25519.ScalarSize + shortKeyIdLength + 3
+	cipherBytesMinLength  = chacha20poly1305.NonceSize + curve25519.ScalarSize + keyBaseLength + 3
 
 	argon2SaltLength    uint8 = 16
 	argon2Iterations          = 12

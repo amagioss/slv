@@ -3,7 +3,6 @@ package crypto
 import (
 	"crypto/cipher"
 	"crypto/rand"
-	"crypto/sha1"
 	"encoding/json"
 
 	"github.com/shibme/slv/core/commons"
@@ -22,13 +21,11 @@ type PublicKey struct {
 	encrypter *encrypter
 }
 
-func (publicKey *PublicKey) ShortId() *[]byte {
-	sum := sha1.Sum(*publicKey.key)
-	keyId := sum[len(sum)-shortKeyIdLength:]
-	return &keyId
+func (publicKey *PublicKey) Id() []byte {
+	return publicKey.toBytes()
 }
 
-func (publicKey *PublicKey) Id() string {
+func (publicKey *PublicKey) IdStr() string {
 	return commons.Encode(publicKey.toBytes())
 }
 
@@ -79,12 +76,12 @@ type SecretKey struct {
 	publicKey *PublicKey
 }
 
-func (secretKey *SecretKey) ShortId() *[]byte {
+func (secretKey *SecretKey) Id() []byte {
 	pubKey, err := secretKey.PublicKey()
 	if err != nil {
 		return nil
 	}
-	return pubKey.ShortId()
+	return pubKey.Id()
 }
 
 func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
@@ -95,14 +92,14 @@ func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
 	return newSecretKey(&privKey, keyType), nil
 }
 
-func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *SecretKey, err error) {
+func NewSecretKeyForPassword(password []byte, keyType KeyType) (*SecretKey, []byte, error) {
 	salt := make([]byte, argon2SaltLength)
-	if _, err = rand.Read(salt); err != nil {
-		return nil, ErrGeneratingKey
+	if _, err := rand.Read(salt); err != nil {
+		return nil, nil, ErrGeneratingKey
 	}
 	privKey := argon2.IDKey(password, salt, argon2Iterations,
 		argon2Memory, argon2Threads, curve25519.ScalarSize)
-	return newSecretKey(&privKey, keyType), nil
+	return newSecretKey(&privKey, keyType), salt, nil
 }
 
 func newSecretKey(privKey *[]byte, keyType KeyType) *SecretKey {

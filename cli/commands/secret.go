@@ -24,20 +24,21 @@ func secretCommand() *cobra.Command {
 			cmd.Help()
 		},
 	}
-	secretCmd.AddCommand(secretAddCommand())
+	secretCmd.AddCommand(secretPutCommand())
 	secretCmd.AddCommand(secretGetCommand())
 	secretCmd.AddCommand(secretRefCommand())
 	secretCmd.AddCommand(secretDerefCommand())
 	return secretCmd
 }
 
-func secretAddCommand() *cobra.Command {
-	if secretAddCmd != nil {
-		return secretAddCmd
+func secretPutCommand() *cobra.Command {
+	if secretPutCmd != nil {
+		return secretPutCmd
 	}
-	secretAddCmd = &cobra.Command{
-		Use:   "add",
-		Short: "Adds a secret to the vault",
+	secretPutCmd = &cobra.Command{
+		Use:     "put",
+		Aliases: []string{"add", "set", "create"},
+		Short:   "Adds a secret to the vault",
 		Run: func(cmd *cobra.Command, args []string) {
 			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
 			name := cmd.Flag(secretNameFlag.name).Value.String()
@@ -54,13 +55,13 @@ func secretAddCommand() *cobra.Command {
 			os.Exit(0)
 		},
 	}
-	secretAddCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
-	secretAddCmd.Flags().StringP(secretNameFlag.name, secretNameFlag.shorthand, "", secretNameFlag.usage)
-	secretAddCmd.Flags().StringP(secretValueFlag.name, secretValueFlag.shorthand, "", secretValueFlag.usage)
-	secretAddCmd.MarkFlagRequired(vaultFileFlag.name)
-	secretAddCmd.MarkFlagRequired(secretNameFlag.name)
-	secretAddCmd.MarkFlagRequired(secretValueFlag.name)
-	return secretAddCmd
+	secretPutCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
+	secretPutCmd.Flags().StringP(secretNameFlag.name, secretNameFlag.shorthand, "", secretNameFlag.usage)
+	secretPutCmd.Flags().StringP(secretValueFlag.name, secretValueFlag.shorthand, "", secretValueFlag.usage)
+	secretPutCmd.MarkFlagRequired(vaultFileFlag.name)
+	secretPutCmd.MarkFlagRequired(secretNameFlag.name)
+	secretPutCmd.MarkFlagRequired(secretValueFlag.name)
+	return secretPutCmd
 }
 
 func secretGetCommand() *cobra.Command {
@@ -121,7 +122,7 @@ func secretRefCommand() *cobra.Command {
 				PrintErrorAndExit(err)
 			}
 			previewOnly, _ := cmd.Flags().GetBool(secretRefPreviewOnlyFlag.name)
-			result, err := vault.ReferenceSecrets(file, previewOnly)
+			result, err := vault.RefSecrets(file, previewOnly)
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
@@ -168,7 +169,8 @@ func secretDerefCommand() *cobra.Command {
 				PrintErrorAndExit(err)
 			}
 			previewOnly, _ := cmd.Flags().GetBool(secretRefPreviewOnlyFlag.name)
-			result, err := vault.DereferenceSecrets(file, previewOnly)
+			result, err := "", nil
+			// result, err := vault.DereferenceSecrets(file, previewOnly)
 			if err != nil {
 				PrintErrorAndExit(err)
 			}

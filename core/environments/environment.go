@@ -28,26 +28,38 @@ func (eType *EnvType) isValid() bool {
 	return *eType == SERVICE || *eType == USER || *eType == ROOT
 }
 
-func New(name, email string, envType EnvType) (*Environment, *crypto.SecretKey, error) {
+func NewEnvironment(name, email string, envType EnvType) (env *Environment, secretKey *crypto.SecretKey, err error) {
+	secretKey, err = crypto.NewSecretKey(EnvironmentKey)
+	if err == nil {
+		env, err = newEnvironment(name, email, envType, secretKey)
+	}
+	return
+}
+
+func NewSelfEnvironment(name, email, password string) (env *Environment, secretKey *crypto.SecretKey, salt []byte, err error) {
+	secretKey, salt, err = crypto.NewSecretKeyForPassword([]byte(password), EnvironmentKey)
+	if err == nil {
+		env, err = newEnvironment(name, email, SERVICE, secretKey)
+	}
+	return
+}
+
+func newEnvironment(name, email string, envType EnvType, secretKey *crypto.SecretKey) (*Environment, error) {
 	if !envType.isValid() {
-		return nil, nil, ErrInvalidEnvironmentType
+		return nil, ErrInvalidEnvironmentType
 	}
-	sKey, err := crypto.NewSecretKey(EnvironmentKey)
+	publicKey, err := secretKey.PublicKey()
 	if err != nil {
-		return nil, nil, err
-	}
-	pKey, err := sKey.PublicKey()
-	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	return &Environment{
 		environment: &environment{
-			PublicKey: *pKey,
+			PublicKey: *publicKey,
 			Name:      name,
 			Email:     email,
 			EnvType:   envType,
 		},
-	}, sKey, nil
+	}, nil
 }
 
 func (env *Environment) Id() string {

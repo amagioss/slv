@@ -138,33 +138,23 @@ func (vlt *Vault) GetVersion() uint8 {
 	return vlt.vault.Config.Version
 }
 
-func (vlt *Vault) share(targetPublicKey crypto.PublicKey, checkForAccess bool) (err error) {
+func (vlt *Vault) ShareAccessToKey(shareWithPubKey crypto.PublicKey) (err error) {
 	if vlt.IsLocked() {
 		err = ErrVaultLocked
 		return
 	}
-	if targetPublicKey.Type() == VaultKey {
+	if shareWithPubKey.Type() == VaultKey {
 		return ErrVaultCannotBeSharedWithVault
 	}
-	if checkForAccess {
-		for _, keyWrappings := range vlt.vault.Config.KeyWraps {
-			if bytes.Equal(*keyWrappings.GetKeyId(), *targetPublicKey.ShortId()) {
-				return ErrVaultAlreadySharedWithKey
-			}
+	for _, keyWrappings := range vlt.vault.Config.KeyWraps {
+		if bytes.Equal(*keyWrappings.GetKeyId(), shareWithPubKey.Id()) {
+			return ErrVaultAlreadySharedWithKey
 		}
 	}
-	encryptedKey, err := targetPublicKey.EncryptKey(*vlt.secretKey)
+	encryptedKey, err := shareWithPubKey.EncryptKey(*vlt.secretKey)
 	if err == nil {
 		vlt.vault.Config.KeyWraps = append(vlt.vault.Config.KeyWraps, encryptedKey)
 		err = vlt.commit()
 	}
 	return
-}
-
-func (vlt *Vault) ShareAccessToKey(envPublicKey crypto.PublicKey) (err error) {
-	return vlt.share(envPublicKey, true)
-}
-
-func (vlt *Vault) ForceShareAccessToKey(envPublicKey crypto.PublicKey) (err error) {
-	return vlt.share(envPublicKey, false)
 }
