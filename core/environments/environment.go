@@ -105,5 +105,7 @@ func (env *Environment) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (env *Environment) Search(query string) bool {
-	return commons.SearchStruct(env, query)
+	return strings.Contains(strings.ToLower(fmt.Sprintf("%s\n%s\n%s\n%s", env.Name, env.Email,
+		env.EnvType, strings.Join(env.Tags, "\n"))),
+		strings.ToLower(query))
 }

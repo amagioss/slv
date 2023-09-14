@@ -82,7 +82,9 @@ func New(vaultFile string, hashLength uint32, publicKeys ...crypto.PublicKey) (v
 		secretKey: vaultSecretKey,
 	}
 	for _, pubKey := range publicKeys {
-		vlt.ShareAccessToKey(pubKey)
+		if _, err := vlt.ShareAccessToKey(pubKey); err != nil {
+			return nil, err
+		}
 	}
 	vlt.commit()
 	return vlt, nil
@@ -142,17 +144,17 @@ func (vlt *Vault) GetVersion() uint8 {
 	return vlt.vault.Config.Version
 }
 
-func (vlt *Vault) ShareAccessToKey(shareWithPubKey crypto.PublicKey) (err error) {
+func (vlt *Vault) ShareAccessToKey(shareWithPubKey crypto.PublicKey) (shared bool, err error) {
 	if vlt.IsLocked() {
 		err = ErrVaultLocked
 		return
 	}
 	if shareWithPubKey.Type() == VaultKey {
-		return ErrVaultCannotBeSharedWithVault
+		return false, ErrVaultCannotBeSharedWithVault
 	}
 	for _, keyWrappings := range vlt.vault.Config.KeyWraps {
 		if bytes.Equal(*keyWrappings.GetKeyId(), shareWithPubKey.Id()) {
-			return ErrVaultAlreadySharedWithKey
+			return false, nil
 		}
 	}
 	encryptedKey, err := shareWithPubKey.EncryptKey(*vlt.secretKey)
@@ -160,5 +162,5 @@ func (vlt *Vault) ShareAccessToKey(shareWithPubKey crypto.PublicKey) (err error)
 		vlt.vault.Config.KeyWraps = append(vlt.vault.Config.KeyWraps, encryptedKey)
 		err = vlt.commit()
 	}
-	return
+	return err == nil, err
 }

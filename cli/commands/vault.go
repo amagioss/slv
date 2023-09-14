@@ -7,6 +7,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/shibme/slv/core/crypto"
 	"github.com/shibme/slv/core/keystore"
+	"github.com/shibme/slv/core/profiles"
 	"github.com/shibme/slv/core/vaults"
 	"github.com/spf13/cobra"
 )
@@ -49,6 +50,25 @@ func vaultNewCommand() *cobra.Command {
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
+			query := cmd.Flag(envSearchFlag.name).Value.String()
+			if query != "" {
+				prof, err := profiles.GetDefaultProfile()
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
+				envManifest, err := prof.GetEnvManifest()
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
+				for _, env := range envManifest.SearchEnv(query) {
+					publicKeys = append(publicKeys, env.PublicKey)
+				}
+
+			}
+			if len(publicKeys) == 0 {
+				PrintErrorAndExit(fmt.Errorf("either --" + envSearchFlag.name +
+					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
+			}
 			enableHash, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.name)
 			var hashLength uint32 = 0
 			if enableHash {
@@ -64,9 +84,9 @@ func vaultNewCommand() *cobra.Command {
 	}
 	vaultNewCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
 	vaultNewCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.name, vaultAccessPublicKeysFlag.shorthand, []string{}, vaultAccessPublicKeysFlag.usage)
+	vaultNewCmd.Flags().StringP(envSearchFlag.name, envSearchFlag.shorthand, "", envSearchFlag.usage)
 	vaultNewCmd.Flags().BoolP(vaultEnableHashingFlag.name, vaultEnableHashingFlag.shorthand, false, vaultEnableHashingFlag.usage)
 	vaultNewCmd.MarkFlagRequired(vaultFileFlag.name)
-	vaultNewCmd.MarkFlagRequired(vaultAccessPublicKeysFlag.name)
 	return vaultNewCmd
 }
 
@@ -99,12 +119,31 @@ func vaultShareCommand() *cobra.Command {
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
+			query := cmd.Flag(envSearchFlag.name).Value.String()
+			if query != "" {
+				prof, err := profiles.GetDefaultProfile()
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
+				envManifest, err := prof.GetEnvManifest()
+				if err != nil {
+					PrintErrorAndExit(err)
+				}
+				for _, env := range envManifest.SearchEnv(query) {
+					publicKeys = append(publicKeys, env.PublicKey)
+				}
+
+			}
+			if len(publicKeys) == 0 {
+				PrintErrorAndExit(fmt.Errorf("either --" + envSearchFlag.name +
+					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
+			}
 			vault, err := vaults.Get(vaultFile)
 			if err == nil {
 				err = vault.Unlock(*envSecretKey)
 				if err == nil {
 					for _, pubKey := range publicKeys {
-						if err = vault.ShareAccessToKey(pubKey); err != nil {
+						if _, err = vault.ShareAccessToKey(pubKey); err != nil {
 							break
 						}
 					}
@@ -119,7 +158,7 @@ func vaultShareCommand() *cobra.Command {
 	}
 	vaultShareCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
 	vaultShareCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.name, vaultAccessPublicKeysFlag.shorthand, []string{}, vaultAccessPublicKeysFlag.usage)
+	vaultShareCmd.Flags().StringP(envSearchFlag.name, envSearchFlag.shorthand, "", envSearchFlag.usage)
 	vaultShareCmd.MarkFlagRequired(vaultFileFlag.name)
-	vaultShareCmd.MarkFlagRequired(vaultAccessPublicKeysFlag.name)
 	return vaultShareCmd
 }

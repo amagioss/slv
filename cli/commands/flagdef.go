@@ -51,9 +51,9 @@ var envAddFlag = FlagDef{
 }
 
 var envSearchFlag = FlagDef{
-	name:      "search",
+	name:      "search-env",
 	shorthand: "s",
-	usage:     "Searches for environments",
+	usage:     "Searches query to filter environments",
 }
 
 // Vault Command Flags
