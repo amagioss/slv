@@ -35,6 +35,10 @@ type Vault struct {
 	unlockedBy *string
 }
 
+func (vlt *Vault) Id() string {
+	return vlt.vault.Config.PublicKey.IdStr()
+}
+
 func (vlt Vault) MarshalYAML() (interface{}, error) {
 	return vlt.vault, nil
 }

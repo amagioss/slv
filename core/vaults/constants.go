@@ -27,3 +27,4 @@ var ErrMaximumReferenceAttemptsReached = errors.New("maximum reference attempts 
 var ErrInvalidReferenceFileFormat = errors.New("invalid reference file - only yaml and json are supported")
 var ErrInvalidRefActionType = errors.New("invalid reference action type")
 var ErrInvalidAutoRefString = errors.New("invalid auto reference string")
+var ErrInvalidDirectRefString = errors.New("invalid direct reference string")
