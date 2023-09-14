@@ -14,7 +14,7 @@ const (
 	autoReferenceLength                = 16
 )
 
-var ErrInvalidVaultFileName = errors.New("invalid vault file name")
+var ErrInvalidVaultFileName = errors.New("invalid vault file name [vault file name must end in " + vaultFileExtension + "]")
 var ErrVaultDirPathCreation = errors.New("error in creating a new vault directory path")
 var ErrVaultNotAccessible = errors.New("vault is not accessible using the given environment key")
 var ErrVaultLocked = errors.New("the vault is currently locked")
