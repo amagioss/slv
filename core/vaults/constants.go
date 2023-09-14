@@ -7,12 +7,11 @@ import (
 )
 
 const (
-	vaultFileExtension                        = ".vault.slv"
-	VaultKey                   crypto.KeyType = 'V'
-	directReferencedPrefix                    = "SLV_DRS_" // DR = Direct Referenced Secret
-	autoReferencedPrefix                      = "SLV_ARS_" // AR = Auto Referenced Secret
-	autoReferenceLength                       = 16
-	autoReferencedPreviewValue                = autoReferencedPrefix + "REFERENCEKEYTOBEFILLEDFROMVAULT"
+	vaultFileExtension                 = ".vault.slv"
+	VaultKey            crypto.KeyType = 'V'
+	directRefAbbrev                    = "DRS" // DRS = Direct Referenced Secret
+	autoRefAbbrev                      = "ARS" // ARS = Auto Referenced Secret
+	autoReferenceLength                = 16
 )
 
 var ErrInvalidVaultFileName = errors.New("invalid vault file name")
@@ -27,3 +26,4 @@ var ErrVaultSecretNotFound = errors.New("no secret found for the given name")
 var ErrMaximumReferenceAttemptsReached = errors.New("maximum reference attempts reached")
 var ErrInvalidReferenceFileFormat = errors.New("invalid reference file - only yaml and json are supported")
 var ErrInvalidRefActionType = errors.New("invalid reference action type")
+var ErrInvalidAutoRefString = errors.New("invalid auto reference string")
