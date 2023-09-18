@@ -5,6 +5,10 @@ import "github.com/spf13/cobra"
 // SLV Command
 var slvCmd *cobra.Command
 
+// System Commands
+var systemCmd *cobra.Command
+var systemResetCmd *cobra.Command
+
 // Profile Commands
 var profileCmd *cobra.Command
 var profileNewCmd *cobra.Command

@@ -102,7 +102,6 @@ func (envManifest *EnvManifest) GetEnv(id string) (environment *Environment, err
 	return nil, ErrEnvironmentNotFound
 }
 
-// Lists environments that match a given query by searching for parts of name, email and tags
 func (envManifest *EnvManifest) SearchEnv(query string) (environments []*Environment) {
 	query = strings.ToLower(query)
 	for _, env := range envManifest.Environments {

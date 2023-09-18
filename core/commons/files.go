@@ -26,3 +26,12 @@ func ReadFromYAML(filePath string, out interface{}) error {
 	}
 	return err
 }
+
+func WriteToFile(filePath string, content []byte) error {
+	return os.WriteFile(filePath, content, 0644)
+}
+
+func ReadFromFile(filePath string) ([]byte, error) {
+	content, err := os.ReadFile(filePath)
+	return content, err
+}

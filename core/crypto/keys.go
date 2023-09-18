@@ -92,8 +92,8 @@ func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
 	return newSecretKey(&privKey, keyType), nil
 }
 
-func NewSecretKeyForPassword(password []byte, keyType KeyType) (*SecretKey, []byte, error) {
-	salt := make([]byte, argon2SaltLength)
+func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *SecretKey, salt []byte, err error) {
+	salt = make([]byte, argon2SaltLength)
 	if _, err := rand.Read(salt); err != nil {
 		return nil, nil, ErrGeneratingKey
 	}

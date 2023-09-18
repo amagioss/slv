@@ -23,6 +23,7 @@ func SlvCommand() *cobra.Command {
 		},
 	}
 	slvCmd.Flags().BoolP("version", "v", false, "Shows version")
+	slvCmd.AddCommand(systemCommand())
 	slvCmd.AddCommand(envCommand())
 	slvCmd.AddCommand(profileCommand())
 	slvCmd.AddCommand(vaultCommand())

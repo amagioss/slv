@@ -13,18 +13,18 @@ func initKeyring() (err error) {
 	return
 }
 
-func putPassphraseToKeyring(passphrase []byte) error {
+func putUserSecretToKeyring(secretBytes []byte) error {
 	if err := initKeyring(); err != nil {
 		return err
 	}
 	_ = ring.Set(keyring.Item{
 		Key:  slvKeyringItemKey,
-		Data: (passphrase),
+		Data: (secretBytes),
 	})
 	return nil
 }
 
-func getPassphraseFromKeyring() ([]byte, error) {
+func getUserSecretFromKeyring() ([]byte, error) {
 	if err := initKeyring(); err != nil {
 		return nil, err
 	}

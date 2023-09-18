@@ -6,6 +6,13 @@ type FlagDef struct {
 	usage     string
 }
 
+// Common Flags
+var yesFlag = FlagDef{
+	name:      "yes",
+	shorthand: "y",
+	usage:     "Confirm action",
+}
+
 // Profile Command Flags
 var profileNameFlag = FlagDef{
 	name:      "name",

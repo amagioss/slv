@@ -31,20 +31,12 @@ func (eType *EnvType) isValid() bool {
 func NewEnvironment(name, email string, envType EnvType) (env *Environment, secretKey *crypto.SecretKey, err error) {
 	secretKey, err = crypto.NewSecretKey(EnvironmentKey)
 	if err == nil {
-		env, err = newEnvironment(name, email, envType, secretKey)
+		env, err = NewEnvironmentForSecretKey(name, email, envType, secretKey)
 	}
 	return
 }
 
-func NewSelfEnvironment(name, email, password string) (env *Environment, secretKey *crypto.SecretKey, salt []byte, err error) {
-	secretKey, salt, err = crypto.NewSecretKeyForPassword([]byte(password), EnvironmentKey)
-	if err == nil {
-		env, err = newEnvironment(name, email, SERVICE, secretKey)
-	}
-	return
-}
-
-func newEnvironment(name, email string, envType EnvType, secretKey *crypto.SecretKey) (*Environment, error) {
+func NewEnvironmentForSecretKey(name, email string, envType EnvType, secretKey *crypto.SecretKey) (*Environment, error) {
 	if !envType.isValid() {
 		return nil, ErrInvalidEnvironmentType
 	}

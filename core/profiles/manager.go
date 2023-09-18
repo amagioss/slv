@@ -10,7 +10,6 @@ import (
 type profileManager struct {
 	dir                string
 	profileList        map[string]struct{}
-	defaultFile        *string
 	defaultProfileName *string
 	defaultProfile     *Profile
 }
@@ -24,8 +23,6 @@ func initProfileManager() error {
 	}
 	var manager profileManager
 	manager.dir = filepath.Join(commons.AppDataDir(), profilesDirName)
-
-	// Creates the profiles directory if it doesn't exist
 	profileManagerDirInfo, err := os.Stat(manager.dir)
 	if err != nil {
 		err = os.MkdirAll(manager.dir, 0755)
@@ -35,8 +32,6 @@ func initProfileManager() error {
 	} else if !profileManagerDirInfo.IsDir() {
 		return ErrInitializingProfileManagementDir
 	}
-
-	// Populating list of all profiles
 	profileManagerDir, err := os.Open(manager.dir)
 	if err != nil {
 		return ErrOpeningProfileManagementDir
@@ -117,14 +112,10 @@ func SetDefault(profileName string) error {
 	if _, exists := profileMgr.profileList[profileName]; !exists {
 		return ErrProfileNotFound
 	}
-	if profileMgr.defaultFile == nil {
-		defaultInfoFile := filepath.Join(profileMgr.dir, defaultProfileFileName)
-		profileMgr.defaultFile = &defaultInfoFile
-	}
-	err := os.WriteFile(*profileMgr.defaultFile, []byte(profileName), 0644)
-	if err != nil {
+	if commons.WriteToFile(filepath.Join(profileMgr.dir, defaultProfileFileName), []byte(profileName)) != nil {
 		return ErrSettingDefaultProfile
 	}
+	profileMgr.defaultProfileName = &profileName
 	profileMgr.defaultProfile = nil
 	return nil
 }
@@ -136,15 +127,11 @@ func GetDefaultProfileName() (string, error) {
 	if profileMgr.defaultProfileName != nil {
 		return *profileMgr.defaultProfileName, nil
 	}
-	if profileMgr.defaultFile == nil {
-		defaultInfoFile := filepath.Join(profileMgr.dir, defaultProfileFileName)
-		profileMgr.defaultFile = &defaultInfoFile
-	}
-	bytes, err := os.ReadFile(*profileMgr.defaultFile)
+	fileContent, err := commons.ReadFromFile(filepath.Join(profileMgr.dir, defaultProfileFileName))
+	defaultProfileName := string(fileContent)
 	if err != nil {
 		return "", ErrNoDefaultProfileFound
 	}
-	defaultProfileName := string(bytes)
 	profileMgr.defaultProfileName = &defaultProfileName
 	return *profileMgr.defaultProfileName, nil
 }

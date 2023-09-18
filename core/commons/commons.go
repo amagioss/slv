@@ -35,6 +35,10 @@ func AppDataDir() string {
 	return *appDataDir
 }
 
+func ResetAppDataDir() error {
+	return os.RemoveAll(getAppDataDirPath())
+}
+
 func FileExists(path string) bool {
 	f, err := os.Stat(path)
 	return err == nil && !f.IsDir()

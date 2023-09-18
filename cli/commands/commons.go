@@ -8,11 +8,11 @@ import (
 )
 
 func PrintErrorAndExit(err error) {
-	fmt.Fprintln(os.Stderr, color.RedString("error:\t"+err.Error()))
+	fmt.Fprintln(os.Stderr, color.RedString(err.Error()))
 	os.Exit(1)
 }
 
 func PrintErrorMessageAndExit(errMessage string) {
-	fmt.Fprintln(os.Stderr, color.RedString("error:\t"+errMessage))
+	fmt.Fprintln(os.Stderr, color.RedString(errMessage))
 	os.Exit(1)
 }
