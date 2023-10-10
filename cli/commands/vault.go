@@ -42,6 +42,11 @@ func vaultNewCommand() *cobra.Command {
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
+			query := cmd.Flag(envSearchFlag.name).Value.String()
+			if len(publicKeyStrings) == 0 && query == "" {
+				PrintErrorAndExit(fmt.Errorf("either --" + envSearchFlag.name +
+					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
+			}
 			var publicKeys []crypto.PublicKey
 			for _, publicKeyString := range publicKeyStrings {
 				publicKey, err := crypto.PublicKeyFromString(publicKeyString)
@@ -50,7 +55,6 @@ func vaultNewCommand() *cobra.Command {
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
-			query := cmd.Flag(envSearchFlag.name).Value.String()
 			if query != "" {
 				prof, err := profiles.GetDefaultProfile()
 				if err != nil {
@@ -63,11 +67,9 @@ func vaultNewCommand() *cobra.Command {
 				for _, env := range envManifest.SearchEnv(query) {
 					publicKeys = append(publicKeys, env.PublicKey)
 				}
-
-			}
-			if len(publicKeys) == 0 {
-				PrintErrorAndExit(fmt.Errorf("either --" + envSearchFlag.name +
-					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
+				if len(publicKeys) == 0 {
+					PrintErrorAndExit(fmt.Errorf("no matching environments found for search query: " + query))
+				}
 			}
 			enableHash, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.name)
 			var hashLength uint32 = 0
@@ -111,6 +113,11 @@ func vaultShareCommand() *cobra.Command {
 			if err != nil {
 				PrintErrorAndExit(err)
 			}
+			query := cmd.Flag(envSearchFlag.name).Value.String()
+			if len(publicKeyStrings) == 0 && query == "" {
+				PrintErrorAndExit(fmt.Errorf("either --" + envSearchFlag.name +
+					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
+			}
 			var publicKeys []crypto.PublicKey
 			for _, publicKeyString := range publicKeyStrings {
 				publicKey, err := crypto.PublicKeyFromString(publicKeyString)
@@ -119,7 +126,6 @@ func vaultShareCommand() *cobra.Command {
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
-			query := cmd.Flag(envSearchFlag.name).Value.String()
 			if query != "" {
 				prof, err := profiles.GetDefaultProfile()
 				if err != nil {
@@ -132,11 +138,9 @@ func vaultShareCommand() *cobra.Command {
 				for _, env := range envManifest.SearchEnv(query) {
 					publicKeys = append(publicKeys, env.PublicKey)
 				}
-
-			}
-			if len(publicKeys) == 0 {
-				PrintErrorAndExit(fmt.Errorf("either --" + envSearchFlag.name +
-					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
+				if len(publicKeys) == 0 {
+					PrintErrorAndExit(fmt.Errorf("no matching environments found for search query: " + query))
+				}
 			}
 			vault, err := vaults.Get(vaultFile)
 			if err == nil {

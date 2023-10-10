@@ -9,10 +9,8 @@ import (
 func zCompress(data []byte) (compressedData []byte, err error) {
 	var buf bytes.Buffer
 	writer := zlib.NewWriter(&buf)
-	_, err = writer.Write(data)
-	if err == nil {
-		err = writer.Close()
-		if err == nil {
+	if _, err = writer.Write(data); err == nil {
+		if writer.Close() == nil {
 			return buf.Bytes(), nil
 		}
 	}
@@ -32,8 +30,7 @@ func Compress(data []byte) (compressedBytes []byte, err error) {
 	dataSize := len(data)
 	compressedData, err := zCompress(data)
 	if err == nil {
-		compressedSize := len(compressedData)
-		if dataSize <= compressedSize {
+		if dataSize <= len(compressedData) {
 			compressedBytes = append([]byte{0}, data...)
 		} else {
 			compressedBytes = append([]byte{1}, compressedData...)

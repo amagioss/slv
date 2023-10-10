@@ -1,5 +1,5 @@
 local_test
 dist/
 .DS_Store
-slv_cli_dev_run.sh
+slv-dev
 .vscode
