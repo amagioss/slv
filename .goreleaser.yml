@@ -16,3 +16,17 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+brews:
+  -
+    name: slv
+    homepage: "https://github.com/shibme/slv"
+    commit_author:
+      name: shibme
+      email: git@shib.me
+    repository:
+      owner: shibme
+      name: homebrew-tap
+      branch: main
+      git:
+        url: 'git@github.com:shibme/homebrew-tap.git'
+        private_key: '{{ .Env.HOMEBREW_SSH_KEY }}'
