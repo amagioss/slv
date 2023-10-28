@@ -13,6 +13,12 @@ var yesFlag = FlagDef{
 	usage:     "Confirm action",
 }
 
+var versionFlag = FlagDef{
+	name:      "version",
+	shorthand: "v",
+	usage:     "Shows version info",
+}
+
 // Profile Command Flags
 var profileNameFlag = FlagDef{
 	name:      "name",
