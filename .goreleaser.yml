@@ -3,11 +3,15 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags: "-X github.com/shibme/slv/cli/commands.AppName={{.ProjectName}} -X github.com/shibme/slv/cli/commands.Version={{.Version}}"
+    goarch:
+      - amd64
+      - arm64
+    goos:
+      - darwin
+      - linux
+      - windows
 archives:
   - format: zip
-    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-checksum:
-  name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ incpatch .Version }}-dev"
 changelog:
@@ -16,6 +20,14 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+nfpms:
+  - vendor: Shibly Meeran
+    homepage: https://github.com/shibme/slv
+    maintainer: Shibly Meeran <pkg@shib.me>
+    formats:
+      - apk
+      - deb
+      - rpm
 brews:
   - name: slv
     homepage: "https://github.com/shibme/slv"
