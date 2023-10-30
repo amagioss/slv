@@ -10,4 +10,4 @@ SLV is designed based on the following **key principles**
 ```zsh
 brew install shibme/tap/slv
 ```
-Alternatively, you can download the SLV binary from the [releases](https://github.com/shibme/slv/releases/latest) page and add it to your path.
+Alternatively, you can download the SLV binary from the [releases](https://github.com/shibme/slv-beta/releases/latest) page and add it to your path.
