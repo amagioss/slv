@@ -1,4 +1,4 @@
-package keystore
+package keyringstore
 
 import (
 	"os"
@@ -42,5 +42,13 @@ func setSalt(salt []byte) error {
 }
 
 func getSalt() (salt []byte, err error) {
-	return commons.ReadFromFile(filepath.Join(commons.AppDataDir(), userDataDirName, userSaltFileName))
+	return os.ReadFile(filepath.Join(commons.AppDataDir(), userDataDirName, userSaltFileName))
+}
+
+func getPassphraseFromEnvar() (string, error) {
+	passphrase := os.Getenv(slvPassphraseEnvarName)
+	if passphrase == "" {
+		return "", ErrPassphraseNotSet
+	}
+	return passphrase, nil
 }

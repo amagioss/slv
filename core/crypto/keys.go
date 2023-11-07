@@ -12,7 +12,7 @@ import (
 )
 
 type encrypter struct {
-	ephpublicKey *[]byte
+	ephPublicKey *[]byte
 	aead         *cipher.AEAD
 }
 
@@ -36,7 +36,7 @@ func (publicKey PublicKey) MarshalYAML() (interface{}, error) {
 func (publicKey *PublicKey) UnmarshalYAML(value *yaml.Node) error {
 	var pubKeyStr string
 	if err := value.Decode(&pubKeyStr); err == nil {
-		keyBase, err := kyeBaseFromString(pubKeyStr)
+		keyBase, err := keyBaseFromString(pubKeyStr)
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ func (publicKey PublicKey) MarshalJSON() ([]byte, error) {
 func (publicKey *PublicKey) UnmarshalJSON(data []byte) (err error) {
 	var pubKeyStr string
 	if err = json.Unmarshal(data, &pubKeyStr); err == nil {
-		keyBase, err := kyeBaseFromString(pubKeyStr)
+		keyBase, err := keyBaseFromString(pubKeyStr)
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,7 @@ func (publicKey *PublicKey) UnmarshalJSON(data []byte) (err error) {
 }
 
 func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
-	keyBase, err := kyeBaseFromString(publicKeyStr)
+	keyBase, err := keyBaseFromString(publicKeyStr)
 	if err != nil {
 		return nil, err
 	}
@@ -132,12 +132,26 @@ func (secretKey *SecretKey) PublicKey() (*PublicKey, error) {
 	return secretKey.publicKey, nil
 }
 
-func SecretKeyFromString(secretKeyStr string) (*SecretKey, error) {
-	keyBase, err := kyeBaseFromString(secretKeyStr)
+func SecretKeyFromBytes(secretKeyBytes []byte) (*SecretKey, error) {
+	keyBase, err := keyBaseFromBytes(secretKeyBytes)
 	if err != nil {
 		return nil, err
 	}
 	return &SecretKey{
 		keyBase: keyBase,
 	}, nil
+}
+
+func SecretKeyFromString(secretKeyStr string) (*SecretKey, error) {
+	keyBase, err := keyBaseFromString(secretKeyStr)
+	if err != nil {
+		return nil, err
+	}
+	return &SecretKey{
+		keyBase: keyBase,
+	}, nil
+}
+
+func (secretKey *SecretKey) Bytes() []byte {
+	return secretKey.toBytes()
 }

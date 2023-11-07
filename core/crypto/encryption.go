@@ -28,7 +28,7 @@ func (publicKey *PublicKey) getEncrypter() (*encrypter, error) {
 			return nil, ErrGeneratingKey
 		}
 		publicKey.encrypter = &encrypter{
-			ephpublicKey: &ephPubKey,
+			ephPublicKey: &ephPubKey,
 			aead:         &aead,
 		}
 	}
@@ -52,7 +52,7 @@ func (publicKey *PublicKey) encrypt(data []byte) (ciphd *ciphered, err error) {
 	aead := *publicKey.encrypter.aead
 	encrypted := aead.Seal(nil, nonce, compressedData, nil)
 	if err == nil {
-		ciphertext := append(*publicKey.encrypter.ephpublicKey, nonce...)
+		ciphertext := append(*publicKey.encrypter.ephPublicKey, nonce...)
 		ciphertext = append(ciphertext, encrypted...)
 		pubKeyBytes := publicKey.Id()
 		ciphd = &ciphered{

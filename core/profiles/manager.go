@@ -127,7 +127,7 @@ func GetDefaultProfileName() (string, error) {
 	if profileMgr.defaultProfileName != nil {
 		return *profileMgr.defaultProfileName, nil
 	}
-	fileContent, err := commons.ReadFromFile(filepath.Join(profileMgr.dir, defaultProfileFileName))
+	fileContent, err := os.ReadFile(filepath.Join(profileMgr.dir, defaultProfileFileName))
 	defaultProfileName := string(fileContent)
 	if err != nil {
 		return "", ErrNoDefaultProfileFound

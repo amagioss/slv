@@ -9,6 +9,7 @@ import (
 	"github.com/shibme/slv/core/crypto"
 	"github.com/shibme/slv/core/environments"
 	"github.com/shibme/slv/core/profiles"
+	"github.com/shibme/slv/core/secretkeystore"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +30,7 @@ func envCommand() *cobra.Command {
 	return envCmd
 }
 
-func showEnv(env environments.Environment, secretKey *crypto.SecretKey) {
+func showEnv(env environments.Environment) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 	fmt.Fprintln(w, "ID (Public Key):\t", color.YellowString(env.PublicKey.String()))
 	fmt.Fprintln(w, "Name:\t", env.Name)
@@ -37,9 +38,6 @@ func showEnv(env environments.Environment, secretKey *crypto.SecretKey) {
 	fmt.Fprintln(w, "Tags:\t", env.Tags)
 	if envDef, err := env.ToEnvDef(); err == nil {
 		fmt.Fprintln(w, "Environment Definition:\t", envDef)
-	}
-	if secretKey != nil {
-		fmt.Fprintln(w, "Secret Key:\t", color.HiBlackString(secretKey.String()))
 	}
 	w.Flush()
 }
@@ -56,18 +54,46 @@ func envNewCommand() *cobra.Command {
 			email, _ := cmd.Flags().GetString(envEmailFlag.name)
 			tags, err := cmd.Flags().GetStringSlice(envTagsFlag.name)
 			if err != nil {
-				PrintErrorAndExit(err)
-				os.Exit(1)
+				exitOnError(err)
 			}
 			userEnv, _ := cmd.Flags().GetBool(envSelfFlag.name)
 			envType := environments.SERVICE
-			if userEnv {
-				envType = environments.USER
+
+			kmsType, _ := cmd.Flags().GetString(envKMSTypeFlag.name)
+			kmsRef, _ := cmd.Flags().GetString(envKMSRefFlag.name)
+			kmsPublicKeyFile, _ := cmd.Flags().GetString(envKMSPemFlag.name)
+			var env *environments.Environment
+			var secretKey *crypto.SecretKey
+			var accessKey *environments.AccessKey
+			if kmsType != "" && kmsRef != "" && kmsPublicKeyFile != "" {
+				var rsaPublicKey []byte
+				if rsaPublicKey, err = os.ReadFile(kmsPublicKeyFile); err == nil {
+					env, accessKey, err = secretkeystore.NewEnvForKMS(name, email, envType, kmsType, kmsRef, rsaPublicKey)
+				}
+				if err != nil {
+					exitOnError(err)
+				}
+			} else {
+				if userEnv {
+					envType = environments.USER
+				}
+				env, secretKey, err = environments.NewEnvironment(name, email, envType)
+				if err != nil {
+					exitOnError(err)
+				}
 			}
 
-			env, secretKey, _ := environments.NewEnvironment(name, email, envType)
 			env.AddTags(tags...)
-			showEnv(*env, secretKey)
+			showEnv(*env)
+			if secretKey != nil {
+				fmt.Println("\nSecret Key:\t", color.HiBlackString(secretKey.String()))
+			} else if accessKey != nil {
+				accessKeyDef, err := accessKey.String()
+				if err != nil {
+					exitOnError(err)
+				}
+				fmt.Println("\nAccess Key:\t", color.HiBlackString(accessKeyDef))
+			}
 
 			// Adding env to a specified profile
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
@@ -75,20 +101,24 @@ func envNewCommand() *cobra.Command {
 			if addToProfileFlag {
 				prof, err = profiles.GetDefaultProfile()
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				err = prof.AddEnv(env)
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 			}
-			os.Exit(0)
+
+			safeExit()
 		},
 	}
 
 	envNewCmd.Flags().StringP(envNameFlag.name, envNameFlag.shorthand, "", envNameFlag.usage)
 	envNewCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
 	envNewCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
+	envNewCmd.Flags().StringP(envKMSTypeFlag.name, envKMSTypeFlag.shorthand, "", envKMSTypeFlag.usage)
+	envNewCmd.Flags().StringP(envKMSRefFlag.name, envKMSRefFlag.shorthand, "", envKMSRefFlag.usage)
+	envNewCmd.Flags().StringP(envKMSPemFlag.name, envKMSPemFlag.shorthand, "", envKMSPemFlag.usage)
 	envNewCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
 	envNewCmd.Flags().BoolP(envSelfFlag.name, envSelfFlag.shorthand, false, envSelfFlag.usage)
 	envNewCmd.MarkFlagRequired(envNameFlag.name)
@@ -112,11 +142,11 @@ func envListCommand() *cobra.Command {
 				prof, err = profiles.GetDefaultProfile()
 			}
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			envManifest, err := prof.GetEnvManifest()
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			query := cmd.Flag(envSearchFlag.name).Value.String()
 			var envs []*environments.Environment
@@ -126,10 +156,10 @@ func envListCommand() *cobra.Command {
 				envs = envManifest.ListEnv()
 			}
 			for _, env := range envs {
-				showEnv(*env, nil)
+				showEnv(*env)
 				fmt.Println()
 			}
-			os.Exit(0)
+			safeExit()
 
 		},
 	}

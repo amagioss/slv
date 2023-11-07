@@ -7,12 +7,15 @@ import (
 	"github.com/fatih/color"
 )
 
-func PrintErrorAndExit(err error) {
+func exitOnError(err error) {
 	fmt.Fprintln(os.Stderr, color.RedString(err.Error()))
+	erroredExit()
+}
+
+func erroredExit() {
 	os.Exit(1)
 }
 
-func PrintErrorMessageAndExit(errMessage string) {
-	fmt.Fprintln(os.Stderr, color.RedString(errMessage))
-	os.Exit(1)
+func safeExit() {
+	os.Exit(0)
 }

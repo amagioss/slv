@@ -57,7 +57,7 @@ func (keyBase *keyBase) String() string {
 	}
 }
 
-func kyeBaseFromString(keyBaseStr string) (*keyBase, error) {
+func keyBaseFromString(keyBaseStr string) (*keyBase, error) {
 	sliced := strings.Split(keyBaseStr, "_")
 	if len(sliced) != 3 || sliced[0] != commons.SLV {
 		return nil, ErrInvalidKeyFormat

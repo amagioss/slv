@@ -1,4 +1,4 @@
-package keystore
+package keyringstore
 
 import "github.com/99designs/keyring"
 

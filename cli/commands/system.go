@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shibme/slv/core/commons"
@@ -31,8 +30,8 @@ func systemResetCommand() *cobra.Command {
 		return systemResetCmd
 	}
 	systemResetCmd = &cobra.Command{
-		Use:     "purge",
-		Aliases: []string{"clean", "clear"},
+		Use:     "reset",
+		Aliases: []string{"reset", "pruge", "prune", "clean", "clear"},
 		Short:   "Reset the system",
 		Long:    `Cleans all existing profiles and any other data`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -48,11 +47,12 @@ func systemResetCommand() *cobra.Command {
 				if err == nil {
 					fmt.Println(color.GreenString("System reset successful"))
 				} else {
-					fmt.Fprintln(os.Stderr, err.Error())
-					os.Exit(1)
+					exitOnError(err)
 				}
+			} else {
+				fmt.Println(color.YellowString("System reset aborted"))
 			}
-			os.Exit(0)
+			safeExit()
 		},
 	}
 	systemResetCmd.Flags().BoolP(yesFlag.name, yesFlag.shorthand, false, yesFlag.usage)

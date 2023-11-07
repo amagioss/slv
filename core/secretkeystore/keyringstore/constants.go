@@ -1,4 +1,4 @@
-package keystore
+package keyringstore
 
 import "errors"
 
@@ -9,9 +9,10 @@ const (
 	slvPassphraseEnvarName = "SLV_USER_PASSWORD"
 	slvKeyringServiceName  = "slv"
 	slvKeyringItemKey      = "slv_secret_key"
+	slvSecretIdEnvarName   = "SLV_SECRET_ID"
 )
 
-var ErrEnvSecretNotSet = errors.New(slvSecreKeyEnvarName + " environment variable is not set")
+var ErrPassphraseNotSet = errors.New(slvPassphraseEnvarName + " environment variable is not set")
 var ErrCreatingUserDataDir = errors.New("error in creating user data directory")
 var ErrFileExistsInPathOfUserDataDir = errors.New("file exists in path of user data directory")
 var ErrSaltNotFound = errors.New("salt not found")

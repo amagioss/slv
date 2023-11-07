@@ -2,11 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
-	"github.com/shibme/slv/core/crypto"
-	"github.com/shibme/slv/core/keystore"
+	"github.com/shibme/slv/core/secretkeystore"
 	"github.com/shibme/slv/core/vaults"
 	"github.com/spf13/cobra"
 )
@@ -45,14 +43,14 @@ func secretPutCommand() *cobra.Command {
 			secret := cmd.Flag(secretValueFlag.name).Value.String()
 			vault, err := vaults.Get(vaultFile)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			err = vault.AddDirectSecret(name, secret)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			fmt.Println("Added secret: ", color.GreenString(name), " to vault: ", color.GreenString(vaultFile))
-			os.Exit(0)
+			safeExit()
 		},
 	}
 	secretPutCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
@@ -73,30 +71,26 @@ func secretGetCommand() *cobra.Command {
 		Aliases: []string{"show", "view", "read"},
 		Short:   "Gets a secret from the vault",
 		Run: func(cmd *cobra.Command, args []string) {
-			var envSecretKey *crypto.SecretKey
-			envSecretKeyString, err := keystore.GetSecretKeyFromEnvar()
-			if err == nil {
-				envSecretKey, err = crypto.SecretKeyFromString(envSecretKeyString)
-			}
+			envSecretKey, err := secretkeystore.GetSecretKey()
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
 			name := cmd.Flag(secretNameFlag.name).Value.String()
 			vault, err := vaults.Get(vaultFile)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			err = vault.Unlock(*envSecretKey)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			secret, err := vault.GetDirectSecret(name)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			fmt.Println(secret)
-			os.Exit(0)
+			safeExit()
 		},
 	}
 	secretGetCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
@@ -118,11 +112,11 @@ func secretRefCommand() *cobra.Command {
 			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
 			files, err := cmd.Flags().GetStringSlice(secretRefFileFlag.name)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			vault, err := vaults.Get(vaultFile)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			previewOnly := false
 			if len(files) > 1 {
@@ -131,7 +125,7 @@ func secretRefCommand() *cobra.Command {
 			for _, file := range files {
 				result, err := vault.RefSecrets(file, previewOnly)
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				if previewOnly {
 					fmt.Println(result)
@@ -139,7 +133,7 @@ func secretRefCommand() *cobra.Command {
 					fmt.Println("Referenced", color.GreenString(file), "from vault", color.GreenString(vaultFile))
 				}
 			}
-			os.Exit(0)
+			safeExit()
 		},
 	}
 	secretRefCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
@@ -158,19 +152,17 @@ func secretDerefCommand() *cobra.Command {
 		Use:   "deref",
 		Short: "Dereferences and updates secrets from a vault to a given yaml or json file",
 		Run: func(cmd *cobra.Command, args []string) {
-			var envSecretKey *crypto.SecretKey
-			if envSecretKeyString, err := keystore.GetSecretKeyFromEnvar(); err == nil {
-				if envSecretKey, err = crypto.SecretKeyFromString(envSecretKeyString); err != nil {
-					PrintErrorAndExit(err)
-				}
+			envSecretKey, err := secretkeystore.GetSecretKey()
+			if err != nil {
+				exitOnError(err)
 			}
 			vaultFiles, err := cmd.Flags().GetStringSlice(vaultFileFlag.name)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			files, err := cmd.Flags().GetStringSlice(secretRefFileFlag.name)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			previewOnly := false
 			if len(vaultFiles) > 1 || len(files) > 1 {
@@ -179,16 +171,16 @@ func secretDerefCommand() *cobra.Command {
 			for _, vaultFile := range vaultFiles {
 				vault, err := vaults.Get(vaultFile)
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				err = vault.Unlock(*envSecretKey)
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				for _, file := range files {
 					result, err := vault.DeRefSecrets(file, previewOnly)
 					if err != nil {
-						PrintErrorAndExit(err)
+						exitOnError(err)
 					}
 					if previewOnly {
 						fmt.Println(result)
@@ -197,7 +189,7 @@ func secretDerefCommand() *cobra.Command {
 					}
 				}
 			}
-			os.Exit(0)
+			safeExit()
 		},
 	}
 	secretDerefCmd.Flags().StringSliceP(vaultFileFlag.name, vaultFileFlag.shorthand, []string{}, vaultFileFlag.usage)

@@ -2,12 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shibme/slv/core/crypto"
-	"github.com/shibme/slv/core/keystore"
 	"github.com/shibme/slv/core/profiles"
+	"github.com/shibme/slv/core/secretkeystore"
 	"github.com/shibme/slv/core/vaults"
 	"github.com/spf13/cobra"
 )
@@ -40,35 +39,35 @@ func vaultNewCommand() *cobra.Command {
 			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
 			publicKeyStrings, err := cmd.Flags().GetStringSlice(vaultAccessPublicKeysFlag.name)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			query := cmd.Flag(envSearchFlag.name).Value.String()
 			if len(publicKeyStrings) == 0 && query == "" {
-				PrintErrorAndExit(fmt.Errorf("either --" + envSearchFlag.name +
+				exitOnError(fmt.Errorf("either --" + envSearchFlag.name +
 					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
 			}
 			var publicKeys []crypto.PublicKey
 			for _, publicKeyString := range publicKeyStrings {
 				publicKey, err := crypto.PublicKeyFromString(publicKeyString)
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
 			if query != "" {
 				prof, err := profiles.GetDefaultProfile()
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				envManifest, err := prof.GetEnvManifest()
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				for _, env := range envManifest.SearchEnv(query) {
 					publicKeys = append(publicKeys, env.PublicKey)
 				}
 				if len(publicKeys) == 0 {
-					PrintErrorAndExit(fmt.Errorf("no matching environments found for search query: " + query))
+					exitOnError(fmt.Errorf("no matching environments found for search query: " + query))
 				}
 			}
 			enableHash, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.name)
@@ -78,10 +77,10 @@ func vaultNewCommand() *cobra.Command {
 			}
 			_, err = vaults.New(vaultFile, hashLength, publicKeys...)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			fmt.Println("Created vault:", color.GreenString(vaultFile))
-			os.Exit(0)
+			safeExit()
 		},
 	}
 	vaultNewCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
@@ -100,46 +99,42 @@ func vaultShareCommand() *cobra.Command {
 		Use:   "share",
 		Short: "Shares a vault with another environment or group",
 		Run: func(cmd *cobra.Command, args []string) {
-			var envSecretKey *crypto.SecretKey
-			envSecretKeyString, err := keystore.GetSecretKeyFromEnvar()
-			if err == nil {
-				envSecretKey, err = crypto.SecretKeyFromString(envSecretKeyString)
-			}
+			envSecretKey, err := secretkeystore.GetSecretKey()
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
 			publicKeyStrings, err := cmd.Flags().GetStringSlice(vaultAccessPublicKeysFlag.name)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			query := cmd.Flag(envSearchFlag.name).Value.String()
 			if len(publicKeyStrings) == 0 && query == "" {
-				PrintErrorAndExit(fmt.Errorf("either --" + envSearchFlag.name +
+				exitOnError(fmt.Errorf("either --" + envSearchFlag.name +
 					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
 			}
 			var publicKeys []crypto.PublicKey
 			for _, publicKeyString := range publicKeyStrings {
 				publicKey, err := crypto.PublicKeyFromString(publicKeyString)
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
 			if query != "" {
 				prof, err := profiles.GetDefaultProfile()
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				envManifest, err := prof.GetEnvManifest()
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 				for _, env := range envManifest.SearchEnv(query) {
 					publicKeys = append(publicKeys, env.PublicKey)
 				}
 				if len(publicKeys) == 0 {
-					PrintErrorAndExit(fmt.Errorf("no matching environments found for search query: " + query))
+					exitOnError(fmt.Errorf("no matching environments found for search query: " + query))
 				}
 			}
 			vault, err := vaults.Get(vaultFile)
@@ -153,11 +148,11 @@ func vaultShareCommand() *cobra.Command {
 					}
 					if err == nil {
 						fmt.Println("Shared vault:", color.GreenString(vaultFile))
-						os.Exit(0)
+						safeExit()
 					}
 				}
 			}
-			PrintErrorAndExit(err)
+			exitOnError(err)
 		},
 	}
 	vaultShareCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)

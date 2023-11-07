@@ -28,14 +28,6 @@ func (eType *EnvType) isValid() bool {
 	return *eType == SERVICE || *eType == USER || *eType == ROOT
 }
 
-func NewEnvironment(name, email string, envType EnvType) (env *Environment, secretKey *crypto.SecretKey, err error) {
-	secretKey, err = crypto.NewSecretKey(EnvironmentKey)
-	if err == nil {
-		env, err = NewEnvironmentForSecretKey(name, email, envType, secretKey)
-	}
-	return
-}
-
 func NewEnvironmentForSecretKey(name, email string, envType EnvType, secretKey *crypto.SecretKey) (*Environment, error) {
 	if !envType.isValid() {
 		return nil, ErrInvalidEnvironmentType
@@ -52,6 +44,23 @@ func NewEnvironmentForSecretKey(name, email string, envType EnvType, secretKey *
 			EnvType:   envType,
 		},
 	}, nil
+}
+
+func NewEnvironment(name, email string, envType EnvType) (env *Environment, secretKey *crypto.SecretKey, err error) {
+	secretKey, err = crypto.NewSecretKey(EnvironmentKey)
+	if err == nil {
+		env, err = NewEnvironmentForSecretKey(name, email, envType, secretKey)
+	}
+	return
+}
+
+func NewEnvironmentWithAccessKey(name, email string, envType EnvType, accessType, accessRef string, rsaPublicKey []byte) (env *Environment, accessKey *AccessKey, err error) {
+	var secretKey *crypto.SecretKey
+	env, secretKey, err = NewEnvironment(name, email, envType)
+	if err == nil {
+		accessKey, err = newAccessKeyForSecretKey(accessType, accessRef, secretKey, rsaPublicKey)
+	}
+	return
 }
 
 func (env *Environment) Id() string {

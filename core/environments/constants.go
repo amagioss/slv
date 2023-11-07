@@ -7,12 +7,13 @@ import (
 )
 
 const (
-	envDefAbbrev                  = "EDS" // Environment Definition Serialized
-	EnvironmentKey crypto.KeyType = 'E'
-	RootKey        crypto.KeyType = 'R'
-	USER           EnvType        = "user"
-	SERVICE        EnvType        = "service"
-	ROOT           EnvType        = "root"
+	envDefAbbrev                         = "EDS" // Environment Definition Serialized
+	envAccessKeyDefAbbrev                = "EAK" // Environment Access Key
+	EnvironmentKey        crypto.KeyType = 'E'
+	RootKey               crypto.KeyType = 'R'
+	USER                  EnvType        = "user"
+	SERVICE               EnvType        = "service"
+	ROOT                  EnvType        = "root"
 )
 
 var ErrInvalidEnvDef = errors.New("invalid environment definition")
@@ -22,3 +23,5 @@ var ErrManifestPathExistsAlready = errors.New("manifest path exists already")
 var ErrManifestNotFound = errors.New("manifest not found")
 var ErrWritingManifest = errors.New("error in writing manifest")
 var ErrManifestRootExistsAlready = errors.New("error root exists already in manifest")
+var ErrInvalidAccessKeyDef = errors.New("invalid access key definition")
+var ErrInvalidRSAPublicKey = errors.New("invalid RSA public key")

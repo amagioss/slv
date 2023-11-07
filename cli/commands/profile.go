@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shibme/slv/core/profiles"
@@ -41,10 +40,9 @@ func profileNewCommand() *cobra.Command {
 			err := profiles.New(name)
 			if err == nil {
 				fmt.Println("Created profile: ", color.GreenString(name))
-				os.Exit(0)
+				safeExit()
 			} else {
-				fmt.Fprintln(os.Stderr, err.Error())
-				os.Exit(1)
+				exitOnError(err)
 			}
 		},
 	}
@@ -63,8 +61,7 @@ func profileListCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			profileNames, err := profiles.List()
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				exitOnError(err)
 			} else {
 				defaultProfileName, _ := profiles.GetDefaultProfileName()
 				for _, profileName := range profileNames {
@@ -91,17 +88,17 @@ func profileDefaultCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			profileNames, err := profiles.List()
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			name, _ := cmd.Flags().GetString(profileNameFlag.name)
 			for _, profileName := range profileNames {
 				if profileName == name {
 					profiles.SetDefault(name)
 					fmt.Printf("Successfully set %s as default profile\n", color.GreenString(name))
-					os.Exit(0)
+					safeExit()
 				}
 			}
-			PrintErrorAndExit(fmt.Errorf("profile %s not found", name))
+			exitOnError(fmt.Errorf("profile %s not found", name))
 		},
 	}
 	profileSetCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
@@ -120,7 +117,7 @@ func profileAddEnvCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			envdefs, err := cmd.Flags().GetStringSlice(profileEnvDefFlag.name)
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			profileName := cmd.Flag(profileNameFlag.name).Value.String()
 			var prof *profiles.Profile
@@ -130,16 +127,16 @@ func profileAddEnvCommand() *cobra.Command {
 				prof, err = profiles.GetDefaultProfile()
 			}
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			for _, envdef := range envdefs {
 				err = prof.AddEnvDef(envdef)
 				if err != nil {
-					PrintErrorAndExit(err)
+					exitOnError(err)
 				}
 			}
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 		},
 	}
@@ -167,11 +164,11 @@ func profileInitRootCommand() *cobra.Command {
 				prof, err = profiles.GetDefaultProfile()
 			}
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			secretKey, err := prof.InitRoot()
 			if err != nil {
-				PrintErrorAndExit(err)
+				exitOnError(err)
 			}
 			fmt.Println("Root environment initialized with secret key:", secretKey)
 		},

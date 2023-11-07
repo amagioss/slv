@@ -10,7 +10,7 @@ func WriteToYAML(filePath string, data interface{}) error {
 	bytes, err := yaml.Marshal(data)
 	bytes = append([]byte(yamlNotice), bytes...)
 	if err == nil {
-		if err = os.WriteFile(filePath, bytes, 0644); err != nil {
+		if err = WriteToFile(filePath, bytes); err != nil {
 			return err
 		}
 	}
@@ -29,9 +29,4 @@ func ReadFromYAML(filePath string, out interface{}) error {
 
 func WriteToFile(filePath string, content []byte) error {
 	return os.WriteFile(filePath, content, 0644)
-}
-
-func ReadFromFile(filePath string) ([]byte, error) {
-	content, err := os.ReadFile(filePath)
-	return content, err
 }
