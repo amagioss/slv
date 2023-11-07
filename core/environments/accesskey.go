@@ -13,33 +13,32 @@ import (
 	"github.com/shibme/slv/core/crypto"
 )
 
-type AccessKey struct {
-	*accessKey
+type EnvProviderContext struct {
+	*envProviderContext
 }
 
-type accessKey struct {
-	Accessor        string `json:"type"`
-	Ref             string `json:"ref"`
+type envProviderContext struct {
+	ProviderType    string `json:"type"`
+	Id              string `json:"id"`
 	SealedSecretKey []byte `json:"ssk"`
 }
 
-func AccessKeyFromDefString(accessKeyDef string) (ak *AccessKey, err error) {
-	sliced := strings.Split(accessKeyDef, "_")
-	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envAccessKeyDefAbbrev {
-		return nil, ErrInvalidAccessKeyDef
+func EnvProviderContextFromStringData(envProviderContextStringData string) (epc *EnvProviderContext, err error) {
+	sliced := strings.Split(envProviderContextStringData, "_")
+	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envProviderContextAbbrev {
+		return nil, ErrInvalidEnvProviderContextData
 	}
-	accessKey := new(accessKey)
-	err = commons.Deserialize(sliced[2], &accessKey)
+	envProviderContext := new(envProviderContext)
+	err = commons.Deserialize(sliced[2], &envProviderContext)
 	if err == nil {
-		ak = &AccessKey{accessKey}
+		epc = &EnvProviderContext{envProviderContext}
 	}
 	return
 }
 
-func newAccessKeyForSecretKey(accessor string, ref string, secretKey *crypto.SecretKey, rsaPublicKey []byte) (ak *AccessKey, err error) {
-	var sealedSecretKey []byte
-
+func newEnvProviderContextForSecretKey(providerType string, id string, secretKey *crypto.SecretKey, rsaPublicKey []byte) (epc *EnvProviderContext, err error) {
 	//Encrypting Environment Secret Key with RSA OAEP SHA256
+	var sealedSecretKey []byte
 	block, _ := pem.Decode(rsaPublicKey)
 	if block == nil {
 		return nil, ErrInvalidRSAPublicKey
@@ -53,12 +52,11 @@ func newAccessKeyForSecretKey(accessor string, ref string, secretKey *crypto.Sec
 		return nil, ErrInvalidRSAPublicKey
 	}
 	sealedSecretKey, err = rsa.EncryptOAEP(sha256.New(), rand.Reader, rsaPub, secretKey.Bytes(), []byte(""))
-
 	if err == nil {
-		ak = &AccessKey{
-			accessKey: &accessKey{
-				Accessor:        accessor,
-				Ref:             ref,
+		epc = &EnvProviderContext{
+			envProviderContext: &envProviderContext{
+				ProviderType:    providerType,
+				Id:              id,
 				SealedSecretKey: sealedSecretKey,
 			},
 		}
@@ -66,22 +64,22 @@ func newAccessKeyForSecretKey(accessor string, ref string, secretKey *crypto.Sec
 	return
 }
 
-func (ak AccessKey) String() (string, error) {
-	data, err := commons.Serialize(*ak.accessKey)
+func (epc EnvProviderContext) String() (string, error) {
+	data, err := commons.Serialize(*epc.envProviderContext)
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s_%s_%s", commons.SLV, envAccessKeyDefAbbrev, data), nil
+	return fmt.Sprintf("%s_%s_%s", commons.SLV, envProviderContextAbbrev, data), nil
 }
 
-func (ak *AccessKey) Accessor() string {
-	return ak.accessKey.Accessor
+func (epc *EnvProviderContext) Type() string {
+	return epc.envProviderContext.ProviderType
 }
 
-func (ak *AccessKey) Ref() string {
-	return ak.accessKey.Ref
+func (epc *EnvProviderContext) Id() string {
+	return epc.envProviderContext.Id
 }
 
-func (ak *AccessKey) SealedSecretKey() []byte {
-	return ak.accessKey.SealedSecretKey
+func (epc *EnvProviderContext) SealedSecretKey() []byte {
+	return epc.envProviderContext.SealedSecretKey
 }

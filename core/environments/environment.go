@@ -17,11 +17,12 @@ type Environment struct {
 }
 
 type environment struct {
-	PublicKey crypto.PublicKey `yaml:"publicKey"`
-	Name      string           `yaml:"name"`
-	Email     string           `yaml:"email"`
-	EnvType   EnvType          `yaml:"type"`
-	Tags      []string         `yaml:"tags"`
+	PublicKey              crypto.PublicKey `yaml:"publicKey"`
+	Name                   string           `yaml:"name"`
+	Email                  string           `yaml:"email"`
+	EnvType                EnvType          `yaml:"type"`
+	Tags                   []string         `yaml:"tags"`
+	EnvProviderContextData string           `yaml:"envProviderContext,omitempty"`
 }
 
 func (eType *EnvType) isValid() bool {
@@ -54,13 +55,21 @@ func NewEnvironment(name, email string, envType EnvType) (env *Environment, secr
 	return
 }
 
-func NewEnvironmentWithAccessKey(name, email string, envType EnvType, accessType, accessRef string, rsaPublicKey []byte) (env *Environment, accessKey *AccessKey, err error) {
-	var secretKey *crypto.SecretKey
-	env, secretKey, err = NewEnvironment(name, email, envType)
-	if err == nil {
-		accessKey, err = newAccessKeyForSecretKey(accessType, accessRef, secretKey, rsaPublicKey)
+func NewEnvironmentWithProvider(name, email string, envType EnvType, accessType, accessRef string, rsaPublicKey []byte) (*Environment, error) {
+	env, secretKey, err := NewEnvironment(name, email, envType)
+	if err != nil {
+		return nil, err
 	}
-	return
+	envProviderContext, err := newEnvProviderContextForSecretKey(accessType, accessRef, secretKey, rsaPublicKey)
+	if err != nil {
+		return nil, err
+	}
+	envProviderContextData, err := envProviderContext.String()
+	if err != nil {
+		return nil, err
+	}
+	env.EnvProviderContextData = envProviderContextData
+	return env, nil
 }
 
 func (env *Environment) Id() string {
@@ -73,7 +82,7 @@ func (env *Environment) AddTags(tags ...string) {
 
 func FromEnvDef(envDef string) (env *Environment, err error) {
 	sliced := strings.Split(envDef, "_")
-	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envDefAbbrev {
+	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envMetadataContextAbbrev {
 		return nil, ErrInvalidEnvDef
 	}
 	err = commons.Deserialize(sliced[2], &env)
@@ -85,7 +94,7 @@ func (env *Environment) ToEnvDef() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s_%s_%s", commons.SLV, envDefAbbrev, data), nil
+	return fmt.Sprintf("%s_%s_%s", commons.SLV, envMetadataContextAbbrev, data), nil
 }
 
 func (env Environment) MarshalYAML() (interface{}, error) {

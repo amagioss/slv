@@ -30,14 +30,19 @@ func envCommand() *cobra.Command {
 	return envCmd
 }
 
-func showEnv(env environments.Environment) {
+func showEnv(env environments.Environment, includeMetadataContext bool) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintln(w, "ID (Public Key):\t", color.YellowString(env.PublicKey.String()))
+	fmt.Fprintln(w, "ID (Public Key):\t", env.PublicKey.String())
 	fmt.Fprintln(w, "Name:\t", env.Name)
 	fmt.Fprintln(w, "Email:\t", env.Email)
 	fmt.Fprintln(w, "Tags:\t", env.Tags)
-	if envDef, err := env.ToEnvDef(); err == nil {
-		fmt.Fprintln(w, "Environment Definition:\t", envDef)
+	if env.EnvProviderContextData != "" {
+		fmt.Fprintln(w, "Env Provider Context:\t", env.EnvProviderContextData)
+	}
+	if includeMetadataContext {
+		if envDef, err := env.ToEnvDef(); err == nil {
+			fmt.Fprintln(w, "\nEnv Metadata Context:\t", color.CyanString(envDef))
+		}
 	}
 	w.Flush()
 }
@@ -60,15 +65,14 @@ func envNewCommand() *cobra.Command {
 			envType := environments.SERVICE
 
 			kmsType, _ := cmd.Flags().GetString(envKMSTypeFlag.name)
-			kmsRef, _ := cmd.Flags().GetString(envKMSRefFlag.name)
+			kmsRef, _ := cmd.Flags().GetString(envKMSIdFlag.name)
 			kmsPublicKeyFile, _ := cmd.Flags().GetString(envKMSPemFlag.name)
 			var env *environments.Environment
 			var secretKey *crypto.SecretKey
-			var accessKey *environments.AccessKey
 			if kmsType != "" && kmsRef != "" && kmsPublicKeyFile != "" {
 				var rsaPublicKey []byte
 				if rsaPublicKey, err = os.ReadFile(kmsPublicKeyFile); err == nil {
-					env, accessKey, err = secretkeystore.NewEnvForKMS(name, email, envType, kmsType, kmsRef, rsaPublicKey)
+					env, err = secretkeystore.NewEnvForKMS(name, email, envType, kmsType, kmsRef, rsaPublicKey)
 				}
 				if err != nil {
 					exitOnError(err)
@@ -84,15 +88,9 @@ func envNewCommand() *cobra.Command {
 			}
 
 			env.AddTags(tags...)
-			showEnv(*env)
+			showEnv(*env, true)
 			if secretKey != nil {
 				fmt.Println("\nSecret Key:\t", color.HiBlackString(secretKey.String()))
-			} else if accessKey != nil {
-				accessKeyDef, err := accessKey.String()
-				if err != nil {
-					exitOnError(err)
-				}
-				fmt.Println("\nAccess Key:\t", color.HiBlackString(accessKeyDef))
 			}
 
 			// Adding env to a specified profile
@@ -117,7 +115,7 @@ func envNewCommand() *cobra.Command {
 	envNewCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
 	envNewCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
 	envNewCmd.Flags().StringP(envKMSTypeFlag.name, envKMSTypeFlag.shorthand, "", envKMSTypeFlag.usage)
-	envNewCmd.Flags().StringP(envKMSRefFlag.name, envKMSRefFlag.shorthand, "", envKMSRefFlag.usage)
+	envNewCmd.Flags().StringP(envKMSIdFlag.name, envKMSIdFlag.shorthand, "", envKMSIdFlag.usage)
 	envNewCmd.Flags().StringP(envKMSPemFlag.name, envKMSPemFlag.shorthand, "", envKMSPemFlag.usage)
 	envNewCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
 	envNewCmd.Flags().BoolP(envSelfFlag.name, envSelfFlag.shorthand, false, envSelfFlag.usage)
@@ -156,7 +154,7 @@ func envListCommand() *cobra.Command {
 				envs = envManifest.ListEnv()
 			}
 			for _, env := range envs {
-				showEnv(*env)
+				showEnv(*env, false)
 				fmt.Println()
 			}
 			safeExit()

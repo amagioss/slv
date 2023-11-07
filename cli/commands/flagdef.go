@@ -53,17 +53,17 @@ var envTagsFlag = FlagDef{
 
 var envKMSTypeFlag = FlagDef{
 	name:  "kms-type",
-	usage: "Used to specify a KMS type",
+	usage: "KMS provider type",
 }
 
-var envKMSRefFlag = FlagDef{
-	name:  "kms-ref",
-	usage: "Used to specify some reference to a KMS key",
+var envKMSIdFlag = FlagDef{
+	name:  "kms-id",
+	usage: "KMS provider ID",
 }
 
 var envKMSPemFlag = FlagDef{
 	name:  "kms-pem",
-	usage: "Used to specify KMS public key pem file",
+	usage: "KMS public key pem file [Use RSA 4096]",
 }
 
 var envSelfFlag = FlagDef{

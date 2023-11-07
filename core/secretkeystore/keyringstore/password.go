@@ -46,7 +46,7 @@ func getSalt() (salt []byte, err error) {
 }
 
 func getPassphraseFromEnvar() (string, error) {
-	passphrase := os.Getenv(slvPassphraseEnvarName)
+	passphrase := os.Getenv(slvEnvPasswordEnvarName)
 	if passphrase == "" {
 		return "", ErrPassphraseNotSet
 	}
