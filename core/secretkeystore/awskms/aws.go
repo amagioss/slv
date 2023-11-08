@@ -3,7 +3,9 @@ package awskms
 import (
 	"errors"
 	"regexp"
+	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/shibme/slv/core/commons"
@@ -19,23 +21,38 @@ const (
 
 var ErrInvalidAWSKMSARN = errors.New("invalid AWS KMS ARN")
 
-func NewEnvironment(name, email string, envType environments.EnvType, arn string, rsa4096PublicKey []byte) (env *environments.Environment, err error) {
+func validateAWSARN(arn string) (err error) {
 	validARN, _ := regexp.MatchString(awsKMSARNPattern, arn)
 	if !validARN {
-		return nil, ErrInvalidAWSKMSARN
+		err = ErrInvalidAWSKMSARN
+	}
+	return
+}
+
+func NewEnvironment(name, email string, envType environments.EnvType, arn string, rsa4096PublicKey []byte) (env *environments.Environment, err error) {
+	if err = validateAWSARN(arn); err != nil {
+		return nil, err
 	}
 	return environments.NewEnvironmentWithProvider(name, email, envType, AccessSourceAWS, arn, rsa4096PublicKey)
 }
 
 func GetSecretKeyUsingAWSKMS(envProviderContext *environments.EnvProviderContext) (secretKey *crypto.SecretKey, err error) {
-	awsSession, err := session.NewSession()
+	arn := envProviderContext.Id()
+	if err = validateAWSARN(arn); err != nil {
+		return nil, err
+	}
+	arnParts := strings.Split(arn, ":")
+	region := arnParts[3]
+	awsSession, err := session.NewSession(&aws.Config{
+		Region: aws.String(region),
+	})
 	if err != nil {
 		return nil, err
 	}
 	kmsClient := kms.New(awsSession)
 	input := &kms.DecryptInput{
 		CiphertextBlob:      envProviderContext.SealedSecretKey(),
-		KeyId:               commons.String(envProviderContext.Id()),
+		KeyId:               commons.String(arn),
 		EncryptionAlgorithm: commons.String(awsKMSEncryptionAlgorithm),
 	}
 	result, err := kmsClient.Decrypt(input)
