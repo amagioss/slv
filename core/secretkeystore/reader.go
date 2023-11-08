@@ -22,7 +22,9 @@ func GetSecretKey() (*crypto.SecretKey, error) {
 				return nil, err
 			}
 		}
-
+	}
+	if secretKey == nil && err == nil {
+		err = ErrEnvironmentAccessNotFound
 	}
 	return secretKey, err
 }
