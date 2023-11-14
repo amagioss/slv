@@ -64,7 +64,7 @@ func GetManifest(path string) (settings *Settings, err error) {
 }
 
 func (settings *Settings) commit() error {
-	if commons.WriteToYAML(*settings.path, settings) != nil {
+	if commons.WriteToYAML(*settings.path, "", settings) != nil {
 		return ErrWritingManifest
 	}
 	return nil

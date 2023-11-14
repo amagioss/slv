@@ -58,8 +58,8 @@ func (publicKey *PublicKey) encrypt(data []byte) (ciphd *ciphered, err error) {
 		ciphd = &ciphered{
 			version:     publicKey.version,
 			keyType:     publicKey.keyType,
-			ciphertext:  &ciphertext,
 			pubKeyBytes: &pubKeyBytes,
+			ciphertext:  &ciphertext,
 		}
 	}
 	return
@@ -94,8 +94,4 @@ func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint32) (se
 		}
 	}
 	return
-}
-
-func (publicKey *PublicKey) EncryptSecretString(str string, hashLength *uint32) (sealedSecret *SealedSecret, err error) {
-	return publicKey.EncryptSecret([]byte(str), hashLength)
 }

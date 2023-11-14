@@ -14,7 +14,6 @@ type EnvManifest struct {
 }
 
 type manifest struct {
-	Version      uint8                   `yaml:"version"`
 	Root         *Root                   `yaml:"root,omitempty"`
 	Environments map[string]*Environment `yaml:"environments,omitempty"`
 }
@@ -32,10 +31,8 @@ func NewManifest(path string) (envManifest *EnvManifest, err error) {
 		return nil, ErrManifestPathExistsAlready
 	}
 	envManifest = &EnvManifest{
-		path: &path,
-		manifest: &manifest{
-			Version: commons.Version,
-		},
+		path:     &path,
+		manifest: new(manifest),
 	}
 	err = envManifest.commit()
 	if err != nil {
@@ -57,7 +54,7 @@ func GetManifest(path string) (envManifest *EnvManifest, err error) {
 }
 
 func (envManifest *EnvManifest) commit() error {
-	if commons.WriteToYAML(*envManifest.path, envManifest) != nil {
+	if commons.WriteToYAML(*envManifest.path, "", envManifest) != nil {
 		return ErrWritingManifest
 	}
 	return nil

@@ -7,7 +7,7 @@ import (
 )
 
 var Version = "dev"
-var AppName = "app"
+var AppName = "slv"
 
 func showVersionInfo() {
 	fmt.Println(AppName, Version)

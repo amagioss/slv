@@ -4,7 +4,7 @@ import "errors"
 
 const (
 	slvSecreKeyEnvarName        = "SLV_SECRET_KEY"
-	slvProviderContextEnvarName = "SLV_PROVIDER_CONTEXT"
+	slvProviderContextEnvarName = "SLV_PROVIDER_DATA"
 )
 
 var ErrInvalidEnvProviderType = errors.New("invalid environment provider type")

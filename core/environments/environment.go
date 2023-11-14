@@ -17,12 +17,12 @@ type Environment struct {
 }
 
 type environment struct {
-	PublicKey              crypto.PublicKey `yaml:"publicKey"`
-	Name                   string           `yaml:"name"`
-	Email                  string           `yaml:"email"`
-	EnvType                EnvType          `yaml:"type"`
-	Tags                   []string         `yaml:"tags"`
-	EnvProviderContextData string           `yaml:"envProviderContext,omitempty"`
+	PublicKey    crypto.PublicKey `yaml:"publicKey"`
+	Name         string           `yaml:"name"`
+	Email        string           `yaml:"email"`
+	EnvType      EnvType          `yaml:"type"`
+	Tags         []string         `yaml:"tags"`
+	ProviderData string           `yaml:"providerData,omitempty"`
 }
 
 func (eType *EnvType) isValid() bool {
@@ -60,7 +60,7 @@ func NewEnvironmentWithProvider(name, email string, envType EnvType, accessType,
 	if err != nil {
 		return nil, err
 	}
-	envProviderContext, err := newEnvProviderContextForSecretKey(accessType, accessRef, secretKey, rsaPublicKey)
+	envProviderContext, err := newProviderDataForSecretKey(accessType, accessRef, secretKey, rsaPublicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func NewEnvironmentWithProvider(name, email string, envType EnvType, accessType,
 	if err != nil {
 		return nil, err
 	}
-	env.EnvProviderContextData = envProviderContextData
+	env.ProviderData = envProviderContextData
 	return env, nil
 }
 
@@ -82,7 +82,7 @@ func (env *Environment) AddTags(tags ...string) {
 
 func FromEnvDef(envDef string) (env *Environment, err error) {
 	sliced := strings.Split(envDef, "_")
-	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envMetadataContextAbbrev {
+	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envDataStringAbbrev {
 		return nil, ErrInvalidEnvDef
 	}
 	err = commons.Deserialize(sliced[2], &env)
@@ -94,7 +94,7 @@ func (env *Environment) ToEnvDef() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s_%s_%s", commons.SLV, envMetadataContextAbbrev, data), nil
+	return fmt.Sprintf("%s_%s_%s", commons.SLV, envDataStringAbbrev, data), nil
 }
 
 func (env Environment) MarshalYAML() (interface{}, error) {

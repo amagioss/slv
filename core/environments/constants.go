@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	envMetadataContextAbbrev                = "EMC" // Environment Metadata Context
-	envProviderContextAbbrev                = "EPC" // Environment Provider Context
+	envDataStringAbbrev                     = "EDS" // Environment Data String
+	providerDataStringAbbrev                = "PDS" // Provider Data String
 	EnvironmentKey           crypto.KeyType = 'E'
 	RootKey                  crypto.KeyType = 'R'
 	USER                     EnvType        = "user"

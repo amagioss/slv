@@ -16,14 +16,14 @@ func NewEnvForKMS(name, email string, envType environments.EnvType, kmsType, kms
 	return
 }
 
-func getSecretKeyFromEnvProviderContext(envProviderContextData string) (secretKey *crypto.SecretKey, err error) {
-	envProviderContext, err := environments.EnvProviderContextFromStringData(envProviderContextData)
+func getSecretKeyFromProviderDataString(providerDataString string) (secretKey *crypto.SecretKey, err error) {
+	providerData, err := environments.ProviderDataFromString(providerDataString)
 	if err != nil {
 		return nil, err
 	}
-	switch envProviderContext.Type() {
+	switch providerData.Type() {
 	case awskms.AccessSourceAWS:
-		secretKey, err = awskms.GetSecretKeyUsingAWSKMS(envProviderContext)
+		secretKey, err = awskms.GetSecretKeyUsingAWSKMS(providerData)
 	default:
 		err = ErrInvalidEnvProviderType
 	}

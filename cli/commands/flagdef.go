@@ -117,10 +117,21 @@ var secretValueFlag = FlagDef{
 	usage:     "Secret to be added to the vault",
 }
 
+var secretForceUpdateFlag = FlagDef{
+	name:  "force",
+	usage: "Replaces the secret if it exists already",
+}
+
 var secretRefFileFlag = FlagDef{
 	name:      "file",
 	shorthand: "f",
 	usage:     "Path to the YAML/JSON file",
+}
+
+var secretRefTypeFlag = FlagDef{
+	name:      "type",
+	shorthand: "t",
+	usage:     "Data format to be considered for the file to be referenced",
 }
 
 var secretRefPreviewOnlyFlag = FlagDef{

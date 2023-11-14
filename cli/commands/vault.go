@@ -43,8 +43,8 @@ func vaultNewCommand() *cobra.Command {
 			}
 			query := cmd.Flag(envSearchFlag.name).Value.String()
 			if len(publicKeyStrings) == 0 && query == "" {
-				exitOnError(fmt.Errorf("either --" + envSearchFlag.name +
-					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
+				exitOnErrorWithMessage("either --" + envSearchFlag.name +
+					" or --" + vaultAccessPublicKeysFlag.name + " must be specified")
 			}
 			var publicKeys []crypto.PublicKey
 			for _, publicKeyString := range publicKeyStrings {
@@ -142,7 +142,7 @@ func vaultShareCommand() *cobra.Command {
 				err = vault.Unlock(*envSecretKey)
 				if err == nil {
 					for _, pubKey := range publicKeys {
-						if _, err = vault.ShareAccessToKey(pubKey); err != nil {
+						if _, err = vault.Share(pubKey); err != nil {
 							break
 						}
 					}

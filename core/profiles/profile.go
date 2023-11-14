@@ -40,7 +40,7 @@ func (profile *Profile) UnmarshalYAML(value *yaml.Node) (err error) {
 }
 
 func (profile *Profile) commit() error {
-	if commons.WriteToYAML(*profile.path, profile) != nil {
+	if commons.WriteToYAML(*profile.path, "", profile) != nil {
 		return ErrWritingManifest
 	}
 	return nil

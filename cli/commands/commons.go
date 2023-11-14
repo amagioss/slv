@@ -12,6 +12,11 @@ func exitOnError(err error) {
 	erroredExit()
 }
 
+func exitOnErrorWithMessage(errMessage string) {
+	fmt.Fprintln(os.Stderr, color.RedString(errMessage))
+	erroredExit()
+}
+
 func erroredExit() {
 	os.Exit(1)
 }

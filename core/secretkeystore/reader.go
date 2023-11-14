@@ -17,7 +17,7 @@ func GetSecretKey() (*crypto.SecretKey, error) {
 	if err == nil && secretKey == nil {
 		envProviderContextData := os.Getenv(slvProviderContextEnvarName)
 		if envProviderContextData != "" {
-			secretKey, err = getSecretKeyFromEnvProviderContext(envProviderContextData)
+			secretKey, err = getSecretKeyFromProviderDataString(envProviderContextData)
 			if err != nil {
 				return nil, err
 			}

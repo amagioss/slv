@@ -4,11 +4,11 @@ go 1.20
 
 require (
 	github.com/99designs/keyring v1.2.2
-	github.com/aws/aws-sdk-go v1.47.5
+	github.com/aws/aws-sdk-go v1.47.11
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/fatih/color v1.16.0
 	github.com/spf13/cobra v1.8.0
-	golang.org/x/crypto v0.14.0
+	golang.org/x/crypto v0.15.0
 )
 
 require (

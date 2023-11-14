@@ -6,9 +6,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func WriteToYAML(filePath string, data interface{}) error {
+func WriteToYAML(filePath, notice string, data interface{}) error {
 	bytes, err := yaml.Marshal(data)
-	bytes = append([]byte(yamlNotice), bytes...)
+	bytes = append([]byte(notice), bytes...)
+	bytes = append([]byte(slvYamlNotice), bytes...)
 	if err == nil {
 		if err = WriteToFile(filePath, bytes); err != nil {
 			return err

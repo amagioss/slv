@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/shibme/slv/core/commons"
@@ -11,28 +12,24 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type secrets struct {
-	Direct     map[string]*crypto.SealedSecret `yaml:"direct,omitempty"`
-	Referenced map[string]*crypto.SealedSecret `yaml:"referenced,omitempty"`
-}
-
 type config struct {
-	Version    uint8                `yaml:"version,omitempty"`
-	PublicKey  *crypto.PublicKey    `yaml:"publicKey"`
-	HashLength *uint32              `yaml:"hashLength,omitempty"`
-	KeyWraps   []*crypto.WrappedKey `yaml:"wrappedKeys"`
+	PublicKey   *crypto.PublicKey    `yaml:"publicKey"`
+	HashLength  *uint32              `yaml:"hashLength,omitempty"`
+	WrappedKeys []*crypto.WrappedKey `yaml:"accessKeys,omitempty"`
 }
 
 type vault struct {
-	Secrets secrets `yaml:"secrets,omitempty"`
-	Config  config  `yaml:"config,omitempty"`
+	Id      string                          `yaml:"vaultId,omitempty"`
+	Secrets map[string]*crypto.SealedSecret `yaml:"secrets,omitempty"`
+	Config  config                          `yaml:"config,omitempty"`
 }
 
 type Vault struct {
 	*vault
-	path       string
-	secretKey  *crypto.SecretKey
-	unlockedBy *string
+	path                string
+	secretKey           *crypto.SecretKey
+	unlockedBy          *string
+	vaultSecretRefRegex *regexp.Regexp
 }
 
 func (vlt *Vault) Id() string {
@@ -73,7 +70,6 @@ func New(vaultFile string, hashLength uint32, publicKeys ...crypto.PublicKey) (v
 	vlt = &Vault{
 		vault: &vault{
 			Config: config{
-				Version:    commons.Version,
 				PublicKey:  vaultPublicKey,
 				HashLength: hashLen,
 			},
@@ -81,13 +77,13 @@ func New(vaultFile string, hashLength uint32, publicKeys ...crypto.PublicKey) (v
 		path:      vaultFile,
 		secretKey: vaultSecretKey,
 	}
+	vlt.vault.Id = vlt.Id()
 	for _, pubKey := range publicKeys {
-		if _, err := vlt.ShareAccessToKey(pubKey); err != nil {
+		if _, err := vlt.Share(pubKey); err != nil {
 			return nil, err
 		}
 	}
-	vlt.commit()
-	return vlt, nil
+	return vlt, vlt.commit()
 }
 
 // Returns the vault instance for a given vault file. The vault name should end with .slv
@@ -104,6 +100,7 @@ func Get(vaultFile string) (vlt *Vault, err error) {
 	if err = commons.ReadFromYAML(vlt.path, &vlt.vault); err != nil {
 		return nil, err
 	}
+	vlt.vault.Id = vlt.Id()
 	return vlt, nil
 }
 
@@ -124,7 +121,7 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
 	if err != nil || (!vlt.IsLocked() && *vlt.unlockedBy == publicKey.String()) {
 		return err
 	}
-	for _, secretKeyWrapping := range vlt.vault.Config.KeyWraps {
+	for _, secretKeyWrapping := range vlt.vault.Config.WrappedKeys {
 		decryptedKey, err := secretKey.DecryptKey(*secretKeyWrapping)
 		if err == nil {
 			vlt.secretKey = decryptedKey
@@ -137,29 +134,29 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
 }
 
 func (vlt *Vault) commit() error {
-	return commons.WriteToYAML(vlt.path, *vlt.vault)
+	return commons.WriteToYAML(vlt.path,
+		"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" to reference secrets from this vault into files\n", *vlt.vault)
 }
 
-func (vlt *Vault) GetVersion() uint8 {
-	return vlt.vault.Config.Version
+func (vlt *Vault) reset() error {
+	return commons.ReadFromYAML(vlt.path, &vlt.vault)
 }
 
-func (vlt *Vault) ShareAccessToKey(shareWithPubKey crypto.PublicKey) (shared bool, err error) {
+func (vlt *Vault) Share(publicKey crypto.PublicKey) (bool, error) {
 	if vlt.IsLocked() {
-		err = ErrVaultLocked
-		return
+		return false, ErrVaultLocked
 	}
-	if shareWithPubKey.Type() == VaultKey {
+	if publicKey.Type() == VaultKey {
 		return false, ErrVaultCannotBeSharedWithVault
 	}
-	for _, keyWrappings := range vlt.vault.Config.KeyWraps {
-		if bytes.Equal(*keyWrappings.GetKeyId(), shareWithPubKey.Id()) {
+	for _, keyWrappings := range vlt.vault.Config.WrappedKeys {
+		if bytes.Equal(*keyWrappings.GetKeyId(), publicKey.Id()) {
 			return false, nil
 		}
 	}
-	encryptedKey, err := shareWithPubKey.EncryptKey(*vlt.secretKey)
+	encryptedKey, err := publicKey.EncryptKey(*vlt.secretKey)
 	if err == nil {
-		vlt.vault.Config.KeyWraps = append(vlt.vault.Config.KeyWraps, encryptedKey)
+		vlt.vault.Config.WrappedKeys = append(vlt.vault.Config.WrappedKeys, encryptedKey)
 		err = vlt.commit()
 	}
 	return err == nil, err

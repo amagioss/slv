@@ -36,8 +36,8 @@ func NewEnvironment(name, email string, envType environments.EnvType, arn string
 	return environments.NewEnvironmentWithProvider(name, email, envType, AccessSourceAWS, arn, rsa4096PublicKey)
 }
 
-func GetSecretKeyUsingAWSKMS(envProviderContext *environments.EnvProviderContext) (secretKey *crypto.SecretKey, err error) {
-	arn := envProviderContext.Id()
+func GetSecretKeyUsingAWSKMS(providerData *environments.ProviderData) (secretKey *crypto.SecretKey, err error) {
+	arn := providerData.Ref()
 	if err = validateAWSARN(arn); err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func GetSecretKeyUsingAWSKMS(envProviderContext *environments.EnvProviderContext
 	}
 	kmsClient := kms.New(awsSession)
 	input := &kms.DecryptInput{
-		CiphertextBlob:      envProviderContext.SealedSecretKey(),
+		CiphertextBlob:      providerData.SealedKey(),
 		KeyId:               commons.String(arn),
 		EncryptionAlgorithm: commons.String(awsKMSEncryptionAlgorithm),
 	}

@@ -8,20 +8,27 @@ import (
 	"golang.org/x/crypto/curve25519"
 )
 
+func (secretKey *SecretKey) isDecipherable(ciphered *ciphered) error {
+	if *ciphered.keyType != *secretKey.keyType {
+		return ErrKeyTypeMismatch
+	}
+	if !bytes.Equal(*ciphered.pubKeyBytes, secretKey.Id()) {
+		return ErrSecretKeyMismatch
+	}
+	if ciphered.version == nil || *ciphered.version != *secretKey.version {
+		return ErrUnsupportedCryptoVersion
+	}
+	return nil
+}
+
 func (secretKey *SecretKey) decrypt(ciphered *ciphered) (data []byte, err error) {
 	encryptedBytes := *ciphered.ciphertext
 	ephemeralPubKey := encryptedBytes[:curve25519.ScalarSize]
 	encryptedBytes = encryptedBytes[curve25519.ScalarSize:]
 	nonce := encryptedBytes[:chacha20poly1305.NonceSize]
 	ciphertext := encryptedBytes[chacha20poly1305.NonceSize:]
-	if *ciphered.keyType != *secretKey.keyType {
-		return nil, ErrKeyTypeMismatch
-	}
-	if !bytes.Equal(*ciphered.pubKeyBytes, secretKey.Id()) {
-		return nil, ErrSecretKeyMismatch
-	}
-	if ciphered.version == nil || *ciphered.version != *secretKey.version {
-		return nil, ErrUnsupportedCryptoVersion
+	if err = secretKey.isDecipherable(ciphered); err != nil {
+		return nil, err
 	}
 	sharedKey, err := curve25519.X25519(*secretKey.key, ephemeralPubKey)
 	if err != nil {
