@@ -46,7 +46,7 @@ func (vlt *Vault) UnmarshalYAML(value *yaml.Node) (err error) {
 }
 
 // Returns new vault instance. The vault name should end with .vlt.slv
-func New(vaultFile string, hashLength uint32, publicKeys ...crypto.PublicKey) (vlt *Vault, err error) {
+func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...crypto.PublicKey) (vlt *Vault, err error) {
 	if !strings.HasSuffix(vaultFile, vaultFileExtension) {
 		return nil, ErrInvalidVaultFileName
 	}
@@ -79,6 +79,11 @@ func New(vaultFile string, hashLength uint32, publicKeys ...crypto.PublicKey) (v
 		secretKey: vaultSecretKey,
 	}
 	vlt.vault.Id = vlt.Id()
+	if rootPublicKey != nil {
+		if _, err := vlt.Share(*rootPublicKey); err != nil {
+			return nil, err
+		}
+	}
 	for _, pubKey := range publicKeys {
 		if _, err := vlt.Share(pubKey); err != nil {
 			return nil, err

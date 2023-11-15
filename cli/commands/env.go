@@ -37,11 +37,11 @@ func showEnv(env environments.Environment, includeMetadataContext bool) {
 	fmt.Fprintln(w, "Email:\t", env.Email)
 	fmt.Fprintln(w, "Tags:\t", env.Tags)
 	if env.ProviderData != "" {
-		fmt.Fprintln(w, "Env Provider Context:\t", env.ProviderData)
+		fmt.Fprintln(w, "Provider Data:\t", env.ProviderData)
 	}
 	if includeMetadataContext {
 		if envDef, err := env.ToEnvDef(); err == nil {
-			fmt.Fprintln(w, "\nEnv Metadata Context:\t", color.CyanString(envDef))
+			fmt.Fprintln(w, "\nEnv Data:\t", color.CyanString(envDef))
 		}
 	}
 	w.Flush()

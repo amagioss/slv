@@ -54,15 +54,15 @@ func vaultNewCommand() *cobra.Command {
 				}
 				publicKeys = append(publicKeys, *publicKey)
 			}
+			prof, err := profiles.GetDefaultProfile()
+			if err != nil {
+				exitOnError(err)
+			}
+			envManifest, err := prof.GetEnvManifest()
+			if err != nil {
+				exitOnError(err)
+			}
 			if query != "" {
-				prof, err := profiles.GetDefaultProfile()
-				if err != nil {
-					exitOnError(err)
-				}
-				envManifest, err := prof.GetEnvManifest()
-				if err != nil {
-					exitOnError(err)
-				}
 				for _, env := range envManifest.SearchEnv(query) {
 					publicKeys = append(publicKeys, env.PublicKey)
 				}
@@ -75,7 +75,8 @@ func vaultNewCommand() *cobra.Command {
 			if enableHash {
 				hashLength = 4
 			}
-			_, err = vaults.New(vaultFile, hashLength, publicKeys...)
+			rootPublicKey := envManifest.RootPublicKey()
+			_, err = vaults.New(vaultFile, hashLength, rootPublicKey, publicKeys...)
 			if err != nil {
 				exitOnError(err)
 			}

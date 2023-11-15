@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/shibme/slv/core/commons"
-	"github.com/shibme/slv/core/crypto"
 	"github.com/shibme/slv/core/environments"
 	"github.com/shibme/slv/core/settings"
 	"gopkg.in/yaml.v3"
@@ -111,15 +110,6 @@ func (profile *Profile) GetEnvManifest() (*environments.EnvManifest, error) {
 	return profile.envManifest, nil
 }
 
-func (profile *Profile) AddEnvDef(envDef string) error {
-	envManifest, err := profile.GetEnvManifest()
-	if err != nil {
-		return err
-	}
-	envManifest.AddEnvDef(envDef)
-	return nil
-}
-
 func (profile *Profile) AddEnv(env *environments.Environment) error {
 	envManifest, err := profile.GetEnvManifest()
 	if err != nil {
@@ -128,12 +118,12 @@ func (profile *Profile) AddEnv(env *environments.Environment) error {
 	return envManifest.AddEnv(env)
 }
 
-func (profile *Profile) InitRoot() (*crypto.SecretKey, error) {
+func (profile *Profile) SetRoot(env *environments.Environment) error {
 	envManifest, err := profile.GetEnvManifest()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return envManifest.InitRoot()
+	return envManifest.SetRoot(env)
 }
 
 func (profile *Profile) Sync() {

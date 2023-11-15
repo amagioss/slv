@@ -14,7 +14,7 @@ type EnvManifest struct {
 }
 
 type manifest struct {
-	Root         *Root                   `yaml:"root,omitempty"`
+	Root         *Environment            `yaml:"root,omitempty"`
 	Environments map[string]*Environment `yaml:"environments,omitempty"`
 }
 
@@ -67,20 +67,12 @@ func (envManifest *EnvManifest) RootPublicKey() *crypto.PublicKey {
 	return nil
 }
 
-func (envManifest *EnvManifest) InitRoot() (*crypto.SecretKey, error) {
+func (envManifest *EnvManifest) SetRoot(env *Environment) error {
 	if envManifest.Root != nil {
-		return nil, ErrManifestRootExistsAlready
+		return ErrRootExistsAlready
 	}
-	root, rootSecretKey, err := newRoot()
-	if err != nil {
-		return nil, err
-	}
-	envManifest.Root = root
-	err = envManifest.commit()
-	if err != nil {
-		return nil, err
-	}
-	return rootSecretKey, nil
+	envManifest.Root = env
+	return envManifest.commit()
 }
 
 func (envManifest *EnvManifest) ListEnv() (environments []*Environment) {
@@ -119,12 +111,4 @@ func (envManifest *EnvManifest) updateEnvironment(env *Environment) error {
 
 func (envManifest *EnvManifest) AddEnv(env *Environment) (err error) {
 	return envManifest.updateEnvironment(env)
-}
-
-func (envManifest *EnvManifest) AddEnvDef(envString string) (err error) {
-	environment, err := FromEnvDef(envString)
-	if err != nil {
-		return
-	}
-	return envManifest.AddEnv(environment)
 }

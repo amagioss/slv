@@ -96,13 +96,13 @@ func validateProjectVaultName(vaultName string) (err error) {
 	return
 }
 
-func (project *Project) NewVault(vaultName string, hashLength uint32, publicKeys ...crypto.PublicKey) (v *vaults.Vault, err error) {
+func (project *Project) NewVault(vaultName string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...crypto.PublicKey) (v *vaults.Vault, err error) {
 	if err = validateProjectVaultName(vaultName); err != nil {
 		return
 	}
 	simplifiedVaultName := strings.ToLower(vaultName)
 	vaultPath := filepath.Join(project.projectRoot, slvDirName, vaultsDirName, simplifiedVaultName+vaultFileExtension)
-	v, err = vaults.New(vaultPath, hashLength, publicKeys...)
+	v, err = vaults.New(vaultPath, hashLength, rootPublicKey, publicKeys...)
 	if err == nil {
 		project.vaults[vaultName] = v
 		project.vaults[simplifiedVaultName] = v

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
+	"github.com/shibme/slv/core/environments"
 	"github.com/shibme/slv/core/profiles"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +25,6 @@ func profileCommand() *cobra.Command {
 	profileCmd.AddCommand(profileDefaultCommand())
 	profileCmd.AddCommand(profileListCommand())
 	profileCmd.AddCommand(profileAddEnvCommand())
-	profileCmd.AddCommand(profileInitRootCommand())
 	return profileCmd
 }
 
@@ -129,50 +129,28 @@ func profileAddEnvCommand() *cobra.Command {
 			if err != nil {
 				exitOnError(err)
 			}
+			setAsRoot, _ := cmd.Flags().GetBool(profileSetRootEnvFlag.name)
+			if setAsRoot && len(envdefs) > 1 {
+				exitOnError(fmt.Errorf("cannot set more than one environment as root"))
+			}
 			for _, envdef := range envdefs {
-				err = prof.AddEnvDef(envdef)
+				var env *environments.Environment
+				if env, err = environments.FromEnvDef(envdef); err == nil && env != nil {
+					if setAsRoot {
+						err = prof.SetRoot(env)
+					} else {
+						err = prof.AddEnv(env)
+					}
+				}
 				if err != nil {
 					exitOnError(err)
 				}
-			}
-			if err != nil {
-				exitOnError(err)
 			}
 		},
 	}
 	envAddCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
 	envAddCmd.Flags().StringSliceP(profileEnvDefFlag.name, profileEnvDefFlag.shorthand, []string{}, profileEnvDefFlag.usage)
+	envAddCmd.Flags().Bool(profileSetRootEnvFlag.name, false, profileSetRootEnvFlag.usage)
 	envAddCmd.MarkFlagRequired(profileEnvDefFlag.name)
 	return envAddCmd
-}
-
-func profileInitRootCommand() *cobra.Command {
-	if profileInitRootCmd != nil {
-		return profileInitRootCmd
-	}
-	profileInitRootCmd = &cobra.Command{
-		Use:     "initroot",
-		Aliases: []string{"rootinit", "init-root", "root-init"},
-		Short:   "Initializes the root environment in a profile",
-		Run: func(cmd *cobra.Command, args []string) {
-			profileName := cmd.Flag(profileNameFlag.name).Value.String()
-			var prof *profiles.Profile
-			var err error
-			if profileName != "" {
-				prof, err = profiles.GetProfile(profileName)
-			} else {
-				prof, err = profiles.GetDefaultProfile()
-			}
-			if err != nil {
-				exitOnError(err)
-			}
-			secretKey, err := prof.InitRoot()
-			if err != nil {
-				exitOnError(err)
-			}
-			fmt.Println("Root environment initialized with secret key:", secretKey)
-		},
-	}
-	profileInitRootCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
-	return profileInitRootCmd
 }

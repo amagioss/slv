@@ -32,6 +32,11 @@ var profileEnvDefFlag = FlagDef{
 	usage:     "Environment definition",
 }
 
+var profileSetRootEnvFlag = FlagDef{
+	name:  "root",
+	usage: "Set the given environment as root",
+}
+
 // Env Command Flags
 var envNameFlag = FlagDef{
 	name:      "name",
