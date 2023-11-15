@@ -11,7 +11,7 @@ import (
 const (
 	vaultFileExtension                  = ".slv"
 	VaultKey             crypto.KeyType = 'V'
-	secretNamePattern                   = "[A-Za-z][A-Za-z0-9_]+[A-Za-z0-9]"
+	secretNamePattern                   = "[a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?"
 	secretRefAbbrev                     = "VSR" // VSR = Vault Secret Reference
 	vaultIdPattern                      = "[A-Za-z0-9]+"
 	secretRefPatternBase                = `\{\{\s*SLV_VSR_VAULTID\.` + secretNamePattern + `\s*\}\}`
