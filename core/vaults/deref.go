@@ -1,15 +1,16 @@
 package vaults
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
 )
 
-func (vlt *Vault) getSecretByReference(secretRef string) (secret string, err error) {
+func (vlt *Vault) getSecretByReference(secretRef string) (secret []byte, err error) {
 	sliced := strings.Split(secretRef, vlt.Id()+".")
 	if len(sliced) != 2 {
-		return "", ErrInvalidReferenceFormat
+		return nil, ErrInvalidReferenceFormat
 	}
 	secretName := strings.Trim(sliced[1], " }")
 	return vlt.GetSecret(secretName)
@@ -22,33 +23,38 @@ func (vlt *Vault) getVaultSecretRefRegex() *regexp.Regexp {
 	return vlt.vaultSecretRefRegex
 }
 
-func (vlt *Vault) deRefSecretsFromContent(content string) (string, error) {
+func (vlt *Vault) deRefSecretsFromContent(content string) ([]byte, error) {
 	vaultSecretRefRegex := vlt.getVaultSecretRefRegex()
 	secretRefs := vaultSecretRefRegex.FindAllString(content, -1)
-	for _, secretRef := range secretRefs {
-		decrypted, err := vlt.getSecretByReference(secretRef)
-		if err != nil {
-			return "", err
+	if len(secretRefs) == 1 && len(content) == len(secretRefs[0]) {
+		fmt.Println("blob is a secret reference")
+		return vlt.getSecretByReference(secretRefs[0])
+	} else {
+		for _, secretRef := range secretRefs {
+			decrypted, err := vlt.getSecretByReference(secretRef)
+			if err != nil {
+				return nil, err
+			}
+			content = strings.Replace(content, secretRef, string(decrypted), -1)
 		}
-		content = strings.Replace(content, secretRef, decrypted, -1)
 	}
-	return content, nil
+	return []byte(content), nil
 }
 
-func (vlt *Vault) DeRefSecrets(file string, previewOnly bool) (derefedContent string, err error) {
+func (vlt *Vault) DeRefSecrets(file string, previewOnly bool) (dereferncedBytes []byte, err error) {
 	if vlt.IsLocked() {
-		return "", ErrVaultLocked
+		return nil, ErrVaultLocked
 	}
 	data, err := os.ReadFile(file)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	derefedContent, err = vlt.deRefSecretsFromContent(string(data))
+	dereferncedBytes, err = vlt.deRefSecretsFromContent(string(data))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if !previewOnly {
-		err = os.WriteFile(file, []byte(derefedContent), 0644)
+		err = os.WriteFile(file, dereferncedBytes, 0644)
 	}
 	return
 }

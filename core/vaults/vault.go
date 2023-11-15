@@ -19,17 +19,18 @@ type config struct {
 }
 
 type vault struct {
-	Id      string                          `yaml:"vaultId,omitempty"`
-	Secrets map[string]*crypto.SealedSecret `yaml:"secrets,omitempty"`
-	Config  config                          `yaml:"config,omitempty"`
+	Id      string             `yaml:"vaultId,omitempty"`
+	Secrets map[string]*string `yaml:"secrets,omitempty"`
+	Config  config             `yaml:"config,omitempty"`
 }
 
 type Vault struct {
 	*vault
-	path                string
-	secretKey           *crypto.SecretKey
-	unlockedBy          *string
-	vaultSecretRefRegex *regexp.Regexp
+	path                 string
+	secretKey            *crypto.SecretKey
+	unlockedBy           *string
+	decryptedSecretCache map[string][]byte
+	vaultSecretRefRegex  *regexp.Regexp
 }
 
 func (vlt *Vault) Id() string {
@@ -109,6 +110,7 @@ func (vlt *Vault) IsLocked() bool {
 }
 
 func (vlt *Vault) Lock() {
+	vlt.clearSecretCache()
 	vlt.secretKey = nil
 }
 
@@ -139,6 +141,7 @@ func (vlt *Vault) commit() error {
 }
 
 func (vlt *Vault) reset() error {
+	vlt.clearSecretCache()
 	return commons.ReadFromYAML(vlt.path, &vlt.vault)
 }
 

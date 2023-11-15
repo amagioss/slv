@@ -90,7 +90,7 @@ func secretGetCommand() *cobra.Command {
 			if err != nil {
 				exitOnError(err)
 			}
-			fmt.Println(secret)
+			fmt.Println(string(secret))
 			safeExit()
 		},
 	}

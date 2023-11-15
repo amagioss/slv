@@ -56,7 +56,7 @@ func (sealedSecret SealedSecret) String() string {
 	}
 }
 
-func (sealedSecret *SealedSecret) fromString(sealedSecretStr string) (err error) {
+func (sealedSecret *SealedSecret) FromString(sealedSecretStr string) (err error) {
 	sliced := strings.Split(sealedSecretStr, "_")
 	if len(sliced) != 3 && len(sliced) != 4 {
 		return ErrInvalidCiphertextFormat
@@ -91,7 +91,7 @@ func (sealedSecret SealedSecret) MarshalYAML() (interface{}, error) {
 func (sealedSecret *SealedSecret) UnmarshalYAML(value *yaml.Node) (err error) {
 	var sealedSecretStr string
 	if value.Decode(&sealedSecretStr) == nil {
-		return sealedSecret.fromString(sealedSecretStr)
+		return sealedSecret.FromString(sealedSecretStr)
 	}
 	return
 }
