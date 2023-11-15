@@ -1,7 +1,6 @@
 package vaults
 
 import (
-	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -27,7 +26,6 @@ func (vlt *Vault) deRefSecretsFromContent(content string) ([]byte, error) {
 	vaultSecretRefRegex := vlt.getVaultSecretRefRegex()
 	secretRefs := vaultSecretRefRegex.FindAllString(content, -1)
 	if len(secretRefs) == 1 && len(content) == len(secretRefs[0]) {
-		fmt.Println("blob is a secret reference")
 		return vlt.getSecretByReference(secretRefs[0])
 	} else {
 		for _, secretRef := range secretRefs {
