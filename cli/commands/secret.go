@@ -46,6 +46,10 @@ func secretPutCommand() *cobra.Command {
 			if err != nil {
 				exitOnError(err)
 			}
+			forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.name)
+			if !forceUpdate && vault.SecretExists(name) {
+				exitOnErrorWithMessage("secret already exists. please use the --" + secretForceUpdateFlag.name + " flag to overwrite it.")
+			}
 			err = vault.PutSecret(name, []byte(secret))
 			if err != nil {
 				exitOnError(err)
@@ -57,6 +61,7 @@ func secretPutCommand() *cobra.Command {
 	secretPutCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
 	secretPutCmd.Flags().StringP(secretNameFlag.name, secretNameFlag.shorthand, "", secretNameFlag.usage)
 	secretPutCmd.Flags().StringP(secretValueFlag.name, secretValueFlag.shorthand, "", secretValueFlag.usage)
+	secretPutCmd.Flags().Bool(secretForceUpdateFlag.name, false, secretForceUpdateFlag.usage)
 	secretPutCmd.MarkFlagRequired(vaultFileFlag.name)
 	secretPutCmd.MarkFlagRequired(secretNameFlag.name)
 	secretPutCmd.MarkFlagRequired(secretValueFlag.name)
