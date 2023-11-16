@@ -12,6 +12,7 @@ import (
 )
 
 type Profile struct {
+	name        *string
 	dir         *string
 	path        *string
 	settings    *settings.Settings
@@ -28,6 +29,10 @@ type profile struct {
 	} `yaml:"repo,omitempty"`
 	Diff     bool      `yaml:"diff"`
 	LastSync time.Time `yaml:"lastSync,omitempty"`
+}
+
+func (profile *Profile) Name() string {
+	return *profile.name
 }
 
 func (profile Profile) MarshalYAML() (interface{}, error) {

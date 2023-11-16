@@ -58,7 +58,7 @@ var envTagsFlag = FlagDef{
 
 var envKMSTypeFlag = FlagDef{
 	name:  "kms-type",
-	usage: "KMS provider type",
+	usage: "KMS provider type [AWS, GCP, AZURE]",
 }
 
 var envKMSIdFlag = FlagDef{

@@ -14,6 +14,6 @@ func DirExists(path string) bool {
 	return err == nil && f.IsDir()
 }
 
-func String(s string) *string {
+func StringPtr(s string) *string {
 	return &s
 }

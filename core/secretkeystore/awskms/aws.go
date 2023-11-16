@@ -52,8 +52,8 @@ func GetSecretKeyUsingAWSKMS(providerData *environments.ProviderData) (secretKey
 	kmsClient := kms.New(awsSession)
 	input := &kms.DecryptInput{
 		CiphertextBlob:      providerData.SealedKey(),
-		KeyId:               commons.String(arn),
-		EncryptionAlgorithm: commons.String(awsKMSEncryptionAlgorithm),
+		KeyId:               commons.StringPtr(arn),
+		EncryptionAlgorithm: commons.StringPtr(awsKMSEncryptionAlgorithm),
 	}
 	result, err := kmsClient.Decrypt(input)
 	if err != nil {

@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/99designs/keyring v1.2.2
-	github.com/aws/aws-sdk-go v1.47.11
+	github.com/aws/aws-sdk-go v1.47.12
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/fatih/color v1.16.0
 	github.com/spf13/cobra v1.8.0

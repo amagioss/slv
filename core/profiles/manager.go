@@ -78,6 +78,7 @@ func GetProfile(profileName string) (profile *Profile, err error) {
 	if profile, err = getProfileForPath(filepath.Join(profileMgr.dir, profileName)); err != nil {
 		return nil, err
 	}
+	profile.name = commons.StringPtr(profileName)
 	profileMap[profileName] = profile
 	return
 }

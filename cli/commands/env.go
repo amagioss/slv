@@ -86,14 +86,11 @@ func envNewCommand() *cobra.Command {
 					exitOnError(err)
 				}
 			}
-
 			env.AddTags(tags...)
 			showEnv(*env, true)
 			if secretKey != nil {
 				fmt.Println("\nSecret Key:\t", color.HiBlackString(secretKey.String()))
 			}
-
-			// Adding env to a specified profile
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
 			var prof *profiles.Profile
 			if addToProfileFlag {
@@ -106,7 +103,6 @@ func envNewCommand() *cobra.Command {
 					exitOnError(err)
 				}
 			}
-
 			safeExit()
 		},
 	}
@@ -158,7 +154,6 @@ func envListCommand() *cobra.Command {
 				fmt.Println()
 			}
 			safeExit()
-
 		},
 	}
 	envListCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)

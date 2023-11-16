@@ -133,11 +133,13 @@ func profileAddEnvCommand() *cobra.Command {
 			if setAsRoot && len(envdefs) > 1 {
 				exitOnError(fmt.Errorf("cannot set more than one environment as root"))
 			}
+			var successMessage string
 			for _, envdef := range envdefs {
 				var env *environments.Environment
 				if env, err = environments.FromEnvDef(envdef); err == nil && env != nil {
 					if setAsRoot {
 						err = prof.SetRoot(env)
+						successMessage = fmt.Sprintf("Successfully set %s as root environment for profile %s", color.GreenString(env.Name), color.GreenString(prof.Name()))
 					} else {
 						err = prof.AddEnv(env)
 					}
@@ -146,6 +148,11 @@ func profileAddEnvCommand() *cobra.Command {
 					exitOnError(err)
 				}
 			}
+			if successMessage == "" {
+				successMessage = fmt.Sprintf("Successfully added %d environments to profile %s", len(envdefs), color.GreenString(prof.Name()))
+			}
+			fmt.Println(successMessage)
+			safeExit()
 		},
 	}
 	envAddCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)

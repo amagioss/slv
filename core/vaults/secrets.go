@@ -15,7 +15,7 @@ func (vlt *Vault) putSecretWithoutCommit(secretName string, secretValue []byte) 
 		if vlt.vault.Secrets == nil {
 			vlt.vault.Secrets = make(map[string]*string)
 		}
-		vlt.vault.Secrets[secretName] = commons.String(sealedSecret.String())
+		vlt.vault.Secrets[secretName] = commons.StringPtr(sealedSecret.String())
 	}
 	return
 }
