@@ -19,9 +19,8 @@ type config struct {
 }
 
 type vault struct {
-	Id      string             `yaml:"vaultId,omitempty"`
-	Secrets map[string]*string `yaml:"secrets,omitempty"`
-	Config  config             `yaml:"config,omitempty"`
+	Secrets map[string]*string `yaml:"slvSecrets,omitempty"`
+	Config  config             `yaml:"slvConfig,omitempty"`
 }
 
 type Vault struct {
@@ -34,7 +33,7 @@ type Vault struct {
 }
 
 func (vlt *Vault) Id() string {
-	return vlt.vault.Config.PublicKey.IdStr()
+	return vlt.Config.PublicKey.String()
 }
 
 func (vlt Vault) MarshalYAML() (interface{}, error) {
@@ -78,7 +77,6 @@ func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, p
 		path:      vaultFile,
 		secretKey: vaultSecretKey,
 	}
-	vlt.vault.Id = vlt.Id()
 	if rootPublicKey != nil {
 		if _, err := vlt.Share(*rootPublicKey); err != nil {
 			return nil, err
@@ -106,7 +104,6 @@ func Get(vaultFile string) (vlt *Vault, err error) {
 	if err = commons.ReadFromYAML(vlt.path, &vlt.vault); err != nil {
 		return nil, err
 	}
-	vlt.vault.Id = vlt.Id()
 	return vlt, nil
 }
 

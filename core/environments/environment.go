@@ -17,25 +17,21 @@ type Environment struct {
 }
 
 type environment struct {
-	PublicKey    crypto.PublicKey `yaml:"publicKey"`
-	Name         string           `yaml:"name"`
-	Email        string           `yaml:"email"`
-	EnvType      EnvType          `yaml:"type"`
-	Tags         []string         `yaml:"tags"`
-	ProviderData string           `yaml:"providerData,omitempty"`
+	PublicKey       crypto.PublicKey `yaml:"publicKey"`
+	Name            string           `yaml:"name"`
+	Email           string           `yaml:"email"`
+	EnvType         EnvType          `yaml:"type"`
+	Tags            []string         `yaml:"tags"`
+	ProviderBinding string           `yaml:"binding,omitempty"`
 }
 
 func (eType *EnvType) isValid() bool {
 	return *eType == SERVICE || *eType == USER || *eType == ROOT
 }
 
-func NewEnvironmentForSecretKey(name, email string, envType EnvType, secretKey *crypto.SecretKey) (*Environment, error) {
+func NewEnvironmentForPublicKey(name, email string, envType EnvType, publicKey *crypto.PublicKey) (*Environment, error) {
 	if !envType.isValid() {
 		return nil, ErrInvalidEnvironmentType
-	}
-	publicKey, err := secretKey.PublicKey()
-	if err != nil {
-		return nil, err
 	}
 	return &Environment{
 		environment: &environment{
@@ -47,28 +43,33 @@ func NewEnvironmentForSecretKey(name, email string, envType EnvType, secretKey *
 	}, nil
 }
 
-func NewEnvironment(name, email string, envType EnvType) (env *Environment, secretKey *crypto.SecretKey, err error) {
-	secretKey, err = crypto.NewSecretKey(EnvironmentKey)
+func NewEnvironment(name, email string, envType EnvType) (*Environment, *crypto.SecretKey, error) {
+	secretKey, err := crypto.NewSecretKey(EnvironmentKey)
 	if err == nil {
-		env, err = NewEnvironmentForSecretKey(name, email, envType, secretKey)
+		publicKey, err := secretKey.PublicKey()
+		if err != nil {
+			return nil, nil, err
+		}
+		env, err := NewEnvironmentForPublicKey(name, email, envType, publicKey)
+		return env, secretKey, err
 	}
-	return
+	return nil, nil, err
 }
 
-func NewEnvironmentWithProvider(name, email string, envType EnvType, accessType, accessRef string, rsaPublicKey []byte) (*Environment, error) {
+func NewEnvironmentForProvider(name, email string, envType EnvType, provider, accessRef string, rsaPublicKey []byte) (*Environment, error) {
 	env, secretKey, err := NewEnvironment(name, email, envType)
 	if err != nil {
 		return nil, err
 	}
-	envProviderContext, err := newProviderDataForSecretKey(accessType, accessRef, secretKey, rsaPublicKey)
+	envAccessBinding, err := newEnvAccessBindingForSecretKey(provider, accessRef, secretKey, rsaPublicKey)
 	if err != nil {
 		return nil, err
 	}
-	envProviderContextData, err := envProviderContext.String()
+	envAccessBindingStr, err := envAccessBinding.String()
 	if err != nil {
 		return nil, err
 	}
-	env.ProviderData = envProviderContextData
+	env.ProviderBinding = envAccessBindingStr
 	return env, nil
 }
 
@@ -80,16 +81,16 @@ func (env *Environment) AddTags(tags ...string) {
 	env.Tags = append(env.Tags, tags...)
 }
 
-func FromEnvDef(envDef string) (env *Environment, err error) {
-	sliced := strings.Split(envDef, "_")
+func FromEnvData(envData string) (env *Environment, err error) {
+	sliced := strings.Split(envData, "_")
 	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envDataStringAbbrev {
-		return nil, ErrInvalidEnvDef
+		return nil, ErrInvalidEnvData
 	}
 	err = commons.Deserialize(sliced[2], &env)
 	return
 }
 
-func (env *Environment) ToEnvDef() (string, error) {
+func (env *Environment) ToEnvData() (string, error) {
 	data, err := commons.Serialize(env)
 	if err != nil {
 		return "", err

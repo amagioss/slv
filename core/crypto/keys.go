@@ -25,10 +25,6 @@ func (publicKey *PublicKey) Id() []byte {
 	return publicKey.toBytes()
 }
 
-func (publicKey *PublicKey) IdStr() string {
-	return commons.Encode(publicKey.toBytes())
-}
-
 func (publicKey PublicKey) MarshalYAML() (interface{}, error) {
 	return publicKey.String(), nil
 }
@@ -92,14 +88,22 @@ func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
 	return newSecretKey(&privKey, keyType), nil
 }
 
-func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *SecretKey, salt []byte, err error) {
+func NewSecretKeyFromPassword(password []byte, keyType KeyType) (secretKey *SecretKey, salt []byte, err error) {
 	salt = make([]byte, argon2SaltLength)
 	if _, err := rand.Read(salt); err != nil {
 		return nil, nil, ErrGeneratingKey
 	}
+	secretKey, err = NewSecretKeyFromPasswordAndSalt(password, salt, keyType)
+	return
+}
+
+func NewSecretKeyFromPasswordAndSalt(password, salt []byte, keyType KeyType) (secretKey *SecretKey, err error) {
+	if salt != nil && len(salt) != int(argon2SaltLength) {
+		return nil, ErrIncorrectSaltLength
+	}
 	privKey := argon2.IDKey(password, salt, argon2Iterations,
 		argon2Memory, argon2Threads, curve25519.ScalarSize)
-	return newSecretKey(&privKey, keyType), salt, nil
+	return newSecretKey(&privKey, keyType), nil
 }
 
 func newSecretKey(privKey *[]byte, keyType KeyType) *SecretKey {

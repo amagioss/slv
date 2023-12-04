@@ -4,11 +4,11 @@ go 1.20
 
 require (
 	github.com/99designs/keyring v1.2.2
-	github.com/aws/aws-sdk-go v1.47.12
+	github.com/aws/aws-sdk-go v1.48.9
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/fatih/color v1.16.0
 	github.com/spf13/cobra v1.8.0
-	golang.org/x/crypto v0.15.0
+	golang.org/x/crypto v0.16.0
 )
 
 require (
@@ -23,10 +23,10 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/term v0.14.0 // indirect
+	golang.org/x/term v0.15.0 // indirect
 )
 
 require (
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 )

@@ -13,12 +13,11 @@ const (
 	VaultKey             crypto.KeyType = 'V'
 	secretNamePattern                   = "[a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?"
 	secretRefAbbrev                     = "VSR" // VSR = Vault Secret Reference
-	vaultIdPattern                      = "[A-Za-z0-9]+"
-	secretRefPatternBase                = `\{\{\s*SLV_VSR_VAULTID\.` + secretNamePattern + `\s*\}\}`
+	secretRefPatternBase                = `\{\{\s*VAULTID\.` + secretNamePattern + `\s*\}\}`
 )
 
 var secretNameRegex = regexp.MustCompile(secretNamePattern)
-var secretRefRegex = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", vaultIdPattern))
+var secretRefRegex = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", "SLV_VPK_[A-Za-z0-9]+"))
 
 var ErrInvalidVaultFileName = errors.New("invalid vault file name [vault file name must end in " + vaultFileExtension + "]")
 var ErrVaultDirPathCreation = errors.New("error in creating a new vault directory path")

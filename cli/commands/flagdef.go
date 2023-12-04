@@ -58,17 +58,17 @@ var envTagsFlag = FlagDef{
 
 var envKMSTypeFlag = FlagDef{
 	name:  "kms-type",
-	usage: "KMS provider type [AWS, GCP, AZURE]",
+	usage: "KMS provider [AWS, GCP, AZURE]",
 }
 
 var envKMSIdFlag = FlagDef{
 	name:  "kms-id",
-	usage: "KMS provider ID",
+	usage: "KMS ID",
 }
 
 var envKMSPemFlag = FlagDef{
-	name:  "kms-pem",
-	usage: "KMS public key pem file [Use RSA 4096]",
+	name:  "kms-pubkey",
+	usage: "KMS public key [RSA 4096] file (pem format)",
 }
 
 var envSelfFlag = FlagDef{
@@ -87,6 +87,18 @@ var envSearchFlag = FlagDef{
 	name:      "search-env",
 	shorthand: "s",
 	usage:     "Searches query to filter environments",
+}
+
+// KMS Flags
+
+var kmsAWSARNFlag = FlagDef{
+	name:  "arn",
+	usage: "ARN for the AWS KMS key",
+}
+
+var kmsRSAPublicKey = FlagDef{
+	name:  "rsa-pubkey",
+	usage: "KMS public key [RSA 4096] file (pem format)",
 }
 
 // Vault Command Flags

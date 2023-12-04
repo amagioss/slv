@@ -3,12 +3,10 @@ package vaults
 import (
 	"fmt"
 	"os"
-
-	"github.com/shibme/slv/core/commons"
 )
 
 func (vlt *Vault) getSecretRef(secretName string) string {
-	return fmt.Sprintf("{{%s_%s_%s.%s}}", commons.SLV, secretRefAbbrev, vlt.Id(), secretName)
+	return fmt.Sprintf("{{%s.%s}}", vlt.Id(), secretName)
 }
 
 func (vlt *Vault) refBlob(data []byte, secretName string, forceUpdate bool) (result string, conflicting bool, err error) {

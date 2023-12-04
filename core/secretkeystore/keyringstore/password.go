@@ -15,8 +15,12 @@ func RegisterUser(name, email, password string) (env *environments.Environment, 
 	}
 	var salt []byte
 	var secretKey *crypto.SecretKey
-	if secretKey, salt, err = crypto.NewSecretKeyForPassword([]byte(password), environments.EnvironmentKey); err == nil {
-		if env, err = environments.NewEnvironmentForSecretKey(name, email, environments.USER, secretKey); err == nil {
+	if secretKey, salt, err = crypto.NewSecretKeyFromPassword([]byte(password), environments.EnvironmentKey); err == nil {
+		publicKey, err := secretKey.PublicKey()
+		if err != nil {
+			return nil, err
+		}
+		if env, err = environments.NewEnvironmentForPublicKey(name, email, environments.USER, publicKey); err == nil {
 			if err = setSalt(salt); err == nil {
 				if err = putUserSecretToKeyring([]byte(secretKey.String())); err == nil {
 					return env, nil

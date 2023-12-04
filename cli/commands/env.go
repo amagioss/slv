@@ -26,21 +26,38 @@ func envCommand() *cobra.Command {
 		},
 	}
 	envCmd.AddCommand(envNewCommand())
+	envCmd.AddCommand(envProviderCommand())
 	envCmd.AddCommand(envListCommand())
 	return envCmd
 }
 
-func showEnv(env environments.Environment, includeMetadataContext bool) {
+func envProviderCommand() *cobra.Command {
+	if envProviderCmd != nil {
+		return envProviderCmd
+	}
+	envProviderCmd = &cobra.Command{
+		Use:   "provider",
+		Short: "Create a new environment",
+		Long:  `Create a new environment using various options available`,
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+	envProviderCmd.AddCommand(newKMSEnvCommand("awskms", "Create environment using AWS KMS public key", kmsAWSARNFlag, kmsRSAPublicKey))
+	return envProviderCmd
+}
+
+func showEnv(env environments.Environment, includeEDS bool) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 	fmt.Fprintln(w, "ID (Public Key):\t", env.PublicKey.String())
 	fmt.Fprintln(w, "Name:\t", env.Name)
 	fmt.Fprintln(w, "Email:\t", env.Email)
 	fmt.Fprintln(w, "Tags:\t", env.Tags)
-	if env.ProviderData != "" {
-		fmt.Fprintln(w, "Provider Data:\t", env.ProviderData)
+	if env.ProviderBinding != "" {
+		fmt.Fprintln(w, "Provider Binding:\t", env.ProviderBinding)
 	}
-	if includeMetadataContext {
-		if envDef, err := env.ToEnvDef(); err == nil {
+	if includeEDS {
+		if envDef, err := env.ToEnvData(); err == nil {
 			fmt.Fprintln(w, "\nEnv Data:\t", color.CyanString(envDef))
 		}
 	}

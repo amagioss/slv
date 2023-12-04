@@ -21,6 +21,7 @@ var profileSetCmd *cobra.Command
 // Environment Commands
 var envCmd *cobra.Command
 var envNewCmd *cobra.Command
+var envProviderCmd *cobra.Command
 var envAddCmd *cobra.Command
 var envListCmd *cobra.Command
 

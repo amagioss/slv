@@ -14,21 +14,21 @@ func NewEnvForKMS(name, email string, envType environments.EnvType, kmsType, kms
 	case awskms.AccessSourceAWS:
 		return awskms.NewEnvironment(name, email, envType, kmsRef, rsa4096PublicKey)
 	default:
-		err = ErrInvalidEnvProviderType
+		err = ErrInvalidEnvAccessProvider
 	}
 	return
 }
 
-func getSecretKeyFromProviderDataString(providerDataString string) (secretKey *crypto.SecretKey, err error) {
-	providerData, err := environments.ProviderDataFromString(providerDataString)
+func getSecretKeyFromAccessBindingString(accessBindingStr string) (secretKey *crypto.SecretKey, err error) {
+	accessBinding, err := environments.EnvAccessBindingFromString(accessBindingStr)
 	if err != nil {
 		return nil, err
 	}
-	switch providerData.Type() {
+	switch accessBinding.Provider() {
 	case awskms.AccessSourceAWS:
-		secretKey, err = awskms.GetSecretKeyUsingAWSKMS(providerData)
+		secretKey, err = awskms.GetSecretKeyUsingAWSKMS(accessBinding)
 	default:
-		err = ErrInvalidEnvProviderType
+		err = ErrInvalidEnvAccessProvider
 	}
 	return
 }
