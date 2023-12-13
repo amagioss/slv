@@ -27,12 +27,12 @@ func isValidARN(arn string) bool {
 	return validARN
 }
 
-func BindWithAWSKMS(inputs map[string]any) (publicKey *crypto.PublicKey, ref map[string]any, err error) {
-	arn, ok := inputs["arn"].(string)
-	if !ok || !isValidARN(arn) {
+func BindWithAWSKMS(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error) {
+	arn := string(inputs["arn"])
+	if !isValidARN(arn) {
 		return nil, nil, ErrInvalidAWSKMSARN
 	}
-	rsaPublicKey, ok := inputs["pubkey"].([]byte)
+	rsaPublicKey, ok := inputs["rsa-pubkey"]
 	if !ok || len(rsaPublicKey) == 0 {
 		return nil, nil, ErrInvalidRSAPublicKey
 	}
@@ -44,19 +44,19 @@ func BindWithAWSKMS(inputs map[string]any) (publicKey *crypto.PublicKey, ref map
 	if err != nil {
 		return
 	}
-	sealedSecretKeyBytes, err := encryptSecretKeyBytesWithKMS(secretKey.Bytes(), rsaPublicKey)
+	sealedSecretKeyBytes, err := rsaEncrypt(secretKey.Bytes(), rsaPublicKey)
 	if err != nil {
 		return nil, nil, err
 	}
-	ref = make(map[string]any)
-	ref["arn"] = arn
-	ref["sealedSecretKeyBytes"] = sealedSecretKeyBytes
+	ref = make(map[string][]byte)
+	ref["arn"] = []byte(arn)
+	ref["ssk"] = sealedSecretKeyBytes
 	return publicKey, ref, nil
 }
 
-func UnBindFromAWSKMS(ref map[string]any) (secretKeyBytes []byte, err error) {
-	arn, ok := ref["arn"].(string)
-	if !ok || !isValidARN(arn) {
+func UnBindFromAWSKMS(ref map[string][]byte) (secretKeyBytes []byte, err error) {
+	arn := string(ref["arn"])
+	if !isValidARN(arn) {
 		return nil, ErrInvalidAWSKMSARN
 	}
 	arnParts := strings.Split(arn, ":")
@@ -67,8 +67,8 @@ func UnBindFromAWSKMS(ref map[string]any) (secretKeyBytes []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-	sealedSecretKeyBytes, ok := ref["arn"].([]byte)
-	if !ok || len(sealedSecretKeyBytes) == 0 {
+	sealedSecretKeyBytes := ref["ssk"]
+	if len(sealedSecretKeyBytes) == 0 {
 		return nil, ErrSealedSecretKeyRef
 	}
 	kmsClient := kms.New(awsSession)

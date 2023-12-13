@@ -1,0 +1,113 @@
+package environments
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/shibme/slv/core/commons"
+	"github.com/shibme/slv/core/crypto"
+)
+
+type Bind func(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error)
+type UnBind func(ref map[string][]byte) (secretKeyBytes []byte, err error)
+
+var providerMap = make(map[string]*provider)
+
+type provider struct {
+	Name        string
+	bind        *Bind
+	unbind      *UnBind
+	refRequired bool
+}
+
+type envAccessBinding struct {
+	Provider string            `json:"p"`
+	Ref      map[string][]byte `json:"r"`
+}
+
+func (eab *envAccessBinding) string() (string, error) {
+	data, err := commons.Serialize(*eab)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s_%s_%s", commons.SLV, envAccessBindingAbbrev, data), nil
+}
+
+func accessBindingFromString(envProviderBindingStr string) (*envAccessBinding, error) {
+	sliced := strings.Split(envProviderBindingStr, "_")
+	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envAccessBindingAbbrev {
+		return nil, ErrInvalidEnvAccessBindingFormat
+	}
+	binding := new(envAccessBinding)
+	if err := commons.Deserialize(sliced[2], &binding); err != nil {
+		return nil, err
+	}
+	return binding, nil
+}
+
+func RegisterAccessProvider(name string, bind Bind, unbind UnBind, refRequired bool) {
+	providerMap[name] = &provider{
+		Name:        name,
+		bind:        &bind,
+		unbind:      &unbind,
+		refRequired: refRequired,
+	}
+}
+
+func NewEnvForProvider(providerName, envName string, envType EnvType,
+	inputs map[string][]byte) (*Environment, error) {
+	provider, ok := providerMap[providerName]
+	if !ok {
+		return nil, ErrEnvProviderUnknown
+	}
+	publicKey, ref, err := (*provider.bind)(inputs)
+	if err != nil {
+		return nil, err
+	}
+	env, err := NewEnvironmentForPublicKey(envName, envType, publicKey)
+	if err != nil {
+		return nil, err
+	}
+	if provider.refRequired {
+		eab := &envAccessBinding{
+			Provider: providerName,
+			Ref:      ref,
+		}
+		env.ProviderBinding, err = eab.string()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return env, nil
+}
+
+func GetSecretKeyFromAccessBinding(envAccessBindingStr string) (secretKey *crypto.SecretKey, err error) {
+	if envAccessBindingStr == "" {
+		var providersWithoutRef []provider
+		for _, provider := range providerMap {
+			if !provider.refRequired {
+				providersWithoutRef = append(providersWithoutRef, *provider)
+			}
+		}
+		for _, provider := range providersWithoutRef {
+			secretKeyBytes, err := (*provider.unbind)(nil)
+			if err == nil {
+				return crypto.SecretKeyFromBytes(secretKeyBytes)
+			}
+		}
+		return nil, ErrEnvAccessBindingUnspecified
+	}
+	envAccessBinding, err := accessBindingFromString(envAccessBindingStr)
+	if err != nil {
+		return nil, err
+	}
+	provider, ok := providerMap[envAccessBinding.Provider]
+	if !ok {
+		return nil, ErrEnvProviderUnknown
+	}
+	secretKeyBytes, err := (*provider.unbind)(envAccessBinding.Ref)
+	if err == nil {
+		return crypto.SecretKeyFromBytes(secretKeyBytes)
+	}
+	return nil, err
+}

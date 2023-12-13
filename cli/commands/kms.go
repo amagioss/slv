@@ -5,13 +5,27 @@ import (
 
 	"github.com/shibme/slv/core/environments"
 	"github.com/shibme/slv/core/profiles"
-	"github.com/shibme/slv/core/secretkeystore/providers"
 	"github.com/spf13/cobra"
 )
 
-func newKMSEnvCommand(kmsProviderName, kmsProviderDesc string, keyIdFlag FlagDef, pubkeyFileFlag FlagDef) *cobra.Command {
+func envKMSCommand() *cobra.Command {
+	if envKMSCmd != nil {
+		return envKMSCmd
+	}
+	envKMSCmd = &cobra.Command{
+		Use:   "kms",
+		Short: "Create a new environment for a KMS provider",
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+	envKMSCmd.AddCommand(newKMSEnvCommand("aws", "Create environment for AWS KMS using RSA-4096 public key", kmsAWSARNFlag, kmsRSAPublicKey))
+	return envKMSCmd
+}
+
+func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef, pubkeyFileFlag FlagDef) *cobra.Command {
 	newKMSEnvCmd := &cobra.Command{
-		Use:   kmsProviderName,
+		Use:   kmsName,
 		Short: kmsProviderDesc,
 		Run: func(cmd *cobra.Command, args []string) {
 			name, _ := cmd.Flags().GetString(envNameFlag.name)
@@ -20,19 +34,21 @@ func newKMSEnvCommand(kmsProviderName, kmsProviderDesc string, keyIdFlag FlagDef
 			if err != nil {
 				exitOnError(err)
 			}
-			inputs := make(map[string]any)
+			inputs := make(map[string][]byte)
 			keyIdFlagValue := cmd.Flag(keyIdFlag.name).Value.String()
-			inputs[keyIdFlag.name] = keyIdFlagValue
+			inputs[keyIdFlag.name] = []byte(keyIdFlagValue)
 			pubKeyFilePath := cmd.Flag(pubkeyFileFlag.name).Value.String()
 			var rsaPublicKey []byte
 			var env *environments.Environment
 			if rsaPublicKey, err = os.ReadFile(pubKeyFilePath); err == nil {
 				inputs[pubkeyFileFlag.name] = rsaPublicKey
-				env, err = providers.NewEnvForProvider(name, email, environments.SERVICE, kmsProviderName, inputs)
+				providerName := "kms-" + kmsName
+				env, err = environments.NewEnvForProvider(providerName, name, environments.SERVICE, inputs)
 			}
 			if err != nil {
 				exitOnError(err)
 			}
+			env.SetEmail(email)
 			env.AddTags(tags...)
 			showEnv(*env, true)
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)

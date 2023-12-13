@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/shibme/slv/core/crypto"
+	"github.com/shibme/slv/core/environments"
 )
 
 var secretKey *crypto.SecretKey
@@ -15,9 +16,9 @@ func GetSecretKey() (*crypto.SecretKey, error) {
 	var err error
 	secretKey, err = getSecretKeyFromEnvar()
 	if err == nil && secretKey == nil {
-		envAccessBindingStr := os.Getenv(slvAccessBindingEnvarName)
-		if envAccessBindingStr != "" {
-			secretKey, err = getSecretKeyFromAccessBindingString(envAccessBindingStr)
+		envProviderBindingStr := os.Getenv(slvAccessBindingEnvarName)
+		if envProviderBindingStr != "" {
+			secretKey, err = environments.GetSecretKeyFromAccessBinding(envProviderBindingStr)
 			if err != nil {
 				return nil, err
 			}

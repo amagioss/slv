@@ -56,20 +56,20 @@ var envTagsFlag = FlagDef{
 	usage:     "Environment tags",
 }
 
-var envKMSTypeFlag = FlagDef{
-	name:  "kms-type",
-	usage: "KMS provider [AWS, GCP, AZURE]",
-}
+// var envKMSTypeFlag = FlagDef{
+// 	name:  "kms-type",
+// 	usage: "KMS provider [AWS, GCP, AZURE]",
+// }
 
-var envKMSIdFlag = FlagDef{
-	name:  "kms-id",
-	usage: "KMS ID",
-}
+// var envKMSIdFlag = FlagDef{
+// 	name:  "kms-id",
+// 	usage: "KMS ID",
+// }
 
-var envKMSPemFlag = FlagDef{
-	name:  "kms-pubkey",
-	usage: "KMS public key [RSA 4096] file (pem format)",
-}
+// var envKMSPemFlag = FlagDef{
+// 	name:  "kms-pubkey",
+// 	usage: "KMS public key [RSA 4096] file (pem format)",
+// }
 
 var envSelfFlag = FlagDef{
 	name:      "self",

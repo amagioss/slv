@@ -9,7 +9,7 @@ import (
 	"github.com/shibme/slv/core/environments"
 )
 
-func RegisterUser(name, email, password string) (env *environments.Environment, err error) {
+func RegisterUser(name, password string) (env *environments.Environment, err error) {
 	if _, err = getSalt(); err != nil {
 		return nil, UserAlreadyRegistered
 	}
@@ -20,7 +20,7 @@ func RegisterUser(name, email, password string) (env *environments.Environment, 
 		if err != nil {
 			return nil, err
 		}
-		if env, err = environments.NewEnvironmentForPublicKey(name, email, environments.USER, publicKey); err == nil {
+		if env, err = environments.NewEnvironmentForPublicKey(name, environments.USER, publicKey); err == nil {
 			if err = setSalt(salt); err == nil {
 				if err = putUserSecretToKeyring([]byte(secretKey.String())); err == nil {
 					return env, nil

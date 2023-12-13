@@ -9,7 +9,6 @@ import (
 	"github.com/shibme/slv/core/crypto"
 	"github.com/shibme/slv/core/environments"
 	"github.com/shibme/slv/core/profiles"
-	"github.com/shibme/slv/core/secretkeystore"
 	"github.com/spf13/cobra"
 )
 
@@ -26,25 +25,8 @@ func envCommand() *cobra.Command {
 		},
 	}
 	envCmd.AddCommand(envNewCommand())
-	envCmd.AddCommand(envProviderCommand())
 	envCmd.AddCommand(envListCommand())
 	return envCmd
-}
-
-func envProviderCommand() *cobra.Command {
-	if envProviderCmd != nil {
-		return envProviderCmd
-	}
-	envProviderCmd = &cobra.Command{
-		Use:   "provider",
-		Short: "Create a new environment",
-		Long:  `Create a new environment using various options available`,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-	envProviderCmd.AddCommand(newKMSEnvCommand("awskms", "Create environment using AWS KMS public key", kmsAWSARNFlag, kmsRSAPublicKey))
-	return envProviderCmd
 }
 
 func showEnv(env environments.Environment, includeEDS bool) {
@@ -81,28 +63,16 @@ func envNewCommand() *cobra.Command {
 			userEnv, _ := cmd.Flags().GetBool(envSelfFlag.name)
 			envType := environments.SERVICE
 
-			kmsType, _ := cmd.Flags().GetString(envKMSTypeFlag.name)
-			kmsRef, _ := cmd.Flags().GetString(envKMSIdFlag.name)
-			kmsPublicKeyFile, _ := cmd.Flags().GetString(envKMSPemFlag.name)
 			var env *environments.Environment
 			var secretKey *crypto.SecretKey
-			if kmsType != "" && kmsRef != "" && kmsPublicKeyFile != "" {
-				var rsaPublicKey []byte
-				if rsaPublicKey, err = os.ReadFile(kmsPublicKeyFile); err == nil {
-					env, err = secretkeystore.NewEnvForKMS(name, email, envType, kmsType, kmsRef, rsaPublicKey)
-				}
-				if err != nil {
-					exitOnError(err)
-				}
-			} else {
-				if userEnv {
-					envType = environments.USER
-				}
-				env, secretKey, err = environments.NewEnvironment(name, email, envType)
-				if err != nil {
-					exitOnError(err)
-				}
+			if userEnv {
+				envType = environments.USER
 			}
+			env, secretKey, err = environments.NewEnvironment(name, envType)
+			if err != nil {
+				exitOnError(err)
+			}
+			env.SetEmail(email)
 			env.AddTags(tags...)
 			showEnv(*env, true)
 			if secretKey != nil {
@@ -127,12 +97,12 @@ func envNewCommand() *cobra.Command {
 	envNewCmd.Flags().StringP(envNameFlag.name, envNameFlag.shorthand, "", envNameFlag.usage)
 	envNewCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
 	envNewCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
-	envNewCmd.Flags().StringP(envKMSTypeFlag.name, envKMSTypeFlag.shorthand, "", envKMSTypeFlag.usage)
-	envNewCmd.Flags().StringP(envKMSIdFlag.name, envKMSIdFlag.shorthand, "", envKMSIdFlag.usage)
-	envNewCmd.Flags().StringP(envKMSPemFlag.name, envKMSPemFlag.shorthand, "", envKMSPemFlag.usage)
 	envNewCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
 	envNewCmd.Flags().BoolP(envSelfFlag.name, envSelfFlag.shorthand, false, envSelfFlag.usage)
 	envNewCmd.MarkFlagRequired(envNameFlag.name)
+
+	envNewCmd.AddCommand(envKMSCommand())
+
 	return envNewCmd
 }
 

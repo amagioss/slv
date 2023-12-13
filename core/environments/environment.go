@@ -29,7 +29,7 @@ func (eType *EnvType) isValid() bool {
 	return *eType == SERVICE || *eType == USER || *eType == ROOT
 }
 
-func NewEnvironmentForPublicKey(name, email string, envType EnvType, publicKey *crypto.PublicKey) (*Environment, error) {
+func NewEnvironmentForPublicKey(name string, envType EnvType, publicKey *crypto.PublicKey) (*Environment, error) {
 	if !envType.isValid() {
 		return nil, ErrInvalidEnvironmentType
 	}
@@ -37,44 +37,30 @@ func NewEnvironmentForPublicKey(name, email string, envType EnvType, publicKey *
 		environment: &environment{
 			PublicKey: *publicKey,
 			Name:      name,
-			Email:     email,
 			EnvType:   envType,
 		},
 	}, nil
 }
 
-func NewEnvironment(name, email string, envType EnvType) (*Environment, *crypto.SecretKey, error) {
+func NewEnvironment(name string, envType EnvType) (*Environment, *crypto.SecretKey, error) {
 	secretKey, err := crypto.NewSecretKey(EnvironmentKey)
 	if err == nil {
 		publicKey, err := secretKey.PublicKey()
 		if err != nil {
 			return nil, nil, err
 		}
-		env, err := NewEnvironmentForPublicKey(name, email, envType, publicKey)
+		env, err := NewEnvironmentForPublicKey(name, envType, publicKey)
 		return env, secretKey, err
 	}
 	return nil, nil, err
 }
 
-func NewEnvironmentForProvider(name, email string, envType EnvType, provider, accessRef string, rsaPublicKey []byte) (*Environment, error) {
-	env, secretKey, err := NewEnvironment(name, email, envType)
-	if err != nil {
-		return nil, err
-	}
-	envAccessBinding, err := newEnvAccessBindingForSecretKey(provider, accessRef, secretKey, rsaPublicKey)
-	if err != nil {
-		return nil, err
-	}
-	envAccessBindingStr, err := envAccessBinding.String()
-	if err != nil {
-		return nil, err
-	}
-	env.ProviderBinding = envAccessBindingStr
-	return env, nil
-}
-
 func (env *Environment) Id() string {
 	return env.PublicKey.String()
+}
+
+func (env *Environment) SetEmail(email string) {
+	env.Email = email
 }
 
 func (env *Environment) AddTags(tags ...string) {
