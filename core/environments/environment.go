@@ -17,12 +17,13 @@ type Environment struct {
 }
 
 type environment struct {
-	PublicKey       crypto.PublicKey `yaml:"publicKey"`
-	Name            string           `yaml:"name"`
-	Email           string           `yaml:"email"`
-	EnvType         EnvType          `yaml:"type"`
-	Tags            []string         `yaml:"tags"`
-	ProviderBinding string           `yaml:"binding,omitempty"`
+	PublicKey       string   `yaml:"publicKey"`
+	Name            string   `yaml:"name"`
+	Email           string   `yaml:"email"`
+	EnvType         EnvType  `yaml:"type"`
+	Tags            []string `yaml:"tags"`
+	ProviderBinding string   `yaml:"binding,omitempty"`
+	publicKey       *crypto.PublicKey
 }
 
 func (eType *EnvType) isValid() bool {
@@ -35,7 +36,7 @@ func NewEnvironmentForPublicKey(name string, envType EnvType, publicKey *crypto.
 	}
 	return &Environment{
 		environment: &environment{
-			PublicKey: *publicKey,
+			PublicKey: publicKey.String(),
 			Name:      name,
 			EnvType:   envType,
 		},
@@ -55,8 +56,21 @@ func NewEnvironment(name string, envType EnvType) (*Environment, *crypto.SecretK
 	return nil, nil, err
 }
 
+func (env *Environment) getPublicKey() (publicKey *crypto.PublicKey, err error) {
+	if env.publicKey == nil {
+		if env.PublicKey == "" {
+			return nil, ErrEnvironmentPublicKeyNotFound
+		}
+		publicKey, err = crypto.PublicKeyFromString(env.PublicKey)
+		if err == nil {
+			env.publicKey = publicKey
+		}
+	}
+	return env.publicKey, nil
+}
+
 func (env *Environment) Id() string {
-	return env.PublicKey.String()
+	return env.PublicKey
 }
 
 func (env *Environment) SetEmail(email string) {

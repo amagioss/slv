@@ -10,7 +10,11 @@ func (vlt *Vault) putSecretWithoutCommit(secretName string, secretValue []byte) 
 		return ErrInvalidSecretName
 	}
 	var sealedSecret *crypto.SealedSecret
-	sealedSecret, err = vlt.Config.PublicKey.EncryptSecret(secretValue, vlt.Config.HashLength)
+	vaultPublicKey, err := vlt.getPublicKey()
+	if err != nil {
+		return err
+	}
+	sealedSecret, err = vaultPublicKey.EncryptSecret(secretValue, vlt.Config.HashLength)
 	if err == nil {
 		if vlt.vault.Secrets == nil {
 			vlt.vault.Secrets = make(map[string]*string)

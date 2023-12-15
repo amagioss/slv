@@ -29,4 +29,5 @@ var ErrVaultCannotBeSharedWithVault = errors.New("vault cannot be shared with an
 var ErrInvalidSecretName = errors.New("invalid secret name format [secret name must start with a letter and can only contain letters, numbers and underscores]")
 var ErrVaultSecretExistsAlready = errors.New("secret exists already for the given name")
 var ErrVaultSecretNotFound = errors.New("no secret found for the given name")
+var ErrVaultPublicKeyNotFound = errors.New("vault public key not found")
 var ErrInvalidReferenceFormat = errors.New("invalid reference format. references must follow the pattern {{SLV_VSR_VAULTID.secretName}} to allow dereferencing")

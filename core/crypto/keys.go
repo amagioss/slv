@@ -1,11 +1,9 @@
 package crypto
 
 import (
-	"encoding/json"
 	"strings"
 
 	"github.com/shibme/slv/core/commons"
-	"gopkg.in/yaml.v3"
 	"gopkg.shib.me/gociphers/argon2"
 	"gopkg.shib.me/gociphers/ecc"
 )
@@ -64,42 +62,6 @@ func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
 		return nil, ErrInvalidPublicKeyFormat
 	}
 	return publicKey, nil
-}
-
-func (publicKey PublicKey) MarshalYAML() (interface{}, error) {
-	return publicKey.String(), nil
-}
-
-func (publicKey *PublicKey) UnmarshalYAML(value *yaml.Node) error {
-	var pubKeyStr string
-	if err := value.Decode(&pubKeyStr); err == nil {
-		pk, err := PublicKeyFromString(pubKeyStr)
-		if err != nil {
-			return err
-		}
-		publicKey.keyType = pk.keyType
-		publicKey.version = pk.version
-		publicKey.pubKey = pk.pubKey
-	}
-	return nil
-}
-
-func (publicKey PublicKey) MarshalJSON() ([]byte, error) {
-	return json.Marshal(publicKey.String())
-}
-
-func (publicKey *PublicKey) UnmarshalJSON(data []byte) (err error) {
-	var pubKeyStr string
-	if err = json.Unmarshal(data, &pubKeyStr); err == nil {
-		pk, err := PublicKeyFromString(pubKeyStr)
-		if err != nil {
-			return err
-		}
-		publicKey.keyType = pk.keyType
-		publicKey.version = pk.version
-		publicKey.pubKey = pk.pubKey
-	}
-	return
 }
 
 type SecretKey struct {

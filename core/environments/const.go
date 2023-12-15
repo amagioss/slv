@@ -18,6 +18,7 @@ const (
 var ErrInvalidEnvData = errors.New("invalid environment data string")
 var ErrInvalidEnvironmentType = errors.New("invalid environment type")
 var ErrEnvironmentNotFound = errors.New("no such environment exists")
+var ErrEnvironmentPublicKeyNotFound = errors.New("environment public key not found")
 var ErrManifestPathExistsAlready = errors.New("manifest path exists already")
 var ErrManifestNotFound = errors.New("manifest not found")
 var ErrWritingManifest = errors.New("error in writing manifest")

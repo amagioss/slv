@@ -60,11 +60,11 @@ func (envManifest *EnvManifest) commit() error {
 	return nil
 }
 
-func (envManifest *EnvManifest) RootPublicKey() *crypto.PublicKey {
+func (envManifest *EnvManifest) RootPublicKey() (*crypto.PublicKey, error) {
 	if envManifest.Root != nil {
-		return &envManifest.Root.PublicKey
+		return envManifest.Root.getPublicKey()
 	}
-	return nil
+	return nil, nil
 }
 
 func (envManifest *EnvManifest) SetRoot(env *Environment) error {

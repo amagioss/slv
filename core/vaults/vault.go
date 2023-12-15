@@ -12,9 +12,10 @@ import (
 )
 
 type config struct {
-	PublicKey   *crypto.PublicKey    `yaml:"publicKey"`
-	HashLength  *uint32              `yaml:"hashLength,omitempty"`
-	WrappedKeys []*crypto.WrappedKey `yaml:"accessKeys,omitempty"`
+	PublicKey   *string   `yaml:"publicKey"`
+	HashLength  *uint32   `yaml:"hashLength,omitempty"`
+	WrappedKeys []*string `yaml:"wrappedKeys,omitempty"`
+	publicKey   *crypto.PublicKey
 }
 
 type vault struct {
@@ -32,7 +33,20 @@ type Vault struct {
 }
 
 func (vlt *Vault) Id() string {
-	return vlt.Config.PublicKey.String()
+	return *vlt.Config.PublicKey
+}
+
+func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
+	if vlt.Config.publicKey == nil {
+		if vlt.Config.PublicKey == nil {
+			return nil, ErrVaultPublicKeyNotFound
+		}
+		publicKey, err = crypto.PublicKeyFromString(*vlt.Config.PublicKey)
+		if err == nil {
+			vlt.Config.publicKey = publicKey
+		}
+	}
+	return vlt.Config.publicKey, err
 }
 
 func (vlt Vault) MarshalYAML() (interface{}, error) {
@@ -69,7 +83,8 @@ func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, p
 	vlt = &Vault{
 		vault: &vault{
 			Config: config{
-				PublicKey:  vaultPublicKey,
+				publicKey:  vaultPublicKey,
+				PublicKey:  commons.StringPtr(vaultPublicKey.String()),
 				HashLength: hashLen,
 			},
 		},
@@ -124,8 +139,12 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
 	if err != nil || (!vlt.IsLocked() && *vlt.unlockedBy == publicKey.String()) {
 		return err
 	}
-	for _, secretKeyWrapping := range vlt.vault.Config.WrappedKeys {
-		decryptedKey, err := secretKey.DecryptKey(*secretKeyWrapping)
+	for _, wrappedKeyStr := range vlt.vault.Config.WrappedKeys {
+		wrappedKey := &crypto.WrappedKey{}
+		if err = wrappedKey.FromString(*wrappedKeyStr); err != nil {
+			return err
+		}
+		decryptedKey, err := secretKey.DecryptKey(*wrappedKey)
 		if err == nil {
 			vlt.secretKey = decryptedKey
 			vlt.unlockedBy = new(string)
@@ -153,14 +172,18 @@ func (vlt *Vault) Share(publicKey crypto.PublicKey) (bool, error) {
 	if publicKey.Type() == VaultKey {
 		return false, ErrVaultCannotBeSharedWithVault
 	}
-	for _, keyWrappings := range vlt.vault.Config.WrappedKeys {
-		if keyWrappings.IsEncryptedBy(&publicKey) {
+	for _, wrappedKeyStr := range vlt.vault.Config.WrappedKeys {
+		wrappedKey := &crypto.WrappedKey{}
+		if err := wrappedKey.FromString(*wrappedKeyStr); err != nil {
+			return false, err
+		}
+		if wrappedKey.IsEncryptedBy(&publicKey) {
 			return false, nil
 		}
 	}
-	encryptedKey, err := publicKey.EncryptKey(*vlt.secretKey)
+	wrappedKey, err := publicKey.EncryptKey(*vlt.secretKey)
 	if err == nil {
-		vlt.vault.Config.WrappedKeys = append(vlt.vault.Config.WrappedKeys, encryptedKey)
+		vlt.vault.Config.WrappedKeys = append(vlt.vault.Config.WrappedKeys, commons.StringPtr(wrappedKey.String()))
 		err = vlt.commit()
 	}
 	return err == nil, err

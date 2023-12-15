@@ -64,7 +64,11 @@ func vaultNewCommand() *cobra.Command {
 			}
 			if query != "" {
 				for _, env := range envManifest.SearchEnv(query) {
-					publicKeys = append(publicKeys, env.PublicKey)
+					publicKey, err := crypto.PublicKeyFromString(env.PublicKey)
+					if err != nil {
+						exitOnError(err)
+					}
+					publicKeys = append(publicKeys, *publicKey)
 				}
 				if len(publicKeys) == 0 {
 					exitOnError(fmt.Errorf("no matching environments found for search query: " + query))
@@ -75,7 +79,10 @@ func vaultNewCommand() *cobra.Command {
 			if enableHash {
 				hashLength = 4
 			}
-			rootPublicKey := envManifest.RootPublicKey()
+			rootPublicKey, err := envManifest.RootPublicKey()
+			if err != nil {
+				exitOnError(err)
+			}
 			_, err = vaults.New(vaultFile, hashLength, rootPublicKey, publicKeys...)
 			if err != nil {
 				exitOnError(err)
@@ -132,7 +139,11 @@ func vaultShareCommand() *cobra.Command {
 					exitOnError(err)
 				}
 				for _, env := range envManifest.SearchEnv(query) {
-					publicKeys = append(publicKeys, env.PublicKey)
+					publicKey, err := crypto.PublicKeyFromString(env.PublicKey)
+					if err != nil {
+						exitOnError(err)
+					}
+					publicKeys = append(publicKeys, *publicKey)
 				}
 				if len(publicKeys) == 0 {
 					exitOnError(fmt.Errorf("no matching environments found for search query: " + query))

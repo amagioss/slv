@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/shibme/slv/core/commons"
-	"gopkg.in/yaml.v3"
 )
 
 type ciphered struct {
@@ -102,18 +101,6 @@ func (sealedSecret *SealedSecret) GetHash() string {
 	return commons.Encode(*sealedSecret.hash)
 }
 
-func (sealedSecret SealedSecret) MarshalYAML() (interface{}, error) {
-	return sealedSecret.String(), nil
-}
-
-func (sealedSecret *SealedSecret) UnmarshalYAML(value *yaml.Node) (err error) {
-	var sealedSecretStr string
-	if value.Decode(&sealedSecretStr) == nil {
-		return sealedSecret.FromString(sealedSecretStr)
-	}
-	return
-}
-
 type WrappedKey struct {
 	*ciphered
 }
@@ -123,7 +110,7 @@ func (wrappedKey WrappedKey) String() string {
 		commons.Encode(wrappedKey.toBytes())
 }
 
-func (wrappedKey *WrappedKey) fromString(wrappedKeyStr string) (err error) {
+func (wrappedKey *WrappedKey) FromString(wrappedKeyStr string) (err error) {
 	sliced := strings.Split(wrappedKeyStr, "_")
 	if len(sliced) != 3 {
 		return ErrInvalidCiphertextFormat
@@ -137,17 +124,5 @@ func (wrappedKey *WrappedKey) fromString(wrappedKeyStr string) (err error) {
 		return ErrInvalidCiphertextFormat
 	}
 	wrappedKey.ciphered = ciphered
-	return
-}
-
-func (wrappedKey WrappedKey) MarshalYAML() (interface{}, error) {
-	return wrappedKey.String(), nil
-}
-
-func (wrappedKey *WrappedKey) UnmarshalYAML(value *yaml.Node) (err error) {
-	var wrappedKeyStr string
-	if value.Decode(&wrappedKeyStr) == nil {
-		return wrappedKey.fromString(wrappedKeyStr)
-	}
 	return
 }
