@@ -1,7 +1,6 @@
 package vaults
 
 import (
-	"bytes"
 	"os"
 	"path"
 	"regexp"
@@ -155,7 +154,7 @@ func (vlt *Vault) Share(publicKey crypto.PublicKey) (bool, error) {
 		return false, ErrVaultCannotBeSharedWithVault
 	}
 	for _, keyWrappings := range vlt.vault.Config.WrappedKeys {
-		if bytes.Equal(*keyWrappings.GetKeyId(), publicKey.Id()) {
+		if keyWrappings.IsEncryptedBy(&publicKey) {
 			return false, nil
 		}
 	}

@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"bytes"
 	"strings"
 
 	"github.com/shibme/slv/core/commons"
@@ -21,14 +22,14 @@ func (ciph ciphered) toBytes() []byte {
 }
 
 func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
-	if len(cipheredBytes) < cipherBytesMinLength {
+	if len(cipheredBytes) < cipherTextMinLength {
 		return nil, ErrInvalidCiphertextFormat
 	}
 	var version byte = cipheredBytes[0]
 	var keyType KeyType = KeyType(cipheredBytes[1])
 	cipheredBytes = cipheredBytes[2:]
-	shortKeyId := cipheredBytes[:keyBaseLength]
-	ciphertext := cipheredBytes[keyBaseLength:]
+	shortKeyId := cipheredBytes[:keyLength]
+	ciphertext := cipheredBytes[keyLength:]
 	return &ciphered{
 		version:     &version,
 		keyType:     &keyType,
@@ -37,8 +38,25 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	}, nil
 }
 
-func (ciph *ciphered) GetKeyId() *[]byte {
-	return ciph.pubKeyBytes
+func (ciph *ciphered) IsEncryptedBy(publicKey *PublicKey) bool {
+	return bytes.Equal(*ciph.pubKeyBytes, publicKey.toBytes())
+}
+
+func (ciph *ciphered) isDecryptableBy(secretKey *SecretKey) error {
+	if *ciph.keyType != *secretKey.keyType {
+		return ErrSecretKeyMismatch
+	}
+	publicKey, err := secretKey.PublicKey()
+	if err != nil {
+		return err
+	}
+	if ciph.IsEncryptedBy(publicKey) {
+		return ErrSecretKeyMismatch
+	}
+	if ciph.version == nil || *ciph.version != *secretKey.version {
+		return ErrUnsupportedCryptoVersion
+	}
+	return nil
 }
 
 type SealedSecret struct {
@@ -66,7 +84,7 @@ func (sealedSecret *SealedSecret) FromString(sealedSecretStr string) (err error)
 		return err
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
-		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) || len(*ciphered.pubKeyBytes) != keyBaseLength {
+		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) || len(*ciphered.pubKeyBytes) != keyLength {
 		return ErrInvalidCiphertextFormat
 	}
 	if len(sliced) == 4 {
@@ -115,7 +133,7 @@ func (wrappedKey *WrappedKey) fromString(wrappedKeyStr string) (err error) {
 		return err
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
-		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.pubKeyBytes) != keyBaseLength {
+		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.pubKeyBytes) != keyLength {
 		return ErrInvalidCiphertextFormat
 	}
 	wrappedKey.ciphered = ciphered

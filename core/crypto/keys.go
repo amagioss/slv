@@ -1,28 +1,69 @@
 package crypto
 
 import (
-	"crypto/cipher"
-	"crypto/rand"
 	"encoding/json"
+	"strings"
 
 	"github.com/shibme/slv/core/commons"
-	"golang.org/x/crypto/argon2"
-	"golang.org/x/crypto/curve25519"
 	"gopkg.in/yaml.v3"
+	"gopkg.shib.me/gociphers/argon2"
+	"gopkg.shib.me/gociphers/ecc"
 )
 
-type encrypter struct {
-	ephPublicKey *[]byte
-	aead         *cipher.AEAD
-}
+type KeyType byte
 
 type PublicKey struct {
-	*keyBase
-	encrypter *encrypter
+	version *uint8
+	keyType *KeyType
+	pubKey  *ecc.PublicKey
 }
 
-func (publicKey *PublicKey) Id() []byte {
-	return publicKey.toBytes()
+func (publicKey *PublicKey) toBytes() []byte {
+	return append([]byte{*publicKey.version, 1, byte(*publicKey.keyType)}, publicKey.pubKey.Bytes()...)
+}
+
+func (publicKey *PublicKey) Type() KeyType {
+	return *publicKey.keyType
+}
+
+func publicKeyFromBytes(bytes []byte) (*PublicKey, error) {
+	if len(bytes) != keyLength || bytes[1] != 1 {
+		return nil, ErrInvalidPublicKeyFormat
+	}
+	if bytes[0] > commons.Version {
+		return nil, ErrUnsupportedCryptoVersion
+	}
+	var version uint8 = bytes[0]
+	var keyType KeyType = KeyType(bytes[2])
+	pubKey, err := ecc.GetPublicKeyForBytes(bytes[3:])
+	if err != nil {
+		return nil, ErrInvalidPublicKeyFormat
+	}
+	return &PublicKey{
+		version: &version,
+		keyType: &keyType,
+		pubKey:  pubKey,
+	}, nil
+}
+
+func (publicKey PublicKey) String() string {
+	return commons.SLV + "_" + string(*publicKey.keyType) + publicKeyAbbrev + "_" + commons.Encode(publicKey.toBytes())
+}
+
+func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
+	sliced := strings.Split(publicKeyStr, "_")
+	if len(sliced) != 3 || sliced[0] != commons.SLV {
+		return nil, ErrInvalidPublicKeyFormat
+	}
+	publicKey, err := publicKeyFromBytes(commons.Decode(sliced[2]))
+	if err != nil {
+		return nil, err
+	}
+	if len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*publicKey.keyType)) ||
+		!strings.HasSuffix(sliced[1], publicKeyAbbrev) {
+		return nil, ErrInvalidPublicKeyFormat
+	}
+	return publicKey, nil
 }
 
 func (publicKey PublicKey) MarshalYAML() (interface{}, error) {
@@ -32,11 +73,13 @@ func (publicKey PublicKey) MarshalYAML() (interface{}, error) {
 func (publicKey *PublicKey) UnmarshalYAML(value *yaml.Node) error {
 	var pubKeyStr string
 	if err := value.Decode(&pubKeyStr); err == nil {
-		keyBase, err := keyBaseFromString(pubKeyStr)
+		pk, err := PublicKeyFromString(pubKeyStr)
 		if err != nil {
 			return err
 		}
-		publicKey.keyBase = keyBase
+		publicKey.keyType = pk.keyType
+		publicKey.version = pk.version
+		publicKey.pubKey = pk.pubKey
 	}
 	return nil
 }
@@ -48,114 +91,120 @@ func (publicKey PublicKey) MarshalJSON() ([]byte, error) {
 func (publicKey *PublicKey) UnmarshalJSON(data []byte) (err error) {
 	var pubKeyStr string
 	if err = json.Unmarshal(data, &pubKeyStr); err == nil {
-		keyBase, err := keyBaseFromString(pubKeyStr)
+		pk, err := PublicKeyFromString(pubKeyStr)
 		if err != nil {
 			return err
 		}
-		publicKey.keyBase = keyBase
+		publicKey.keyType = pk.keyType
+		publicKey.version = pk.version
+		publicKey.pubKey = pk.pubKey
 	}
 	return
-}
-
-func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
-	keyBase, err := keyBaseFromString(publicKeyStr)
-	if err != nil {
-		return nil, err
-	}
-	return &PublicKey{
-		keyBase: keyBase,
-	}, nil
 }
 
 type SecretKey struct {
-	*keyBase
+	version   *uint8
+	keyType   *KeyType
+	privKey   *ecc.PrivateKey
 	publicKey *PublicKey
 }
 
-func (secretKey *SecretKey) Id() []byte {
-	pubKey, err := secretKey.PublicKey()
-	if err != nil {
-		return nil
-	}
-	return pubKey.Id()
-}
-
 func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
-	privKey := make([]byte, curve25519.ScalarSize)
-	if _, err = rand.Read(privKey); err != nil {
-		return nil, ErrGeneratingKey
+	privKey, err := ecc.NewPrivateKey()
+	if err != nil {
+		return nil, ErrGeneratingSecretKey
 	}
-	return newSecretKey(&privKey, keyType), nil
+	return newSecretKey(privKey, keyType), nil
 }
 
-func NewSecretKeyFromPassword(password []byte, keyType KeyType) (secretKey *SecretKey, salt []byte, err error) {
-	salt = make([]byte, argon2SaltLength)
-	if _, err := rand.Read(salt); err != nil {
-		return nil, nil, ErrGeneratingKey
+func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *SecretKey, salt []byte, err error) {
+	key, salt, err := argon2.GenerateKeyForPassword(password)
+	if err != nil {
+		return nil, nil, err
 	}
-	secretKey, err = NewSecretKeyFromPasswordAndSalt(password, salt, keyType)
-	return
+	privKey, err := ecc.GetPrivateKeyForBytes(key)
+	if err != nil {
+		return nil, nil, err
+	}
+	return newSecretKey(privKey, keyType), salt, nil
 }
 
-func NewSecretKeyFromPasswordAndSalt(password, salt []byte, keyType KeyType) (secretKey *SecretKey, err error) {
-	if salt != nil && len(salt) != int(argon2SaltLength) {
-		return nil, ErrIncorrectSaltLength
+func NewSecretKeyForPasswordAndSalt(password, salt []byte, keyType KeyType) (secretKey *SecretKey, err error) {
+	key, err := argon2.GenerateKeyForPasswordAndSalt(password, salt)
+	if err != nil {
+		return nil, err
 	}
-	privKey := argon2.IDKey(password, salt, argon2Iterations,
-		argon2Memory, argon2Threads, curve25519.ScalarSize)
-	return newSecretKey(&privKey, keyType), nil
+	privKey, err := ecc.GetPrivateKeyForBytes(key)
+	if err != nil {
+		return nil, err
+	}
+	return newSecretKey(privKey, keyType), nil
 }
 
-func newSecretKey(privKey *[]byte, keyType KeyType) *SecretKey {
+func newSecretKey(privKey *ecc.PrivateKey, keyType KeyType) *SecretKey {
 	version := commons.Version
 	return &SecretKey{
-		keyBase: &keyBase{
-			version: &version,
-			public:  false,
-			keyType: &keyType,
-			key:     privKey,
-		},
+		version: &version,
+		keyType: &keyType,
+		privKey: privKey,
 	}
 }
 
 func (secretKey *SecretKey) PublicKey() (*PublicKey, error) {
 	if secretKey.publicKey == nil {
-		key, err := curve25519.X25519(*secretKey.key, curve25519.Basepoint)
+		pubKey, err := secretKey.privKey.PublicKey()
 		if err != nil {
-			return nil, ErrGeneratingKey
+			return nil, ErrDerivingPublicKey
 		}
 		secretKey.publicKey = &PublicKey{
-			keyBase: &keyBase{
-				version: secretKey.version,
-				public:  true,
-				keyType: secretKey.keyType,
-				key:     &key,
-			},
+			version: secretKey.version,
+			keyType: secretKey.keyType,
+			pubKey:  pubKey,
 		}
 	}
 	return secretKey.publicKey, nil
 }
 
-func SecretKeyFromBytes(secretKeyBytes []byte) (*SecretKey, error) {
-	keyBase, err := keyBaseFromBytes(secretKeyBytes)
+func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {
+	if len(bytes) != keyLength || bytes[1] != 0 {
+		return nil, ErrInvalidSecretKeyFormat
+	}
+	if bytes[0] > commons.Version {
+		return nil, ErrUnsupportedCryptoVersion
+	}
+	var version uint8 = bytes[0]
+	var keyType KeyType = KeyType(bytes[2])
+	privKey, err := ecc.GetPrivateKeyForBytes(bytes[3:])
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidSecretKeyFormat
 	}
 	return &SecretKey{
-		keyBase: keyBase,
+		version: &version,
+		keyType: &keyType,
+		privKey: privKey,
 	}, nil
 }
 
 func SecretKeyFromString(secretKeyStr string) (*SecretKey, error) {
-	keyBase, err := keyBaseFromString(secretKeyStr)
+	sliced := strings.Split(secretKeyStr, "_")
+	if len(sliced) != 3 || sliced[0] != commons.SLV {
+		return nil, ErrInvalidSecretKeyFormat
+	}
+	secretKey, err := SecretKeyFromBytes(commons.Decode(sliced[2]))
 	if err != nil {
 		return nil, err
 	}
-	return &SecretKey{
-		keyBase: keyBase,
-	}, nil
+	if len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*secretKey.keyType)) ||
+		!strings.HasSuffix(sliced[1], secretKeyAbbrev) {
+		return nil, ErrInvalidSecretKeyFormat
+	}
+	return secretKey, nil
 }
 
 func (secretKey *SecretKey) Bytes() []byte {
-	return secretKey.toBytes()
+	return append([]byte{*secretKey.version, 0, byte(*secretKey.keyType)}, secretKey.privKey.Bytes()...)
+}
+
+func (secretKey SecretKey) String() string {
+	return commons.SLV + "_" + string(*secretKey.keyType) + secretKeyAbbrev + "_" + commons.Encode(secretKey.Bytes())
 }

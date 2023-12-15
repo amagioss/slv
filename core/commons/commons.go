@@ -17,3 +17,7 @@ func DirExists(path string) bool {
 func StringPtr(s string) *string {
 	return &s
 }
+
+func ByteSlicePtr(bytes []byte) *[]byte {
+	return &bytes
+}

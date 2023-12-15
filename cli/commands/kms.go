@@ -8,21 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func envKMSCommand() *cobra.Command {
-	if envKMSCmd != nil {
-		return envKMSCmd
-	}
-	envKMSCmd = &cobra.Command{
-		Use:   "kms",
-		Short: "Create a new environment for a KMS provider",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-	envKMSCmd.AddCommand(newKMSEnvCommand("aws", "Create environment for AWS KMS using RSA-4096 public key", kmsAWSARNFlag, kmsRSAPublicKey))
-	return envKMSCmd
-}
-
 func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef, pubkeyFileFlag FlagDef) *cobra.Command {
 	newKMSEnvCmd := &cobra.Command{
 		Use:   kmsName,
