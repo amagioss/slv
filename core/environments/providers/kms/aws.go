@@ -19,8 +19,10 @@ const (
 	awsKMSARNPattern          = `^arn:aws:kms:[a-z0-9-]+:[0-9]+:key/[a-f0-9-]+$`
 )
 
-var ErrInvalidAWSKMSARN = errors.New("invalid AWS KMS ARN")
-var ErrSealedSecretKeyRef = errors.New("invalid sealed secret key ref from provider binding")
+var (
+	ErrInvalidAWSKMSARN   = errors.New("invalid AWS KMS ARN")
+	ErrSealedSecretKeyRef = errors.New("invalid sealed secret key ref from provider binding")
+)
 
 func isValidARN(arn string) bool {
 	validARN, _ := regexp.MatchString(awsKMSARNPattern, arn)

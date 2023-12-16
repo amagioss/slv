@@ -46,13 +46,13 @@ func vaultNewCommand() *cobra.Command {
 				exitOnErrorWithMessage("either --" + envSearchFlag.name +
 					" or --" + vaultAccessPublicKeysFlag.name + " must be specified")
 			}
-			var publicKeys []crypto.PublicKey
+			var publicKeys []*crypto.PublicKey
 			for _, publicKeyString := range publicKeyStrings {
 				publicKey, err := crypto.PublicKeyFromString(publicKeyString)
 				if err != nil {
 					exitOnError(err)
 				}
-				publicKeys = append(publicKeys, *publicKey)
+				publicKeys = append(publicKeys, publicKey)
 			}
 			prof, err := profiles.GetDefaultProfile()
 			if err != nil {
@@ -68,7 +68,7 @@ func vaultNewCommand() *cobra.Command {
 					if err != nil {
 						exitOnError(err)
 					}
-					publicKeys = append(publicKeys, *publicKey)
+					publicKeys = append(publicKeys, publicKey)
 				}
 				if len(publicKeys) == 0 {
 					exitOnError(fmt.Errorf("no matching environments found for search query: " + query))
@@ -121,13 +121,13 @@ func vaultShareCommand() *cobra.Command {
 				exitOnError(fmt.Errorf("either --" + envSearchFlag.name +
 					" or --" + vaultAccessPublicKeysFlag.name + " must be specified"))
 			}
-			var publicKeys []crypto.PublicKey
+			var publicKeys []*crypto.PublicKey
 			for _, publicKeyString := range publicKeyStrings {
 				publicKey, err := crypto.PublicKeyFromString(publicKeyString)
 				if err != nil {
 					exitOnError(err)
 				}
-				publicKeys = append(publicKeys, *publicKey)
+				publicKeys = append(publicKeys, publicKey)
 			}
 			if query != "" {
 				prof, err := profiles.GetDefaultProfile()
@@ -143,7 +143,7 @@ func vaultShareCommand() *cobra.Command {
 					if err != nil {
 						exitOnError(err)
 					}
-					publicKeys = append(publicKeys, *publicKey)
+					publicKeys = append(publicKeys, publicKey)
 				}
 				if len(publicKeys) == 0 {
 					exitOnError(fmt.Errorf("no matching environments found for search query: " + query))
@@ -153,8 +153,8 @@ func vaultShareCommand() *cobra.Command {
 			if err == nil {
 				err = vault.Unlock(*envSecretKey)
 				if err == nil {
-					for _, pubKey := range publicKeys {
-						if _, err = vault.Share(pubKey); err != nil {
+					for _, publicKey := range publicKeys {
+						if _, err = vault.Share(publicKey); err != nil {
 							break
 						}
 					}

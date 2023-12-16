@@ -25,7 +25,7 @@ func (vlt *Vault) yamlTraverseAndUpdateRefSecrets(data *map[string]interface{}, 
 			}
 		case string:
 			if !secretRefRegex.MatchString(secretValue) {
-				simplifiedPathName := strings.Join(append(path, key), "_")
+				simplifiedPathName := strings.Join(append(path, key), "__")
 				if !forceUpdate && vlt.SecretExists(simplifiedPathName) {
 					return ErrVaultSecretExistsAlready
 				}

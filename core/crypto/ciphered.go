@@ -27,35 +27,18 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	var version byte = cipheredBytes[0]
 	var keyType KeyType = KeyType(cipheredBytes[1])
 	cipheredBytes = cipheredBytes[2:]
-	shortKeyId := cipheredBytes[:keyLength]
+	pubKeyBytes := cipheredBytes[:keyLength]
 	ciphertext := cipheredBytes[keyLength:]
 	return &ciphered{
 		version:     &version,
 		keyType:     &keyType,
-		pubKeyBytes: &shortKeyId,
+		pubKeyBytes: &pubKeyBytes,
 		ciphertext:  &ciphertext,
 	}, nil
 }
 
 func (ciph *ciphered) IsEncryptedBy(publicKey *PublicKey) bool {
 	return bytes.Equal(*ciph.pubKeyBytes, publicKey.toBytes())
-}
-
-func (ciph *ciphered) isDecryptableBy(secretKey *SecretKey) error {
-	if *ciph.keyType != *secretKey.keyType {
-		return ErrSecretKeyMismatch
-	}
-	publicKey, err := secretKey.PublicKey()
-	if err != nil {
-		return err
-	}
-	if ciph.IsEncryptedBy(publicKey) {
-		return ErrSecretKeyMismatch
-	}
-	if ciph.version == nil || *ciph.version != *secretKey.version {
-		return ErrUnsupportedCryptoVersion
-	}
-	return nil
 }
 
 type SealedSecret struct {

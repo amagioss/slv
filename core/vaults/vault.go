@@ -58,7 +58,7 @@ func (vlt *Vault) UnmarshalYAML(value *yaml.Node) (err error) {
 }
 
 // Returns new vault instance. The vault name should end with .vlt.slv
-func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...crypto.PublicKey) (vlt *Vault, err error) {
+func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !strings.HasSuffix(vaultFile, vaultFileExtension) {
 		return nil, ErrInvalidVaultFileName
 	}
@@ -92,7 +92,7 @@ func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, p
 		secretKey: vaultSecretKey,
 	}
 	if rootPublicKey != nil {
-		if _, err := vlt.Share(*rootPublicKey); err != nil {
+		if _, err := vlt.Share(rootPublicKey); err != nil {
 			return nil, err
 		}
 	}
@@ -165,7 +165,7 @@ func (vlt *Vault) reset() error {
 	return commons.ReadFromYAML(vlt.path, &vlt.vault)
 }
 
-func (vlt *Vault) Share(publicKey crypto.PublicKey) (bool, error) {
+func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	if vlt.IsLocked() {
 		return false, ErrVaultLocked
 	}
@@ -177,7 +177,7 @@ func (vlt *Vault) Share(publicKey crypto.PublicKey) (bool, error) {
 		if err := wrappedKey.FromString(*wrappedKeyStr); err != nil {
 			return false, err
 		}
-		if wrappedKey.IsEncryptedBy(&publicKey) {
+		if wrappedKey.IsEncryptedBy(publicKey) {
 			return false, nil
 		}
 	}

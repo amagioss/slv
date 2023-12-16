@@ -46,6 +46,10 @@ func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint32) (se
 }
 
 func (secretKey *SecretKey) decrypt(ciphered *ciphered) (data []byte, err error) {
+	publicKey, err := secretKey.PublicKey()
+	if err != nil || !ciphered.IsEncryptedBy(publicKey) {
+		return nil, ErrSecretKeyMismatch
+	}
 	data, err = secretKey.privKey.Decrypt(*ciphered.ciphertext)
 	if err != nil {
 		return nil, ErrDecryptionFailed

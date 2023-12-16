@@ -6,8 +6,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Version = "dev"
-var AppName = "slv"
+var (
+	Version = "dev"
+	AppName = "slv"
+)
 
 func showVersionInfo() {
 	fmt.Println(AppName, Version)

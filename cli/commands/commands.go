@@ -2,36 +2,39 @@ package commands
 
 import "github.com/spf13/cobra"
 
-// SLV Command
-var slvCmd *cobra.Command
+var (
 
-// Version Command
-var versionCmd *cobra.Command
+	// SLV Command
+	slvCmd *cobra.Command
 
-// System Commands
-var systemCmd *cobra.Command
-var systemResetCmd *cobra.Command
+	// Version Command
+	versionCmd *cobra.Command
 
-// Profile Commands
-var profileCmd *cobra.Command
-var profileNewCmd *cobra.Command
-var profileListCmd *cobra.Command
-var profileSetCmd *cobra.Command
+	// System Commands
+	systemCmd      *cobra.Command
+	systemResetCmd *cobra.Command
 
-// Environment Commands
-var envCmd *cobra.Command
-var envNewCmd *cobra.Command
-var envAddCmd *cobra.Command
-var envListCmd *cobra.Command
+	// Profile Commands
+	profileCmd     *cobra.Command
+	profileNewCmd  *cobra.Command
+	profileListCmd *cobra.Command
+	profileSetCmd  *cobra.Command
 
-// Vault Commands
-var vaultCmd *cobra.Command
-var vaultNewCmd *cobra.Command
-var vaultShareCmd *cobra.Command
+	// Environment Commands
+	envCmd     *cobra.Command
+	envNewCmd  *cobra.Command
+	envAddCmd  *cobra.Command
+	envListCmd *cobra.Command
 
-// Secret Commands
-var secretCmd *cobra.Command
-var secretPutCmd *cobra.Command
-var secretGetCmd *cobra.Command
-var secretRefCmd *cobra.Command
-var secretDerefCmd *cobra.Command
+	// Vault Commands
+	vaultCmd      *cobra.Command
+	vaultNewCmd   *cobra.Command
+	vaultShareCmd *cobra.Command
+
+	// Secret Commands
+	secretCmd      *cobra.Command
+	secretPutCmd   *cobra.Command
+	secretGetCmd   *cobra.Command
+	secretRefCmd   *cobra.Command
+	secretDerefCmd *cobra.Command
+)

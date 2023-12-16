@@ -2,6 +2,8 @@ package commons
 
 import (
 	"os"
+	"strconv"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -16,6 +18,36 @@ func WriteToYAML(filePath, notice string, data interface{}) error {
 		}
 	}
 	return err
+}
+
+func ReadChildFromYAML(filePath string, nodePath string) (interface{}, error) {
+	// Read the file
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal the YAML data into a map
+	var objMap map[string]interface{}
+	err = yaml.Unmarshal(data, &objMap)
+	if err != nil {
+		return nil, err
+	}
+
+	// Split the node path and traverse the map
+	nodes := strings.Split(nodePath, ".")
+	for _, node := range nodes {
+		if index, err := strconv.Atoi(node); err == nil {
+			// If the node is an integer, treat it as an array index
+			objArray, _ := objMap[nodes[0]].([]interface{})
+			objMap, _ = objArray[index].(map[string]interface{})
+			nodes = nodes[1:]
+		} else {
+			objMap, _ = objMap[node].(map[string]interface{})
+		}
+	}
+
+	return objMap, nil
 }
 
 func ReadFromYAML(filePath string, out interface{}) error {
