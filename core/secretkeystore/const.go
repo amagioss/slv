@@ -8,6 +8,5 @@ const (
 )
 
 var (
-	ErrInvalidEnvAccessProvider  = errors.New("invalid environment access provider")
-	ErrEnvironmentAccessNotFound = errors.New("environment doesn't have access. please set one of the environment variables: " + slvSecreKeyEnvarName + " or " + slvAccessBindingEnvarName)
+	errEnvironmentAccessNotFound = errors.New("environment doesn't have access. please set one of the environment variables: " + slvSecreKeyEnvarName + " or " + slvAccessBindingEnvarName)
 )

@@ -9,7 +9,7 @@ import (
 func (vlt *Vault) getSecretByReference(secretRef string) (secret []byte, err error) {
 	sliced := strings.Split(secretRef, vlt.Id()+".")
 	if len(sliced) != 2 {
-		return nil, ErrInvalidReferenceFormat
+		return nil, errInvalidReferenceFormat
 	}
 	secretName := strings.Trim(sliced[1], " }")
 	return vlt.GetSecret(secretName)
@@ -41,7 +41,7 @@ func (vlt *Vault) deRefSecretsFromContent(content string) ([]byte, error) {
 
 func (vlt *Vault) DeRefSecrets(file string, previewOnly bool) (dereferncedBytes []byte, err error) {
 	if vlt.IsLocked() {
-		return nil, ErrVaultLocked
+		return nil, errVaultLocked
 	}
 	data, err := os.ReadFile(file)
 	if err != nil {

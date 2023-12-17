@@ -7,7 +7,7 @@ import (
 
 func (vlt *Vault) putSecretWithoutCommit(secretName string, secretValue []byte) (err error) {
 	if !secretNameRegex.MatchString(secretName) {
-		return ErrInvalidSecretName
+		return errInvalidSecretName
 	}
 	var sealedSecret *crypto.SealedSecret
 	vaultPublicKey, err := vlt.getPublicKey()
@@ -48,11 +48,11 @@ func (vlt *Vault) ListSecrets() []string {
 
 func (vlt *Vault) GetSecret(secretName string) (decryptedSecret []byte, err error) {
 	if vlt.IsLocked() {
-		return decryptedSecret, ErrVaultLocked
+		return decryptedSecret, errVaultLocked
 	}
 	sealedSecretData := vlt.vault.Secrets[secretName]
 	if sealedSecretData == nil {
-		return nil, ErrVaultSecretNotFound
+		return nil, errVaultSecretNotFound
 	}
 	if decryptedSecret = vlt.getSecretFromCache(secretName); decryptedSecret == nil {
 		sealedSecret := &crypto.SealedSecret{}

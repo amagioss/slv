@@ -8,7 +8,7 @@ import (
 func (publicKey *PublicKey) encrypt(data []byte) (*ciphered, error) {
 	ciphertext, err := publicKey.pubKey.Encrypt(data, true)
 	if err != nil {
-		return nil, ErrEncryptionFailed
+		return nil, errEncryptionFailed
 	}
 	return &ciphered{
 		version:     publicKey.version,
@@ -48,11 +48,11 @@ func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint32) (se
 func (secretKey *SecretKey) decrypt(ciphered *ciphered) (data []byte, err error) {
 	publicKey, err := secretKey.PublicKey()
 	if err != nil || !ciphered.IsEncryptedBy(publicKey) {
-		return nil, ErrSecretKeyMismatch
+		return nil, errSecretKeyMismatch
 	}
 	data, err = secretKey.privKey.Decrypt(*ciphered.ciphertext)
 	if err != nil {
-		return nil, ErrDecryptionFailed
+		return nil, errDecryptionFailed
 	}
 	return
 }

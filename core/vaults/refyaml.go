@@ -27,7 +27,7 @@ func (vlt *Vault) yamlTraverseAndUpdateRefSecrets(data *map[string]interface{}, 
 			if !secretRefRegex.MatchString(secretValue) {
 				simplifiedPathName := strings.Join(append(path, key), "__")
 				if !forceUpdate && vlt.SecretExists(simplifiedPathName) {
-					return ErrVaultSecretExistsAlready
+					return errVaultSecretExistsAlready
 				}
 				err = vlt.putSecretWithoutCommit(simplifiedPathName, []byte(secretValue))
 				if err == nil {
@@ -50,7 +50,7 @@ func (vlt *Vault) yamlRef(data []byte, prefix string, forceUpdate bool) (result 
 		path = append(path, prefix)
 	}
 	err = vlt.yamlTraverseAndUpdateRefSecrets(&yamlMap, path, forceUpdate)
-	conflicting = (err == ErrVaultSecretExistsAlready)
+	conflicting = (err == errVaultSecretExistsAlready)
 	if err == nil {
 		updatedYaml, err := yaml.Marshal(yamlMap)
 		if err == nil {

@@ -32,7 +32,7 @@ func (eType *EnvType) isValid() bool {
 
 func NewEnvironmentForPublicKey(name string, envType EnvType, publicKey *crypto.PublicKey) (*Environment, error) {
 	if !envType.isValid() {
-		return nil, ErrInvalidEnvironmentType
+		return nil, errInvalidEnvironmentType
 	}
 	return &Environment{
 		environment: &environment{
@@ -59,7 +59,7 @@ func NewEnvironment(name string, envType EnvType) (*Environment, *crypto.SecretK
 func (env *Environment) getPublicKey() (publicKey *crypto.PublicKey, err error) {
 	if env.publicKey == nil {
 		if env.PublicKey == "" {
-			return nil, ErrEnvironmentPublicKeyNotFound
+			return nil, errEnvironmentPublicKeyNotFound
 		}
 		publicKey, err = crypto.PublicKeyFromString(env.PublicKey)
 		if err == nil {
@@ -84,7 +84,7 @@ func (env *Environment) AddTags(tags ...string) {
 func FromEnvData(envData string) (env *Environment, err error) {
 	sliced := strings.Split(envData, "_")
 	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envDataStringAbbrev {
-		return nil, ErrInvalidEnvData
+		return nil, errInvalidEnvData
 	}
 	err = commons.Deserialize(sliced[2], &env)
 	return

@@ -45,18 +45,18 @@ func (profile *Profile) UnmarshalYAML(value *yaml.Node) (err error) {
 
 func (profile *Profile) commit() error {
 	if commons.WriteToYAML(*profile.path, "", profile) != nil {
-		return ErrWritingManifest
+		return errWritingManifest
 	}
 	return nil
 }
 
 func newProfileForPath(dir string) (*Profile, error) {
 	if commons.DirExists(dir) {
-		return nil, ErrProfilePathExistsAlready
+		return nil, errProfilePathExistsAlready
 	}
 	err := os.MkdirAll(dir, 0755)
 	if err != nil {
-		return nil, ErrCreatingProfileDir
+		return nil, errCreatingProfileDir
 	}
 	path := filepath.Join(dir, profileFileName)
 	profile := &Profile{
@@ -75,7 +75,7 @@ func newProfileForPath(dir string) (*Profile, error) {
 
 func getProfileForPath(dir string) (*Profile, error) {
 	if !commons.DirExists(dir) {
-		return nil, ErrProfilePathDoesNotExist
+		return nil, errProfilePathDoesNotExist
 	}
 	path := filepath.Join(dir, profileFileName)
 	profile := &Profile{}

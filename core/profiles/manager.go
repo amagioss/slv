@@ -27,19 +27,19 @@ func initProfileManager() error {
 	if err != nil {
 		err = os.MkdirAll(manager.dir, 0755)
 		if err != nil {
-			return ErrCreatingProfileCollectionDir
+			return errCreatingProfileCollectionDir
 		}
 	} else if !profileManagerDirInfo.IsDir() {
-		return ErrInitializingProfileManagementDir
+		return errInitializingProfileManagementDir
 	}
 	profileManagerDir, err := os.Open(manager.dir)
 	if err != nil {
-		return ErrOpeningProfileManagementDir
+		return errOpeningProfileManagementDir
 	}
 	defer profileManagerDir.Close()
 	fileInfoList, err := profileManagerDir.Readdir(-1)
 	if err != nil {
-		return ErrOpeningProfileManagementDir
+		return errOpeningProfileManagementDir
 	}
 	manager.profileList = make(map[string]struct{})
 	for _, fileInfo := range fileInfoList {
@@ -73,7 +73,7 @@ func GetProfile(profileName string) (profile *Profile, err error) {
 		return
 	}
 	if _, exists := profileMgr.profileList[profileName]; !exists {
-		return nil, ErrProfileNotFound
+		return nil, errProfileNotFound
 	}
 	if profile, err = getProfileForPath(filepath.Join(profileMgr.dir, profileName)); err != nil {
 		return nil, err
@@ -85,13 +85,13 @@ func GetProfile(profileName string) (profile *Profile, err error) {
 
 func New(profileName string) error {
 	if profileName == "" {
-		return ErrInvalidProfileName
+		return errInvalidProfileName
 	}
 	if err := initProfileManager(); err != nil {
 		return err
 	}
 	if _, exists := profileMgr.profileList[profileName]; exists {
-		return ErrProfileExistsAlready
+		return errProfileExistsAlready
 	}
 	if _, err := newProfileForPath(filepath.Join(profileMgr.dir, profileName)); err != nil {
 		return err
@@ -105,16 +105,16 @@ func New(profileName string) error {
 
 func SetDefault(profileName string) error {
 	if profileName == "" {
-		return ErrInvalidProfileName
+		return errInvalidProfileName
 	}
 	if err := initProfileManager(); err != nil {
 		return err
 	}
 	if _, exists := profileMgr.profileList[profileName]; !exists {
-		return ErrProfileNotFound
+		return errProfileNotFound
 	}
 	if commons.WriteToFile(filepath.Join(profileMgr.dir, defaultProfileFileName), []byte(profileName)) != nil {
-		return ErrSettingDefaultProfile
+		return errSettingDefaultProfile
 	}
 	profileMgr.defaultProfileName = &profileName
 	profileMgr.defaultProfile = nil
@@ -131,7 +131,7 @@ func GetDefaultProfileName() (string, error) {
 	fileContent, err := os.ReadFile(filepath.Join(profileMgr.dir, defaultProfileFileName))
 	defaultProfileName := string(fileContent)
 	if err != nil {
-		return "", ErrNoDefaultProfileFound
+		return "", errNoDefaultProfileFound
 	}
 	profileMgr.defaultProfileName = &defaultProfileName
 	return *profileMgr.defaultProfileName, nil

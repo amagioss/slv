@@ -39,7 +39,7 @@ func (vlt *Vault) Id() string {
 func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
 	if vlt.Config.publicKey == nil {
 		if vlt.Config.PublicKey == nil {
-			return nil, ErrVaultPublicKeyNotFound
+			return nil, errVaultPublicKeyNotFound
 		}
 		publicKey, err = crypto.PublicKeyFromString(*vlt.Config.PublicKey)
 		if err == nil {
@@ -60,13 +60,13 @@ func (vlt *Vault) UnmarshalYAML(value *yaml.Node) (err error) {
 // Returns new vault instance. The vault name should end with .vlt.slv
 func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !strings.HasSuffix(vaultFile, vaultFileExtension) {
-		return nil, ErrInvalidVaultFileName
+		return nil, errInvalidVaultFileName
 	}
 	if commons.FileExists(vaultFile) {
-		return nil, ErrVaultExists
+		return nil, errVaultExists
 	}
 	if os.MkdirAll(path.Dir(vaultFile), os.FileMode(0755)) != nil {
-		return nil, ErrVaultDirPathCreation
+		return nil, errVaultDirPathCreation
 	}
 	vaultSecretKey, err := crypto.NewSecretKey(VaultKey)
 	if err != nil {
@@ -107,10 +107,10 @@ func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, p
 // Returns the vault instance for a given vault file. The vault name should end with .slv
 func Get(vaultFile string) (vlt *Vault, err error) {
 	if !strings.HasSuffix(vaultFile, vaultFileExtension) {
-		return nil, ErrInvalidVaultFileName
+		return nil, errInvalidVaultFileName
 	}
 	if !commons.FileExists(vaultFile) {
-		return nil, ErrVaultNotFound
+		return nil, errVaultNotFound
 	}
 	vlt = &Vault{
 		path: vaultFile,
@@ -152,7 +152,7 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
 			return nil
 		}
 	}
-	return ErrVaultNotAccessible
+	return errVaultNotAccessible
 }
 
 func (vlt *Vault) commit() error {
@@ -167,10 +167,10 @@ func (vlt *Vault) reset() error {
 
 func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	if vlt.IsLocked() {
-		return false, ErrVaultLocked
+		return false, errVaultLocked
 	}
 	if publicKey.Type() == VaultKey {
-		return false, ErrVaultCannotBeSharedWithVault
+		return false, errVaultCannotBeSharedWithVault
 	}
 	for _, wrappedKeyStr := range vlt.vault.Config.WrappedKeys {
 		wrappedKey := &crypto.WrappedKey{}

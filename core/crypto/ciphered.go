@@ -22,7 +22,7 @@ func (ciph ciphered) toBytes() []byte {
 
 func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	if len(cipheredBytes) < cipherTextMinLength {
-		return nil, ErrInvalidCiphertextFormat
+		return nil, errInvalidCiphertextFormat
 	}
 	var version byte = cipheredBytes[0]
 	var keyType KeyType = KeyType(cipheredBytes[1])
@@ -59,7 +59,7 @@ func (sealedSecret SealedSecret) String() string {
 func (sealedSecret *SealedSecret) FromString(sealedSecretStr string) (err error) {
 	sliced := strings.Split(sealedSecretStr, "_")
 	if len(sliced) != 3 && len(sliced) != 4 {
-		return ErrInvalidCiphertextFormat
+		return errInvalidCiphertextFormat
 	}
 	ciphered, err := cipheredFromBytes(commons.Decode(sliced[len(sliced)-1]))
 	if err != nil {
@@ -67,12 +67,12 @@ func (sealedSecret *SealedSecret) FromString(sealedSecretStr string) (err error)
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
 		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) || len(*ciphered.pubKeyBytes) != keyLength {
-		return ErrInvalidCiphertextFormat
+		return errInvalidCiphertextFormat
 	}
 	if len(sliced) == 4 {
 		hash := commons.Decode(sliced[2])
 		if len(hash) > argon2HashMaxLength {
-			return ErrInvalidCiphertextFormat
+			return errInvalidCiphertextFormat
 		}
 		sealedSecret.hash = &hash
 	}
@@ -96,7 +96,7 @@ func (wrappedKey WrappedKey) String() string {
 func (wrappedKey *WrappedKey) FromString(wrappedKeyStr string) (err error) {
 	sliced := strings.Split(wrappedKeyStr, "_")
 	if len(sliced) != 3 {
-		return ErrInvalidCiphertextFormat
+		return errInvalidCiphertextFormat
 	}
 	ciphered, err := cipheredFromBytes(commons.Decode(sliced[len(sliced)-1]))
 	if err != nil {
@@ -104,7 +104,7 @@ func (wrappedKey *WrappedKey) FromString(wrappedKeyStr string) (err error) {
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
 		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.pubKeyBytes) != keyLength {
-		return ErrInvalidCiphertextFormat
+		return errInvalidCiphertextFormat
 	}
 	wrappedKey.ciphered = ciphered
 	return

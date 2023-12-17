@@ -11,7 +11,7 @@ import (
 
 func RegisterUser(name, password string) (env *environments.Environment, err error) {
 	if _, err = getSalt(); err != nil {
-		return nil, UserAlreadyRegistered
+		return nil, errUserAlreadyRegistered
 	}
 	var salt []byte
 	var secretKey *crypto.SecretKey
@@ -37,10 +37,10 @@ func setSalt(salt []byte) error {
 	if err != nil {
 		err = os.MkdirAll(userDir, 0755)
 		if err != nil {
-			return ErrCreatingUserDataDir
+			return errCreatingUserDataDir
 		}
 	} else if !userDirInfo.IsDir() {
-		return ErrFileExistsInPathOfUserDataDir
+		return errFileExistsInPathOfUserDataDir
 	}
 	return commons.WriteToFile(filepath.Join(userDir, userSaltFileName), salt)
 }
@@ -52,7 +52,7 @@ func getSalt() (salt []byte, err error) {
 func getPassphraseFromEnvar() (string, error) {
 	passphrase := os.Getenv(slvEnvPasswordEnvarName)
 	if passphrase == "" {
-		return "", ErrPassphraseNotSet
+		return "", errPassphraseNotSet
 	}
 	return passphrase, nil
 }

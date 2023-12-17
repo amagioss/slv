@@ -36,7 +36,7 @@ func (settings *Settings) UnmarshalYAML(value *yaml.Node) (err error) {
 
 func NewManifest(path string) (settings *Settings, err error) {
 	if commons.FileExists(path) {
-		return nil, ErrManifestPathExistsAlready
+		return nil, errManifestPathExistsAlready
 	}
 	settings = &Settings{
 		path: &path,
@@ -53,7 +53,7 @@ func NewManifest(path string) (settings *Settings, err error) {
 
 func GetManifest(path string) (settings *Settings, err error) {
 	if !commons.FileExists(path) {
-		return nil, ErrManifestNotFound
+		return nil, errManifestNotFound
 	}
 	settings = &Settings{}
 	if err = commons.ReadFromYAML(path, settings); err != nil {
@@ -65,7 +65,7 @@ func GetManifest(path string) (settings *Settings, err error) {
 
 func (settings *Settings) commit() error {
 	if commons.WriteToYAML(*settings.path, "", settings) != nil {
-		return ErrWritingManifest
+		return errWritingManifest
 	}
 	return nil
 }

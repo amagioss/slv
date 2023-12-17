@@ -11,7 +11,7 @@ func (vlt *Vault) getSecretRef(secretName string) string {
 
 func (vlt *Vault) refBlob(data []byte, secretName string, forceUpdate bool) (result string, conflicting bool, err error) {
 	if !forceUpdate && vlt.SecretExists(secretName) {
-		return "", true, ErrVaultSecretExistsAlready
+		return "", true, errVaultSecretExistsAlready
 	}
 	return vlt.getSecretRef(secretName), false, vlt.putSecretWithoutCommit(secretName, data)
 }
@@ -31,8 +31,8 @@ func (vlt *Vault) RefSecrets(refType, file, name string, forceUpdate, dryRun boo
 				err = os.WriteFile(file, []byte(result), 0644)
 			}
 		}
-		if resetErr := vlt.reset(); resetErr != nil {
-			err = resetErr
+		if reseterr := vlt.reset(); reseterr != nil {
+			err = reseterr
 		}
 	}
 	return

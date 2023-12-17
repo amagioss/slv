@@ -26,16 +26,16 @@ func (publicKey *PublicKey) Type() KeyType {
 
 func publicKeyFromBytes(bytes []byte) (*PublicKey, error) {
 	if len(bytes) != keyLength || bytes[1] != 1 {
-		return nil, ErrInvalidPublicKeyFormat
+		return nil, errInvalidPublicKeyFormat
 	}
 	if bytes[0] > commons.Version {
-		return nil, ErrUnsupportedCryptoVersion
+		return nil, errUnsupportedCryptoVersion
 	}
 	var version uint8 = bytes[0]
 	var keyType KeyType = KeyType(bytes[2])
 	pubKey, err := ecc.GetPublicKeyForBytes(bytes[3:])
 	if err != nil {
-		return nil, ErrInvalidPublicKeyFormat
+		return nil, errInvalidPublicKeyFormat
 	}
 	return &PublicKey{
 		version: &version,
@@ -51,7 +51,7 @@ func (publicKey PublicKey) String() string {
 func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
 	sliced := strings.Split(publicKeyStr, "_")
 	if len(sliced) != 3 || sliced[0] != commons.SLV {
-		return nil, ErrInvalidPublicKeyFormat
+		return nil, errInvalidPublicKeyFormat
 	}
 	publicKey, err := publicKeyFromBytes(commons.Decode(sliced[2]))
 	if err != nil {
@@ -59,7 +59,7 @@ func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
 	}
 	if len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*publicKey.keyType)) ||
 		!strings.HasSuffix(sliced[1], publicKeyAbbrev) {
-		return nil, ErrInvalidPublicKeyFormat
+		return nil, errInvalidPublicKeyFormat
 	}
 	return publicKey, nil
 }
@@ -74,7 +74,7 @@ type SecretKey struct {
 func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
 	privKey, err := ecc.NewPrivateKey()
 	if err != nil {
-		return nil, ErrGeneratingSecretKey
+		return nil, errGeneratingSecretKey
 	}
 	return newSecretKey(privKey, keyType), nil
 }
@@ -116,7 +116,7 @@ func (secretKey *SecretKey) PublicKey() (*PublicKey, error) {
 	if secretKey.publicKey == nil {
 		pubKey, err := secretKey.privKey.PublicKey()
 		if err != nil {
-			return nil, ErrDerivingPublicKey
+			return nil, errDerivingPublicKey
 		}
 		secretKey.publicKey = &PublicKey{
 			version: secretKey.version,
@@ -129,16 +129,16 @@ func (secretKey *SecretKey) PublicKey() (*PublicKey, error) {
 
 func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {
 	if len(bytes) != keyLength || bytes[1] != 0 {
-		return nil, ErrInvalidSecretKeyFormat
+		return nil, errInvalidSecretKeyFormat
 	}
 	if bytes[0] > commons.Version {
-		return nil, ErrUnsupportedCryptoVersion
+		return nil, errUnsupportedCryptoVersion
 	}
 	var version uint8 = bytes[0]
 	var keyType KeyType = KeyType(bytes[2])
 	privKey, err := ecc.GetPrivateKeyForBytes(bytes[3:])
 	if err != nil {
-		return nil, ErrInvalidSecretKeyFormat
+		return nil, errInvalidSecretKeyFormat
 	}
 	return &SecretKey{
 		version: &version,
@@ -150,7 +150,7 @@ func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {
 func SecretKeyFromString(secretKeyStr string) (*SecretKey, error) {
 	sliced := strings.Split(secretKeyStr, "_")
 	if len(sliced) != 3 || sliced[0] != commons.SLV {
-		return nil, ErrInvalidSecretKeyFormat
+		return nil, errInvalidSecretKeyFormat
 	}
 	secretKey, err := SecretKeyFromBytes(commons.Decode(sliced[2]))
 	if err != nil {
@@ -158,7 +158,7 @@ func SecretKeyFromString(secretKeyStr string) (*SecretKey, error) {
 	}
 	if len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*secretKey.keyType)) ||
 		!strings.HasSuffix(sliced[1], secretKeyAbbrev) {
-		return nil, ErrInvalidSecretKeyFormat
+		return nil, errInvalidSecretKeyFormat
 	}
 	return secretKey, nil
 }

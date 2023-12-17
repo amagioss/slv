@@ -36,7 +36,7 @@ func (pab *providerAccessBinding) string() (string, error) {
 func providerAccessBindingFromString(providerAccessBindingStr string) (*providerAccessBinding, error) {
 	sliced := strings.Split(providerAccessBindingStr, "_")
 	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != providerAccessBindingAbbrev {
-		return nil, ErrInvalidProviderAccessBindingFormat
+		return nil, errInvalidProviderAccessBindingFormat
 	}
 	binding := new(providerAccessBinding)
 	if err := commons.Deserialize(sliced[2], &binding); err != nil {
@@ -45,20 +45,24 @@ func providerAccessBindingFromString(providerAccessBindingStr string) (*provider
 	return binding, nil
 }
 
-func RegisterAccessProvider(name string, bind Bind, unbind UnBind, refRequired bool) {
+func RegisterAccessProvider(name string, bind Bind, unbind UnBind, refRequired bool) error {
+	if _, ok := providerMap[name]; ok {
+		return errProviderRegisteredAlready
+	}
 	providerMap[name] = &provider{
 		Name:        name,
 		bind:        &bind,
 		unbind:      &unbind,
 		refRequired: refRequired,
 	}
+	return nil
 }
 
 func NewEnvForProvider(providerName, envName string, envType EnvType,
 	inputs map[string][]byte) (*Environment, error) {
 	provider, ok := providerMap[providerName]
 	if !ok {
-		return nil, ErrProviderUnknown
+		return nil, errProviderUnknown
 	}
 	publicKey, ref, err := (*provider.bind)(inputs)
 	if err != nil {
@@ -95,7 +99,7 @@ func GetSecretKeyFromAccessBinding(providerAccessBindingStr string) (secretKey *
 				return crypto.SecretKeyFromBytes(secretKeyBytes)
 			}
 		}
-		return nil, ErrProviderAccessBindingUnspecified
+		return nil, errProviderAccessBindingUnspecified
 	}
 	pab, err := providerAccessBindingFromString(providerAccessBindingStr)
 	if err != nil {
@@ -103,7 +107,7 @@ func GetSecretKeyFromAccessBinding(providerAccessBindingStr string) (secretKey *
 	}
 	provider, ok := providerMap[pab.Provider]
 	if !ok {
-		return nil, ErrProviderUnknown
+		return nil, errProviderUnknown
 	}
 	secretKeyBytes, err := (*provider.unbind)(pab.Ref)
 	if err == nil {

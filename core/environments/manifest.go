@@ -28,7 +28,7 @@ func (envManifest *EnvManifest) UnmarshalYAML(value *yaml.Node) (err error) {
 
 func NewManifest(path string) (envManifest *EnvManifest, err error) {
 	if commons.FileExists(path) {
-		return nil, ErrManifestPathExistsAlready
+		return nil, errManifestPathExistsAlready
 	}
 	envManifest = &EnvManifest{
 		path:     &path,
@@ -43,7 +43,7 @@ func NewManifest(path string) (envManifest *EnvManifest, err error) {
 
 func GetManifest(path string) (envManifest *EnvManifest, err error) {
 	if !commons.FileExists(path) {
-		return nil, ErrManifestNotFound
+		return nil, errManifestNotFound
 	}
 	envManifest = &EnvManifest{}
 	if err = commons.ReadFromYAML(path, envManifest); err != nil {
@@ -55,7 +55,7 @@ func GetManifest(path string) (envManifest *EnvManifest, err error) {
 
 func (envManifest *EnvManifest) commit() error {
 	if commons.WriteToYAML(*envManifest.path, "", envManifest) != nil {
-		return ErrWritingManifest
+		return errWritingManifest
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func (envManifest *EnvManifest) RootPublicKey() (*crypto.PublicKey, error) {
 
 func (envManifest *EnvManifest) SetRoot(env *Environment) error {
 	if envManifest.Root != nil {
-		return ErrRootExistsAlready
+		return errRootExistsAlready
 	}
 	envManifest.Root = env
 	return envManifest.commit()
@@ -88,7 +88,7 @@ func (envManifest *EnvManifest) GetEnv(id string) (environment *Environment, err
 	if environment, ok := envManifest.Environments[id]; ok {
 		return environment, nil
 	}
-	return nil, ErrEnvironmentNotFound
+	return nil, errEnvironmentNotFound
 }
 
 func (envManifest *EnvManifest) SearchEnv(query string) (environments []*Environment) {
