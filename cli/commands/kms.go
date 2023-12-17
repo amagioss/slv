@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef, pubkeyFileFlag FlagDef) *cobra.Command {
+func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef) *cobra.Command {
 	newKMSEnvCmd := &cobra.Command{
 		Use:   kmsName,
 		Short: kmsProviderDesc,
@@ -23,12 +23,12 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef, pubkey
 			keyIdFlagValue := cmd.Flag(keyIdFlag.name).Value.String()
 			providerName := "kms-" + kmsName
 			inputs[keyIdFlag.name] = []byte(keyIdFlagValue)
-			pubKeyFilePath := cmd.Flag(pubkeyFileFlag.name).Value.String()
+			pubKeyFilePath := cmd.Flag(kmsRSAPublicKey.name).Value.String()
 			var rsaPublicKey []byte
 			var env *environments.Environment
 			if pubKeyFilePath != "" {
 				if rsaPublicKey, err = os.ReadFile(pubKeyFilePath); err == nil {
-					inputs[pubkeyFileFlag.name] = rsaPublicKey
+					inputs[kmsRSAPublicKey.name] = rsaPublicKey
 				}
 			}
 			env, err = environments.NewEnvForProvider(providerName, name, environments.SERVICE, inputs)
@@ -58,10 +58,9 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef, pubkey
 	newKMSEnvCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
 	newKMSEnvCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
 	newKMSEnvCmd.Flags().StringP(keyIdFlag.name, keyIdFlag.shorthand, "", keyIdFlag.usage)
-	newKMSEnvCmd.Flags().StringP(pubkeyFileFlag.name, pubkeyFileFlag.shorthand, "", pubkeyFileFlag.usage)
+	newKMSEnvCmd.Flags().StringP(kmsRSAPublicKey.name, kmsRSAPublicKey.shorthand, "", kmsRSAPublicKey.usage)
 	newKMSEnvCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
 	newKMSEnvCmd.MarkFlagRequired(envNameFlag.name)
 	newKMSEnvCmd.MarkFlagRequired(keyIdFlag.name)
-	// newKMSEnvCmd.MarkFlagRequired(pubkeyFileFlag.name)
 	return newKMSEnvCmd
 }

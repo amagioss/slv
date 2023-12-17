@@ -21,9 +21,10 @@ const (
 )
 
 var (
-	ErrAWSConfiguration   = errors.New("please configure AWS access")
-	ErrInvalidAWSKMSARN   = errors.New("invalid AWS KMS ARN")
-	ErrSealedSecretKeyRef = errors.New("invalid sealed secret key ref from provider binding")
+	ErrAWSConfiguration       = errors.New("please configure AWS access")
+	ErrInvalidAWSKMSARN       = errors.New("invalid AWS KMS ARN")
+	ErrInvalidAWSKMSAlgorithm = errors.New("invalid AWS KMS algorithm")
+	ErrSealedSecretKeyRef     = errors.New("invalid sealed secret key from provider binding")
 )
 
 func isValidARN(arn string) bool {
@@ -39,9 +40,9 @@ func isAWSConfigured(session *session.Session) bool {
 	return false
 }
 
-func encryptWithAWSKMSAPI(secretKeyBytes []byte, arn string) (sealedSecretKeyBytes []byte, err error) {
+func encryptWithAWSKMSAPI(secretKeyBytes []byte, arn string) (sealedSecretKeyBytes []byte, algorithm *string, err error) {
 	if !isValidARN(arn) {
-		return nil, ErrInvalidAWSKMSARN
+		return nil, nil, ErrInvalidAWSKMSARN
 	}
 	arnParts := strings.Split(arn, ":")
 	region := arnParts[3]
@@ -49,22 +50,31 @@ func encryptWithAWSKMSAPI(secretKeyBytes []byte, arn string) (sealedSecretKeyByt
 		Region: aws.String(region),
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	kmsClient := kms.New(awsSession)
+	input := &kms.DescribeKeyInput{
+		KeyId: aws.String(arn),
+	}
+	keyDesc, err := kmsClient.DescribeKey(input)
+	if err != nil {
+		if !isAWSConfigured(awsSession) {
+			return nil, nil, ErrAWSConfiguration
+		}
+		return nil, nil, err
+	}
+	encryptionAlgos := keyDesc.KeyMetadata.EncryptionAlgorithms
+	algorithm = encryptionAlgos[len(encryptionAlgos)-1]
 	kmsInput := &kms.EncryptInput{
-		KeyId:     commons.StringPtr(arn),
-		Plaintext: secretKeyBytes,
-		// EncryptionAlgorithm: commons.StringPtr(awsKMSEncryptionAlgorithm),
+		KeyId:               commons.StringPtr(arn),
+		Plaintext:           secretKeyBytes,
+		EncryptionAlgorithm: algorithm,
 	}
 	result, err := kmsClient.Encrypt(kmsInput)
 	if err != nil {
-		if !isAWSConfigured(awsSession) {
-			return nil, ErrAWSConfiguration
-		}
-		return nil, err
+		return nil, nil, err
 	}
-	return result.CiphertextBlob, nil
+	return result.CiphertextBlob, algorithm, err
 }
 
 func BindWithAWSKMS(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error) {
@@ -78,8 +88,11 @@ func BindWithAWSKMS(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref 
 		ref = make(map[string][]byte)
 		ref["arn"] = []byte(arn)
 		if !ok || len(rsaPublicKey) == 0 {
-			if sealedSecretKeyBytes, err = encryptWithAWSKMSAPI(secretKey.Bytes(), arn); err != nil {
+			var algorithm *string
+			if sealedSecretKeyBytes, algorithm, err = encryptWithAWSKMSAPI(secretKey.Bytes(), arn); err != nil {
 				return nil, nil, err
+			} else {
+				ref["alg"] = []byte(*algorithm)
 			}
 		} else if sealedSecretKeyBytes, err = rsaEncrypt(secretKey.Bytes(), rsaPublicKey); err != nil {
 			return nil, nil, err
@@ -112,13 +125,15 @@ func UnBindFromAWSKMS(ref map[string][]byte) (secretKeyBytes []byte, err error) 
 	if len(sealedSecretKeyBytes) == 0 {
 		return nil, ErrSealedSecretKeyRef
 	}
+	algorithm := ref["alg"]
+	if len(algorithm) == 0 {
+		return nil, ErrInvalidAWSKMSAlgorithm
+	}
 	kmsClient := kms.New(awsSession)
 	kmsInput := &kms.DecryptInput{
-		CiphertextBlob: sealedSecretKeyBytes,
-		KeyId:          commons.StringPtr(arn),
-	}
-	if alg, ok := ref["alg"]; ok && len(alg) > 0 {
-		kmsInput.EncryptionAlgorithm = commons.StringPtr(string(alg))
+		CiphertextBlob:      sealedSecretKeyBytes,
+		KeyId:               commons.StringPtr(arn),
+		EncryptionAlgorithm: commons.StringPtr(string(algorithm)),
 	}
 	result, err := kmsClient.Decrypt(kmsInput)
 	if err != nil {

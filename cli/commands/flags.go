@@ -85,7 +85,7 @@ var (
 
 	kmsRSAPublicKey = FlagDef{
 		name:  "rsa-pubkey",
-		usage: "KMS public key [RSA 4096] file (pem format)",
+		usage: "KMS public key [RSA 4096] as pem file (Recommended to perform offline access binding)",
 	}
 
 	// Vault Command Flags
