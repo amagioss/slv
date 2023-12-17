@@ -101,7 +101,7 @@ func envNewCommand() *cobra.Command {
 	envNewCmd.Flags().BoolP(envSelfFlag.name, envSelfFlag.shorthand, false, envSelfFlag.usage)
 	envNewCmd.MarkFlagRequired(envNameFlag.name)
 
-	envNewCmd.AddCommand(newKMSEnvCommand("aws", "Create environment for AWS KMS using RSA-4096 public key", kmsAWSARNFlag, kmsRSAPublicKey))
+	envNewCmd.AddCommand(newKMSEnvCommand("aws", "Create environment accessibly by AWS KMS", kmsAWSARNFlag, kmsRSAPublicKey))
 
 	return envNewCmd
 }

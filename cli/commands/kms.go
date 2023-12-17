@@ -21,15 +21,17 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef, pubkey
 			}
 			inputs := make(map[string][]byte)
 			keyIdFlagValue := cmd.Flag(keyIdFlag.name).Value.String()
+			providerName := "kms-" + kmsName
 			inputs[keyIdFlag.name] = []byte(keyIdFlagValue)
 			pubKeyFilePath := cmd.Flag(pubkeyFileFlag.name).Value.String()
 			var rsaPublicKey []byte
 			var env *environments.Environment
-			if rsaPublicKey, err = os.ReadFile(pubKeyFilePath); err == nil {
-				inputs[pubkeyFileFlag.name] = rsaPublicKey
-				providerName := "kms-" + kmsName
-				env, err = environments.NewEnvForProvider(providerName, name, environments.SERVICE, inputs)
+			if pubKeyFilePath != "" {
+				if rsaPublicKey, err = os.ReadFile(pubKeyFilePath); err == nil {
+					inputs[pubkeyFileFlag.name] = rsaPublicKey
+				}
 			}
+			env, err = environments.NewEnvForProvider(providerName, name, environments.SERVICE, inputs)
 			if err != nil {
 				exitOnError(err)
 			}
@@ -60,6 +62,6 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef, pubkey
 	newKMSEnvCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
 	newKMSEnvCmd.MarkFlagRequired(envNameFlag.name)
 	newKMSEnvCmd.MarkFlagRequired(keyIdFlag.name)
-	newKMSEnvCmd.MarkFlagRequired(pubkeyFileFlag.name)
+	// newKMSEnvCmd.MarkFlagRequired(pubkeyFileFlag.name)
 	return newKMSEnvCmd
 }
