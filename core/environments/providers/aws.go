@@ -8,9 +8,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/shibme/slv/core/commons"
-	"github.com/shibme/slv/core/crypto"
-	"github.com/shibme/slv/core/environments"
+	"github.com/amagimedia/slv/core/commons"
+	"github.com/amagimedia/slv/core/crypto"
+	"github.com/amagimedia/slv/core/environments"
 )
 
 func isValidARN(arn string) bool {

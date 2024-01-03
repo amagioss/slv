@@ -6,9 +6,9 @@ import (
 	"text/tabwriter"
 
 	"github.com/fatih/color"
-	"github.com/shibme/slv/core/crypto"
-	"github.com/shibme/slv/core/environments"
-	"github.com/shibme/slv/core/profiles"
+	"github.com/amagimedia/slv/core/crypto"
+	"github.com/amagimedia/slv/core/environments"
+	"github.com/amagimedia/slv/core/profiles"
 	"github.com/spf13/cobra"
 )
 
@@ -118,7 +118,7 @@ func envListCommand() *cobra.Command {
 			var prof *profiles.Profile
 			var err error
 			if profileName != "" {
-				prof, err = profiles.GetProfile(profileName)
+				prof, err = profiles.Get(profileName)
 			} else {
 				prof, err = profiles.GetDefaultProfile()
 			}

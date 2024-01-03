@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/shibme/slv/core/crypto"
-	"github.com/shibme/slv/core/profiles"
-	"github.com/shibme/slv/core/secretkeystore"
-	"github.com/shibme/slv/core/vaults"
+	"github.com/amagimedia/slv/core/crypto"
+	"github.com/amagimedia/slv/core/profiles"
+	"github.com/amagimedia/slv/core/secretkeystore"
+	"github.com/amagimedia/slv/core/vaults"
 	"github.com/spf13/cobra"
 )
 

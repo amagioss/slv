@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/shibme/slv/core/crypto"
+	"github.com/amagimedia/slv/core/crypto"
 )
 
 const (

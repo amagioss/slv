@@ -3,9 +3,8 @@ package crypto
 import (
 	"strings"
 
-	"github.com/shibme/slv/core/commons"
-	"gopkg.shib.me/gociphers/argon2"
-	"gopkg.shib.me/gociphers/ecc"
+	"dev.shib.me/xipher"
+	"github.com/amagimedia/slv/core/commons"
 )
 
 type KeyType byte
@@ -13,7 +12,7 @@ type KeyType byte
 type PublicKey struct {
 	version *uint8
 	keyType *KeyType
-	pubKey  *ecc.PublicKey
+	pubKey  *xipher.PublicKey
 }
 
 func (publicKey *PublicKey) toBytes() []byte {
@@ -25,7 +24,7 @@ func (publicKey *PublicKey) Type() KeyType {
 }
 
 func publicKeyFromBytes(bytes []byte) (*PublicKey, error) {
-	if len(bytes) != keyLength || bytes[1] != 1 {
+	if len(bytes) != publicKeyLength || bytes[1] != 1 {
 		return nil, errInvalidPublicKeyFormat
 	}
 	if bytes[0] > commons.Version {
@@ -33,7 +32,7 @@ func publicKeyFromBytes(bytes []byte) (*PublicKey, error) {
 	}
 	var version uint8 = bytes[0]
 	var keyType KeyType = KeyType(bytes[2])
-	pubKey, err := ecc.GetPublicKeyForBytes(bytes[3:])
+	pubKey, err := xipher.ParsePublicKey(bytes[3:])
 	if err != nil {
 		return nil, errInvalidPublicKeyFormat
 	}
@@ -53,7 +52,11 @@ func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
 	if len(sliced) != 3 || sliced[0] != commons.SLV {
 		return nil, errInvalidPublicKeyFormat
 	}
-	publicKey, err := publicKeyFromBytes(commons.Decode(sliced[2]))
+	decoded, err := commons.Decode(sliced[2])
+	if err != nil {
+		return nil, err
+	}
+	publicKey, err := publicKeyFromBytes(decoded)
 	if err != nil {
 		return nil, err
 	}
@@ -67,43 +70,27 @@ func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
 type SecretKey struct {
 	version   *uint8
 	keyType   *KeyType
-	privKey   *ecc.PrivateKey
+	privKey   *xipher.PrivateKey
 	publicKey *PublicKey
 }
 
 func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
-	privKey, err := ecc.NewPrivateKey()
+	privKey, err := xipher.NewPrivateKey()
 	if err != nil {
 		return nil, errGeneratingSecretKey
 	}
 	return newSecretKey(privKey, keyType), nil
 }
 
-func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *SecretKey, salt []byte, err error) {
-	key, salt, err := argon2.GenerateKeyForPassword(password)
-	if err != nil {
-		return nil, nil, err
-	}
-	privKey, err := ecc.GetPrivateKeyForBytes(key)
-	if err != nil {
-		return nil, nil, err
-	}
-	return newSecretKey(privKey, keyType), salt, nil
-}
-
-func NewSecretKeyForPasswordAndSalt(password, salt []byte, keyType KeyType) (secretKey *SecretKey, err error) {
-	key, err := argon2.GenerateKeyForPasswordAndSalt(password, salt)
-	if err != nil {
-		return nil, err
-	}
-	privKey, err := ecc.GetPrivateKeyForBytes(key)
+func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *SecretKey, err error) {
+	privKey, err := xipher.NewPrivateKeyForPassword(password)
 	if err != nil {
 		return nil, err
 	}
 	return newSecretKey(privKey, keyType), nil
 }
 
-func newSecretKey(privKey *ecc.PrivateKey, keyType KeyType) *SecretKey {
+func newSecretKey(privKey *xipher.PrivateKey, keyType KeyType) *SecretKey {
 	version := commons.Version
 	return &SecretKey{
 		version: &version,
@@ -128,7 +115,7 @@ func (secretKey *SecretKey) PublicKey() (*PublicKey, error) {
 }
 
 func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {
-	if len(bytes) != keyLength || bytes[1] != 0 {
+	if len(bytes) != secretKeyLength || bytes[1] != 0 {
 		return nil, errInvalidSecretKeyFormat
 	}
 	if bytes[0] > commons.Version {
@@ -136,7 +123,7 @@ func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {
 	}
 	var version uint8 = bytes[0]
 	var keyType KeyType = KeyType(bytes[2])
-	privKey, err := ecc.GetPrivateKeyForBytes(bytes[3:])
+	privKey, err := xipher.ParsePrivateKey(bytes[3:])
 	if err != nil {
 		return nil, errInvalidSecretKeyFormat
 	}
@@ -152,7 +139,11 @@ func SecretKeyFromString(secretKeyStr string) (*SecretKey, error) {
 	if len(sliced) != 3 || sliced[0] != commons.SLV {
 		return nil, errInvalidSecretKeyFormat
 	}
-	secretKey, err := SecretKeyFromBytes(commons.Decode(sliced[2]))
+	decoded, err := commons.Decode(sliced[2])
+	if err != nil {
+		return nil, err
+	}
+	secretKey, err := SecretKeyFromBytes(decoded)
 	if err != nil {
 		return nil, err
 	}
@@ -164,9 +155,17 @@ func SecretKeyFromString(secretKeyStr string) (*SecretKey, error) {
 }
 
 func (secretKey *SecretKey) Bytes() []byte {
-	return append([]byte{*secretKey.version, 0, byte(*secretKey.keyType)}, secretKey.privKey.Bytes()...)
+	if privKeyBytes, err := secretKey.privKey.Bytes(); err != nil {
+		return nil
+	} else {
+		return append([]byte{*secretKey.version, 0, byte(*secretKey.keyType)}, privKeyBytes...)
+	}
 }
 
 func (secretKey SecretKey) String() string {
-	return commons.SLV + "_" + string(*secretKey.keyType) + secretKeyAbbrev + "_" + commons.Encode(secretKey.Bytes())
+	if secretKeyBytes := secretKey.Bytes(); secretKeyBytes == nil {
+		return ""
+	} else {
+		return commons.SLV + "_" + string(*secretKey.keyType) + secretKeyAbbrev + "_" + commons.Encode(secretKeyBytes)
+	}
 }

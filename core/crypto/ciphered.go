@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/shibme/slv/core/commons"
+	"github.com/amagimedia/slv/core/commons"
 )
 
 type ciphered struct {
@@ -27,8 +27,8 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	var version byte = cipheredBytes[0]
 	var keyType KeyType = KeyType(cipheredBytes[1])
 	cipheredBytes = cipheredBytes[2:]
-	pubKeyBytes := cipheredBytes[:keyLength]
-	ciphertext := cipheredBytes[keyLength:]
+	pubKeyBytes := cipheredBytes[:publicKeyLength]
+	ciphertext := cipheredBytes[publicKeyLength:]
 	return &ciphered{
 		version:     &version,
 		keyType:     &keyType,
@@ -61,17 +61,24 @@ func (sealedSecret *SealedSecret) FromString(sealedSecretStr string) (err error)
 	if len(sliced) != 3 && len(sliced) != 4 {
 		return errInvalidCiphertextFormat
 	}
-	ciphered, err := cipheredFromBytes(commons.Decode(sliced[len(sliced)-1]))
+	decoded, err := commons.Decode(sliced[len(sliced)-1])
+	if err != nil {
+		return err
+	}
+	ciphered, err := cipheredFromBytes(decoded)
 	if err != nil {
 		return err
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
-		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) || len(*ciphered.pubKeyBytes) != keyLength {
+		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) || len(*ciphered.pubKeyBytes) != publicKeyLength {
 		return errInvalidCiphertextFormat
 	}
 	if len(sliced) == 4 {
-		hash := commons.Decode(sliced[2])
-		if len(hash) > argon2HashMaxLength {
+		hash, err := commons.Decode(sliced[2])
+		if err != nil {
+			return err
+		}
+		if len(hash) > hashMaxLength {
 			return errInvalidCiphertextFormat
 		}
 		sealedSecret.hash = &hash
@@ -98,12 +105,16 @@ func (wrappedKey *WrappedKey) FromString(wrappedKeyStr string) (err error) {
 	if len(sliced) != 3 {
 		return errInvalidCiphertextFormat
 	}
-	ciphered, err := cipheredFromBytes(commons.Decode(sliced[len(sliced)-1]))
+	decoded, err := commons.Decode(sliced[len(sliced)-1])
+	if err != nil {
+		return err
+	}
+	ciphered, err := cipheredFromBytes(decoded)
 	if err != nil {
 		return err
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
-		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.pubKeyBytes) != keyLength {
+		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.pubKeyBytes) != publicKeyLength {
 		return errInvalidCiphertextFormat
 	}
 	wrappedKey.ciphered = ciphered

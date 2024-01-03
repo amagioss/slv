@@ -1,9 +1,8 @@
 package commons
 
 import (
+	"encoding/base32"
 	"encoding/json"
-
-	"github.com/btcsuite/btcutil/base58"
 )
 
 func jsonSerialize(data interface{}) (dataBytes []byte, err error) {
@@ -35,7 +34,10 @@ func Serialize(data interface{}) (string, error) {
 }
 
 func Deserialize(serialized string, data interface{}) (err error) {
-	serializedBytes := Decode(serialized)
+	serializedBytes, err := Decode(serialized)
+	if err != nil {
+		return err
+	}
 	serializedBytes, err = Decompress(serializedBytes)
 	if err != nil {
 		return err
@@ -44,9 +46,9 @@ func Deserialize(serialized string, data interface{}) (err error) {
 }
 
 func Encode(data []byte) (encoded string) {
-	return base58.Encode(data)
+	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(data)
 }
 
-func Decode(encoded string) (data []byte) {
-	return base58.Decode(encoded)
+func Decode(encoded string) (data []byte, err error) {
+	return base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(encoded)
 }

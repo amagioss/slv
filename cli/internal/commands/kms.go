@@ -3,8 +3,8 @@ package commands
 import (
 	"os"
 
-	"github.com/shibme/slv/core/environments"
-	"github.com/shibme/slv/core/profiles"
+	"github.com/amagimedia/slv/core/environments"
+	"github.com/amagimedia/slv/core/profiles"
 	"github.com/spf13/cobra"
 )
 

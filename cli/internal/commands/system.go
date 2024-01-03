@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/shibme/slv/core/commons"
+	"github.com/amagimedia/slv/core/commons"
 	"github.com/spf13/cobra"
 )
 

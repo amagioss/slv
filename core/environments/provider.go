@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/shibme/slv/core/commons"
-	"github.com/shibme/slv/core/crypto"
+	"github.com/amagimedia/slv/core/commons"
+	"github.com/amagimedia/slv/core/crypto"
 )
 
 type Bind func(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error)

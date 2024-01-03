@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/shibme/slv/core/commons"
+	"github.com/amagimedia/slv/core/commons"
 )
 
 type profileManager struct {
@@ -65,7 +65,7 @@ func List() (profileNames []string, err error) {
 	return
 }
 
-func GetProfile(profileName string) (profile *Profile, err error) {
+func Get(profileName string) (profile *Profile, err error) {
 	if err = initProfileManager(); err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func GetDefaultProfile() (profile *Profile, err error) {
 		if err != nil {
 			return nil, err
 		}
-		if profileMgr.defaultProfile, err = GetProfile(defaultProfileName); err != nil {
+		if profileMgr.defaultProfile, err = Get(defaultProfileName); err != nil {
 			return nil, err
 		}
 	}

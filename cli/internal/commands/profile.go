@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/shibme/slv/core/environments"
-	"github.com/shibme/slv/core/profiles"
+	"github.com/amagimedia/slv/core/environments"
+	"github.com/amagimedia/slv/core/profiles"
 	"github.com/spf13/cobra"
 )
 
@@ -122,7 +122,7 @@ func profileAddEnvCommand() *cobra.Command {
 			profileName := cmd.Flag(profileNameFlag.name).Value.String()
 			var prof *profiles.Profile
 			if profileName != "" {
-				prof, err = profiles.GetProfile(profileName)
+				prof, err = profiles.Get(profileName)
 			} else {
 				prof, err = profiles.GetDefaultProfile()
 			}

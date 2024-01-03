@@ -3,7 +3,7 @@ package crypto
 import (
 	"errors"
 
-	"gopkg.shib.me/gociphers/ecc"
+	"dev.shib.me/xipher"
 )
 
 const (
@@ -12,10 +12,11 @@ const (
 	wrappedKeyAbbrev   = "WK" // WK = Wrapped Key
 	sealedSecretAbbrev = "SS" // SS = Sealed Secret
 
-	keyLength           = ecc.KeyLength + 3
-	cipherTextMinLength = ecc.CipherTextMinLength + keyLength + 2
+	publicKeyLength     = xipher.PublicKeyLength + 3
+	secretKeyLength     = xipher.PrivateKeyLength + 3
+	cipherTextMinLength = publicKeyLength + 2
 
-	argon2HashMaxLength = 4
+	hashMaxLength = 4
 )
 
 var (

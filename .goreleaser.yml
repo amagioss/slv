@@ -2,7 +2,7 @@ builds:
   - main: ./cli
     env:
       - CGO_ENABLED=0
-    ldflags: "-X github.com/shibme/slv/cli/commands.AppName={{.ProjectName}} -X github.com/shibme/slv/cli/commands.Version={{.Version}}"
+    ldflags: "-X github.com/amagimedia/slv/cli/commands.AppName={{.ProjectName}} -X github.com/amagimedia/slv/cli/commands.Version={{.Version}}"
     goarch:
       - amd64
       - arm64
@@ -21,23 +21,23 @@ changelog:
       - '^docs:'
       - '^test:'
 nfpms:
-  - vendor: Shibly Meeran
-    homepage: https://github.com/shibme/slv
-    maintainer: Shibly Meeran <pkg@shib.me>
+  - vendor: Amagi Media Private Ltd.
+    homepage: https://github.com/amagimedia/slv
+    maintainer: Shibly Meeran <shibly.meeran@amagi.com>
     formats:
       - apk
       - deb
       - rpm
 brews:
   - name: slv
-    homepage: "https://github.com/shibme/slv"
+    homepage: "https://github.com/amagimedia/slv"
     commit_author:
-      name: shibme
-      email: git@shib.me
+      name: Shibly Meeran
+      email: shibme@shib.me
     repository:
-      owner: shibme
+      owner: amagimedia
       name: homebrew-tap
       branch: main
       git:
-        url: 'git@github.com:shibme/homebrew-tap.git'
+        url: 'git@github.com:amagimedia/homebrew-tap.git'
         private_key: '{{ .Env.HOMEBREW_SSH_KEY }}'

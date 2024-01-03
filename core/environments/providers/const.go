@@ -3,6 +3,9 @@ package providers
 import "errors"
 
 const (
+	// Password Provider Constants
+	passwordProviderName = "password"
+	passwordPolicyRegex  = `^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*?])[A-Za-z\d!@#$%^&*?]{10,}$`
 
 	// AWS Provider Constants
 	awsKMSAsymmetricEncryptionAlgorithm = "RSAES_OAEP_SHA_256"

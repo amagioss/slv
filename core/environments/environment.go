@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/shibme/slv/core/commons"
-	"github.com/shibme/slv/core/crypto"
+	"github.com/amagimedia/slv/core/commons"
+	"github.com/amagimedia/slv/core/crypto"
 	"gopkg.in/yaml.v3"
 )
 

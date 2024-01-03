@@ -3,7 +3,7 @@ package secretkeystore
 import (
 	"os"
 
-	"github.com/shibme/slv/core/crypto"
+	"github.com/amagimedia/slv/core/crypto"
 )
 
 func getSecretKeyFromEnvar() (*crypto.SecretKey, error) {

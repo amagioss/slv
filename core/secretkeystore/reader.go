@@ -3,8 +3,8 @@ package secretkeystore
 import (
 	"os"
 
-	"github.com/shibme/slv/core/crypto"
-	"github.com/shibme/slv/core/environments"
+	"github.com/amagimedia/slv/core/crypto"
+	"github.com/amagimedia/slv/core/environments"
 )
 
 var secretKey *crypto.SecretKey

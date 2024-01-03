@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/shibme/slv/core/commons"
-	"github.com/shibme/slv/core/environments"
-	"github.com/shibme/slv/core/settings"
+	"github.com/amagimedia/slv/core/commons"
+	"github.com/amagimedia/slv/core/environments"
+	"github.com/amagimedia/slv/core/settings"
 	"gopkg.in/yaml.v3"
 )
 

@@ -1,8 +1,8 @@
 package vaults
 
 import (
-	"github.com/shibme/slv/core/commons"
-	"github.com/shibme/slv/core/crypto"
+	"github.com/amagimedia/slv/core/commons"
+	"github.com/amagimedia/slv/core/crypto"
 )
 
 func (vlt *Vault) putSecretWithoutCommit(secretName string, secretValue []byte) (err error) {

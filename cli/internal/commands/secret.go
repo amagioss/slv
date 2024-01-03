@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/shibme/slv/core/secretkeystore"
-	"github.com/shibme/slv/core/vaults"
+	"github.com/amagimedia/slv/core/secretkeystore"
+	"github.com/amagimedia/slv/core/vaults"
 	"github.com/spf13/cobra"
 )
 

@@ -1,8 +1,8 @@
 package crypto
 
 import (
-	"github.com/shibme/slv/core/commons"
-	"gopkg.shib.me/gociphers/argon2"
+	"github.com/amagimedia/slv/core/commons"
+	"golang.org/x/crypto/argon2"
 )
 
 func (publicKey *PublicKey) encrypt(data []byte) (*ciphered, error) {
@@ -28,6 +28,10 @@ func (publicKey *PublicKey) EncryptKey(secretKey SecretKey) (wrappedKey *Wrapped
 	return
 }
 
+func hash(data []byte, length uint32) []byte {
+	return argon2.IDKey(data, nil, 16, 64, 1, length)
+}
+
 func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint32) (sealedSecret *SealedSecret, err error) {
 	ciphered, err := publicKey.encrypt(secret)
 	if err == nil {
@@ -35,10 +39,10 @@ func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint32) (se
 			ciphered: ciphered,
 		}
 		if hashLength != nil && *hashLength > 0 {
-			if *hashLength > argon2HashMaxLength {
-				*hashLength = argon2HashMaxLength
+			if *hashLength > hashMaxLength {
+				*hashLength = hashMaxLength
 			}
-			hash := argon2.Hash(secret, *hashLength)
+			hash := hash(secret, *hashLength)
 			sealedSecret.hash = &hash
 		}
 	}
