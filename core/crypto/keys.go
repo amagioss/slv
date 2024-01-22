@@ -24,7 +24,7 @@ func (publicKey *PublicKey) Type() KeyType {
 }
 
 func publicKeyFromBytes(bytes []byte) (*PublicKey, error) {
-	if len(bytes) != publicKeyLength || bytes[1] != 1 {
+	if bytes[1] != 1 {
 		return nil, errInvalidPublicKeyFormat
 	}
 	if bytes[0] > commons.Version {
@@ -115,7 +115,7 @@ func (secretKey *SecretKey) PublicKey() (*PublicKey, error) {
 }
 
 func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {
-	if len(bytes) != secretKeyLength || bytes[1] != 0 {
+	if bytes[1] != 0 {
 		return nil, errInvalidSecretKeyFormat
 	}
 	if bytes[0] > commons.Version {

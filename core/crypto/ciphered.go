@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"bytes"
+	"encoding/binary"
 	"strings"
 
 	"github.com/amagimedia/slv/core/commons"
@@ -15,20 +16,25 @@ type ciphered struct {
 }
 
 func (ciph ciphered) toBytes() []byte {
-	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, *ciph.pubKeyBytes...)
+	keyLenBytes := make([]byte, 2)
+	binary.BigEndian.PutUint16(keyLenBytes, uint16(len(*ciph.pubKeyBytes)))
+	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, keyLenBytes...)
+	cipheredBytes = append(cipheredBytes, *ciph.pubKeyBytes...)
 	cipheredBytes = append(cipheredBytes, *ciph.ciphertext...)
 	return cipheredBytes
 }
 
 func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
-	if len(cipheredBytes) < cipherTextMinLength {
-		return nil, errInvalidCiphertextFormat
-	}
 	var version byte = cipheredBytes[0]
 	var keyType KeyType = KeyType(cipheredBytes[1])
 	cipheredBytes = cipheredBytes[2:]
-	pubKeyBytes := cipheredBytes[:publicKeyLength]
-	ciphertext := cipheredBytes[publicKeyLength:]
+	keyLen := binary.BigEndian.Uint16(cipheredBytes[:2])
+	cipheredBytes = cipheredBytes[2:]
+	if len(cipheredBytes) < int(keyLen) {
+		return nil, errInvalidCiphertextFormat
+	}
+	pubKeyBytes := cipheredBytes[:keyLen]
+	ciphertext := cipheredBytes[keyLen:]
 	return &ciphered{
 		version:     &version,
 		keyType:     &keyType,
@@ -70,7 +76,7 @@ func (sealedSecret *SealedSecret) FromString(sealedSecretStr string) (err error)
 		return err
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
-		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) || len(*ciphered.pubKeyBytes) != publicKeyLength {
+		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) {
 		return errInvalidCiphertextFormat
 	}
 	if len(sliced) == 4 {
@@ -114,7 +120,7 @@ func (wrappedKey *WrappedKey) FromString(wrappedKeyStr string) (err error) {
 		return err
 	}
 	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
-		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) || len(*ciphered.pubKeyBytes) != publicKeyLength {
+		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) {
 		return errInvalidCiphertextFormat
 	}
 	wrappedKey.ciphered = ciphered

@@ -1,5 +1,11 @@
 #!/bin/sh
 
+slvbinfile=$(mktemp)
+
+go build -o $slvbinfile ./cli
+
+alias slv=$slvbinfile
+
 # Clear the system before starting
 slv system prune -y
 

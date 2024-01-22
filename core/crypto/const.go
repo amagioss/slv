@@ -2,8 +2,6 @@ package crypto
 
 import (
 	"errors"
-
-	"dev.shib.me/xipher"
 )
 
 const (
@@ -11,10 +9,6 @@ const (
 	secretKeyAbbrev    = "SK" // SK = Secret Key
 	wrappedKeyAbbrev   = "WK" // WK = Wrapped Key
 	sealedSecretAbbrev = "SS" // SS = Sealed Secret
-
-	publicKeyLength     = xipher.PublicKeyLength + 3
-	secretKeyLength     = xipher.PrivateKeyLength + 3
-	cipherTextMinLength = publicKeyLength + 2
 
 	hashMaxLength = 4
 )
