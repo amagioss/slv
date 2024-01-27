@@ -3,16 +3,12 @@ package commands
 import (
 	"fmt"
 
+	"github.com/amagimedia/slv"
 	"github.com/spf13/cobra"
 )
 
-var (
-	Version = "dev"
-	AppName = "slv"
-)
-
 func showVersionInfo() {
-	fmt.Println(AppName, Version)
+	fmt.Println(slv.AppName, slv.Version)
 }
 
 func versionCommand() *cobra.Command {

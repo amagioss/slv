@@ -8,28 +8,53 @@ import (
 
 	"github.com/amagimedia/slv/core/commons"
 	"github.com/amagimedia/slv/core/crypto"
-	"gopkg.in/yaml.v3"
 )
 
 type config struct {
-	PublicKey   *string   `yaml:"publicKey"`
-	HashLength  *uint32   `yaml:"hashLength,omitempty"`
-	WrappedKeys []*string `yaml:"wrappedKeys,omitempty"`
-	publicKey   *crypto.PublicKey
-}
-
-type vault struct {
-	Secrets map[string]*string `yaml:"slvSecrets,omitempty"`
-	Config  config             `yaml:"slvConfig,omitempty"`
+	PublicKey   *string   `json:"publicKey" yaml:"publicKey"`
+	HashLength  *uint32   `json:"hashLength,omitempty" yaml:"hashLength,omitempty"`
+	WrappedKeys []*string `json:"wrappedKeys" yaml:"wrappedKeys"`
 }
 
 type Vault struct {
-	*vault
-	path                 string
-	secretKey            *crypto.SecretKey
-	unlockedBy           *string
-	decryptedSecretCache map[string][]byte
-	vaultSecretRefRegex  *regexp.Regexp
+	Secrets             map[string]*string `json:"slvSecrets,omitempty" yaml:"slvSecrets,omitempty"`
+	Config              config             `json:"slvConfig" yaml:"slvConfig"`
+	path                string             `json:"-"`
+	publicKey           *crypto.PublicKey  `json:"-"`
+	secretKey           *crypto.SecretKey  `json:"-"`
+	unlockedBy          *string            `json:"-"`
+	decryptedSecrets    map[string][]byte  `json:"-"`
+	vaultSecretRefRegex *regexp.Regexp     `json:"-"`
+}
+
+func (v *Vault) DeepCopyInto(out *Vault) {
+	*out = *v
+	out.Secrets = make(map[string]*string, len(v.Secrets))
+	for key, val := range v.Secrets {
+		out.Secrets[key] = commons.StringPtr(*val)
+	}
+	out.Config = config{}
+	if v.Config.PublicKey != nil {
+		out.Config.PublicKey = commons.StringPtr(*v.Config.PublicKey)
+	}
+	if v.Config.HashLength != nil {
+		var hashLen uint32 = *v.Config.HashLength
+		out.Config.HashLength = &hashLen
+	}
+	out.Config.WrappedKeys = make([]*string, len(v.Config.WrappedKeys))
+	for i, val := range v.Config.WrappedKeys {
+		out.Config.WrappedKeys[i] = commons.StringPtr(*val)
+	}
+	out.path = v.path
+	out.publicKey = v.publicKey
+	out.secretKey = v.secretKey
+	out.unlockedBy = v.unlockedBy
+	out.decryptedSecrets = make(map[string][]byte, len(v.decryptedSecrets))
+	for key, val := range v.decryptedSecrets {
+		out.decryptedSecrets[key] = make([]byte, len(val))
+		copy(out.decryptedSecrets[key], val)
+	}
+	out.vaultSecretRefRegex = v.vaultSecretRefRegex
 }
 
 func (vlt *Vault) Id() string {
@@ -37,24 +62,16 @@ func (vlt *Vault) Id() string {
 }
 
 func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
-	if vlt.Config.publicKey == nil {
+	if vlt.publicKey == nil {
 		if vlt.Config.PublicKey == nil {
 			return nil, errVaultPublicKeyNotFound
 		}
 		publicKey, err = crypto.PublicKeyFromString(*vlt.Config.PublicKey)
 		if err == nil {
-			vlt.Config.publicKey = publicKey
+			vlt.publicKey = publicKey
 		}
 	}
-	return vlt.Config.publicKey, err
-}
-
-func (vlt Vault) MarshalYAML() (interface{}, error) {
-	return vlt.vault, nil
-}
-
-func (vlt *Vault) UnmarshalYAML(value *yaml.Node) (err error) {
-	return value.Decode(&vlt.vault)
+	return vlt.publicKey, err
 }
 
 // Returns new vault instance. The vault name should end with .vlt.slv
@@ -81,12 +98,10 @@ func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, p
 		hashLen = &hashLength
 	}
 	vlt = &Vault{
-		vault: &vault{
-			Config: config{
-				publicKey:  vaultPublicKey,
-				PublicKey:  commons.StringPtr(vaultPublicKey.String()),
-				HashLength: hashLen,
-			},
+		publicKey: vaultPublicKey,
+		Config: config{
+			PublicKey:  commons.StringPtr(vaultPublicKey.String()),
+			HashLength: hashLen,
 		},
 		path:      vaultFile,
 		secretKey: vaultSecretKey,
@@ -115,7 +130,7 @@ func Get(vaultFile string) (vlt *Vault, err error) {
 	vlt = &Vault{
 		path: vaultFile,
 	}
-	if err = commons.ReadFromYAML(vlt.path, &vlt.vault); err != nil {
+	if err = commons.ReadFromYAML(vlt.path, &vlt); err != nil {
 		return nil, err
 	}
 	return vlt, nil
@@ -139,7 +154,7 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
 	if err != nil || (!vlt.IsLocked() && *vlt.unlockedBy == publicKey.String()) {
 		return err
 	}
-	for _, wrappedKeyStr := range vlt.vault.Config.WrappedKeys {
+	for _, wrappedKeyStr := range vlt.Config.WrappedKeys {
 		wrappedKey := &crypto.WrappedKey{}
 		if err = wrappedKey.FromString(*wrappedKeyStr); err != nil {
 			return err
@@ -157,12 +172,12 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
 
 func (vlt *Vault) commit() error {
 	return commons.WriteToYAML(vlt.path,
-		"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" to reference secrets from this vault into files\n", *vlt.vault)
+		"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" to reference secrets from this vault into files\n", *vlt)
 }
 
 func (vlt *Vault) reset() error {
 	vlt.clearSecretCache()
-	return commons.ReadFromYAML(vlt.path, &vlt.vault)
+	return commons.ReadFromYAML(vlt.path, &vlt)
 }
 
 func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
@@ -172,7 +187,7 @@ func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	if publicKey.Type() == VaultKey {
 		return false, errVaultCannotBeSharedWithVault
 	}
-	for _, wrappedKeyStr := range vlt.vault.Config.WrappedKeys {
+	for _, wrappedKeyStr := range vlt.Config.WrappedKeys {
 		wrappedKey := &crypto.WrappedKey{}
 		if err := wrappedKey.FromString(*wrappedKeyStr); err != nil {
 			return false, err
@@ -183,7 +198,7 @@ func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	}
 	wrappedKey, err := publicKey.EncryptKey(*vlt.secretKey)
 	if err == nil {
-		vlt.vault.Config.WrappedKeys = append(vlt.vault.Config.WrappedKeys, commons.StringPtr(wrappedKey.String()))
+		vlt.Config.WrappedKeys = append(vlt.Config.WrappedKeys, commons.StringPtr(wrappedKey.String()))
 		err = vlt.commit()
 	}
 	return err == nil, err

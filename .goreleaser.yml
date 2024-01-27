@@ -1,8 +1,10 @@
 builds:
-  - main: ./cli
+  - id: slv
+    binary: slv
+    main: ./cli
     env:
       - CGO_ENABLED=0
-    ldflags: "-X github.com/amagimedia/slv/cli/commands.AppName={{.ProjectName}} -X github.com/amagimedia/slv/cli/commands.Version={{.Version}}"
+    ldflags: "-X github.com/amagimedia/slv.AppName={{.ProjectName}} -X github.com/amagimedia/slv.Version={{.Version}}"
     goarch:
       - amd64
       - arm64
@@ -10,8 +12,22 @@ builds:
       - darwin
       - linux
       - windows
+  - id: k8slv
+    binary: k8slv
+    main: ./k8s/cmd
+    env:
+      - CGO_ENABLED=0
+    ldflags: "-X github.com/amagimedia/slv.AppName={{.ProjectName}} -X github.com/amagimedia/slv.Version={{.Version}}"
+    goarch:
+      - amd64
+      - arm64
+    goos:
+      - linux
 archives:
-  - format: zip
+  - id: slv
+    format: zip
+    builds:
+      - slv
 snapshot:
   name_template: "{{ incpatch .Version }}-dev"
 changelog:
@@ -21,7 +37,9 @@ changelog:
       - '^docs:'
       - '^test:'
 nfpms:
-  - vendor: Amagi Media Private Ltd.
+  - builds:
+      - slv
+    vendor: Amagi Media Private Ltd.
     homepage: https://github.com/amagimedia/slv
     maintainer: Shibly Meeran <shibly.meeran@amagi.com>
     formats:
@@ -29,7 +47,9 @@ nfpms:
       - deb
       - rpm
 brews:
-  - name: slv
+  - ids:
+      - slv
+    name: slv
     homepage: "https://github.com/amagimedia/slv"
     commit_author:
       name: Shibly Meeran
