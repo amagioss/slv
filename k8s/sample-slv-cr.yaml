@@ -2,7 +2,6 @@ apiVersion: k8s.amagi.com/v1
 kind: SLV
 metadata:
   name: slv-sample
-  namespace: elsewhere
 spec:
   secretName: cat
   vault:

@@ -94,6 +94,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 				logCtx.Error(err, "Failed to create secret", "Secret", secret)
 				return ctrl.Result{}, err
 			}
+			logCtx.Info("Created secret", "Secret", crObj.Spec.SecretName)
 		} else {
 			logCtx.Error(err, "Failed to get secret", "Secret", secret)
 			return ctrl.Result{}, err
@@ -105,6 +106,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			logCtx.Error(err, "Failed to update secret", "Secret", secret)
 			return ctrl.Result{}, err
 		}
+		logCtx.Info("Updated secret", "Secret", crObj.Spec.SecretName)
 	}
 
 	return ctrl.Result{}, nil
