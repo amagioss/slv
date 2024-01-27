@@ -20,7 +20,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: build -f k8s/.goreleaser.yml --clean
+          args: build -f k8s/.goreleaser.yml --clean --snapshot
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -39,4 +39,4 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/k8slv:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/k8slv:${{ github.ref_name }}-snapshot
