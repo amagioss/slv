@@ -1,0 +1,12 @@
+builds:
+  - id: k8slv
+    binary: k8slv
+    main: ./k8s/cmd
+    env:
+      - CGO_ENABLED=0
+    ldflags: "-X github.com/amagimedia/slv.AppName={{.ProjectName}} -X github.com/amagimedia/slv.Version={{.Version}}"
+    goarch:
+      - amd64
+      - arm64
+    goos:
+      - linux

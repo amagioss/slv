@@ -2,8 +2,6 @@ module github.com/amagimedia/slv
 
 go 1.21
 
-toolchain go1.21.5
-
 require (
 	dev.shib.me/xipher v0.8.3
 	github.com/99designs/keyring v1.2.2
