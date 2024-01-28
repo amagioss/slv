@@ -1,5 +1,4 @@
-FROM gcr.io/distroless/static:nonroot
+FROM cgr.dev/chainguard/static:latest
 WORKDIR /
 COPY ./dist/k8slv_linux_${TARGETARCH}*/ .
-USER 65532:65532
 ENTRYPOINT ["/k8slv"]

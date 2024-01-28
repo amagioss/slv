@@ -28,9 +28,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/amagimedia/slv"
 	"github.com/amagimedia/slv/core/secretkeystore"
 	k8samagicomv1 "github.com/amagimedia/slv/k8s/api/v1"
 )
+
+const secretSourceKey = "source"
+const secretSourceValue = slv.AppName
 
 // SLVReconciler reconciles a SLV object
 type SLVReconciler struct {
@@ -53,60 +57,107 @@ type SLVReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
-	logCtx := log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
-	var crObj k8samagicomv1.SLV
-	if err := r.Get(ctx, req.NamespacedName, &crObj); err != nil {
+	var slvCR k8samagicomv1.SLV
+	if err := r.Get(ctx, req.NamespacedName, &slvCR); err != nil {
+		if errors.IsNotFound(err) {
+			secret := &corev1.Secret{}
+			if err := r.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, secret); err == nil {
+				if secret.Annotations[secretSourceKey] == secretSourceValue {
+					logger.Info("Deleting secret", "Secret", secret.Name)
+					if err := r.Delete(ctx, secret); err != nil {
+						logger.Error(err, "Failed to delete secret", "Secret", secret)
+						return ctrl.Result{}, err
+					}
+					logger.Info("Deleted secret", "Secret", secret.Name)
+				} else {
+					logger.Info("Not deleting secret", "Secret", secret.Name, "Reason", "Not created by SLV")
+					return ctrl.Result{}, nil
+				}
+			}
+		}
 		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	// Delete secret if CR is being deleted
+	if !slvCR.DeletionTimestamp.IsZero() {
+		secret := &corev1.Secret{}
+		if err := r.Get(ctx, types.NamespacedName{Name: slvCR.Name, Namespace: req.Namespace}, secret); err == nil {
+			if secret.Annotations[secretSourceKey] == secretSourceValue {
+				logger.Info("Deleting secret", "Secret", slvCR.Name)
+				if err := r.Delete(ctx, secret); err != nil {
+					logger.Error(err, "Failed to delete secret", "Secret", secret)
+					return ctrl.Result{}, err
+				}
+				logger.Info("Deleted secret", "Secret", slvCR.Name)
+			} else {
+				logger.Info("Not deleting secret", "Secret", slvCR.Name, "Reason", "Not created by SLV")
+				return ctrl.Result{}, nil
+			}
+		}
 	}
 
 	secretKey, err := secretkeystore.GetSecretKey()
 	if err != nil {
-		logCtx.Error(err, "SLV has no configured environmentF")
+		logger.Error(err, "SLV has no configured environment")
 		return ctrl.Result{}, err
 	}
-	vault := crObj.Vault
+	vault := slvCR.Vault
 	if err = vault.Unlock(*secretKey); err != nil {
-		logCtx.Error(err, "Failed to unlock vault", "Vault", vault)
+		logger.Error(err, "Failed to unlock vault", "Vault", vault)
 		return ctrl.Result{}, err
 	}
-
 	slvSecretMap, err := vault.GetAllSecrets()
 	if err != nil {
-		logCtx.Error(err, "Failed to get all secrets from vault", "Vault", vault)
+		logger.Error(err, "Failed to get all secrets from vault", "Vault", vault)
 		return ctrl.Result{}, err
 	}
 
 	// Check if the secret exists
 	secret := &corev1.Secret{}
-	err = r.Get(ctx, types.NamespacedName{Name: crObj.Name, Namespace: req.Namespace}, secret)
+	err = r.Get(ctx, types.NamespacedName{Name: slvCR.Name, Namespace: req.Namespace}, secret)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Create secret
 			secret := &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      crObj.Name,
+					Name:      slvCR.Name,
 					Namespace: req.Namespace,
+					Annotations: map[string]string{
+						secretSourceKey: secretSourceValue,
+					},
+					Labels: map[string]string{
+						secretSourceKey: secretSourceValue,
+					},
 				},
 				Data: slvSecretMap,
 			}
 			if err := r.Create(ctx, secret); err != nil {
-				logCtx.Error(err, "Failed to create secret", "Secret", secret)
+				logger.Error(err, "Failed to create secret", "Secret", secret)
 				return ctrl.Result{}, err
 			}
-			logCtx.Info("Created secret", "Secret", crObj.Name)
+			logger.Info("Created secret", "Secret", slvCR.Name)
 		} else {
-			logCtx.Error(err, "Failed to get secret", "Secret", secret)
+			logger.Error(err, "Failed to get secret", "Secret", secret)
 			return ctrl.Result{}, err
 		}
 	} else {
 		// Update secret
 		secret.Data = slvSecretMap
+		if secret.Annotations == nil {
+			secret.Annotations = make(map[string]string)
+		}
+		secret.Annotations[secretSourceKey] = secretSourceValue
+		if secret.Labels == nil {
+			secret.Labels = make(map[string]string)
+		}
+		secret.Labels[secretSourceKey] = secretSourceValue
 		if err := r.Update(ctx, secret); err != nil {
-			logCtx.Error(err, "Failed to update secret", "Secret", secret)
+			logger.Error(err, "Failed to update secret", "Secret", secret)
 			return ctrl.Result{}, err
 		}
-		logCtx.Info("Updated secret", "Secret", crObj.Name)
+		logger.Info("Updated secret", "Secret", slvCR.Name)
 	}
 
 	return ctrl.Result{}, nil
