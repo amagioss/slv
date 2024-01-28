@@ -31,37 +31,32 @@ spec:
             type: string
           metadata:
             type: object
+          slvConfig:
+            properties:
+              hashLength:
+                format: int32
+                type: integer
+              publicKey:
+                type: string
+              wrappedKeys:
+                items:
+                  type: string
+                type: array
+            required:
+            - publicKey
+            - wrappedKeys
+            type: object
+          slvSecrets:
+            additionalProperties:
+              type: string
+            type: object
           status:
             description: SLVStatus defines the observed state of SLV
             type: object
-          vault:
-            properties:
-              slvConfig:
-                properties:
-                  hashLength:
-                    format: int32
-                    type: integer
-                  publicKey:
-                    type: string
-                  wrappedKeys:
-                    items:
-                      type: string
-                    type: array
-                required:
-                - publicKey
-                - wrappedKeys
-                type: object
-              slvSecrets:
-                additionalProperties:
-                  type: string
-                type: object
-            required:
-            - slvConfig
-            - slvSecrets
-            type: object
         required:
         - metadata
-        - vault
+        - slvConfig
+        - slvSecrets
         type: object
     served: true
     storage: true

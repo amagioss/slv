@@ -35,8 +35,8 @@ type SLV struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 
-	Status SLVStatus     `json:"status,omitempty"`
-	Vault  *vaults.Vault `json:"vault"`
+	Status       SLVStatus `json:"status,omitempty"`
+	vaults.Vault `json:""`
 }
 
 //+kubebuilder:object:root=true
