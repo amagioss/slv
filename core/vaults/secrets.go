@@ -1,7 +1,6 @@
 package vaults
 
 import (
-	"github.com/amagimedia/slv/core/commons"
 	"github.com/amagimedia/slv/core/crypto"
 )
 
@@ -17,9 +16,9 @@ func (vlt *Vault) putSecretWithoutCommit(secretName string, secretValue []byte) 
 	sealedSecret, err = vaultPublicKey.EncryptSecret(secretValue, vlt.Config.HashLength)
 	if err == nil {
 		if vlt.Secrets == nil {
-			vlt.Secrets = make(map[string]*string)
+			vlt.Secrets = make(map[string]string)
 		}
-		vlt.Secrets[secretName] = commons.StringPtr(sealedSecret.String())
+		vlt.Secrets[secretName] = sealedSecret.String()
 	}
 	return
 }
@@ -67,12 +66,12 @@ func (vlt *Vault) GetSecret(secretName string) (decryptedSecret []byte, err erro
 		return decryptedSecret, errVaultLocked
 	}
 	sealedSecretData := vlt.Secrets[secretName]
-	if sealedSecretData == nil {
+	if sealedSecretData == "" {
 		return nil, errVaultSecretNotFound
 	}
 	if decryptedSecret = vlt.getSecretFromCache(secretName); decryptedSecret == nil {
 		sealedSecret := &crypto.SealedSecret{}
-		if err = sealedSecret.FromString(*sealedSecretData); err == nil {
+		if err = sealedSecret.FromString(sealedSecretData); err == nil {
 			if decryptedSecret, err = vlt.secretKey.DecryptSecret(*sealedSecret); err == nil {
 				vlt.putSecretToCache(secretName, decryptedSecret)
 			}

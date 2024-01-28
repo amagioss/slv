@@ -65,7 +65,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		logCtx.Error(err, "SLV has no configured environmentF")
 		return ctrl.Result{}, err
 	}
-	vault := crObj.Spec.Vault
+	vault := crObj.Vault
 	if err = vault.Unlock(*secretKey); err != nil {
 		logCtx.Error(err, "Failed to unlock vault", "Vault", vault)
 		return ctrl.Result{}, err
@@ -79,13 +79,13 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 
 	// Check if the secret exists
 	secret := &corev1.Secret{}
-	err = r.Get(ctx, types.NamespacedName{Name: crObj.Spec.SecretName, Namespace: req.Namespace}, secret)
+	err = r.Get(ctx, types.NamespacedName{Name: crObj.Name, Namespace: req.Namespace}, secret)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Create secret
 			secret := &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      crObj.Spec.SecretName,
+					Name:      crObj.Name,
 					Namespace: req.Namespace,
 				},
 				Data: slvSecretMap,
@@ -94,7 +94,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 				logCtx.Error(err, "Failed to create secret", "Secret", secret)
 				return ctrl.Result{}, err
 			}
-			logCtx.Info("Created secret", "Secret", crObj.Spec.SecretName)
+			logCtx.Info("Created secret", "Secret", crObj.Name)
 		} else {
 			logCtx.Error(err, "Failed to get secret", "Secret", secret)
 			return ctrl.Result{}, err
@@ -106,7 +106,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			logCtx.Error(err, "Failed to update secret", "Secret", secret)
 			return ctrl.Result{}, err
 		}
-		logCtx.Info("Updated secret", "Secret", crObj.Spec.SecretName)
+		logCtx.Info("Updated secret", "Secret", crObj.Name)
 	}
 
 	return ctrl.Result{}, nil

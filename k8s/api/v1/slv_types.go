@@ -21,12 +21,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SLVSpec defines the desired state of SLV
-type SLVSpec struct {
-	SecretName string       `json:"secretName"`
-	Vault      vaults.Vault `json:"vault"`
-}
-
 // SLVStatus defines the observed state of SLV
 type SLVStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
@@ -39,10 +33,10 @@ type SLVStatus struct {
 // SLV is the Schema for the slvs API
 type SLV struct {
 	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.ObjectMeta `json:"metadata"`
 
-	Spec   SLVSpec   `json:"spec,omitempty"`
-	Status SLVStatus `json:"status,omitempty"`
+	Status SLVStatus     `json:"status,omitempty"`
+	Vault  *vaults.Vault `json:"vault"`
 }
 
 //+kubebuilder:object:root=true

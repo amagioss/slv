@@ -11,62 +11,60 @@ import (
 )
 
 type config struct {
-	PublicKey   *string   `json:"publicKey" yaml:"publicKey"`
-	HashLength  *uint32   `json:"hashLength,omitempty" yaml:"hashLength,omitempty"`
-	WrappedKeys []*string `json:"wrappedKeys" yaml:"wrappedKeys"`
+	PublicKey   string   `json:"publicKey" yaml:"publicKey"`
+	HashLength  *uint32  `json:"hashLength,omitempty" yaml:"hashLength,omitempty"`
+	WrappedKeys []string `json:"wrappedKeys" yaml:"wrappedKeys"`
 }
 
 type Vault struct {
-	Secrets             map[string]*string `json:"slvSecrets,omitempty" yaml:"slvSecrets,omitempty"`
-	Config              config             `json:"slvConfig" yaml:"slvConfig"`
-	path                string             `json:"-"`
-	publicKey           *crypto.PublicKey  `json:"-"`
-	secretKey           *crypto.SecretKey  `json:"-"`
-	unlockedBy          *string            `json:"-"`
-	decryptedSecrets    map[string][]byte  `json:"-"`
-	vaultSecretRefRegex *regexp.Regexp     `json:"-"`
+	Secrets             map[string]string `json:"slvSecrets" yaml:"slvSecrets"`
+	Config              config            `json:"slvConfig" yaml:"slvConfig"`
+	path                string            `json:"-"`
+	publicKey           *crypto.PublicKey `json:"-"`
+	secretKey           *crypto.SecretKey `json:"-"`
+	unlockedBy          *string           `json:"-"`
+	decryptedSecrets    map[string][]byte `json:"-"`
+	vaultSecretRefRegex *regexp.Regexp    `json:"-"`
+}
+
+func (v *Vault) DeepCopy() *Vault {
+	if v == nil {
+		return nil
+	}
+	out := new(Vault)
+	v.DeepCopyInto(out)
+	return out
 }
 
 func (v *Vault) DeepCopyInto(out *Vault) {
 	*out = *v
-	out.Secrets = make(map[string]*string, len(v.Secrets))
+	out.Secrets = make(map[string]string, len(v.Secrets))
 	for key, val := range v.Secrets {
-		out.Secrets[key] = commons.StringPtr(*val)
+		out.Secrets[key] = val
 	}
 	out.Config = config{}
-	if v.Config.PublicKey != nil {
-		out.Config.PublicKey = commons.StringPtr(*v.Config.PublicKey)
+	if v.Config.PublicKey != "" {
+		out.Config.PublicKey = v.Config.PublicKey
 	}
 	if v.Config.HashLength != nil {
 		var hashLen uint32 = *v.Config.HashLength
 		out.Config.HashLength = &hashLen
 	}
-	out.Config.WrappedKeys = make([]*string, len(v.Config.WrappedKeys))
-	for i, val := range v.Config.WrappedKeys {
-		out.Config.WrappedKeys[i] = commons.StringPtr(*val)
-	}
-	out.path = v.path
-	out.publicKey = v.publicKey
-	out.secretKey = v.secretKey
-	out.unlockedBy = v.unlockedBy
-	out.decryptedSecrets = make(map[string][]byte, len(v.decryptedSecrets))
-	for key, val := range v.decryptedSecrets {
-		out.decryptedSecrets[key] = make([]byte, len(val))
-		copy(out.decryptedSecrets[key], val)
-	}
+	out.Config.WrappedKeys = make([]string, len(v.Config.WrappedKeys))
+	copy(out.Config.WrappedKeys, v.Config.WrappedKeys)
 	out.vaultSecretRefRegex = v.vaultSecretRefRegex
 }
 
 func (vlt *Vault) Id() string {
-	return *vlt.Config.PublicKey
+	return vlt.Config.PublicKey
 }
 
 func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
 	if vlt.publicKey == nil {
-		if vlt.Config.PublicKey == nil {
+		if vlt.Config.PublicKey == "" {
 			return nil, errVaultPublicKeyNotFound
 		}
-		publicKey, err = crypto.PublicKeyFromString(*vlt.Config.PublicKey)
+		publicKey, err = crypto.PublicKeyFromString(vlt.Config.PublicKey)
 		if err == nil {
 			vlt.publicKey = publicKey
 		}
@@ -100,7 +98,7 @@ func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, p
 	vlt = &Vault{
 		publicKey: vaultPublicKey,
 		Config: config{
-			PublicKey:  commons.StringPtr(vaultPublicKey.String()),
+			PublicKey:  vaultPublicKey.String(),
 			HashLength: hashLen,
 		},
 		path:      vaultFile,
@@ -156,7 +154,7 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
 	}
 	for _, wrappedKeyStr := range vlt.Config.WrappedKeys {
 		wrappedKey := &crypto.WrappedKey{}
-		if err = wrappedKey.FromString(*wrappedKeyStr); err != nil {
+		if err = wrappedKey.FromString(wrappedKeyStr); err != nil {
 			return err
 		}
 		decryptedKey, err := secretKey.DecryptKey(*wrappedKey)
@@ -189,7 +187,7 @@ func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	}
 	for _, wrappedKeyStr := range vlt.Config.WrappedKeys {
 		wrappedKey := &crypto.WrappedKey{}
-		if err := wrappedKey.FromString(*wrappedKeyStr); err != nil {
+		if err := wrappedKey.FromString(wrappedKeyStr); err != nil {
 			return false, err
 		}
 		if wrappedKey.IsEncryptedBy(publicKey) {
@@ -198,7 +196,7 @@ func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	}
 	wrappedKey, err := publicKey.EncryptKey(*vlt.secretKey)
 	if err == nil {
-		vlt.Config.WrappedKeys = append(vlt.Config.WrappedKeys, commons.StringPtr(wrappedKey.String()))
+		vlt.Config.WrappedKeys = append(vlt.Config.WrappedKeys, wrappedKey.String())
 		err = vlt.commit()
 	}
 	return err == nil, err
