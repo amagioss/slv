@@ -1,6 +1,5 @@
 package slv
 
-var (
-	Version = "dev"
-	AppName = "slv"
-)
+const AppName = "slv"
+
+var Version = "dev"

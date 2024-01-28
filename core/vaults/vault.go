@@ -72,9 +72,11 @@ func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
 	return vlt.publicKey, err
 }
 
-// Returns new vault instance. The vault name should end with .vlt.slv
+// Returns new vault instance. The vault file name must end with .slv or .slv.yaml or .slv.yml.
 func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
-	if !strings.HasSuffix(vaultFile, vaultFileExtension) {
+	if !strings.HasSuffix(vaultFile, vaultFileNameExtension+".yaml") &&
+		!strings.HasSuffix(vaultFile, vaultFileNameExtension+".yml") &&
+		!strings.HasSuffix(vaultFile, vaultFileNameExtension) {
 		return nil, errInvalidVaultFileName
 	}
 	if commons.FileExists(vaultFile) {
@@ -117,9 +119,11 @@ func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, p
 	return vlt, vlt.commit()
 }
 
-// Returns the vault instance for a given vault file. The vault name should end with .slv
+// Returns the vault instance for a given vault file. The vault file name must end with .slv or .slv.yaml or .slv.yml.
 func Get(vaultFile string) (vlt *Vault, err error) {
-	if !strings.HasSuffix(vaultFile, vaultFileExtension) {
+	if !strings.HasSuffix(vaultFile, vaultFileNameExtension+".yaml") &&
+		!strings.HasSuffix(vaultFile, vaultFileNameExtension+".yml") &&
+		!strings.HasSuffix(vaultFile, vaultFileNameExtension) {
 		return nil, errInvalidVaultFileName
 	}
 	if !commons.FileExists(vaultFile) {
