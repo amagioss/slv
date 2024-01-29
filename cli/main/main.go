@@ -1,6 +1,6 @@
 package main
 
-import "github.com/amagimedia/slv/cli/cli"
+import "github.com/amagimedia/slv/cli"
 
 func main() {
 	cli.RunCLI()

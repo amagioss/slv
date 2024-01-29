@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package cmd
 
 import (
 	"flag"
@@ -49,7 +49,7 @@ func init() {
 	//+kubebuilder:scaffold:scheme
 }
 
-func main() {
+func Run() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
