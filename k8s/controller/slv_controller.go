@@ -33,8 +33,13 @@ import (
 	k8samagicomv1 "github.com/amagimedia/slv/k8s/api/v1"
 )
 
-const secretSourceKey = "source"
-const secretSourceValue = slv.AppName
+const (
+	secretManagedByAnnotationKey   = k8samagicomv1.Group + "/managed-by"
+	secretManagedByAnnotationValue = slv.AppName
+	secretSLVVersionAnnotationKey  = k8samagicomv1.Group + "/slv-version"
+)
+
+var secretSLVVersionAnnotationValue = slv.Version
 
 // SLVReconciler reconciles a SLV object
 type SLVReconciler struct {
@@ -42,9 +47,9 @@ type SLVReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=k8s.amagi.com,resources=slvs,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=k8s.amagi.com,resources=slvs/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=k8s.amagi.com,resources=slvs/finalizers,verbs=update
+//+kubebuilder:rbac:groups=k8s.amagi.com,resources=slv,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=k8s.amagi.com,resources=slv/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=k8s.amagi.com,resources=slv/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -61,41 +66,10 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 
 	var slvCR k8samagicomv1.SLV
 	if err := r.Get(ctx, req.NamespacedName, &slvCR); err != nil {
-		if errors.IsNotFound(err) {
-			secret := &corev1.Secret{}
-			if err := r.Get(ctx, types.NamespacedName{Name: req.Name, Namespace: req.Namespace}, secret); err == nil {
-				if secret.Annotations[secretSourceKey] == secretSourceValue {
-					logger.Info("Deleting secret", "Secret", secret.Name)
-					if err := r.Delete(ctx, secret); err != nil {
-						logger.Error(err, "Failed to delete secret", "Secret", secret)
-						return ctrl.Result{}, err
-					}
-					logger.Info("Deleted secret", "Secret", secret.Name)
-				} else {
-					logger.Info("Not deleting secret", "Secret", secret.Name, "Reason", "Not created by SLV")
-					return ctrl.Result{}, nil
-				}
-			}
+		if !errors.IsNotFound(err) {
+			logger.Error(err, "Failed to get SLV")
 		}
 		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
-
-	// Delete secret if CR is being deleted
-	if !slvCR.DeletionTimestamp.IsZero() {
-		secret := &corev1.Secret{}
-		if err := r.Get(ctx, types.NamespacedName{Name: slvCR.Name, Namespace: req.Namespace}, secret); err == nil {
-			if secret.Annotations[secretSourceKey] == secretSourceValue {
-				logger.Info("Deleting secret", "Secret", slvCR.Name)
-				if err := r.Delete(ctx, secret); err != nil {
-					logger.Error(err, "Failed to delete secret", "Secret", secret)
-					return ctrl.Result{}, err
-				}
-				logger.Info("Deleted secret", "Secret", slvCR.Name)
-			} else {
-				logger.Info("Not deleting secret", "Secret", slvCR.Name, "Reason", "Not created by SLV")
-				return ctrl.Result{}, nil
-			}
-		}
 	}
 
 	secretKey, err := secretkeystore.GetSecretKey()
@@ -125,10 +99,16 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 					Name:      slvCR.Name,
 					Namespace: req.Namespace,
 					Annotations: map[string]string{
-						secretSourceKey: secretSourceValue,
+						secretManagedByAnnotationKey:  secretManagedByAnnotationValue,
+						secretSLVVersionAnnotationKey: secretSLVVersionAnnotationValue,
 					},
-					Labels: map[string]string{
-						secretSourceKey: secretSourceValue,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							APIVersion: slvCR.APIVersion,
+							Kind:       slvCR.Kind,
+							Name:       slvCR.Name,
+							UID:        slvCR.UID,
+						},
 					},
 				},
 				Data: slvSecretMap,
@@ -148,11 +128,16 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		if secret.Annotations == nil {
 			secret.Annotations = make(map[string]string)
 		}
-		secret.Annotations[secretSourceKey] = secretSourceValue
-		if secret.Labels == nil {
-			secret.Labels = make(map[string]string)
-		}
-		secret.Labels[secretSourceKey] = secretSourceValue
+		secret.Annotations[secretManagedByAnnotationKey] = secretManagedByAnnotationValue
+		secret.Annotations[secretSLVVersionAnnotationKey] = secretSLVVersionAnnotationValue
+		secret.SetOwnerReferences([]metav1.OwnerReference{
+			{
+				APIVersion: slvCR.APIVersion,
+				Kind:       slvCR.Kind,
+				Name:       slvCR.Name,
+				UID:        slvCR.UID,
+			},
+		})
 		if err := r.Update(ctx, secret); err != nil {
 			logger.Error(err, "Failed to update secret", "Secret", secret)
 			return ctrl.Result{}, err

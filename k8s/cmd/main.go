@@ -33,7 +33,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	k8samagicomv1 "github.com/amagimedia/slv/k8s/api/v1"
-	"github.com/amagimedia/slv/k8s/internal/controller"
+	"github.com/amagimedia/slv/k8s/controller"
 	//+kubebuilder:scaffold:imports
 )
 

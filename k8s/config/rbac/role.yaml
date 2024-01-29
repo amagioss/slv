@@ -7,7 +7,7 @@ rules:
 - apiGroups:
   - k8s.amagi.com
   resources:
-  - slvs
+  - slv
   verbs:
   - create
   - delete
@@ -19,13 +19,13 @@ rules:
 - apiGroups:
   - k8s.amagi.com
   resources:
-  - slvs/finalizers
+  - slv/finalizers
   verbs:
   - update
 - apiGroups:
   - k8s.amagi.com
   resources:
-  - slvs/status
+  - slv/status
   verbs:
   - get
   - patch

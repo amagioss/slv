@@ -173,8 +173,15 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
 }
 
 func (vlt *Vault) commit() error {
+	var obj map[string]interface{}
+	err := commons.ReadFromYAML(vlt.path, &obj)
+	if err != nil {
+		return err
+	}
+	obj["slvSecrets"] = vlt.Secrets
+	obj["slvConfig"] = vlt.Config
 	return commons.WriteToYAML(vlt.path,
-		"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" to reference secrets from this vault into files\n", *vlt)
+		"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" as placeholder to reference secrets from this vault into files\n", obj)
 }
 
 func (vlt *Vault) reset() error {

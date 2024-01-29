@@ -30,7 +30,7 @@ type SLVStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// SLV is the Schema for the slvs API
+// SLV is the Schema for the slv API
 type SLV struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
