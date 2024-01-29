@@ -1,4 +1,4 @@
-name: Build Main Branch
+name: Build Branch
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-main:
+  build-branch:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -39,4 +39,4 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/k8slv:${{ github.ref_name }}-snapshot
+            ghcr.io/${{ github.repository }}/k8slv:${{ github.ref_name }}

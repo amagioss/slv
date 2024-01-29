@@ -135,7 +135,7 @@ spec:
       serviceAccountName: slv-controller
       containers:
       - name: slv-controller
-        image: ghcr.io/amagimedia/slv/k8slv:latest # Use the version tag corresponding to the version of SLV used with the CR
+        image: ghcr.io/amagimedia/slv/k8slv:main # Use the specific version tag (main branch releases might be unstable) corresponding to the version of SLV used with the CR
         resources:
           limits:
             cpu: "1" # 1 CPU should be fairly enough for SLV Controller
