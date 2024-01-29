@@ -17,6 +17,7 @@ limitations under the License.
 package controller
 
 import (
+	"bytes"
 	"context"
 
 	corev1 "k8s.io/api/core/v1"
@@ -131,25 +132,60 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		}
 	} else {
 		// Update secret
-		secret.Data = slvSecretMap
+		updateRequired := false
+		if len(secret.Data) != len(slvSecretMap) {
+			updateRequired = true
+			secret.Data = slvSecretMap
+		} else {
+			for k, v := range slvSecretMap {
+				if !bytes.Equal(secret.Data[k], v) {
+					updateRequired = true
+					secret.Data = slvSecretMap
+					break
+				}
+			}
+		}
 		if secret.Annotations == nil {
 			secret.Annotations = make(map[string]string)
 		}
-		secret.Annotations[secretManagedByAnnotationKey] = secretManagedByAnnotationValue
-		secret.Annotations[secretSLVVersionAnnotationKey] = secretSLVVersionAnnotationValue
-		secret.SetOwnerReferences([]metav1.OwnerReference{
-			{
-				APIVersion: slvCR.APIVersion,
-				Kind:       slvCR.Kind,
-				Name:       slvCR.Name,
-				UID:        slvCR.UID,
-			},
-		})
-		if err := r.Update(ctx, secret); err != nil {
-			logger.Error(err, "Failed to update secret", "Secret", secret)
-			return ctrl.Result{}, err
+		if secret.Annotations[secretManagedByAnnotationKey] != secretManagedByAnnotationValue {
+			secret.Annotations[secretManagedByAnnotationKey] = secretManagedByAnnotationValue
+			updateRequired = true
 		}
-		logger.Info("Updated secret", "Secret", slvCR.Name)
+		if secret.Annotations[secretSLVVersionAnnotationKey] != secretSLVVersionAnnotationValue {
+			secret.Annotations[secretSLVVersionAnnotationKey] = secretSLVVersionAnnotationValue
+			updateRequired = true
+		}
+		updateOwnerReferences := false
+		if secret.OwnerReferences == nil || len(secret.OwnerReferences) != 1 {
+			updateOwnerReferences = true
+		} else {
+			ownerReference := secret.OwnerReferences[0]
+			if ownerReference.APIVersion != slvCR.APIVersion || ownerReference.Kind != slvCR.Kind ||
+				ownerReference.Name != slvCR.Name || ownerReference.UID != slvCR.UID {
+				updateOwnerReferences = true
+			}
+		}
+		if updateOwnerReferences {
+			secret.SetOwnerReferences([]metav1.OwnerReference{
+				{
+					APIVersion: slvCR.APIVersion,
+					Kind:       slvCR.Kind,
+					Name:       slvCR.Name,
+					UID:        slvCR.UID,
+				},
+			})
+			updateRequired = true
+		}
+		if updateRequired {
+			if err := r.Update(ctx, secret); err != nil {
+				logger.Error(err, "Failed to update secret", "Secret", secret)
+				return ctrl.Result{}, err
+			}
+			logger.Info("Updated secret", "Secret", slvCR.Name)
+		} else {
+			logger.Info("Secret is up-to-date", "Secret", slvCR.Name)
+		}
 	}
 
 	return ctrl.Result{}, nil
