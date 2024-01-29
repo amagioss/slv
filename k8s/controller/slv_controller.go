@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/amagimedia/slv"
+	"github.com/amagimedia/slv/core/crypto"
 	"github.com/amagimedia/slv/core/secretkeystore"
 	k8samagicomv1 "github.com/amagimedia/slv/k8s/api/v1"
 )
@@ -40,6 +41,18 @@ const (
 )
 
 var secretSLVVersionAnnotationValue = slv.Version
+var secretKey *crypto.SecretKey
+
+func InitSLVSecretKey() error {
+	if secretKey == nil {
+		sk, err := secretkeystore.GetSecretKey()
+		if err != nil {
+			return err
+		}
+		secretKey = sk
+	}
+	return nil
+}
 
 // SLVReconciler reconciles a SLV object
 type SLVReconciler struct {
@@ -71,14 +84,8 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		}
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-
-	secretKey, err := secretkeystore.GetSecretKey()
-	if err != nil {
-		logger.Error(err, "SLV has no configured environment")
-		return ctrl.Result{}, err
-	}
 	vault := slvCR.Vault
-	if err = vault.Unlock(*secretKey); err != nil {
+	if err := vault.Unlock(*secretKey); err != nil {
 		logger.Error(err, "Failed to unlock vault", "Vault", vault)
 		return ctrl.Result{}, err
 	}
