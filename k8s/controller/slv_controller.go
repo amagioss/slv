@@ -27,6 +27,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/amagimedia/slv"
@@ -99,6 +101,8 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	// Check if the secret exists
 	secret := &corev1.Secret{}
 	err = r.Get(ctx, types.NamespacedName{Name: slvCR.Name, Namespace: req.Namespace}, secret)
+
+	// add vault annotation
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Create secret
@@ -110,16 +114,16 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 						secretManagedByAnnotationKey:  secretManagedByAnnotationValue,
 						secretSLVVersionAnnotationKey: secretSLVVersionAnnotationValue,
 					},
-					OwnerReferences: []metav1.OwnerReference{
-						{
-							APIVersion: slvCR.APIVersion,
-							Kind:       slvCR.Kind,
-							Name:       slvCR.Name,
-							UID:        slvCR.UID,
-						},
-					},
 				},
 				Data: slvSecretMap,
+			}
+			if err = controllerutil.SetControllerReference(&slvCR, secret, r.Scheme); err != nil {
+				logger.Error(err, "Failed to set controller reference", "Secret", secret)
+				return ctrl.Result{}, err
+			}
+			if err = controllerutil.SetOwnerReference(&slvCR, secret, r.Scheme); err != nil {
+				logger.Error(err, "Failed to set owner reference", "Secret", secret)
+				return ctrl.Result{}, err
 			}
 			if err := r.Create(ctx, secret); err != nil {
 				logger.Error(err, "Failed to create secret", "Secret", secret)
@@ -156,35 +160,22 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			secret.Annotations[secretSLVVersionAnnotationKey] = secretSLVVersionAnnotationValue
 			updateRequired = true
 		}
-		updateOwnerReferences := false
-		if secret.OwnerReferences == nil || len(secret.OwnerReferences) != 1 {
-			updateOwnerReferences = true
-		} else {
-			ownerReference := secret.OwnerReferences[0]
-			if ownerReference.APIVersion != slvCR.APIVersion || ownerReference.Kind != slvCR.Kind ||
-				ownerReference.Name != slvCR.Name || ownerReference.UID != slvCR.UID {
-				updateOwnerReferences = true
-			}
-		}
-		if updateOwnerReferences {
-			secret.SetOwnerReferences([]metav1.OwnerReference{
-				{
-					APIVersion: slvCR.APIVersion,
-					Kind:       slvCR.Kind,
-					Name:       slvCR.Name,
-					UID:        slvCR.UID,
-				},
-			})
-			updateRequired = true
-		}
 		if updateRequired {
-			if err := r.Update(ctx, secret); err != nil {
+			if err = controllerutil.SetControllerReference(&slvCR, secret, r.Scheme); err != nil {
+				logger.Error(err, "Failed to set controller reference", "Secret", secret)
+				return ctrl.Result{}, err
+			}
+			if err = controllerutil.SetOwnerReference(&slvCR, secret, r.Scheme); err != nil {
+				logger.Error(err, "Failed to set owner reference", "Secret", secret)
+				return ctrl.Result{}, err
+			}
+			if err = r.Update(ctx, secret); err != nil {
 				logger.Error(err, "Failed to update secret", "Secret", secret)
 				return ctrl.Result{}, err
 			}
 			logger.Info("Updated secret", "Secret", slvCR.Name)
 		} else {
-			logger.Info("Secret is up-to-date", "Secret", slvCR.Name)
+			logger.Info("No update required for secret", "Secret", slvCR.Name)
 		}
 	}
 
@@ -195,5 +186,6 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 func (r *SLVReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&k8samagicomv1.SLV{}).
+		Watches(&corev1.Secret{}, handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &k8samagicomv1.SLV{})).
 		Complete(r)
 }

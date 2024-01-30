@@ -5,7 +5,7 @@ go 1.21
 require (
 	dev.shib.me/xipher v0.8.3
 	github.com/99designs/keyring v1.2.2
-	github.com/aws/aws-sdk-go v1.50.5
+	github.com/aws/aws-sdk-go v1.50.6
 	github.com/fatih/color v1.16.0
 	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/onsi/gomega v1.31.1
