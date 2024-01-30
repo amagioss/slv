@@ -5,8 +5,9 @@ go 1.21
 require (
 	dev.shib.me/xipher v0.8.3
 	github.com/99designs/keyring v1.2.2
-	github.com/aws/aws-sdk-go v1.50.6
+	github.com/aws/aws-sdk-go v1.50.7
 	github.com/fatih/color v1.16.0
+	github.com/go-logr/logr v1.4.1
 	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/onsi/gomega v1.31.1
 	github.com/spf13/cobra v1.8.0
@@ -28,7 +29,6 @@ require (
 	github.com/emicklei/go-restful/v3 v3.11.2 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v0.20.2 // indirect
 	github.com/go-openapi/jsonreference v0.20.4 // indirect

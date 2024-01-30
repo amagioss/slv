@@ -52,6 +52,9 @@ spec:
             type: object
           status:
             description: SLVStatus defines the observed state of SLV
+            properties:
+              error:
+                type: string
             type: object
         required:
         - metadata

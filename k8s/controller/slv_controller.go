@@ -35,6 +35,7 @@ import (
 	"github.com/amagimedia/slv/core/crypto"
 	"github.com/amagimedia/slv/core/secretkeystore"
 	k8samagicomv1 "github.com/amagimedia/slv/k8s/api/v1"
+	"github.com/go-logr/logr"
 )
 
 const (
@@ -63,6 +64,34 @@ type SLVReconciler struct {
 	Scheme *runtime.Scheme
 }
 
+func (r *SLVReconciler) returnError(ctx context.Context, req ctrl.Request,
+	slvObj *k8samagicomv1.SLV, logger *logr.Logger, err error, msg string) (ctrl.Result, error) {
+	logger.Error(err, msg, "SLV", slvObj.Name)
+	if slvObj.Status.Error == "" {
+		slvObj.Status.Error = err.Error()
+		if err := r.Status().Update(ctx, slvObj); err != nil {
+			logger.Error(err, "Failed to update status", "SLV", slvObj.Name)
+			return ctrl.Result{}, err
+		}
+	} else {
+		err = nil
+	}
+	return ctrl.Result{}, err
+}
+
+func (r *SLVReconciler) success(ctx context.Context, req ctrl.Request,
+	slvObj *k8samagicomv1.SLV, logger *logr.Logger, msg string) error {
+	logger.Info(msg, "Secret", slvObj.Name)
+	if slvObj.Status.Error != "" {
+		slvObj.Status = k8samagicomv1.SLVStatus{}
+		if err := r.Status().Update(ctx, slvObj); err != nil {
+			logger.Error(err, "Failed to update status", "SLV", slvObj.Name)
+			return err
+		}
+	}
+	return nil
+}
+
 //+kubebuilder:rbac:groups=k8s.amagi.com,resources=slv,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=k8s.amagi.com,resources=slv/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=k8s.amagi.com,resources=slv/finalizers,verbs=update
@@ -80,35 +109,34 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	_ = log.FromContext(ctx)
 	logger := log.FromContext(ctx)
 
-	var slvCR k8samagicomv1.SLV
-	if err := r.Get(ctx, req.NamespacedName, &slvCR); err != nil {
+	logger.Info("Reconciling SLV")
+
+	var slvObj k8samagicomv1.SLV
+	if err := r.Get(ctx, req.NamespacedName, &slvObj); err != nil {
 		if !errors.IsNotFound(err) {
 			logger.Error(err, "Failed to get SLV")
 		}
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	vault := slvCR.Vault
+
+	vault := slvObj.Vault
 	if err := vault.Unlock(*secretKey); err != nil {
-		logger.Error(err, "Failed to unlock vault", "Vault", vault)
-		return ctrl.Result{}, err
+		return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to unlock vault")
 	}
 	slvSecretMap, err := vault.GetAllSecrets()
 	if err != nil {
-		logger.Error(err, "Failed to get all secrets from vault", "Vault", vault)
-		return ctrl.Result{}, err
+		return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to get all secrets from vault")
 	}
 
 	// Check if the secret exists
 	secret := &corev1.Secret{}
-	err = r.Get(ctx, types.NamespacedName{Name: slvCR.Name, Namespace: req.Namespace}, secret)
-
-	// add vault annotation
+	err = r.Get(ctx, types.NamespacedName{Name: slvObj.Name, Namespace: req.Namespace}, secret)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Create secret
 			secret := &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      slvCR.Name,
+					Name:      slvObj.Name,
 					Namespace: req.Namespace,
 					Annotations: map[string]string{
 						secretManagedByAnnotationKey:  secretManagedByAnnotationValue,
@@ -117,22 +145,20 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 				},
 				Data: slvSecretMap,
 			}
-			if err = controllerutil.SetControllerReference(&slvCR, secret, r.Scheme); err != nil {
-				logger.Error(err, "Failed to set controller reference", "Secret", secret)
-				return ctrl.Result{}, err
+			if err = controllerutil.SetControllerReference(&slvObj, secret, r.Scheme); err != nil {
+				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set controller reference for secret")
 			}
-			if err = controllerutil.SetOwnerReference(&slvCR, secret, r.Scheme); err != nil {
-				logger.Error(err, "Failed to set owner reference", "Secret", secret)
-				return ctrl.Result{}, err
+			if err = controllerutil.SetOwnerReference(&slvObj, secret, r.Scheme); err != nil {
+				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set owner reference for secret")
 			}
 			if err := r.Create(ctx, secret); err != nil {
-				logger.Error(err, "Failed to create secret", "Secret", secret)
+				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to create secret")
+			}
+			if err := r.success(ctx, req, &slvObj, &logger, "Created secret"); err != nil {
 				return ctrl.Result{}, err
 			}
-			logger.Info("Created secret", "Secret", slvCR.Name)
 		} else {
-			logger.Error(err, "Failed to get secret", "Secret", secret)
-			return ctrl.Result{}, err
+			return r.returnError(ctx, req, &slvObj, &logger, err, "Error getting secret for SLV Object")
 		}
 	} else {
 		// Update secret
@@ -160,25 +186,25 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			secret.Annotations[secretSLVVersionAnnotationKey] = secretSLVVersionAnnotationValue
 			updateRequired = true
 		}
+		var msg string
 		if updateRequired {
-			if err = controllerutil.SetControllerReference(&slvCR, secret, r.Scheme); err != nil {
-				logger.Error(err, "Failed to set controller reference", "Secret", secret)
-				return ctrl.Result{}, err
+			if err = controllerutil.SetControllerReference(&slvObj, secret, r.Scheme); err != nil {
+				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set controller reference for secret")
 			}
-			if err = controllerutil.SetOwnerReference(&slvCR, secret, r.Scheme); err != nil {
-				logger.Error(err, "Failed to set owner reference", "Secret", secret)
-				return ctrl.Result{}, err
+			if err = controllerutil.SetOwnerReference(&slvObj, secret, r.Scheme); err != nil {
+				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set owner reference for secret")
 			}
 			if err = r.Update(ctx, secret); err != nil {
-				logger.Error(err, "Failed to update secret", "Secret", secret)
-				return ctrl.Result{}, err
+				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to update secret")
 			}
-			logger.Info("Updated secret", "Secret", slvCR.Name)
+			msg = "Updated secret"
 		} else {
-			logger.Info("No update required for secret", "Secret", slvCR.Name)
+			msg = "No update required for secret"
+		}
+		if err := r.success(ctx, req, &slvObj, &logger, msg); err != nil {
+			return ctrl.Result{}, err
 		}
 	}
-
 	return ctrl.Result{}, nil
 }
 
