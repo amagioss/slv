@@ -21,6 +21,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// SLVSpec defines the desired state of SLV
+type SLVSpec struct {
+	vaults.Vault `json:""`
+}
+
 // SLVStatus defines the observed state of SLV
 type SLVStatus struct {
 	Error string `json:"error,omitempty"`
@@ -34,8 +39,8 @@ type SLV struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 
-	Status       SLVStatus `json:"status,omitempty"`
-	vaults.Vault `json:""`
+	Spec   SLVSpec   `json:"spec"`
+	Status SLVStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true

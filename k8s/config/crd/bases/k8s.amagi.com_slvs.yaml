@@ -31,24 +31,31 @@ spec:
             type: string
           metadata:
             type: object
-          slvConfig:
+          spec:
+            description: SLVSpec defines the desired state of SLV
             properties:
-              hashLength:
-                format: int32
-                type: integer
-              publicKey:
-                type: string
-              wrappedKeys:
-                items:
+              slvConfig:
+                properties:
+                  hashLength:
+                    format: int32
+                    type: integer
+                  publicKey:
+                    type: string
+                  wrappedKeys:
+                    items:
+                      type: string
+                    type: array
+                required:
+                - publicKey
+                - wrappedKeys
+                type: object
+              slvSecrets:
+                additionalProperties:
                   type: string
-                type: array
+                type: object
             required:
-            - publicKey
-            - wrappedKeys
-            type: object
-          slvSecrets:
-            additionalProperties:
-              type: string
+            - slvConfig
+            - slvSecrets
             type: object
           status:
             description: SLVStatus defines the observed state of SLV
@@ -58,8 +65,7 @@ spec:
             type: object
         required:
         - metadata
-        - slvConfig
-        - slvSecrets
+        - spec
         type: object
     served: true
     storage: true

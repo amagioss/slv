@@ -10,7 +10,9 @@ import (
 
 func WriteToYAML(filePath, notice string, data interface{}) error {
 	bytes, err := yaml.Marshal(data)
-	bytes = append([]byte(notice), bytes...)
+	if notice != "" {
+		bytes = append([]byte(notice), bytes...)
+	}
 	bytes = append([]byte(slvYamlNotice), bytes...)
 	if err == nil {
 		if err = WriteToFile(filePath, bytes); err != nil {
@@ -20,18 +22,18 @@ func WriteToYAML(filePath, notice string, data interface{}) error {
 	return err
 }
 
-func ReadChildFromYAML(filePath string, nodePath string) (interface{}, error) {
+func ReadChildFromYAML(filePath, nodePath string, out interface{}) error {
 	// Read the file
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Unmarshal the YAML data into a map
 	var objMap map[string]interface{}
 	err = yaml.Unmarshal(data, &objMap)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Split the node path and traverse the map
@@ -46,8 +48,11 @@ func ReadChildFromYAML(filePath string, nodePath string) (interface{}, error) {
 			objMap, _ = objMap[node].(map[string]interface{})
 		}
 	}
-
-	return objMap, nil
+	bytes, err := yaml.Marshal(objMap)
+	if err != nil {
+		return err
+	}
+	return yaml.Unmarshal(bytes, out)
 }
 
 func ReadFromYAML(filePath string, out interface{}) error {

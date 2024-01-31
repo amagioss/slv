@@ -3,13 +3,45 @@ package commands
 import (
 	"fmt"
 
-	"github.com/fatih/color"
+	"github.com/amagimedia/slv/core/commons"
 	"github.com/amagimedia/slv/core/crypto"
 	"github.com/amagimedia/slv/core/profiles"
 	"github.com/amagimedia/slv/core/secretkeystore"
 	"github.com/amagimedia/slv/core/vaults"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
+
+const (
+	k8sApiVersion = "k8s.amagi.com/v1"
+	k8sKind       = "SLV"
+	k8sVaultField = "spec"
+)
+
+func getVault(filePath string) (*vaults.Vault, error) {
+	vault, err := vaults.Get(filePath)
+	if err != nil || vault.Config.PublicKey == "" {
+		vault, err = vaults.GetFromField(filePath, k8sVaultField)
+	}
+	return vault, err
+}
+
+func newK8sVault(filePath, name string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
+	vault, err := vaults.New(filePath, k8sVaultField, hashLength, rootPublicKey, publicKeys...)
+	if err != nil {
+		return nil, err
+	}
+	var obj map[string]interface{}
+	if err := commons.ReadFromYAML(filePath, &obj); err != nil {
+		return nil, err
+	}
+	obj["apiVersion"] = k8sApiVersion
+	obj["kind"] = k8sKind
+	obj["metadata"] = map[string]interface{}{
+		"name": name,
+	}
+	return vault, commons.WriteToYAML(filePath, "", obj)
+}
 
 func vaultCommand() *cobra.Command {
 	if vaultCmd != nil {
@@ -83,7 +115,12 @@ func vaultNewCommand() *cobra.Command {
 			if err != nil {
 				exitOnError(err)
 			}
-			_, err = vaults.New(vaultFile, hashLength, rootPublicKey, publicKeys...)
+			k8slvName := cmd.Flag(vaultK8sFlag.name).Value.String()
+			if k8slvName == "" {
+				_, err = vaults.New(vaultFile, "", hashLength, rootPublicKey, publicKeys...)
+			} else {
+				_, err = newK8sVault(vaultFile, k8slvName, hashLength, rootPublicKey, publicKeys...)
+			}
 			if err != nil {
 				exitOnError(err)
 			}
@@ -94,6 +131,7 @@ func vaultNewCommand() *cobra.Command {
 	vaultNewCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
 	vaultNewCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.name, vaultAccessPublicKeysFlag.shorthand, []string{}, vaultAccessPublicKeysFlag.usage)
 	vaultNewCmd.Flags().StringP(envSearchFlag.name, envSearchFlag.shorthand, "", envSearchFlag.usage)
+	vaultNewCmd.Flags().StringP(vaultK8sFlag.name, vaultK8sFlag.shorthand, "", vaultK8sFlag.usage)
 	vaultNewCmd.Flags().BoolP(vaultEnableHashingFlag.name, vaultEnableHashingFlag.shorthand, false, vaultEnableHashingFlag.usage)
 	vaultNewCmd.MarkFlagRequired(vaultFileFlag.name)
 	return vaultNewCmd
@@ -149,7 +187,7 @@ func vaultShareCommand() *cobra.Command {
 					exitOnError(fmt.Errorf("no matching environments found for search query: " + query))
 				}
 			}
-			vault, err := vaults.Get(vaultFile)
+			vault, err := getVault(vaultFile)
 			if err == nil {
 				err = vault.Unlock(*envSecretKey)
 				if err == nil {

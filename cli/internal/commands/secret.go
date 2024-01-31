@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/amagimedia/slv/core/secretkeystore"
-	"github.com/amagimedia/slv/core/vaults"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +41,7 @@ func secretPutCommand() *cobra.Command {
 			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
 			name := cmd.Flag(secretNameFlag.name).Value.String()
 			secret := cmd.Flag(secretValueFlag.name).Value.String()
-			vault, err := vaults.Get(vaultFile)
+			vault, err := getVault(vaultFile)
 			if err != nil {
 				exitOnError(err)
 			}
@@ -83,7 +82,7 @@ func secretGetCommand() *cobra.Command {
 			}
 			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
 			name := cmd.Flag(secretNameFlag.name).Value.String()
-			vault, err := vaults.Get(vaultFile)
+			vault, err := getVault(vaultFile)
 			if err != nil {
 				exitOnError(err)
 			}
@@ -116,7 +115,7 @@ func secretRefCommand() *cobra.Command {
 		Short:   "References and updates secrets to a vault from a given yaml or json file",
 		Run: func(cmd *cobra.Command, args []string) {
 			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
-			vault, err := vaults.Get(vaultFile)
+			vault, err := getVault(vaultFile)
 			if err != nil {
 				exitOnError(err)
 			}
@@ -178,7 +177,7 @@ func secretDerefCommand() *cobra.Command {
 				previewOnly, _ = cmd.Flags().GetBool(secretRefPreviewOnlyFlag.name)
 			}
 			for _, vaultFile := range vaultFiles {
-				vault, err := vaults.Get(vaultFile)
+				vault, err := getVault(vaultFile)
 				if err != nil {
 					exitOnError(err)
 				}

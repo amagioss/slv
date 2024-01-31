@@ -25,6 +25,7 @@ type Vault struct {
 	unlockedBy          *string           `json:"-"`
 	decryptedSecrets    map[string][]byte `json:"-"`
 	vaultSecretRefRegex *regexp.Regexp    `json:"-"`
+	objectField         string            `json:"-"`
 }
 
 func (v *Vault) DeepCopy() *Vault {
@@ -72,17 +73,17 @@ func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
 	return vlt.publicKey, err
 }
 
-// Returns new vault instance. The vault file name must end with .slv or .slv.yaml or .slv.yml.
-func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
-	if !strings.HasSuffix(vaultFile, vaultFileNameExtension+".yaml") &&
-		!strings.HasSuffix(vaultFile, vaultFileNameExtension+".yml") &&
-		!strings.HasSuffix(vaultFile, vaultFileNameExtension) {
+// Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv or .slv.yaml or .slv.yml.
+func New(filePath, objectField string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+	if !strings.HasSuffix(filePath, vaultFileNameExtension+".yaml") &&
+		!strings.HasSuffix(filePath, vaultFileNameExtension+".yml") &&
+		!strings.HasSuffix(filePath, vaultFileNameExtension) {
 		return nil, errInvalidVaultFileName
 	}
-	if commons.FileExists(vaultFile) {
+	if commons.FileExists(filePath) {
 		return nil, errVaultExists
 	}
-	if os.MkdirAll(path.Dir(vaultFile), os.FileMode(0755)) != nil {
+	if os.MkdirAll(path.Dir(filePath), os.FileMode(0755)) != nil {
 		return nil, errVaultDirPathCreation
 	}
 	vaultSecretKey, err := crypto.NewSecretKey(VaultKey)
@@ -103,8 +104,9 @@ func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, p
 			PublicKey:  vaultPublicKey.String(),
 			HashLength: hashLen,
 		},
-		path:      vaultFile,
-		secretKey: vaultSecretKey,
+		path:        filePath,
+		secretKey:   vaultSecretKey,
+		objectField: objectField,
 	}
 	if rootPublicKey != nil {
 		if _, err := vlt.Share(rootPublicKey); err != nil {
@@ -119,22 +121,33 @@ func New(vaultFile string, hashLength uint32, rootPublicKey *crypto.PublicKey, p
 	return vlt, vlt.commit()
 }
 
-// Returns the vault instance for a given vault file. The vault file name must end with .slv or .slv.yaml or .slv.yml.
-func Get(vaultFile string) (vlt *Vault, err error) {
-	if !strings.HasSuffix(vaultFile, vaultFileNameExtension+".yaml") &&
-		!strings.HasSuffix(vaultFile, vaultFileNameExtension+".yml") &&
-		!strings.HasSuffix(vaultFile, vaultFileNameExtension) {
+// Returns the vault instance from a given yaml. The vault file name must end with .slv or .slv.yaml or .slv.yml.
+func Get(filePath string) (vlt *Vault, err error) {
+	return GetFromField(filePath, "")
+}
+
+// Returns the vault instance from a given yaml file considering a field as vault. The vault file name must end with .slv or .slv.yaml or .slv.yml.
+func GetFromField(filePath, fieldName string) (vlt *Vault, err error) {
+	if !strings.HasSuffix(filePath, vaultFileNameExtension+".yaml") &&
+		!strings.HasSuffix(filePath, vaultFileNameExtension+".yml") &&
+		!strings.HasSuffix(filePath, vaultFileNameExtension) {
 		return nil, errInvalidVaultFileName
 	}
-	if !commons.FileExists(vaultFile) {
+	if !commons.FileExists(filePath) {
 		return nil, errVaultNotFound
 	}
-	vlt = &Vault{
-		path: vaultFile,
+	vlt = &Vault{}
+	if fieldName == "" {
+		if err = commons.ReadFromYAML(filePath, &vlt); err != nil {
+			return nil, err
+		}
+	} else {
+		if err = commons.ReadChildFromYAML(filePath, fieldName, &vlt); err != nil {
+			return nil, err
+		}
+		vlt.objectField = fieldName
 	}
-	if err = commons.ReadFromYAML(vlt.path, &vlt); err != nil {
-		return nil, err
-	}
+	vlt.path = filePath
 	return vlt, nil
 }
 
@@ -173,15 +186,22 @@ func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
 }
 
 func (vlt *Vault) commit() error {
-	var obj map[string]interface{}
-	err := commons.ReadFromYAML(vlt.path, &obj)
-	if err != nil {
-		return err
+	if vlt.objectField == "" {
+		return commons.WriteToYAML(vlt.path,
+			"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" as placeholder to reference secrets from this vault into files\n", vlt)
+	} else {
+		var obj map[string]interface{}
+		if commons.FileExists(vlt.path) {
+			if err := commons.ReadFromYAML(vlt.path, &obj); err != nil {
+				return err
+			}
+		} else {
+			obj = make(map[string]interface{})
+		}
+		obj[vlt.objectField] = vlt
+		return commons.WriteToYAML(vlt.path,
+			"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" as placeholder to reference secrets from this vault into files\n", obj)
 	}
-	obj["slvSecrets"] = vlt.Secrets
-	obj["slvConfig"] = vlt.Config
-	return commons.WriteToYAML(vlt.path,
-		"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" as placeholder to reference secrets from this vault into files\n", obj)
 }
 
 func (vlt *Vault) reset() error {

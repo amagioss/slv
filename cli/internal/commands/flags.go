@@ -107,6 +107,11 @@ var (
 		usage: "Preserve a partial secret hash for the purpose of validating secret rotation [Not recommended, though it might be resilient from brute-forcing]",
 	}
 
+	vaultK8sFlag = FlagDef{
+		name:  "k8s",
+		usage: "Specify a name for the K8s SLV object if the vault is to be used in a K8s environment",
+	}
+
 	// Secret Command Flags
 
 	secretNameFlag = FlagDef{

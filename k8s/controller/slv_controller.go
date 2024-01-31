@@ -119,7 +119,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	vault := slvObj.Vault
+	vault := slvObj.Spec.Vault
 	if err := vault.Unlock(*secretKey); err != nil {
 		return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to unlock vault")
 	}
@@ -147,9 +147,6 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			}
 			if err = controllerutil.SetControllerReference(&slvObj, secret, r.Scheme); err != nil {
 				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set controller reference for secret")
-			}
-			if err = controllerutil.SetOwnerReference(&slvObj, secret, r.Scheme); err != nil {
-				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set owner reference for secret")
 			}
 			if err := r.Create(ctx, secret); err != nil {
 				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to create secret")
@@ -188,11 +185,10 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		}
 		var msg string
 		if updateRequired {
-			if err = controllerutil.SetControllerReference(&slvObj, secret, r.Scheme); err != nil {
-				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set controller reference for secret")
-			}
-			if err = controllerutil.SetOwnerReference(&slvObj, secret, r.Scheme); err != nil {
-				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set owner reference for secret")
+			if !controllerutil.HasControllerReference(secret) {
+				if err = controllerutil.SetControllerReference(&slvObj, secret, r.Scheme); err != nil {
+					return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set controller reference for secret")
+				}
 			}
 			if err = r.Update(ctx, secret); err != nil {
 				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to update secret")
