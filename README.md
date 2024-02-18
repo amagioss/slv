@@ -8,6 +8,6 @@ SLV is designed based on the following **key principles**
  ## How to install
  SLV can be installed using brew using the following command
 ```zsh
-brew install amagimedia/tap/slv
+brew install savesecrets/tap/slv
 ```
-Alternatively, you can download the SLV binary from the [releases](https://github.com/amagimedia/slv-beta/releases/latest) page and add it to your path.
+Alternatively, you can download the SLV binary from the [releases](https://github.com/savesecrets/slv/releases/latest) page and add it to your path.

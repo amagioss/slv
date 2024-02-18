@@ -2,7 +2,7 @@
 
 slvbinfile=$(mktemp)
 
-go build -o $slvbinfile ./cli
+go build -o $slvbinfile ./cli/main
 
 alias slv=$slvbinfile
 
@@ -13,8 +13,8 @@ slv system prune -y
 slv profile new -n testorg
 
 # Create a new environment
-SLV_SECRET_KEY=$(slv env new -n testenv --add | grep "Secret Key")
-SLV_SECRET_KEY=$(echo $SLV_SECRET_KEY | cut -d ':' -f 2 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+SLV_ENV_SECRET_KEY=$(slv env new -n testenv --add | grep "Secret Key")
+SLV_ENV_SECRET_KEY=$(echo $SLV_ENV_SECRET_KEY | cut -d ':' -f 2 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
 
 # Generate a random vault file name
 VAULT_FILE="$(mktemp).slv"
@@ -26,7 +26,7 @@ slv vault new -v $VAULT_FILE -s testenv --enable-hash
 slv secret put -v $VAULT_FILE -n testsecret -s testvalue
 
 # Export the secret key
-export SLV_SECRET_KEY
+export SLV_ENV_SECRET_KEY
 
 # Get the secret value
 SECRET_VALUE=$(slv secret get -v $VAULT_FILE -n testsecret)

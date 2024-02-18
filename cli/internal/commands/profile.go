@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/amagimedia/slv/core/environments"
-	"github.com/amagimedia/slv/core/profiles"
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv/core/environments"
+	"savesecrets.org/slv/core/profiles"
 )
 
 func profileCommand() *cobra.Command {
@@ -25,6 +25,8 @@ func profileCommand() *cobra.Command {
 	profileCmd.AddCommand(profileDefaultCommand())
 	profileCmd.AddCommand(profileListCommand())
 	profileCmd.AddCommand(profileAddEnvCommand())
+	profileCmd.AddCommand(profileDeleteCommand())
+	profileCmd.AddCommand(profileSyncCommand())
 	return profileCmd
 }
 
@@ -37,7 +39,9 @@ func profileNewCommand() *cobra.Command {
 		Short: "Creates a new profile",
 		Run: func(cmd *cobra.Command, args []string) {
 			name, _ := cmd.Flags().GetString(profileNameFlag.name)
-			err := profiles.New(name)
+			gitURI, _ := cmd.Flags().GetString(profileGitURI.name)
+			gitBranch, _ := cmd.Flags().GetString(profileGitBranch.name)
+			err := profiles.New(name, gitURI, gitBranch)
 			if err == nil {
 				fmt.Println("Created profile: ", color.GreenString(name))
 				safeExit()
@@ -47,6 +51,8 @@ func profileNewCommand() *cobra.Command {
 		},
 	}
 	profileNewCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
+	profileNewCmd.Flags().StringP(profileGitURI.name, profileGitURI.shorthand, "", profileGitURI.usage)
+	profileNewCmd.Flags().StringP(profileGitBranch.name, profileGitBranch.shorthand, "", profileGitBranch.usage)
 	profileNewCmd.MarkFlagRequired(profileNameFlag.name)
 	return profileNewCmd
 }
@@ -120,11 +126,11 @@ func profileAddEnvCommand() *cobra.Command {
 				exitOnError(err)
 			}
 			profileName := cmd.Flag(profileNameFlag.name).Value.String()
-			var prof *profiles.Profile
+			var profile *profiles.Profile
 			if profileName != "" {
-				prof, err = profiles.Get(profileName)
+				profile, err = profiles.Get(profileName)
 			} else {
-				prof, err = profiles.GetDefaultProfile()
+				profile, err = profiles.GetDefaultProfile()
 			}
 			if err != nil {
 				exitOnError(err)
@@ -138,10 +144,10 @@ func profileAddEnvCommand() *cobra.Command {
 				var env *environments.Environment
 				if env, err = environments.FromEnvData(envdef); err == nil && env != nil {
 					if setAsRoot {
-						err = prof.SetRoot(env)
-						successMessage = fmt.Sprintf("Successfully set %s as root environment for profile %s", color.GreenString(env.Name), color.GreenString(prof.Name()))
+						err = profile.SetRoot(env)
+						successMessage = fmt.Sprintf("Successfully set %s as root environment for profile %s", color.GreenString(env.Name), color.GreenString(profile.Name()))
 					} else {
-						err = prof.AddEnv(env)
+						err = profile.PutEnv(env)
 					}
 				}
 				if err != nil {
@@ -149,7 +155,7 @@ func profileAddEnvCommand() *cobra.Command {
 				}
 			}
 			if successMessage == "" {
-				successMessage = fmt.Sprintf("Successfully added %d environments to profile %s", len(envdefs), color.GreenString(prof.Name()))
+				successMessage = fmt.Sprintf("Successfully added %d environments to profile %s", len(envdefs), color.GreenString(profile.Name()))
 			}
 			fmt.Println(successMessage)
 			safeExit()
@@ -160,4 +166,49 @@ func profileAddEnvCommand() *cobra.Command {
 	envAddCmd.Flags().Bool(profileSetRootEnvFlag.name, false, profileSetRootEnvFlag.usage)
 	envAddCmd.MarkFlagRequired(profileEnvDefFlag.name)
 	return envAddCmd
+}
+
+func profileDeleteCommand() *cobra.Command {
+	if profileDelCmd != nil {
+		return profileDelCmd
+	}
+	profileDelCmd = &cobra.Command{
+		Use:     "delete",
+		Aliases: []string{"del", "rm", "remove"},
+		Short:   "Deletes a profile",
+		Run: func(cmd *cobra.Command, args []string) {
+			name, _ := cmd.Flags().GetString(profileNameFlag.name)
+			if err := profiles.Delete(name); err != nil {
+				exitOnError(err)
+			} else {
+				fmt.Println("Deleted profile: ", color.GreenString(name))
+				safeExit()
+			}
+		},
+	}
+	profileDelCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
+	profileDelCmd.MarkFlagRequired(profileNameFlag.name)
+	return profileDelCmd
+}
+
+func profileSyncCommand() *cobra.Command {
+	if profileSyncCmd != nil {
+		return profileSyncCmd
+	}
+	profileSyncCmd = &cobra.Command{
+		Use:     "sync",
+		Aliases: []string{"pull"},
+		Short:   "Sync current profile from remote repository",
+		Run: func(cmd *cobra.Command, args []string) {
+			profile, err := profiles.GetDefaultProfile()
+			if err != nil {
+				exitOnError(err)
+			}
+			if err = profile.Sync(); err != nil {
+				exitOnError(err)
+			}
+			fmt.Printf("Successfully synced profile: %s\n", color.GreenString(profile.Name()))
+		},
+	}
+	return profileSyncCmd
 }

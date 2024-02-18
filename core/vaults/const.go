@@ -5,23 +5,23 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/amagimedia/slv"
-	"github.com/amagimedia/slv/core/crypto"
+	"savesecrets.org/slv/core/config"
+	"savesecrets.org/slv/core/crypto"
 )
 
 const (
-	vaultFileNameExtension                = "." + slv.AppName
-	VaultKey               crypto.KeyType = 'V'
-	secretNamePattern                     = "[a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?"
-	secretRefAbbrev                       = "VSR" // VSR = Vault Secret Reference
-	secretRefPatternBase                  = `\{\{\s*VAULTID\.` + secretNamePattern + `\s*\}\}`
+	vaultFileNameEnding                 = config.AppNameLowerCase
+	VaultKey             crypto.KeyType = 'V'
+	secretNamePattern                   = "[a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?"
+	secretRefAbbrev                     = "VSR" // VSR = Vault Secret Reference
+	secretRefPatternBase                = `\{\{\s*VAULTID\.` + secretNamePattern + `\s*\}\}`
 )
 
 var (
 	secretNameRegex = regexp.MustCompile(secretNamePattern)
 	secretRefRegex  = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", "SLV_VPK_[A-Za-z0-9]+"))
 
-	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameExtension + " or " + vaultFileNameExtension + ".yaml or " + vaultFileNameExtension + ".yml]")
+	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameEnding + " or " + vaultFileNameEnding + ".yaml or " + vaultFileNameEnding + ".yml]")
 	errVaultDirPathCreation         = errors.New("error in creating a new vault directory path")
 	errVaultNotAccessible           = errors.New("vault is not accessible using the given environment key")
 	errVaultLocked                  = errors.New("the vault is currently locked")

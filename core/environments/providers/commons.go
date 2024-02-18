@@ -1,10 +1,10 @@
 package providers
 
-import "github.com/amagimedia/slv/core/environments"
+import "savesecrets.org/slv/core/environments"
 
 func LoadDefaults() {
 	if !defaultProvidersRegistered {
-		environments.RegisterAccessProvider("kms-aws", bindWithAWSKMS, unBindFromAWSKMS, true)
+		environments.RegisterEnvSecretProvider("kms-aws", bindWithAWSKMS, unBindFromAWSKMS, true)
 		defaultProvidersRegistered = true
 	}
 }

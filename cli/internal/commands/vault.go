@@ -3,17 +3,17 @@ package commands
 import (
 	"fmt"
 
-	"github.com/amagimedia/slv/core/commons"
-	"github.com/amagimedia/slv/core/crypto"
-	"github.com/amagimedia/slv/core/profiles"
-	"github.com/amagimedia/slv/core/secretkeystore"
-	"github.com/amagimedia/slv/core/vaults"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv"
+	"savesecrets.org/slv/core/commons"
+	"savesecrets.org/slv/core/crypto"
+	"savesecrets.org/slv/core/profiles"
+	"savesecrets.org/slv/core/vaults"
 )
 
 const (
-	k8sApiVersion = "k8s.amagi.com/v1"
+	k8sApiVersion = "slv.savesecrets.org/v1"
 	k8sKind       = "SLV"
 	k8sVaultField = "spec"
 )
@@ -86,16 +86,17 @@ func vaultNewCommand() *cobra.Command {
 				}
 				publicKeys = append(publicKeys, publicKey)
 			}
-			prof, err := profiles.GetDefaultProfile()
-			if err != nil {
-				exitOnError(err)
-			}
-			envManifest, err := prof.GetEnvManifest()
-			if err != nil {
-				exitOnError(err)
-			}
+			var rootPublicKey *crypto.PublicKey
 			if query != "" {
-				for _, env := range envManifest.SearchEnv(query) {
+				profile, err := profiles.GetDefaultProfile()
+				if err != nil {
+					exitOnError(err)
+				}
+				envs, err := profile.SearchEnvs(query)
+				if err != nil {
+					exitOnError(err)
+				}
+				for _, env := range envs {
 					publicKey, err := crypto.PublicKeyFromString(env.PublicKey)
 					if err != nil {
 						exitOnError(err)
@@ -105,21 +106,21 @@ func vaultNewCommand() *cobra.Command {
 				if len(publicKeys) == 0 {
 					exitOnError(fmt.Errorf("no matching environments found for search query: " + query))
 				}
+				rootPublicKey, err = profile.RootPublicKey()
+				if err != nil {
+					exitOnError(err)
+				}
 			}
 			enableHash, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.name)
 			var hashLength uint32 = 0
 			if enableHash {
 				hashLength = 4
 			}
-			rootPublicKey, err := envManifest.RootPublicKey()
-			if err != nil {
-				exitOnError(err)
-			}
-			k8slvName := cmd.Flag(vaultK8sFlag.name).Value.String()
-			if k8slvName == "" {
+			k8sName := cmd.Flag(vaultK8sFlag.name).Value.String()
+			if k8sName == "" {
 				_, err = vaults.New(vaultFile, "", hashLength, rootPublicKey, publicKeys...)
 			} else {
-				_, err = newK8sVault(vaultFile, k8slvName, hashLength, rootPublicKey, publicKeys...)
+				_, err = newK8sVault(vaultFile, k8sName, hashLength, rootPublicKey, publicKeys...)
 			}
 			if err != nil {
 				exitOnError(err)
@@ -145,7 +146,7 @@ func vaultShareCommand() *cobra.Command {
 		Use:   "share",
 		Short: "Shares a vault with another environment or group",
 		Run: func(cmd *cobra.Command, args []string) {
-			envSecretKey, err := secretkeystore.GetSecretKey()
+			envSecretKey, err := slv.GetSecretKey()
 			if err != nil {
 				exitOnError(err)
 			}
@@ -168,15 +169,15 @@ func vaultShareCommand() *cobra.Command {
 				publicKeys = append(publicKeys, publicKey)
 			}
 			if query != "" {
-				prof, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetDefaultProfile()
 				if err != nil {
 					exitOnError(err)
 				}
-				envManifest, err := prof.GetEnvManifest()
+				envs, err := profile.SearchEnvs(query)
 				if err != nil {
 					exitOnError(err)
 				}
-				for _, env := range envManifest.SearchEnv(query) {
+				for _, env := range envs {
 					publicKey, err := crypto.PublicKeyFromString(env.PublicKey)
 					if err != nil {
 						exitOnError(err)

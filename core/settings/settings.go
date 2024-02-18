@@ -1,14 +1,14 @@
 package settings
 
 import (
-	"github.com/amagimedia/slv/core/commons"
 	"gopkg.in/yaml.v3"
+	"savesecrets.org/slv/core/commons"
 )
 
 // import (
 // 	"os"
 
-// 	"github.com/amagimedia/slv/core/commons"
+// 	"savesecrets.org/slv/core/commons"
 // )
 
 type Settings struct {
@@ -17,13 +17,12 @@ type Settings struct {
 }
 
 type manifest struct {
-	Version           uint8 `yaml:"version,omitempty"`
-	AllowChanges      bool  `yaml:"allow_changes"`
-	AllowCreateEnv    bool  `yaml:"allow_create_env"`
-	AllowCreateGroup  bool  `yaml:"allow_create_group"`
-	SyncInterval      int   `yaml:"sync_interval"`
-	AllowGroups       bool  `yaml:"allow_groups"`
-	AllowVaultSharing bool  `yaml:"allow_vault_sharing"`
+	AllowChanges      bool `yaml:"allow_changes"`
+	AllowCreateEnv    bool `yaml:"allow_create_env"`
+	AllowCreateGroup  bool `yaml:"allow_create_group"`
+	SyncInterval      int  `yaml:"sync_interval"`
+	AllowGroups       bool `yaml:"allow_groups"`
+	AllowVaultSharing bool `yaml:"allow_vault_sharing"`
 }
 
 func (settings Settings) MarshalYAML() (interface{}, error) {
@@ -39,14 +38,8 @@ func NewManifest(path string) (settings *Settings, err error) {
 		return nil, errManifestPathExistsAlready
 	}
 	settings = &Settings{
-		path: &path,
-		manifest: &manifest{
-			Version: commons.Version,
-		},
-	}
-	err = settings.commit()
-	if err != nil {
-		settings = nil
+		path:     &path,
+		manifest: &manifest{},
 	}
 	return
 }
@@ -63,9 +56,9 @@ func GetManifest(path string) (settings *Settings, err error) {
 	return
 }
 
-func (settings *Settings) commit() error {
-	if commons.WriteToYAML(*settings.path, "", settings) != nil {
-		return errWritingManifest
-	}
-	return nil
-}
+// func (settings *Settings) commit() error {
+// 	if commons.WriteToYAML(*settings.path, "", settings) != nil {
+// 		return errWritingManifest
+// 	}
+// 	return nil
+// }

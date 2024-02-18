@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"strings"
 
-	"github.com/amagimedia/slv/core/commons"
+	"savesecrets.org/slv/core/commons"
 )
 
 type ciphered struct {
@@ -54,10 +54,10 @@ type SealedSecret struct {
 
 func (sealedSecret SealedSecret) String() string {
 	if sealedSecret.hash == nil {
-		return commons.SLV + "_" + string(*sealedSecret.keyType) + sealedSecretAbbrev + "_" +
+		return slvPrefix + "_" + string(*sealedSecret.keyType) + sealedSecretAbbrev + "_" +
 			commons.Encode(sealedSecret.toBytes())
 	} else {
-		return commons.SLV + "_" + string(*sealedSecret.keyType) + sealedSecretAbbrev + "_" +
+		return slvPrefix + "_" + string(*sealedSecret.keyType) + sealedSecretAbbrev + "_" +
 			commons.Encode(*sealedSecret.hash) + "_" + commons.Encode(sealedSecret.toBytes())
 	}
 }
@@ -75,7 +75,7 @@ func (sealedSecret *SealedSecret) FromString(sealedSecretStr string) (err error)
 	if err != nil {
 		return err
 	}
-	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
+	if sliced[0] != slvPrefix || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
 		!strings.HasSuffix(sliced[1], sealedSecretAbbrev) {
 		return errInvalidCiphertextFormat
 	}
@@ -102,7 +102,7 @@ type WrappedKey struct {
 }
 
 func (wrappedKey WrappedKey) String() string {
-	return commons.SLV + "_" + string(*wrappedKey.keyType) + wrappedKeyAbbrev + "_" +
+	return slvPrefix + "_" + string(*wrappedKey.keyType) + wrappedKeyAbbrev + "_" +
 		commons.Encode(wrappedKey.toBytes())
 }
 
@@ -119,7 +119,7 @@ func (wrappedKey *WrappedKey) FromString(wrappedKeyStr string) (err error) {
 	if err != nil {
 		return err
 	}
-	if sliced[0] != commons.SLV || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
+	if sliced[0] != slvPrefix || len(sliced[1]) != 3 || !strings.HasPrefix(sliced[1], string(*ciphered.keyType)) ||
 		!strings.HasSuffix(sliced[1], wrappedKeyAbbrev) {
 		return errInvalidCiphertextFormat
 	}

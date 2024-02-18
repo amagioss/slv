@@ -3,9 +3,9 @@ package environments
 import (
 	"strings"
 
-	"github.com/amagimedia/slv/core/commons"
-	"github.com/amagimedia/slv/core/crypto"
 	"gopkg.in/yaml.v3"
+	"savesecrets.org/slv/core/commons"
+	"savesecrets.org/slv/core/crypto"
 )
 
 type EnvManifest struct {
@@ -33,10 +33,6 @@ func NewManifest(path string) (envManifest *EnvManifest, err error) {
 	envManifest = &EnvManifest{
 		path:     &path,
 		manifest: new(manifest),
-	}
-	err = envManifest.commit()
-	if err != nil {
-		envManifest = nil
 	}
 	return
 }
@@ -75,7 +71,7 @@ func (envManifest *EnvManifest) SetRoot(env *Environment) error {
 	return envManifest.commit()
 }
 
-func (envManifest *EnvManifest) ListEnv() (environments []*Environment) {
+func (envManifest *EnvManifest) ListEnvs() (environments []*Environment) {
 	if envManifest.Environments != nil {
 		for _, environment := range envManifest.Environments {
 			environments = append(environments, environment)
@@ -84,14 +80,7 @@ func (envManifest *EnvManifest) ListEnv() (environments []*Environment) {
 	return
 }
 
-func (envManifest *EnvManifest) GetEnv(id string) (environment *Environment, err error) {
-	if environment, ok := envManifest.Environments[id]; ok {
-		return environment, nil
-	}
-	return nil, errEnvironmentNotFound
-}
-
-func (envManifest *EnvManifest) SearchEnv(query string) (environments []*Environment) {
+func (envManifest *EnvManifest) SearchEnvs(query string) (environments []*Environment) {
 	query = strings.ToLower(query)
 	for _, env := range envManifest.Environments {
 		if env.Search(query) {
@@ -101,14 +90,10 @@ func (envManifest *EnvManifest) SearchEnv(query string) (environments []*Environ
 	return
 }
 
-func (envManifest *EnvManifest) updateEnvironment(env *Environment) error {
+func (envManifest *EnvManifest) PutEnv(env *Environment) (err error) {
 	if envManifest.Environments == nil {
 		envManifest.Environments = make(map[string]*Environment)
 	}
 	envManifest.Environments[env.Id()] = env
 	return envManifest.commit()
-}
-
-func (envManifest *EnvManifest) AddEnv(env *Environment) (err error) {
-	return envManifest.updateEnvironment(env)
 }

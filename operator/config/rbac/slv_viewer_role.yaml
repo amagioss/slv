@@ -1,0 +1,27 @@
+# permissions for end users to view slvs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: slv-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: operator
+    app.kubernetes.io/part-of: operator
+    app.kubernetes.io/managed-by: kustomize
+  name: slv-viewer-role
+rules:
+- apiGroups:
+  - slv.savesecrets.org
+  resources:
+  - slvs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - slv.savesecrets.org
+  resources:
+  - slvs/status
+  verbs:
+  - get

@@ -4,7 +4,7 @@ builds:
     main: ./cli/main
     env:
       - CGO_ENABLED=0
-    ldflags: "-X github.com/amagimedia/slv.Version={{.Version}}"
+    ldflags: "-X savesecrets.org/slv.Version={{.Version}}"
     goarch:
       - amd64
       - arm64
@@ -14,10 +14,10 @@ builds:
       - windows
   - id: slv-operator
     binary: slv-operator
-    main: ./k8s/main
+    main: ./operator/cmd
     env:
       - CGO_ENABLED=0
-    ldflags: "-X github.com/amagimedia/slv.Version={{.Version}}"
+    ldflags: "-X savesecrets.org/slv.Version={{.Version}}"
     goarch:
       - amd64
       - arm64
@@ -39,9 +39,9 @@ changelog:
 nfpms:
   - builds:
       - slv
-    vendor: Amagi Media Private Ltd.
-    homepage: https://github.com/amagimedia/slv
-    maintainer: Shibly Meeran <shibly.meeran@amagi.com>
+    vendor: SaveSecrets
+    homepage: https://savesecrets.org/slv
+    maintainer: Shibly Meeran <shibme@shib.me>
     formats:
       - apk
       - deb
@@ -50,14 +50,14 @@ brews:
   - ids:
       - slv
     name: slv
-    homepage: "https://github.com/amagimedia/slv"
+    homepage: "https://savesecrets.org/slv"
     commit_author:
       name: Shibly Meeran
       email: shibme@shib.me
     repository:
-      owner: amagimedia
+      owner: savesecrets
       name: homebrew-tap
       branch: main
       git:
-        url: 'git@github.com:amagimedia/homebrew-tap.git'
+        url: 'git@github.com:savesecrets/homebrew-tap.git'
         private_key: '{{ .Env.HOMEBREW_SSH_KEY }}'

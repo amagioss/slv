@@ -28,6 +28,16 @@ var (
 		usage:     "Profile name",
 	}
 
+	profileGitURI = FlagDef{
+		name:  "git-uri",
+		usage: "Profile git URI",
+	}
+
+	profileGitBranch = FlagDef{
+		name:  "git-branch",
+		usage: "Profile git branch",
+	}
+
 	profileEnvDefFlag = FlagDef{
 		name:      "env",
 		shorthand: "e",
@@ -129,6 +139,16 @@ var (
 	secretForceUpdateFlag = FlagDef{
 		name:  "force",
 		usage: "Replaces the secret if it exists already",
+	}
+
+	secretListFormatFlag = FlagDef{
+		name:  "format",
+		usage: "List secrets as one of [json, yaml, table, envars]. Defaults to table.",
+	}
+
+	secretEncodeBase64Flag = FlagDef{
+		name:  "base64",
+		usage: "Encode the returned secret as base64",
 	}
 
 	secretRefFileFlag = FlagDef{

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/amagimedia/slv/core/commons"
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv/core/config"
 )
 
 func systemCommand() *cobra.Command {
@@ -43,7 +43,7 @@ func systemResetCommand() *cobra.Command {
 				confirm = confirmation == "y"
 			}
 			if confirm {
-				err := commons.ResetAppDataDir()
+				err := config.ResetAppDataDir()
 				if err == nil {
 					fmt.Println(color.GreenString("System reset successful"))
 				} else {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/amagimedia/slv/core/commons"
-	"github.com/amagimedia/slv/core/crypto"
+	"savesecrets.org/slv/core/commons"
+	"savesecrets.org/slv/core/crypto"
 )
 
 type Bind func(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error)
@@ -20,32 +20,32 @@ type provider struct {
 	refRequired bool
 }
 
-type providerAccessBinding struct {
+type envSecretBinding struct {
 	Provider string            `json:"p"`
 	Ref      map[string][]byte `json:"r"`
 }
 
-func (pab *providerAccessBinding) string() (string, error) {
-	data, err := commons.Serialize(*pab)
+func (esb *envSecretBinding) string() (string, error) {
+	data, err := commons.Serialize(*esb)
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s_%s_%s", commons.SLV, providerAccessBindingAbbrev, data), nil
+	return fmt.Sprintf("%s_%s_%s", slvPrefix, envSecretBindingAbbrev, data), nil
 }
 
-func providerAccessBindingFromString(providerAccessBindingStr string) (*providerAccessBinding, error) {
-	sliced := strings.Split(providerAccessBindingStr, "_")
-	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != providerAccessBindingAbbrev {
-		return nil, errInvalidProviderAccessBindingFormat
+func envSecretBindingFromString(envSecretBindingStr string) (*envSecretBinding, error) {
+	sliced := strings.Split(envSecretBindingStr, "_")
+	if len(sliced) != 3 || sliced[0] != slvPrefix || sliced[1] != envSecretBindingAbbrev {
+		return nil, errInvalidEnvSecretBindingFormat
 	}
-	binding := new(providerAccessBinding)
+	binding := new(envSecretBinding)
 	if err := commons.Deserialize(sliced[2], &binding); err != nil {
 		return nil, err
 	}
 	return binding, nil
 }
 
-func RegisterAccessProvider(name string, bind Bind, unbind UnBind, refRequired bool) error {
+func RegisterEnvSecretProvider(name string, bind Bind, unbind UnBind, refRequired bool) error {
 	if _, ok := providerMap[name]; ok {
 		return errProviderRegisteredAlready
 	}
@@ -73,11 +73,11 @@ func NewEnvForProvider(providerName, envName string, envType EnvType,
 		return nil, err
 	}
 	if provider.refRequired {
-		pab := &providerAccessBinding{
+		esb := &envSecretBinding{
 			Provider: providerName,
 			Ref:      ref,
 		}
-		env.ProviderBinding, err = pab.string()
+		env.SecretBinding, err = esb.string()
 		if err != nil {
 			return nil, err
 		}
@@ -85,8 +85,8 @@ func NewEnvForProvider(providerName, envName string, envType EnvType,
 	return env, nil
 }
 
-func GetSecretKeyFromAccessBinding(providerAccessBindingStr string) (secretKey *crypto.SecretKey, err error) {
-	if providerAccessBindingStr == "" {
+func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypto.SecretKey, err error) {
+	if envSecretBindingStr == "" {
 		var providersWithoutRef []provider
 		for _, provider := range providerMap {
 			if !provider.refRequired {
@@ -99,17 +99,17 @@ func GetSecretKeyFromAccessBinding(providerAccessBindingStr string) (secretKey *
 				return crypto.SecretKeyFromBytes(secretKeyBytes)
 			}
 		}
-		return nil, errProviderAccessBindingUnspecified
+		return nil, errEnvSecretBindingUnspecified
 	}
-	pab, err := providerAccessBindingFromString(providerAccessBindingStr)
+	esb, err := envSecretBindingFromString(envSecretBindingStr)
 	if err != nil {
 		return nil, err
 	}
-	provider, ok := providerMap[pab.Provider]
+	provider, ok := providerMap[esb.Provider]
 	if !ok {
 		return nil, errProviderUnknown
 	}
-	secretKeyBytes, err := (*provider.unbind)(pab.Ref)
+	secretKeyBytes, err := (*provider.unbind)(esb.Ref)
 	if err == nil {
 		return crypto.SecretKeyFromBytes(secretKeyBytes)
 	}

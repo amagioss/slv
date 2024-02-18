@@ -4,7 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/amagimedia/slv/core/commons"
+	"savesecrets.org/slv/core/commons"
+	"savesecrets.org/slv/core/config"
 )
 
 type profileManager struct {
@@ -22,7 +23,7 @@ func initProfileManager() error {
 		return nil
 	}
 	var manager profileManager
-	manager.dir = filepath.Join(commons.AppDataDir(), profilesDirName)
+	manager.dir = filepath.Join(config.GetAppDataDir(), profilesDirName)
 	profileManagerDirInfo, err := os.Stat(manager.dir)
 	if err != nil {
 		err = os.MkdirAll(manager.dir, 0755)
@@ -44,9 +45,7 @@ func initProfileManager() error {
 	manager.profileList = make(map[string]struct{})
 	for _, fileInfo := range fileInfoList {
 		if fileInfo.IsDir() {
-			if f, err := os.Stat(filepath.Join(manager.dir, fileInfo.Name(), profileFileName)); err == nil && !f.IsDir() {
-				manager.profileList[fileInfo.Name()] = struct{}{}
-			}
+			manager.profileList[fileInfo.Name()] = struct{}{}
 		}
 	}
 	profileMgr = &manager
@@ -83,7 +82,7 @@ func Get(profileName string) (profile *Profile, err error) {
 	return
 }
 
-func New(profileName string) error {
+func New(profileName, gitURI, gitBranch string) error {
 	if profileName == "" {
 		return errInvalidProfileName
 	}
@@ -93,7 +92,7 @@ func New(profileName string) error {
 	if _, exists := profileMgr.profileList[profileName]; exists {
 		return errProfileExistsAlready
 	}
-	if _, err := newProfileForPath(filepath.Join(profileMgr.dir, profileName)); err != nil {
+	if _, err := newProfile(filepath.Join(profileMgr.dir, profileName), gitURI, gitBranch); err != nil {
 		return err
 	}
 	profileMgr.profileList[profileName] = struct{}{}
@@ -151,4 +150,22 @@ func GetDefaultProfile() (profile *Profile, err error) {
 		}
 	}
 	return profileMgr.defaultProfile, nil
+}
+
+func Delete(profileName string) error {
+	if profileName == "" {
+		return errInvalidProfileName
+	}
+	if err := initProfileManager(); err != nil {
+		return err
+	}
+	if _, exists := profileMgr.profileList[profileName]; !exists {
+		return errProfileNotFound
+	}
+	if profileMgr.defaultProfileName != nil && *profileMgr.defaultProfileName == profileName {
+		return errDeletingDefaultProfile
+	}
+	delete(profileMgr.profileList, profileName)
+	delete(profileMap, profileName)
+	return os.RemoveAll(filepath.Join(profileMgr.dir, profileName))
 }

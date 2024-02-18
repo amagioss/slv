@@ -1,6 +1,6 @@
 package main
 
-import "github.com/amagimedia/slv/cli"
+import "savesecrets.org/slv/cli"
 
 func main() {
 	cli.RunCLI()

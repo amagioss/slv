@@ -19,6 +19,8 @@ var (
 	profileNewCmd  *cobra.Command
 	profileListCmd *cobra.Command
 	profileSetCmd  *cobra.Command
+	profileDelCmd  *cobra.Command
+	profileSyncCmd *cobra.Command
 
 	// Environment Commands
 	envCmd     *cobra.Command
@@ -35,6 +37,7 @@ var (
 	secretCmd      *cobra.Command
 	secretPutCmd   *cobra.Command
 	secretGetCmd   *cobra.Command
+	secretListCmd  *cobra.Command
 	secretRefCmd   *cobra.Command
 	secretDerefCmd *cobra.Command
 )

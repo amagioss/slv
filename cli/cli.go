@@ -3,8 +3,8 @@ package cli
 import (
 	"os"
 
-	"github.com/amagimedia/slv/cli/internal/commands"
-	"github.com/amagimedia/slv/core/environments/providers"
+	"savesecrets.org/slv/cli/internal/commands"
+	"savesecrets.org/slv/core/environments/providers"
 )
 
 func RunCLI() {

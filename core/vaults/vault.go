@@ -6,11 +6,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/amagimedia/slv/core/commons"
-	"github.com/amagimedia/slv/core/crypto"
+	"savesecrets.org/slv/core/commons"
+	"savesecrets.org/slv/core/crypto"
 )
 
-type config struct {
+type vaultConfig struct {
 	PublicKey   string   `json:"publicKey" yaml:"publicKey"`
 	HashLength  *uint32  `json:"hashLength,omitempty" yaml:"hashLength,omitempty"`
 	WrappedKeys []string `json:"wrappedKeys" yaml:"wrappedKeys"`
@@ -18,7 +18,7 @@ type config struct {
 
 type Vault struct {
 	Secrets             map[string]string `json:"slvSecrets" yaml:"slvSecrets"`
-	Config              config            `json:"slvConfig" yaml:"slvConfig"`
+	Config              vaultConfig       `json:"slvConfig" yaml:"slvConfig"`
 	path                string            `json:"-"`
 	publicKey           *crypto.PublicKey `json:"-"`
 	secretKey           *crypto.SecretKey `json:"-"`
@@ -43,7 +43,7 @@ func (v *Vault) DeepCopyInto(out *Vault) {
 	for key, val := range v.Secrets {
 		out.Secrets[key] = val
 	}
-	out.Config = config{}
+	out.Config = vaultConfig{}
 	if v.Config.PublicKey != "" {
 		out.Config.PublicKey = v.Config.PublicKey
 	}
@@ -73,11 +73,15 @@ func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
 	return vlt.publicKey, err
 }
 
+func isValidVaultFileName(fileName string) bool {
+	return strings.HasSuffix(fileName, "."+vaultFileNameEnding) ||
+		strings.HasSuffix(fileName, vaultFileNameEnding+".yaml") ||
+		strings.HasSuffix(fileName, vaultFileNameEnding+".yml")
+}
+
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv or .slv.yaml or .slv.yml.
 func New(filePath, objectField string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
-	if !strings.HasSuffix(filePath, vaultFileNameExtension+".yaml") &&
-		!strings.HasSuffix(filePath, vaultFileNameExtension+".yml") &&
-		!strings.HasSuffix(filePath, vaultFileNameExtension) {
+	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
 	if commons.FileExists(filePath) {
@@ -100,7 +104,7 @@ func New(filePath, objectField string, hashLength uint32, rootPublicKey *crypto.
 	}
 	vlt = &Vault{
 		publicKey: vaultPublicKey,
-		Config: config{
+		Config: vaultConfig{
 			PublicKey:  vaultPublicKey.String(),
 			HashLength: hashLen,
 		},
@@ -128,9 +132,7 @@ func Get(filePath string) (vlt *Vault, err error) {
 
 // Returns the vault instance from a given yaml file considering a field as vault. The vault file name must end with .slv or .slv.yaml or .slv.yml.
 func GetFromField(filePath, fieldName string) (vlt *Vault, err error) {
-	if !strings.HasSuffix(filePath, vaultFileNameExtension+".yaml") &&
-		!strings.HasSuffix(filePath, vaultFileNameExtension+".yml") &&
-		!strings.HasSuffix(filePath, vaultFileNameExtension) {
+	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
 	if !commons.FileExists(filePath) {

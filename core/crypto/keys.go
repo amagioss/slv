@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"dev.shib.me/xipher"
-	"github.com/amagimedia/slv/core/commons"
+	"savesecrets.org/slv/core/commons"
 )
 
 type KeyType byte
@@ -27,7 +27,7 @@ func publicKeyFromBytes(bytes []byte) (*PublicKey, error) {
 	if bytes[1] != 1 {
 		return nil, errInvalidPublicKeyFormat
 	}
-	if bytes[0] > commons.Version {
+	if bytes[0] > cryptoVersion {
 		return nil, errUnsupportedCryptoVersion
 	}
 	var version uint8 = bytes[0]
@@ -44,12 +44,12 @@ func publicKeyFromBytes(bytes []byte) (*PublicKey, error) {
 }
 
 func (publicKey PublicKey) String() string {
-	return commons.SLV + "_" + string(*publicKey.keyType) + publicKeyAbbrev + "_" + commons.Encode(publicKey.toBytes())
+	return slvPrefix + "_" + string(*publicKey.keyType) + publicKeyAbbrev + "_" + commons.Encode(publicKey.toBytes())
 }
 
 func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
 	sliced := strings.Split(publicKeyStr, "_")
-	if len(sliced) != 3 || sliced[0] != commons.SLV {
+	if len(sliced) != 3 || sliced[0] != slvPrefix {
 		return nil, errInvalidPublicKeyFormat
 	}
 	decoded, err := commons.Decode(sliced[2])
@@ -91,7 +91,7 @@ func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *Secre
 }
 
 func newSecretKey(privKey *xipher.PrivateKey, keyType KeyType) *SecretKey {
-	version := commons.Version
+	version := cryptoVersion
 	return &SecretKey{
 		version: &version,
 		keyType: &keyType,
@@ -118,7 +118,7 @@ func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {
 	if bytes[1] != 0 {
 		return nil, errInvalidSecretKeyFormat
 	}
-	if bytes[0] > commons.Version {
+	if bytes[0] > cryptoVersion {
 		return nil, errUnsupportedCryptoVersion
 	}
 	var version uint8 = bytes[0]
@@ -136,7 +136,7 @@ func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {
 
 func SecretKeyFromString(secretKeyStr string) (*SecretKey, error) {
 	sliced := strings.Split(secretKeyStr, "_")
-	if len(sliced) != 3 || sliced[0] != commons.SLV {
+	if len(sliced) != 3 || sliced[0] != slvPrefix {
 		return nil, errInvalidSecretKeyFormat
 	}
 	decoded, err := commons.Decode(sliced[2])
@@ -166,6 +166,6 @@ func (secretKey SecretKey) String() string {
 	if secretKeyBytes := secretKey.Bytes(); secretKeyBytes == nil {
 		return ""
 	} else {
-		return commons.SLV + "_" + string(*secretKey.keyType) + secretKeyAbbrev + "_" + commons.Encode(secretKeyBytes)
+		return slvPrefix + "_" + string(*secretKey.keyType) + secretKeyAbbrev + "_" + commons.Encode(secretKeyBytes)
 	}
 }

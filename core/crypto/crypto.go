@@ -1,8 +1,8 @@
 package crypto
 
 import (
-	"github.com/amagimedia/slv/core/commons"
 	"golang.org/x/crypto/argon2"
+	"savesecrets.org/slv/core/commons"
 )
 
 func (publicKey *PublicKey) encrypt(data []byte) (*ciphered, error) {

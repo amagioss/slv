@@ -1,7 +1,7 @@
 package vaults
 
 import (
-	"github.com/amagimedia/slv/core/crypto"
+	"savesecrets.org/slv/core/crypto"
 )
 
 func (vlt *Vault) putSecretWithoutCommit(secretName string, secretValue []byte) (err error) {

@@ -3,71 +3,52 @@ package profiles
 import (
 	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/amagimedia/slv/core/commons"
-	"github.com/amagimedia/slv/core/environments"
-	"github.com/amagimedia/slv/core/settings"
-	"gopkg.in/yaml.v3"
+	"github.com/go-git/go-git/v5"
+	"savesecrets.org/slv/core/commons"
+	"savesecrets.org/slv/core/config"
+	"savesecrets.org/slv/core/crypto"
+	"savesecrets.org/slv/core/environments"
+	"savesecrets.org/slv/core/settings"
 )
 
 type Profile struct {
 	name        *string
 	dir         *string
-	path        *string
 	settings    *settings.Settings
 	envManifest *environments.EnvManifest
-	*profile
-}
-
-type profile struct {
-	Version uint8 `yaml:"version,omitempty"`
-	Repo    struct {
-		URI    string `yaml:"uri"`
-		Branch string `yaml:"branch,omitempty"`
-		Path   string `yaml:"path,omitempty"`
-	} `yaml:"repo,omitempty"`
-	Diff     bool      `yaml:"diff"`
-	LastSync time.Time `yaml:"lastSync,omitempty"`
+	repo        *git.Repository
 }
 
 func (profile *Profile) Name() string {
 	return *profile.name
 }
 
-func (profile Profile) MarshalYAML() (interface{}, error) {
-	return profile.profile, nil
-}
-
-func (profile *Profile) UnmarshalYAML(value *yaml.Node) (err error) {
-	return value.Decode(&profile.profile)
-}
-
-func (profile *Profile) commit() error {
-	if commons.WriteToYAML(*profile.path, "", profile) != nil {
-		return errWritingManifest
+func (profile *Profile) commit(msg string) error {
+	if msg != "" {
+		return profile.gitCommit(msg)
 	}
 	return nil
 }
 
-func newProfileForPath(dir string) (*Profile, error) {
+func newProfile(dir, gitURI, gitBranch string) (profile *Profile, err error) {
 	if commons.DirExists(dir) {
 		return nil, errProfilePathExistsAlready
 	}
-	err := os.MkdirAll(dir, 0755)
-	if err != nil {
+	var repo *git.Repository
+	if gitURI != "" {
+		repo, err = gitClone(dir, gitURI, gitBranch)
+		if err != nil {
+			return nil, err
+		}
+	} else if err = os.MkdirAll(dir, 0755); err != nil {
 		return nil, errCreatingProfileDir
 	}
-	path := filepath.Join(dir, profileFileName)
-	profile := &Profile{
+	profile = &Profile{
 		dir:  &dir,
-		path: &path,
-		profile: &profile{
-			Version: commons.Version,
-		},
+		repo: repo,
 	}
-	err = profile.commit()
-	if err != nil {
+	if err = profile.commit(""); err != nil {
 		return nil, err
 	}
 	return profile, nil
@@ -77,14 +58,15 @@ func getProfileForPath(dir string) (*Profile, error) {
 	if !commons.DirExists(dir) {
 		return nil, errProfilePathDoesNotExist
 	}
-	path := filepath.Join(dir, profileFileName)
-	profile := &Profile{}
-	if err := commons.ReadFromYAML(path, profile); err != nil {
-		return nil, err
+	profile := &Profile{
+		dir: &dir,
 	}
-	profile.dir = &dir
-	profile.path = &path
+	profile.gitLoadRepo()
 	return profile, nil
+}
+
+func (profile *Profile) isWriteDenied() bool {
+	return profile.repo != nil && !config.IsAdminModeEnabled()
 }
 
 func (profile *Profile) GetSettings() (*settings.Settings, error) {
@@ -101,7 +83,7 @@ func (profile *Profile) GetSettings() (*settings.Settings, error) {
 	return profile.settings, nil
 }
 
-func (profile *Profile) GetEnvManifest() (*environments.EnvManifest, error) {
+func (profile *Profile) getEnvManifest() (*environments.EnvManifest, error) {
 	if profile.envManifest == nil {
 		envManifest, err := environments.GetManifest(filepath.Join(*profile.dir, profileEnvironmentsFileName))
 		if err != nil {
@@ -115,22 +97,58 @@ func (profile *Profile) GetEnvManifest() (*environments.EnvManifest, error) {
 	return profile.envManifest, nil
 }
 
-func (profile *Profile) AddEnv(env *environments.Environment) error {
-	envManifest, err := profile.GetEnvManifest()
+func (profile *Profile) PutEnv(env *environments.Environment) error {
+	if profile.isWriteDenied() {
+		return errChangesNotAllowedInGitProfile
+	}
+	envManifest, err := profile.getEnvManifest()
 	if err != nil {
 		return err
 	}
-	return envManifest.AddEnv(env)
+	if err = envManifest.PutEnv(env); err != nil {
+		return err
+	}
+	return profile.commit("Adding environment: " + env.Id() + " [" + env.Name + "]")
+}
+
+func (profile *Profile) RootPublicKey() (*crypto.PublicKey, error) {
+	envManifest, err := profile.getEnvManifest()
+	if err != nil {
+		return nil, err
+	}
+	return envManifest.RootPublicKey()
 }
 
 func (profile *Profile) SetRoot(env *environments.Environment) error {
-	envManifest, err := profile.GetEnvManifest()
+	if profile.isWriteDenied() {
+		return errChangesNotAllowedInGitProfile
+	}
+	envManifest, err := profile.getEnvManifest()
 	if err != nil {
 		return err
 	}
-	return envManifest.SetRoot(env)
+	if err = envManifest.SetRoot(env); err != nil {
+		return err
+	}
+	return profile.commit("Setting root environment: " + env.Id() + " [" + env.Name + "]")
 }
 
-func (profile *Profile) Sync() {
-	// TODO git operations
+func (profile *Profile) SearchEnvs(query string) ([]*environments.Environment, error) {
+	envManifest, err := profile.getEnvManifest()
+	if err != nil {
+		return nil, err
+	}
+	return envManifest.SearchEnvs(query), nil
+}
+
+func (profile *Profile) ListEnvs() ([]*environments.Environment, error) {
+	envManifest, err := profile.getEnvManifest()
+	if err != nil {
+		return nil, err
+	}
+	return envManifest.ListEnvs(), nil
+}
+
+func (profile *Profile) Sync() error {
+	return profile.gitPull()
 }

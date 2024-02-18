@@ -182,7 +182,7 @@ sequenceDiagram
 
 **Reading secrets from vault**
  - Service reads the secret from vault by specifying the secret name (foo) and the vault name (vault_abc)
- - SLV reads the environment secret key from cloud credential store (for service environemnts) or system keychain (for user machine) or simply from environment variable (SLV_SECRET_KEY)
+ - SLV reads the environment secret key from cloud credential store (for service environemnts) or system keychain (for user machine) or simply from environment variable (SLV_ENV_SECRET_KEY)
  - SLV reads the encrypted secret value (value of foo from the vaults file)
  - SLV attempts to unlock the vault with the secret key
  - If the given secret key has access to the vault, SLV decrypts and returns the secret
@@ -198,7 +198,7 @@ sequenceDiagram
 
     Note over Env,SecretKey: Reading secret from vault
     Env->>SLV: Read secret with a given name (foo)<br/> from the vault (vault_abc)
-    SecretKey-->>SLV: SLV reads the environment secret key <br/> from cloud credential store (for service environemnts) <br/> or system keychain (for user machine) <br/> or simply from environment variable (SLV_SECRET_KEY)
+    SecretKey-->>SLV: SLV reads the environment secret key <br/> from cloud credential store (for service environemnts) <br/> or system keychain (for user machine) <br/> or simply from environment variable (SLV_ENV_SECRET_KEY)
     Vault-->>SLV: SLV reads the encrypted secret value <br/> (value of foo from the vaults file)
     SLV-->>SLV: SLV attempts to unlock the vault with the secret key
     Note over Env,SLV: If the given secret key has access to the vault

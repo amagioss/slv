@@ -6,10 +6,10 @@ import (
 	"text/tabwriter"
 
 	"github.com/fatih/color"
-	"github.com/amagimedia/slv/core/crypto"
-	"github.com/amagimedia/slv/core/environments"
-	"github.com/amagimedia/slv/core/profiles"
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv/core/crypto"
+	"savesecrets.org/slv/core/environments"
+	"savesecrets.org/slv/core/profiles"
 )
 
 func envCommand() *cobra.Command {
@@ -35,8 +35,8 @@ func showEnv(env environments.Environment, includeEDS bool) {
 	fmt.Fprintln(w, "Name:\t", env.Name)
 	fmt.Fprintln(w, "Email:\t", env.Email)
 	fmt.Fprintln(w, "Tags:\t", env.Tags)
-	if env.ProviderBinding != "" {
-		fmt.Fprintln(w, "Provider Binding:\t", env.ProviderBinding)
+	if env.SecretBinding != "" {
+		fmt.Fprintln(w, "Secret Binding:\t", env.SecretBinding)
 	}
 	if includeEDS {
 		if envDef, err := env.ToEnvData(); err == nil {
@@ -79,13 +79,12 @@ func envNewCommand() *cobra.Command {
 				fmt.Println("\nSecret Key:\t", color.HiBlackString(secretKey.String()))
 			}
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
-			var prof *profiles.Profile
 			if addToProfileFlag {
-				prof, err = profiles.GetDefaultProfile()
+				profile, err := profiles.GetDefaultProfile()
 				if err != nil {
 					exitOnError(err)
 				}
-				err = prof.AddEnv(env)
+				err = profile.PutEnv(env)
 				if err != nil {
 					exitOnError(err)
 				}
@@ -115,26 +114,25 @@ func envListCommand() *cobra.Command {
 		Short: "Lists environments from profile",
 		Run: func(cmd *cobra.Command, args []string) {
 			profileName := cmd.Flag(profileNameFlag.name).Value.String()
-			var prof *profiles.Profile
+			var profile *profiles.Profile
 			var err error
 			if profileName != "" {
-				prof, err = profiles.Get(profileName)
+				profile, err = profiles.Get(profileName)
 			} else {
-				prof, err = profiles.GetDefaultProfile()
+				profile, err = profiles.GetDefaultProfile()
 			}
-			if err != nil {
-				exitOnError(err)
-			}
-			envManifest, err := prof.GetEnvManifest()
 			if err != nil {
 				exitOnError(err)
 			}
 			query := cmd.Flag(envSearchFlag.name).Value.String()
 			var envs []*environments.Environment
 			if query != "" {
-				envs = envManifest.SearchEnv(query)
+				envs, err = profile.SearchEnvs(query)
 			} else {
-				envs = envManifest.ListEnv()
+				envs, err = profile.ListEnvs()
+			}
+			if err != nil {
+				exitOnError(err)
 			}
 			for _, env := range envs {
 				showEnv(*env, false)

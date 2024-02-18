@@ -2,13 +2,17 @@ package crypto
 
 import (
 	"errors"
+
+	"savesecrets.org/slv/core/config"
 )
 
 const (
-	publicKeyAbbrev    = "PK" // PK = Public Key
-	secretKeyAbbrev    = "SK" // SK = Secret Key
-	wrappedKeyAbbrev   = "WK" // WK = Wrapped Key
-	sealedSecretAbbrev = "SS" // SS = Sealed Secret
+	publicKeyAbbrev          = "PK" // PK = Public Key
+	secretKeyAbbrev          = "SK" // SK = Secret Key
+	wrappedKeyAbbrev         = "WK" // WK = Wrapped Key
+	sealedSecretAbbrev       = "SS" // SS = Sealed Secret
+	slvPrefix                = config.AppNameUpperCase
+	cryptoVersion      uint8 = 1
 
 	hashMaxLength = 4
 )

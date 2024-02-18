@@ -46,13 +46,13 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-      - name: Release SLV K8s Contoller Image
+      - name: Release SLV K8s Operator Image
         uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
-          file: k8s/Dockerfile
+          file: operator/Dockerfile
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/slv-operator:latest
-            ghcr.io/${{ github.repository }}/slv-operator:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/operator:latest
+            ghcr.io/${{ github.repository }}/operator:${{ github.ref_name }}

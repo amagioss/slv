@@ -1,13 +1,22 @@
 package commands
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
+	"text/tabwriter"
 
-	"github.com/amagimedia/slv/core/secretkeystore"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
+	"savesecrets.org/slv"
 )
+
+func toBase64(data []byte) string {
+	return base64.StdEncoding.EncodeToString(data)
+}
 
 func secretCommand() *cobra.Command {
 	if secretCmd != nil {
@@ -24,6 +33,7 @@ func secretCommand() *cobra.Command {
 	}
 	secretCmd.AddCommand(secretPutCommand())
 	secretCmd.AddCommand(secretGetCommand())
+	secretCmd.AddCommand(secretListCommand())
 	secretCmd.AddCommand(secretRefCommand())
 	secretCmd.AddCommand(secretDerefCommand())
 	return secretCmd
@@ -76,7 +86,7 @@ func secretGetCommand() *cobra.Command {
 		Aliases: []string{"show", "view", "read"},
 		Short:   "Gets a secret from the vault",
 		Run: func(cmd *cobra.Command, args []string) {
-			envSecretKey, err := secretkeystore.GetSecretKey()
+			envSecretKey, err := slv.GetSecretKey()
 			if err != nil {
 				exitOnError(err)
 			}
@@ -94,15 +104,96 @@ func secretGetCommand() *cobra.Command {
 			if err != nil {
 				exitOnError(err)
 			}
-			fmt.Println(string(secret))
+			encodeToBase64, _ := cmd.Flags().GetBool(secretEncodeBase64Flag.name)
+			if encodeToBase64 {
+				fmt.Println(toBase64(secret))
+			} else {
+				fmt.Println(string(secret))
+			}
 			safeExit()
 		},
 	}
 	secretGetCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
 	secretGetCmd.Flags().StringP(secretNameFlag.name, secretNameFlag.shorthand, "", secretNameFlag.usage)
+	secretGetCmd.Flags().BoolP(secretEncodeBase64Flag.name, secretEncodeBase64Flag.shorthand, false, secretEncodeBase64Flag.usage)
 	secretGetCmd.MarkFlagRequired(vaultFileFlag.name)
 	secretGetCmd.MarkFlagRequired(secretNameFlag.name)
 	return secretGetCmd
+}
+
+func secretListCommand() *cobra.Command {
+	if secretListCmd != nil {
+		return secretListCmd
+	}
+	secretListCmd = &cobra.Command{
+		Use:     "dump",
+		Aliases: []string{"list", "get-all", "show-all", "view-all", "read-all"},
+		Short:   "Lists all secrets from the vault",
+		Run: func(cmd *cobra.Command, args []string) {
+			envSecretKey, err := slv.GetSecretKey()
+			if err != nil {
+				exitOnError(err)
+			}
+			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
+			vault, err := getVault(vaultFile)
+			if err != nil {
+				exitOnError(err)
+			}
+			err = vault.Unlock(*envSecretKey)
+			if err != nil {
+				exitOnError(err)
+			}
+			secrets, err := vault.GetAllSecrets()
+			if err != nil {
+				exitOnError(err)
+			}
+			secretOutputMap := make(map[string]string)
+			encodeToBase64, _ := cmd.Flags().GetBool(secretEncodeBase64Flag.name)
+			for name, secret := range secrets {
+				if encodeToBase64 {
+					secretOutputMap[name] = toBase64(secret)
+				} else {
+					secretOutputMap[name] = string(secret)
+				}
+			}
+			listFormat := cmd.Flag(secretListFormatFlag.name).Value.String()
+			if listFormat == "" {
+				listFormat = "table"
+			}
+			switch listFormat {
+			case "table":
+				tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
+				for key, value := range secretOutputMap {
+					fmt.Fprintf(tw, "%s\t%s\n", key, value)
+				}
+				tw.Flush()
+			case "json":
+				jsonData, err := json.MarshalIndent(secretOutputMap, "", "  ")
+				if err != nil {
+					exitOnError(err)
+				}
+				fmt.Println(string(jsonData))
+			case "yaml", "yml":
+				yamlData, err := yaml.Marshal(secretOutputMap)
+				if err != nil {
+					exitOnError(err)
+				}
+				fmt.Println(string(yamlData))
+			case "envars", "envar", "env":
+				for key, value := range secretOutputMap {
+					fmt.Printf("%s=%s\n", key, value)
+				}
+			default:
+				exitOnErrorWithMessage("invalid format: " + listFormat)
+			}
+			safeExit()
+		},
+	}
+	secretListCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
+	secretListCmd.Flags().StringP(secretListFormatFlag.name, secretListFormatFlag.shorthand, "", secretListFormatFlag.usage)
+	secretListCmd.Flags().BoolP(secretEncodeBase64Flag.name, secretEncodeBase64Flag.shorthand, false, secretEncodeBase64Flag.usage)
+	secretListCmd.MarkFlagRequired(vaultFileFlag.name)
+	return secretListCmd
 }
 
 func secretRefCommand() *cobra.Command {
@@ -160,7 +251,7 @@ func secretDerefCommand() *cobra.Command {
 		Use:   "deref",
 		Short: "Dereferences and updates secrets from a vault to a given yaml or json file",
 		Run: func(cmd *cobra.Command, args []string) {
-			envSecretKey, err := secretkeystore.GetSecretKey()
+			envSecretKey, err := slv.GetSecretKey()
 			if err != nil {
 				exitOnError(err)
 			}

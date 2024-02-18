@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/amagimedia/slv/core/commons"
-	"github.com/amagimedia/slv/core/crypto"
 	"gopkg.in/yaml.v3"
+	"savesecrets.org/slv/core/commons"
+	"savesecrets.org/slv/core/crypto"
 )
 
 type EnvType string
@@ -17,13 +17,13 @@ type Environment struct {
 }
 
 type environment struct {
-	PublicKey       string   `yaml:"publicKey"`
-	Name            string   `yaml:"name"`
-	Email           string   `yaml:"email"`
-	EnvType         EnvType  `yaml:"type"`
-	Tags            []string `yaml:"tags"`
-	ProviderBinding string   `yaml:"binding,omitempty"`
-	publicKey       *crypto.PublicKey
+	PublicKey     string   `yaml:"publicKey"`
+	Name          string   `yaml:"name"`
+	Email         string   `yaml:"email"`
+	EnvType       EnvType  `yaml:"type"`
+	Tags          []string `yaml:"tags"`
+	SecretBinding string   `yaml:"binding,omitempty"`
+	publicKey     *crypto.PublicKey
 }
 
 func (eType *EnvType) isValid() bool {
@@ -83,7 +83,7 @@ func (env *Environment) AddTags(tags ...string) {
 
 func FromEnvData(envData string) (env *Environment, err error) {
 	sliced := strings.Split(envData, "_")
-	if len(sliced) != 3 || sliced[0] != commons.SLV || sliced[1] != envDataStringAbbrev {
+	if len(sliced) != 3 || sliced[0] != slvPrefix || sliced[1] != envDataStringAbbrev {
 		return nil, errInvalidEnvData
 	}
 	err = commons.Deserialize(sliced[2], &env)
@@ -95,7 +95,7 @@ func (env *Environment) ToEnvData() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s_%s_%s", commons.SLV, envDataStringAbbrev, data), nil
+	return fmt.Sprintf("%s_%s_%s", slvPrefix, envDataStringAbbrev, data), nil
 }
 
 func (env Environment) MarshalYAML() (interface{}, error) {

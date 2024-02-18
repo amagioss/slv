@@ -3,9 +3,9 @@ package commands
 import (
 	"os"
 
-	"github.com/amagimedia/slv/core/environments"
-	"github.com/amagimedia/slv/core/profiles"
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv/core/environments"
+	"savesecrets.org/slv/core/profiles"
 )
 
 func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef) *cobra.Command {
@@ -39,13 +39,12 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef) *cobra
 			env.AddTags(tags...)
 			showEnv(*env, true)
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
-			var prof *profiles.Profile
 			if addToProfileFlag {
-				prof, err = profiles.GetDefaultProfile()
+				profile, err := profiles.GetDefaultProfile()
 				if err != nil {
 					exitOnError(err)
 				}
-				err = prof.AddEnv(env)
+				err = profile.PutEnv(env)
 				if err != nil {
 					exitOnError(err)
 				}

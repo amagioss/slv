@@ -1,0 +1,31 @@
+# permissions for end users to edit slvs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: slv-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: operator
+    app.kubernetes.io/part-of: operator
+    app.kubernetes.io/managed-by: kustomize
+  name: slv-editor-role
+rules:
+- apiGroups:
+  - slv.savesecrets.org
+  resources:
+  - slvs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - slv.savesecrets.org
+  resources:
+  - slvs/status
+  verbs:
+  - get

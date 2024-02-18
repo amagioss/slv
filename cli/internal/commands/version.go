@@ -3,12 +3,13 @@ package commands
 import (
 	"fmt"
 
-	"github.com/amagimedia/slv"
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv"
+	"savesecrets.org/slv/core/config"
 )
 
 func showVersionInfo() {
-	fmt.Println(slv.AppName, slv.Version)
+	fmt.Println(config.AppNameUpperCase, slv.Version)
 }
 
 func versionCommand() *cobra.Command {
