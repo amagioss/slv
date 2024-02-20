@@ -1,6 +1,8 @@
 package crypto
 
 import (
+	"time"
+
 	"golang.org/x/crypto/argon2"
 	"savesecrets.org/slv/core/commons"
 )
@@ -10,9 +12,11 @@ func (publicKey *PublicKey) encrypt(data []byte) (*ciphered, error) {
 	if err != nil {
 		return nil, errEncryptionFailed
 	}
+	currentTime := time.Now()
 	return &ciphered{
 		version:     publicKey.version,
 		keyType:     publicKey.keyType,
+		encryptedAt: &currentTime,
 		pubKeyBytes: commons.ByteSlicePtr(publicKey.toBytes()),
 		ciphertext:  &ciphertext,
 	}, nil

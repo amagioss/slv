@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"strings"
+	"time"
 
 	"savesecrets.org/slv/core/commons"
 )
@@ -11,14 +12,26 @@ import (
 type ciphered struct {
 	version     *uint8
 	keyType     *KeyType
+	encryptedAt *time.Time
 	ciphertext  *[]byte
 	pubKeyBytes *[]byte
+}
+
+func timeToBytes(t time.Time) []byte {
+	tsBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(tsBytes, uint32(t.Unix()))
+	return tsBytes
+}
+
+func bytesToTime(timeBytes []byte) time.Time {
+	return time.Unix(int64(binary.BigEndian.Uint32(timeBytes)), 0)
 }
 
 func (ciph ciphered) toBytes() []byte {
 	keyLenBytes := make([]byte, 2)
 	binary.BigEndian.PutUint16(keyLenBytes, uint16(len(*ciph.pubKeyBytes)))
-	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, keyLenBytes...)
+	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, timeToBytes(*ciph.encryptedAt)...)
+	cipheredBytes = append(cipheredBytes, keyLenBytes...)
 	cipheredBytes = append(cipheredBytes, *ciph.pubKeyBytes...)
 	cipheredBytes = append(cipheredBytes, *ciph.ciphertext...)
 	return cipheredBytes
@@ -30,6 +43,8 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	cipheredBytes = cipheredBytes[2:]
 	keyLen := binary.BigEndian.Uint16(cipheredBytes[:2])
 	cipheredBytes = cipheredBytes[2:]
+	encryptedAt := bytesToTime(cipheredBytes[:4])
+	cipheredBytes = cipheredBytes[4:]
 	if len(cipheredBytes) < int(keyLen) {
 		return nil, errInvalidCiphertextFormat
 	}
@@ -38,6 +53,7 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	return &ciphered{
 		version:     &version,
 		keyType:     &keyType,
+		encryptedAt: &encryptedAt,
 		pubKeyBytes: &pubKeyBytes,
 		ciphertext:  &ciphertext,
 	}, nil

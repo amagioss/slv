@@ -33,7 +33,7 @@ func secretCommand() *cobra.Command {
 	}
 	secretCmd.AddCommand(secretPutCommand())
 	secretCmd.AddCommand(secretGetCommand())
-	secretCmd.AddCommand(secretListCommand())
+	secretCmd.AddCommand(secretExportCommand())
 	secretCmd.AddCommand(secretRefCommand())
 	secretCmd.AddCommand(secretDerefCommand())
 	return secretCmd
@@ -121,14 +121,14 @@ func secretGetCommand() *cobra.Command {
 	return secretGetCmd
 }
 
-func secretListCommand() *cobra.Command {
-	if secretListCmd != nil {
-		return secretListCmd
+func secretExportCommand() *cobra.Command {
+	if secretExportCmd != nil {
+		return secretExportCmd
 	}
-	secretListCmd = &cobra.Command{
-		Use:     "dump",
-		Aliases: []string{"list", "get-all", "show-all", "view-all", "read-all"},
-		Short:   "Lists all secrets from the vault",
+	secretExportCmd = &cobra.Command{
+		Use:     "export",
+		Aliases: []string{"dump", "get-all", "show-all", "view-all", "read-all"},
+		Short:   "Exports all secrets from the vault",
 		Run: func(cmd *cobra.Command, args []string) {
 			envSecretKey, err := slv.GetSecretKey()
 			if err != nil {
@@ -189,11 +189,11 @@ func secretListCommand() *cobra.Command {
 			safeExit()
 		},
 	}
-	secretListCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
-	secretListCmd.Flags().StringP(secretListFormatFlag.name, secretListFormatFlag.shorthand, "", secretListFormatFlag.usage)
-	secretListCmd.Flags().BoolP(secretEncodeBase64Flag.name, secretEncodeBase64Flag.shorthand, false, secretEncodeBase64Flag.usage)
-	secretListCmd.MarkFlagRequired(vaultFileFlag.name)
-	return secretListCmd
+	secretExportCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
+	secretExportCmd.Flags().StringP(secretListFormatFlag.name, secretListFormatFlag.shorthand, "", secretListFormatFlag.usage)
+	secretExportCmd.Flags().BoolP(secretEncodeBase64Flag.name, secretEncodeBase64Flag.shorthand, false, secretEncodeBase64Flag.usage)
+	secretExportCmd.MarkFlagRequired(vaultFileFlag.name)
+	return secretExportCmd
 }
 
 func secretRefCommand() *cobra.Command {

@@ -35,10 +35,10 @@ var (
 	vaultShareCmd *cobra.Command
 
 	// Secret Commands
-	secretCmd      *cobra.Command
-	secretPutCmd   *cobra.Command
-	secretGetCmd   *cobra.Command
-	secretListCmd  *cobra.Command
-	secretRefCmd   *cobra.Command
-	secretDerefCmd *cobra.Command
+	secretCmd       *cobra.Command
+	secretPutCmd    *cobra.Command
+	secretGetCmd    *cobra.Command
+	secretExportCmd *cobra.Command
+	secretRefCmd    *cobra.Command
+	secretDerefCmd  *cobra.Command
 )
