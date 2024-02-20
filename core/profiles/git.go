@@ -79,3 +79,12 @@ func (profile *Profile) gitPull() error {
 	}
 	return err
 }
+
+func (profile *Profile) gitPush() error {
+	if profile.repo == nil {
+		return errProfileNotGitRepository
+	}
+	return profile.repo.Push(&git.PushOptions{
+		Progress: os.Stderr,
+	})
+}

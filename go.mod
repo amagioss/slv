@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	dev.shib.me/xipher v0.8.3
-	github.com/aws/aws-sdk-go v1.50.20
+	github.com/aws/aws-sdk-go v1.50.21
 	github.com/fatih/color v1.16.0
 	github.com/go-logr/logr v1.4.1
 	github.com/onsi/ginkgo/v2 v2.15.0

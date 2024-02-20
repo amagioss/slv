@@ -20,7 +20,8 @@ var (
 	profileListCmd *cobra.Command
 	profileSetCmd  *cobra.Command
 	profileDelCmd  *cobra.Command
-	profileSyncCmd *cobra.Command
+	profilePullCmd *cobra.Command
+	profilePushCmd *cobra.Command
 
 	// Environment Commands
 	envCmd     *cobra.Command

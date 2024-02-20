@@ -149,6 +149,10 @@ func (profile *Profile) ListEnvs() ([]*environments.Environment, error) {
 	return envManifest.ListEnvs(), nil
 }
 
-func (profile *Profile) Sync() error {
+func (profile *Profile) Pull() error {
 	return profile.gitPull()
+}
+
+func (profile *Profile) Push() error {
+	return profile.gitPush()
 }

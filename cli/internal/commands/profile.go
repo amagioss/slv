@@ -26,7 +26,8 @@ func profileCommand() *cobra.Command {
 	profileCmd.AddCommand(profileListCommand())
 	profileCmd.AddCommand(profileAddEnvCommand())
 	profileCmd.AddCommand(profileDeleteCommand())
-	profileCmd.AddCommand(profileSyncCommand())
+	profileCmd.AddCommand(profilePullCommand())
+	profileCmd.AddCommand(profilePushCommand())
 	return profileCmd
 }
 
@@ -191,24 +192,45 @@ func profileDeleteCommand() *cobra.Command {
 	return profileDelCmd
 }
 
-func profileSyncCommand() *cobra.Command {
-	if profileSyncCmd != nil {
-		return profileSyncCmd
+func profilePullCommand() *cobra.Command {
+	if profilePullCmd != nil {
+		return profilePullCmd
 	}
-	profileSyncCmd = &cobra.Command{
-		Use:     "sync",
-		Aliases: []string{"pull"},
-		Short:   "Sync current profile from remote repository",
+	profilePullCmd = &cobra.Command{
+		Use:     "pull",
+		Aliases: []string{"sync"},
+		Short:   "Pulls the latest changes for the current profile from remote repository",
 		Run: func(cmd *cobra.Command, args []string) {
 			profile, err := profiles.GetDefaultProfile()
 			if err != nil {
 				exitOnError(err)
 			}
-			if err = profile.Sync(); err != nil {
+			if err = profile.Pull(); err != nil {
 				exitOnError(err)
 			}
-			fmt.Printf("Successfully synced profile: %s\n", color.GreenString(profile.Name()))
+			fmt.Printf("Successfully pulled changes into profile: %s\n", color.GreenString(profile.Name()))
 		},
 	}
-	return profileSyncCmd
+	return profilePullCmd
+}
+
+func profilePushCommand() *cobra.Command {
+	if profilePushCmd != nil {
+		return profilePushCmd
+	}
+	profilePushCmd = &cobra.Command{
+		Use:   "push",
+		Short: "Pushes the changes in the current profile to the pre-configured remote repository",
+		Run: func(cmd *cobra.Command, args []string) {
+			profile, err := profiles.GetDefaultProfile()
+			if err != nil {
+				exitOnError(err)
+			}
+			if err = profile.Push(); err != nil {
+				exitOnError(err)
+			}
+			fmt.Printf("Successfully pushed changes from profile: %s\n", color.GreenString(profile.Name()))
+		},
+	}
+	return profilePushCmd
 }
