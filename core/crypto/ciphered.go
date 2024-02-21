@@ -41,10 +41,10 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	var version byte = cipheredBytes[0]
 	var keyType KeyType = KeyType(cipheredBytes[1])
 	cipheredBytes = cipheredBytes[2:]
-	keyLen := binary.BigEndian.Uint16(cipheredBytes[:2])
-	cipheredBytes = cipheredBytes[2:]
 	encryptedAt := bytesToTime(cipheredBytes[:4])
 	cipheredBytes = cipheredBytes[4:]
+	keyLen := binary.BigEndian.Uint16(cipheredBytes[:2])
+	cipheredBytes = cipheredBytes[2:]
 	if len(cipheredBytes) < int(keyLen) {
 		return nil, errInvalidCiphertextFormat
 	}
