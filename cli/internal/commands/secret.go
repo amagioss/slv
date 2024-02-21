@@ -218,6 +218,9 @@ func secretRefCommand() *cobra.Command {
 			if secretNamePrefix == "" && refType == "" {
 				exitOnErrorWithMessage("please provide at least one of --" + secretNameFlag.name + " or --" + secretRefTypeFlag.name + " flag")
 			}
+			if refType != "" && refType != "yaml" {
+				exitOnErrorWithMessage("only yaml auto reference is supported at the moment")
+			}
 			result, conflicting, err := vault.RefSecrets(refType, refFile, secretNamePrefix, forceUpdate, previewOnly)
 			if conflicting {
 				exitOnErrorWithMessage("conflict found. please use the --" + secretNameFlag.name + " flag to set a different name or --" + secretForceUpdateFlag.name + " flag to overwrite them.")
