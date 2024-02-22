@@ -12,7 +12,7 @@ import (
 
 type vaultConfig struct {
 	PublicKey   string   `json:"publicKey" yaml:"publicKey"`
-	HashLength  *uint32  `json:"hashLength,omitempty" yaml:"hashLength,omitempty"`
+	HashLength  *uint8   `json:"hashLength,omitempty" yaml:"hashLength,omitempty"`
 	WrappedKeys []string `json:"wrappedKeys" yaml:"wrappedKeys"`
 }
 
@@ -26,34 +26,6 @@ type Vault struct {
 	decryptedSecrets    map[string][]byte `json:"-"`
 	vaultSecretRefRegex *regexp.Regexp    `json:"-"`
 	objectField         string            `json:"-"`
-}
-
-func (v *Vault) DeepCopy() *Vault {
-	if v == nil {
-		return nil
-	}
-	out := new(Vault)
-	v.DeepCopyInto(out)
-	return out
-}
-
-func (v *Vault) DeepCopyInto(out *Vault) {
-	*out = *v
-	out.Secrets = make(map[string]string, len(v.Secrets))
-	for key, val := range v.Secrets {
-		out.Secrets[key] = val
-	}
-	out.Config = vaultConfig{}
-	if v.Config.PublicKey != "" {
-		out.Config.PublicKey = v.Config.PublicKey
-	}
-	if v.Config.HashLength != nil {
-		var hashLen uint32 = *v.Config.HashLength
-		out.Config.HashLength = &hashLen
-	}
-	out.Config.WrappedKeys = make([]string, len(v.Config.WrappedKeys))
-	copy(out.Config.WrappedKeys, v.Config.WrappedKeys)
-	out.vaultSecretRefRegex = v.vaultSecretRefRegex
 }
 
 func (vlt *Vault) Id() string {
@@ -80,7 +52,7 @@ func isValidVaultFileName(fileName string) bool {
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv or .slv.yaml or .slv.yml.
-func New(filePath, objectField string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+func New(filePath, objectField string, hashLength uint8, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
@@ -98,7 +70,7 @@ func New(filePath, objectField string, hashLength uint32, rootPublicKey *crypto.
 	if err != nil {
 		return nil, err
 	}
-	var hashLen *uint32
+	var hashLen *uint8
 	if hashLength > 0 {
 		hashLen = &hashLength
 	}
@@ -164,6 +136,19 @@ func (vlt *Vault) Lock() {
 
 func (vlt *Vault) UnlockedBy() (id *string) {
 	return vlt.unlockedBy
+}
+
+func (vlt *Vault) ListAccessors() ([]crypto.PublicKey, error) {
+	var accessors []crypto.PublicKey
+	for _, wrappedKeyStr := range vlt.Config.WrappedKeys {
+		wrappedKey := &crypto.WrappedKey{}
+		err := wrappedKey.FromString(wrappedKeyStr)
+		if err != nil {
+			return nil, err
+		}
+		accessors = append(accessors, wrappedKey.EncryptedBy())
+	}
+	return accessors, nil
 }
 
 func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {

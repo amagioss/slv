@@ -10,14 +10,14 @@ jobs:
   slv:
     runs-on: ubuntu-latest
     steps:
+      - name: Setting SLV Version
+        run: echo "SLV_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Set up Go
         uses: actions/setup-go@v5
-        with:
-          go-version: '1.21'
       - name: GoReleaser - Release SLV
         uses: goreleaser/goreleaser-action@v5
         with:
@@ -45,7 +45,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:${{ env.SLV_VERSION }}
       - name: Release SLV K8s Operator Image
         uses: docker/build-push-action@v5
         with:
@@ -55,4 +55,4 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}/operator:latest
-            ghcr.io/${{ github.repository }}/operator:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/operator:${{ env.SLV_VERSION }}

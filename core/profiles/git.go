@@ -12,22 +12,22 @@ import (
 
 func (profile *Profile) gitLoadRepo() {
 	profile.repo, _ = git.PlainOpen(*profile.dir)
-	lastUpdated := profile.gitLastUpdated()
+	lastUpdated := profile.gitLastPulledAt()
 	if time.Since(lastUpdated) > profileGitSyncInterval {
 		profile.gitPull()
 	}
 }
 
-func (profile *Profile) gitLastUpdated() time.Time {
+func (profile *Profile) gitLastPulledAt() time.Time {
 	if profile.repo == nil {
 		return time.Now()
 	}
-	fetchHeadPath := filepath.Join(*profile.dir, ".git", "index")
-	fetchHeadStat, err := os.Stat(fetchHeadPath)
+	slvPullMarkFile := filepath.Join(*profile.dir, ".git", ".slv-pull")
+	slvPullMarkStat, err := os.Stat(slvPullMarkFile)
 	if err != nil {
 		return time.Time{}
 	}
-	return fetchHeadStat.ModTime()
+	return slvPullMarkStat.ModTime()
 }
 
 func (profile *Profile) gitCommit(msg string) error {
@@ -63,9 +63,20 @@ func gitClone(dir, uri, branch string) (*git.Repository, error) {
 	}
 }
 
+func (profile *Profile) gitMarkPull() error {
+	slvPullMarkFile := filepath.Join(*profile.dir, ".git", ".slv-pull")
+	if _, err := os.Create(slvPullMarkFile); err != nil {
+		return errProfileGitPullMarking
+	}
+	return nil
+}
+
 func (profile *Profile) gitPull() error {
 	if profile.repo == nil {
 		return errProfileNotGitRepository
+	}
+	if err := profile.gitMarkPull(); err != nil {
+		return err
 	}
 	worktree, err := profile.repo.Worktree()
 	if err != nil {

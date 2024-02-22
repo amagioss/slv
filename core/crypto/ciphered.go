@@ -14,7 +14,7 @@ type ciphered struct {
 	keyType     *KeyType
 	encryptedAt *time.Time
 	ciphertext  *[]byte
-	pubKeyBytes *[]byte
+	encryptedBy *PublicKey
 }
 
 func timeToBytes(t time.Time) []byte {
@@ -29,10 +29,10 @@ func bytesToTime(timeBytes []byte) time.Time {
 
 func (ciph ciphered) toBytes() []byte {
 	keyLenBytes := make([]byte, 2)
-	binary.BigEndian.PutUint16(keyLenBytes, uint16(len(*ciph.pubKeyBytes)))
+	binary.BigEndian.PutUint16(keyLenBytes, uint16(len(ciph.encryptedBy.toBytes())))
 	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, timeToBytes(*ciph.encryptedAt)...)
 	cipheredBytes = append(cipheredBytes, keyLenBytes...)
-	cipheredBytes = append(cipheredBytes, *ciph.pubKeyBytes...)
+	cipheredBytes = append(cipheredBytes, ciph.encryptedBy.toBytes()...)
 	cipheredBytes = append(cipheredBytes, *ciph.ciphertext...)
 	return cipheredBytes
 }
@@ -48,19 +48,30 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	if len(cipheredBytes) < int(keyLen) {
 		return nil, errInvalidCiphertextFormat
 	}
-	pubKeyBytes := cipheredBytes[:keyLen]
+	encryptedBy, err := publicKeyFromBytes(cipheredBytes[:keyLen])
+	if err != nil {
+		return nil, err
+	}
 	ciphertext := cipheredBytes[keyLen:]
 	return &ciphered{
 		version:     &version,
 		keyType:     &keyType,
 		encryptedAt: &encryptedAt,
-		pubKeyBytes: &pubKeyBytes,
+		encryptedBy: encryptedBy,
 		ciphertext:  &ciphertext,
 	}, nil
 }
 
 func (ciph *ciphered) IsEncryptedBy(publicKey *PublicKey) bool {
-	return bytes.Equal(*ciph.pubKeyBytes, publicKey.toBytes())
+	return bytes.Equal(ciph.encryptedBy.toBytes(), publicKey.toBytes())
+}
+
+func (ciph *ciphered) EncryptedBy() PublicKey {
+	return *ciph.encryptedBy
+}
+
+func (ciph *ciphered) EncryptedAt() time.Time {
+	return *ciph.encryptedAt
 }
 
 type SealedSecret struct {
@@ -109,7 +120,10 @@ func (sealedSecret *SealedSecret) FromString(sealedSecretStr string) (err error)
 	return
 }
 
-func (sealedSecret *SealedSecret) GetHash() string {
+func (sealedSecret *SealedSecret) Hash() string {
+	if sealedSecret.hash == nil {
+		return ""
+	}
 	return commons.Encode(*sealedSecret.hash)
 }
 

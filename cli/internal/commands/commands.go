@@ -31,6 +31,7 @@ var (
 
 	// Vault Commands
 	vaultCmd      *cobra.Command
+	vaultInfoCmd  *cobra.Command
 	vaultNewCmd   *cobra.Command
 	vaultShareCmd *cobra.Command
 

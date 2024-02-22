@@ -149,6 +149,14 @@ func (profile *Profile) ListEnvs() ([]*environments.Environment, error) {
 	return envManifest.ListEnvs(), nil
 }
 
+func (profile *Profile) GetEnv(id string) (*environments.Environment, error) {
+	envManifest, err := profile.getEnvManifest()
+	if err != nil {
+		return nil, err
+	}
+	return envManifest.GetEnv(id), nil
+}
+
 func (profile *Profile) Pull() error {
 	return profile.gitPull()
 }

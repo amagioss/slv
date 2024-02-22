@@ -33,5 +33,6 @@ var (
 	errSettingDefaultProfile            = errors.New("error setting default profile")
 	errDeletingDefaultProfile           = errors.New("error deleting default profile")
 	errProfileNotGitRepository          = errors.New("profile is not a git repository")
+	errProfileGitPullMarking            = errors.New("error marking profile as pulled")
 	errChangesNotAllowedInGitProfile    = errors.New("changes not allowed since the current profile is git based")
 )

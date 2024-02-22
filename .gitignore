@@ -3,4 +3,3 @@ dist/
 .DS_Store
 slv-dev
 .vscode
-operator/bin/

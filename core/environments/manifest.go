@@ -80,6 +80,13 @@ func (envManifest *EnvManifest) ListEnvs() (environments []*Environment) {
 	return
 }
 
+func (envManifest *EnvManifest) GetEnv(id string) (env *Environment) {
+	if envManifest.Environments != nil {
+		env = envManifest.Environments[id]
+	}
+	return
+}
+
 func (envManifest *EnvManifest) SearchEnvs(query string) (environments []*Environment) {
 	query = strings.ToLower(query)
 	for _, env := range envManifest.Environments {

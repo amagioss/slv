@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"golang.org/x/crypto/argon2"
-	"savesecrets.org/slv/core/commons"
 )
 
 func (publicKey *PublicKey) encrypt(data []byte) (*ciphered, error) {
@@ -17,7 +16,7 @@ func (publicKey *PublicKey) encrypt(data []byte) (*ciphered, error) {
 		version:     publicKey.version,
 		keyType:     publicKey.keyType,
 		encryptedAt: &currentTime,
-		pubKeyBytes: commons.ByteSlicePtr(publicKey.toBytes()),
+		encryptedBy: publicKey,
 		ciphertext:  &ciphertext,
 	}, nil
 }
@@ -32,11 +31,11 @@ func (publicKey *PublicKey) EncryptKey(secretKey SecretKey) (wrappedKey *Wrapped
 	return
 }
 
-func hash(data []byte, length uint32) []byte {
-	return argon2.IDKey(data, nil, 16, 64, 1, length)
+func hash(data []byte, length uint8) []byte {
+	return argon2.IDKey(data, nil, 16, 64, 1, uint32(length))
 }
 
-func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint32) (sealedSecret *SealedSecret, err error) {
+func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint8) (sealedSecret *SealedSecret, err error) {
 	ciphered, err := publicKey.encrypt(secret)
 	if err == nil {
 		sealedSecret = &SealedSecret{

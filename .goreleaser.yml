@@ -5,13 +5,13 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags: "-X savesecrets.org/slv.Version={{.Version}}"
-    goarch:
-      - amd64
-      - arm64
-    goos:
-      - darwin
-      - linux
-      - windows
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+      - linux_arm
+      - windows_amd64
   - id: slv-operator
     binary: slv-operator
     main: ./operator/cmd

@@ -2,12 +2,15 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"savesecrets.org/slv"
 	"savesecrets.org/slv/core/commons"
 	"savesecrets.org/slv/core/crypto"
+	"savesecrets.org/slv/core/environments"
 	"savesecrets.org/slv/core/profiles"
 	"savesecrets.org/slv/core/vaults"
 )
@@ -26,7 +29,7 @@ func getVault(filePath string) (*vaults.Vault, error) {
 	return vault, err
 }
 
-func newK8sVault(filePath, name string, hashLength uint32, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
+func newK8sVault(filePath, name string, hashLength uint8, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
 	vault, err := vaults.New(filePath, k8sVaultField, hashLength, rootPublicKey, publicKeys...)
 	if err != nil {
 		return nil, err
@@ -55,9 +58,78 @@ func vaultCommand() *cobra.Command {
 			cmd.Help()
 		},
 	}
+	vaultCmd.AddCommand(vaultInfoCommand())
 	vaultCmd.AddCommand(vaultNewCommand())
 	vaultCmd.AddCommand(vaultShareCommand())
 	return vaultCmd
+}
+
+func vaultInfoCommand() *cobra.Command {
+	if vaultInfoCmd != nil {
+		return vaultInfoCmd
+	}
+	vaultInfoCmd = &cobra.Command{
+		Use:   "info",
+		Short: "Displays information about a vault",
+		Run: func(cmd *cobra.Command, args []string) {
+			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
+			vault, err := getVault(vaultFile)
+			if err != nil {
+				exitOnError(err)
+			}
+			sealedSecretsMap, err := vault.ListSealedSecrets()
+			if err != nil {
+				exitOnError(err)
+			}
+			accessors, err := vault.ListAccessors()
+			if err != nil {
+				exitOnError(err)
+			}
+			profile, err := profiles.GetDefaultProfile()
+			if err != nil {
+				exitOnError(err)
+			}
+			envMap := make(map[string]string, len(accessors))
+			for _, accessor := range accessors {
+				var env *environments.Environment
+				envId := accessor.String()
+				env, err := profile.GetEnv(envId)
+				if err != nil {
+					exitOnError(err)
+				}
+				if env != nil {
+					envMap[envId] = env.Name
+				} else {
+					envMap[envId] = ""
+				}
+			}
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
+			fmt.Fprintln(w, "Vault ID\t:\t", vault.Config.PublicKey)
+			fmt.Fprintln(w, "Secrets:")
+			for name, sealedSecret := range sealedSecretsMap {
+				hash := sealedSecret.Hash()
+				if hash == "" {
+					fmt.Fprintln(w, "  -", name, "\t:\t", sealedSecret.EncryptedAt().Format("Jan _2, 2006 03:04:05 PM MST"))
+				} else {
+					fmt.Fprintln(w, "  -", name, "\t:\t", sealedSecret.EncryptedAt().Format("Jan _2, 2006 03:04:05 PM MST"), "\t(", hash, ")")
+				}
+			}
+			fmt.Fprintln(w, "Accessible by:")
+			for envId, envName := range envMap {
+				if envName == "" {
+					fmt.Fprintln(w, "  -", envId)
+				} else {
+					fmt.Fprintln(w, "  -", envId, "\t(", envName, ")")
+				}
+			}
+			w.Flush()
+			safeExit()
+		},
+	}
+	vaultInfoCmd.Flags().StringP(vaultFileFlag.name, vaultFileFlag.shorthand, "", vaultFileFlag.usage)
+	vaultInfoCmd.MarkFlagRequired(vaultFileFlag.name)
+	return vaultInfoCmd
+
 }
 
 func vaultNewCommand() *cobra.Command {
@@ -112,7 +184,7 @@ func vaultNewCommand() *cobra.Command {
 				}
 			}
 			enableHash, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.name)
-			var hashLength uint32 = 0
+			var hashLength uint8 = 0
 			if enableHash {
 				hashLength = 4
 			}

@@ -37,12 +37,16 @@ func (vlt *Vault) SecretExists(secretName string) (exists bool) {
 	return exists
 }
 
-func (vlt *Vault) ListSecrets() []string {
-	names := make([]string, 0, len(vlt.Secrets))
-	for name := range vlt.Secrets {
-		names = append(names, name)
+func (vlt *Vault) ListSealedSecrets() (map[string]crypto.SealedSecret, error) {
+	sealedSecretsMap := make(map[string]crypto.SealedSecret)
+	for name, value := range vlt.Secrets {
+		sealedSecret := crypto.SealedSecret{}
+		if err := sealedSecret.FromString(value); err != nil {
+			return nil, err
+		}
+		sealedSecretsMap[name] = sealedSecret
 	}
-	return names
+	return sealedSecretsMap, nil
 }
 
 func (vlt *Vault) GetAllSecrets() (secretsMap map[string][]byte, err error) {
