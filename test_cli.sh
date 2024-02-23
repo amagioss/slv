@@ -1,13 +1,12 @@
 #!/bin/sh
 
+export SLV_APP_DATA_DIR=$(mktemp -d)
+
 slvbinfile=$(mktemp)
 
 go build -o $slvbinfile ./cli/main
 
 alias slv=$slvbinfile
-
-# Clear the system before starting
-slv system prune -y
 
 # Create a new profile
 slv profile new -n testorg
@@ -17,7 +16,7 @@ SLV_ENV_SECRET_KEY=$(slv env new -n testenv --add | grep "Secret Key")
 SLV_ENV_SECRET_KEY=$(echo $SLV_ENV_SECRET_KEY | cut -d ':' -f 2 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
 
 # Generate a random vault file name
-VAULT_FILE="$(mktemp).slv"
+VAULT_FILE="$(mktemp).slv.yml"
 
 # Create a new vault
 slv vault new -v $VAULT_FILE -s testenv --enable-hash

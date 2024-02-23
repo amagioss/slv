@@ -51,7 +51,7 @@ func isValidVaultFileName(fileName string) bool {
 		strings.HasSuffix(fileName, vaultFileNameEnding+".yml")
 }
 
-// Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv or .slv.yaml or .slv.yml.
+// Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yml or .slv.yaml.
 func New(filePath, objectField string, hashLength uint8, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
@@ -97,12 +97,12 @@ func New(filePath, objectField string, hashLength uint8, rootPublicKey *crypto.P
 	return vlt, vlt.commit()
 }
 
-// Returns the vault instance from a given yaml. The vault file name must end with .slv or .slv.yaml or .slv.yml.
+// Returns the vault instance from a given yaml. The vault file name must end with .slv.yml or .slv.yaml.
 func Get(filePath string) (vlt *Vault, err error) {
 	return GetFromField(filePath, "")
 }
 
-// Returns the vault instance from a given yaml file considering a field as vault. The vault file name must end with .slv or .slv.yaml or .slv.yml.
+// Returns the vault instance from a given yaml file considering a field as vault. The vault file name must end with .slv.yml or .slv.yaml.
 func GetFromField(filePath, fieldName string) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName

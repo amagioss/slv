@@ -21,7 +21,7 @@ var (
 	secretNameRegex = regexp.MustCompile(secretNamePattern)
 	secretRefRegex  = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", "SLV_VPK_[A-Za-z0-9]+"))
 
-	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameEnding + " or " + vaultFileNameEnding + ".yaml or " + vaultFileNameEnding + ".yml]")
+	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameEnding + ".yml or " + vaultFileNameEnding + ".yaml]")
 	errVaultDirPathCreation         = errors.New("error in creating a new vault directory path")
 	errVaultNotAccessible           = errors.New("vault is not accessible using the given environment key")
 	errVaultLocked                  = errors.New("the vault is currently locked")

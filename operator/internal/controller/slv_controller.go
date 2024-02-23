@@ -33,18 +33,13 @@ import (
 
 	"github.com/go-logr/logr"
 	"savesecrets.org/slv"
-	"savesecrets.org/slv/core/config"
 	slvv1 "savesecrets.org/slv/operator/api/v1"
 	"savesecrets.org/slv/operator/slvenv"
 )
 
 const (
-	secretManagedByAnnotationKey   = slvv1.Group + "/managed-by"
-	secretManagedByAnnotationValue = config.AppNameLowerCase
-	secretSLVVersionAnnotationKey  = slvv1.Group + "/slv-version"
+	slvVersionAnnotationKey = slvv1.Group + "/version"
 )
-
-var secretSLVVersionAnnotationValue = slv.Version
 
 // SLVReconciler reconciles a SLV object
 type SLVReconciler struct {
@@ -126,8 +121,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 					Name:      slvObj.Name,
 					Namespace: req.Namespace,
 					Annotations: map[string]string{
-						secretManagedByAnnotationKey:  secretManagedByAnnotationValue,
-						secretSLVVersionAnnotationKey: secretSLVVersionAnnotationValue,
+						slvVersionAnnotationKey: slv.Version,
 					},
 					OwnerReferences: []metav1.OwnerReference{
 						{
@@ -171,12 +165,8 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		if secret.Annotations == nil {
 			secret.Annotations = make(map[string]string)
 		}
-		if secret.Annotations[secretManagedByAnnotationKey] != secretManagedByAnnotationValue {
-			secret.Annotations[secretManagedByAnnotationKey] = secretManagedByAnnotationValue
-			updateRequired = true
-		}
-		if secret.Annotations[secretSLVVersionAnnotationKey] != secretSLVVersionAnnotationValue {
-			secret.Annotations[secretSLVVersionAnnotationKey] = secretSLVVersionAnnotationValue
+		if secret.Annotations[slvVersionAnnotationKey] != slv.Version {
+			secret.Annotations[slvVersionAnnotationKey] = slv.Version
 			updateRequired = true
 		}
 		var msg string

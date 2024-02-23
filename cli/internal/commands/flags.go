@@ -103,7 +103,7 @@ var (
 	vaultFileFlag = FlagDef{
 		name:      "vault-file",
 		shorthand: "v",
-		usage:     "Path to the vault file [Must end with .vault.slv]",
+		usage:     "Path to the vault file [Must end with .slv.yml or .slv.yaml]",
 	}
 
 	vaultAccessPublicKeysFlag = FlagDef{
