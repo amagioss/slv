@@ -6,13 +6,10 @@ import (
 	"savesecrets.org/slv/core/crypto"
 )
 
-const (
-	// AppName = config.AppName
-	Prefix = "SLV"
-)
-
 var (
 	Version                      = "dev"
+	Commit                       = "none"
+	BuildDate                    = ""
 	secretKey                    *crypto.SecretKey
 	errEnvironmentAccessNotFound = errors.New("environment doesn't have access. please set the required environment variables")
 )

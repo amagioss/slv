@@ -50,20 +50,35 @@ func secretPutCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
 			name := cmd.Flag(secretNameFlag.name).Value.String()
-			secret := cmd.Flag(secretValueFlag.name).Value.String()
+			secretStr := cmd.Flag(secretValueFlag.name).Value.String()
 			vault, err := getVault(vaultFile)
 			if err != nil {
 				exitOnError(err)
 			}
 			forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.name)
 			if !forceUpdate && vault.SecretExists(name) {
-				exitOnErrorWithMessage("secret already exists. please use the --" + secretForceUpdateFlag.name + " flag to overwrite it.")
+				fmt.Print("Secret already exists. Do you wish to overwrite it? (y/n): ")
+				var confirmation string
+				fmt.Scanln(&confirmation)
+				if confirmation != "y" {
+					fmt.Println(color.YellowString("Operation aborted"))
+					safeExit()
+				}
 			}
-			err = vault.PutSecret(name, []byte(secret))
+			var secret []byte
+			if secretStr == "" {
+				secret, err = getHiddenInputFromUser("Enter the secret value for " + name + ": ")
+				if err != nil {
+					exitOnError(err)
+				}
+			} else {
+				secret = []byte(secretStr)
+			}
+			err = vault.PutSecret(name, secret)
 			if err != nil {
 				exitOnError(err)
 			}
-			fmt.Println("Added secret: ", color.GreenString(name), " to vault: ", color.GreenString(vaultFile))
+			fmt.Println("Updated secret: ", color.GreenString(name), " to vault: ", color.GreenString(vaultFile))
 			safeExit()
 		},
 	}
@@ -73,7 +88,6 @@ func secretPutCommand() *cobra.Command {
 	secretPutCmd.Flags().Bool(secretForceUpdateFlag.name, false, secretForceUpdateFlag.usage)
 	secretPutCmd.MarkFlagRequired(vaultFileFlag.name)
 	secretPutCmd.MarkFlagRequired(secretNameFlag.name)
-	secretPutCmd.MarkFlagRequired(secretValueFlag.name)
 	return secretPutCmd
 }
 
@@ -156,11 +170,11 @@ func secretExportCommand() *cobra.Command {
 					secretOutputMap[name] = string(secret)
 				}
 			}
-			listFormat := cmd.Flag(secretListFormatFlag.name).Value.String()
-			if listFormat == "" {
-				listFormat = "table"
+			exportFormat := cmd.Flag(secretListFormatFlag.name).Value.String()
+			if exportFormat == "" {
+				exportFormat = "env"
 			}
-			switch listFormat {
+			switch exportFormat {
 			case "table":
 				tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 				for key, value := range secretOutputMap {
@@ -181,10 +195,12 @@ func secretExportCommand() *cobra.Command {
 				fmt.Println(string(yamlData))
 			case "envars", "envar", "env":
 				for key, value := range secretOutputMap {
-					fmt.Printf("%s=%s\n", key, value)
+					value = strings.ReplaceAll(value, "\\", "\\\\")
+					value = strings.ReplaceAll(value, "\"", "\\\"")
+					fmt.Printf("%s=\"%s\"\n", key, value)
 				}
 			default:
-				exitOnErrorWithMessage("invalid format: " + listFormat)
+				exitOnErrorWithMessage("invalid format: " + exportFormat)
 			}
 			safeExit()
 		},

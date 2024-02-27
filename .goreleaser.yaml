@@ -4,7 +4,7 @@ builds:
     main: ./cli/main
     env:
       - CGO_ENABLED=0
-    ldflags: "-X savesecrets.org/slv.Version={{.Version}}"
+    ldflags: "-X savesecrets.org/slv.Version={{.Version}} -X savesecrets.org/slv.BuildDate={{.Date}} -X savesecrets.org/slv.Commit={{.Commit}}"
     targets:
       - darwin_amd64
       - darwin_arm64

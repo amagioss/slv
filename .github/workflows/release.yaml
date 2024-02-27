@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  slv:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Setting SLV Version

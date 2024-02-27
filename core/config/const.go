@@ -12,6 +12,15 @@ const (
 
 	AppNameLowerCase = "slv"
 	AppNameUpperCase = "SLV"
+	Description      = "Secure Local Vault | Secrets Launch Vehicle"
+	Website          = "https://savesecrets.org/slv"
+	Art              = `
+	 ____  _ __     __
+	/ ___|| |\ \   / /
+	\___ \| | \ \ / / 
+	 ___) | |__\ V /  
+	|____/|_____\_/   
+	`
 )
 
 var (
