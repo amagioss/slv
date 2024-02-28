@@ -13,15 +13,14 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef) *cobra
 		Use:   kmsName,
 		Short: kmsProviderDesc,
 		Run: func(cmd *cobra.Command, args []string) {
-			name, _ := cmd.Flags().GetString(envNameFlag.name)
-			email, _ := cmd.Flags().GetString(envEmailFlag.name)
-			tags, err := cmd.Flags().GetStringSlice(envTagsFlag.name)
+			envName, _ := cmd.Flags().GetString(envNameFlag.name)
+			envEmail, _ := cmd.Flags().GetString(envEmailFlag.name)
+			envTags, err := cmd.Flags().GetStringSlice(envTagsFlag.name)
 			if err != nil {
 				exitOnError(err)
 			}
 			inputs := make(map[string][]byte)
 			keyIdFlagValue := cmd.Flag(keyIdFlag.name).Value.String()
-			providerName := "kms-" + kmsName
 			inputs[keyIdFlag.name] = []byte(keyIdFlagValue)
 			pubKeyFilePath := cmd.Flag(kmsRSAPublicKey.name).Value.String()
 			var rsaPublicKey []byte
@@ -31,12 +30,12 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef) *cobra
 					inputs[kmsRSAPublicKey.name] = rsaPublicKey
 				}
 			}
-			env, err = environments.NewEnvForProvider(providerName, name, environments.SERVICE, inputs)
+			env, err = environments.NewEnvForProvider(kmsName, envName, environments.SERVICE, inputs)
 			if err != nil {
 				exitOnError(err)
 			}
-			env.SetEmail(email)
-			env.AddTags(tags...)
+			env.SetEmail(envEmail)
+			env.AddTags(envTags...)
 			showEnv(*env, true)
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
 			if addToProfileFlag {

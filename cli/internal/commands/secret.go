@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"savesecrets.org/slv"
+	"savesecrets.org/slv/core/input"
 )
 
 func toBase64(data []byte) string {
@@ -57,9 +58,10 @@ func secretPutCommand() *cobra.Command {
 			}
 			forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.name)
 			if !forceUpdate && vault.SecretExists(name) {
-				fmt.Print("Secret already exists. Do you wish to overwrite it? (y/n): ")
-				var confirmation string
-				fmt.Scanln(&confirmation)
+				confirmation, err := input.VisibleInput("Secret already exists. Do you wish to overwrite it? (y/n): ")
+				if err != nil {
+					exitOnError(err)
+				}
 				if confirmation != "y" {
 					fmt.Println(color.YellowString("Operation aborted"))
 					safeExit()
@@ -67,7 +69,7 @@ func secretPutCommand() *cobra.Command {
 			}
 			var secret []byte
 			if secretStr == "" {
-				secret, err = getHiddenInputFromUser("Enter the secret value for " + name + ": ")
+				secret, err = input.HiddenInput("Enter the secret value for " + name + ": ")
 				if err != nil {
 					exitOnError(err)
 				}

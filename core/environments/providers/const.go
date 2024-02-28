@@ -1,13 +1,15 @@
 package providers
 
-import "errors"
+import (
+	"errors"
+)
 
 const (
 	// Password Provider Constants
 	passwordProviderName = "password"
-	passwordPolicyRegex  = `^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*?])[A-Za-z\d!@#$%^&*?]{10,}$`
 
 	// AWS Provider Constants
+	awsProviderName                     = "aws"
 	awsKMSAsymmetricEncryptionAlgorithm = "RSAES_OAEP_SHA_256"
 	awsKMSARNPattern                    = `^arn:aws:kms:[a-z0-9-]+:[0-9]+:key/[a-f0-9-]+$`
 )
@@ -23,4 +25,7 @@ var (
 	errInvalidAWSKMSARN       = errors.New("invalid AWS KMS ARN")
 	errInvalidAWSKMSAlgorithm = errors.New("invalid AWS KMS algorithm")
 	errSealedSecretKeyRef     = errors.New("invalid sealed secret key from provider binding")
+
+	// Password Provider Errors
+	errPasswordNotSet = errors.New("password not set: please set password through the environment variable or use the interactive terminal to enter the password")
 )

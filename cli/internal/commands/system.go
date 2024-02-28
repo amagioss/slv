@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"savesecrets.org/slv/core/config"
+	"savesecrets.org/slv/core/input"
 )
 
 func systemCommand() *cobra.Command {
@@ -37,9 +38,10 @@ func systemResetCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			confirm, _ := cmd.Flags().GetBool(yesFlag.name)
 			if !confirm {
-				fmt.Print("Are you sure you want to proceed? (y/n): ")
-				var confirmation string
-				fmt.Scanln(&confirmation)
+				confirmation, err := input.VisibleInput("Are you sure you want to proceed? (y/n): ")
+				if err != nil {
+					exitOnError(err)
+				}
 				confirm = confirmation == "y"
 			}
 			if confirm {
