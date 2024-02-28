@@ -77,4 +77,7 @@ Once shared, the other environments can access the vault using their respective 
 
 ## Integrations
 Some of the integrations that SLV supports currently are:
+- GitHub Actions
+    - [`slv-setup-action`](https://github.com/savesecrets/slv-setup-action)
+    - [`slv-secrets-action`](https://github.com/savesecrets/slv-secrets-action)
 - [Kubernetes Operator](/operator/README.md)
