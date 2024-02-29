@@ -31,6 +31,7 @@ var (
 	envAddCmd        *cobra.Command
 	envListCmd       *cobra.Command
 	envSelfCmd       *cobra.Command
+	envSelfSetCmd    *cobra.Command
 
 	// Vault Commands
 	vaultCmd      *cobra.Command

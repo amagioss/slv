@@ -83,21 +83,21 @@ func (env *Environment) AddTags(tags ...string) {
 	env.Tags = append(env.Tags, tags...)
 }
 
-func FromEnvData(envData string) (env *Environment, err error) {
-	sliced := strings.Split(envData, "_")
-	if len(sliced) != 3 || sliced[0] != slvPrefix || sliced[1] != envDataStringAbbrev {
-		return nil, errInvalidEnvData
+func FromEnvDef(envDef string) (env *Environment, err error) {
+	sliced := strings.Split(envDef, "_")
+	if len(sliced) != 3 || sliced[0] != slvPrefix || sliced[1] != envDefStringAbbrev {
+		return nil, errInvalidEnvDef
 	}
 	err = commons.Deserialize(sliced[2], &env)
 	return
 }
 
-func (env *Environment) ToEnvData() (string, error) {
+func (env *Environment) ToEnvDef() (string, error) {
 	data, err := commons.Serialize(env)
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s_%s_%s", slvPrefix, envDataStringAbbrev, data), nil
+	return fmt.Sprintf("%s_%s_%s", slvPrefix, envDefStringAbbrev, data), nil
 }
 
 func (env Environment) MarshalYAML() (interface{}, error) {

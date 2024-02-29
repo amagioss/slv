@@ -29,19 +29,13 @@ var (
 	}
 
 	profileGitURI = FlagDef{
-		name:  "git-uri",
+		name:  "git",
 		usage: "Profile git URI",
 	}
 
 	profileGitBranch = FlagDef{
-		name:  "git-branch",
+		name:  "branch",
 		usage: "Profile git branch",
-	}
-
-	profileEnvDefFlag = FlagDef{
-		name:      "env",
-		shorthand: "e",
-		usage:     "Environment definition",
 	}
 
 	profileSetRootEnvFlag = FlagDef{
@@ -80,9 +74,20 @@ var (
 		usage:     "Searches query to filter environments",
 	}
 
-	envSetFlag = FlagDef{
-		name:  "set",
-		usage: "Sets the environment as the self environment",
+	envDefFlag = FlagDef{
+		name:      "env-def",
+		shorthand: "e",
+		usage:     "Environment definition",
+	}
+
+	envShowBindingFlag = FlagDef{
+		name:  "show-binding",
+		usage: "Show the environment secret binding",
+	}
+
+	envShowDefFlag = FlagDef{
+		name:  "show-def",
+		usage: "Show the environment definition string",
 	}
 
 	// Provider Flags

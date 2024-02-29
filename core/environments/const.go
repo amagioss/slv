@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	envDataStringAbbrev                   = "EDS" // Environment Data String
+	envDefStringAbbrev                    = "EDS" // Environment Definition String
 	envSecretBindingAbbrev                = "ESB" // Environment Secret Binding
 	EnvironmentKey         crypto.KeyType = 'E'
 	USER                   EnvType        = "user"
@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	errInvalidEnvData                = errors.New("invalid environment data string")
+	errInvalidEnvDef                 = errors.New("invalid environment definition string")
 	errInvalidEnvironmentType        = errors.New("invalid environment type")
 	errEnvironmentPublicKeyNotFound  = errors.New("environment public key not found")
 	errManifestPathExistsAlready     = errors.New("manifest path exists already")

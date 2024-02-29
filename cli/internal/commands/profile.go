@@ -122,7 +122,7 @@ func profileAddEnvCommand() *cobra.Command {
 		Aliases: []string{"add-env", "add-environment", "add-environments", "addenvs", "envadd", "env-add", "env-adds", "env-adds"},
 		Short:   "Adds an environment to a profile",
 		Run: func(cmd *cobra.Command, args []string) {
-			envdefs, err := cmd.Flags().GetStringSlice(profileEnvDefFlag.name)
+			envdefs, err := cmd.Flags().GetStringSlice(envDefFlag.name)
 			if err != nil {
 				exitOnError(err)
 			}
@@ -143,7 +143,7 @@ func profileAddEnvCommand() *cobra.Command {
 			var successMessage string
 			for _, envdef := range envdefs {
 				var env *environments.Environment
-				if env, err = environments.FromEnvData(envdef); err == nil && env != nil {
+				if env, err = environments.FromEnvDef(envdef); err == nil && env != nil {
 					if setAsRoot {
 						err = profile.SetRoot(env)
 						successMessage = fmt.Sprintf("Successfully set %s as root environment for profile %s", color.GreenString(env.Name), color.GreenString(profile.Name()))
@@ -163,9 +163,9 @@ func profileAddEnvCommand() *cobra.Command {
 		},
 	}
 	envAddCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
-	envAddCmd.Flags().StringSliceP(profileEnvDefFlag.name, profileEnvDefFlag.shorthand, []string{}, profileEnvDefFlag.usage)
+	envAddCmd.Flags().StringSliceP(envDefFlag.name, envDefFlag.shorthand, []string{}, envDefFlag.usage)
 	envAddCmd.Flags().Bool(profileSetRootEnvFlag.name, false, profileSetRootEnvFlag.usage)
-	envAddCmd.MarkFlagRequired(profileEnvDefFlag.name)
+	envAddCmd.MarkFlagRequired(envDefFlag.name)
 	return envAddCmd
 }
 

@@ -42,8 +42,8 @@ func showEnv(env environments.Environment, includeEDS bool) {
 		fmt.Fprintln(w, "Secret Binding:\t", env.SecretBinding)
 	}
 	if includeEDS {
-		if envDef, err := env.ToEnvData(); err == nil {
-			fmt.Fprintln(w, "\nEnv Data:\t", color.CyanString(envDef))
+		if envDef, err := env.ToEnvDef(); err == nil {
+			fmt.Fprintln(w, "\nEnv Definition:\t", color.CyanString(envDef))
 		}
 	}
 	w.Flush()
@@ -146,6 +146,7 @@ func envNewUserCommand() *cobra.Command {
 			if err = env.MarkAsSelf(); err != nil {
 				exitOnError(err)
 			}
+			env.SecretBinding = ""
 			showEnv(*env, true)
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
 			if addToProfileFlag {
@@ -219,28 +220,49 @@ func envSelfCommand() *cobra.Command {
 		Aliases: []string{"me", "my", "current"},
 		Short:   "Shows the current environment if registered",
 		Run: func(cmd *cobra.Command, args []string) {
-			envDef := cmd.Flag(envSetFlag.name).Value.String()
-			if envDef != "" {
-				env, err := environments.FromEnvData(envDef)
-				if err != nil {
-					exitOnError(err)
-				}
-				if err = env.MarkAsSelf(); err != nil {
-					exitOnError(err)
-				}
-				showEnv(*env, true)
-				fmt.Printf("Successfully registered %s as self environment", color.GreenString(env.Name))
+			env := environments.GetSelf()
+			if env == nil {
+				fmt.Println("No environment registered as self.")
 			} else {
-				env := environments.GetSelf()
-				if env == nil {
-					fmt.Println("No environment registered as self.")
-				} else {
-					showEnv(*env, true)
+				showBinding, _ := cmd.Flags().GetBool(envShowBindingFlag.name)
+				if !showBinding {
+					env.SecretBinding = ""
 				}
+				showDef, _ := cmd.Flags().GetBool(envShowDefFlag.name)
+				showEnv(*env, showDef)
 			}
 			safeExit()
 		},
 	}
-	envSelfCmd.Flags().StringP(envSetFlag.name, envSetFlag.shorthand, "", envSetFlag.usage)
+	envSelfCmd.Flags().BoolP(envShowBindingFlag.name, envShowBindingFlag.shorthand, false, envShowBindingFlag.usage)
+	envSelfCmd.Flags().BoolP(envShowDefFlag.name, envShowDefFlag.shorthand, false, envShowDefFlag.usage)
+	envSelfCmd.AddCommand(envSelfSetCommand())
 	return envSelfCmd
+}
+
+func envSelfSetCommand() *cobra.Command {
+	if envSelfSetCmd != nil {
+		return envSelfSetCmd
+	}
+	envSelfSetCmd = &cobra.Command{
+		Use:     "set",
+		Aliases: []string{"save", "put", "store", "s"},
+		Short:   "Shows the current environment if registered",
+		Run: func(cmd *cobra.Command, args []string) {
+			envDef := cmd.Flag(envDefFlag.name).Value.String()
+			env, err := environments.FromEnvDef(envDef)
+			if err != nil {
+				exitOnError(err)
+			}
+			if err = env.MarkAsSelf(); err != nil {
+				exitOnError(err)
+			}
+			env.SecretBinding = ""
+			showEnv(*env, true)
+			fmt.Println(color.GreenString("Successfully registered as self environment"))
+		},
+	}
+	envSelfSetCmd.Flags().StringP(envDefFlag.name, envDefFlag.shorthand, "", envDefFlag.usage)
+	envSelfSetCmd.MarkFlagRequired(envDefFlag.name)
+	return envSelfSetCmd
 }
