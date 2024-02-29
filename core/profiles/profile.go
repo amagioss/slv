@@ -101,6 +101,11 @@ func (profile *Profile) PutEnv(env *environments.Environment) error {
 	if profile.isWriteDenied() {
 		return errChangesNotAllowedInGitProfile
 	}
+	if profile.repo != nil {
+		if err := profile.Pull(); err != nil {
+			return err
+		}
+	}
 	envManifest, err := profile.getEnvManifest()
 	if err != nil {
 		return err
@@ -122,6 +127,11 @@ func (profile *Profile) RootPublicKey() (*crypto.PublicKey, error) {
 func (profile *Profile) SetRoot(env *environments.Environment) error {
 	if profile.isWriteDenied() {
 		return errChangesNotAllowedInGitProfile
+	}
+	if profile.repo != nil {
+		if err := profile.Pull(); err != nil {
+			return err
+		}
 	}
 	envManifest, err := profile.getEnvManifest()
 	if err != nil {

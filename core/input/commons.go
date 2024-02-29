@@ -18,7 +18,6 @@ func VisibleInput(prompt string) (string, error) {
 	var output string
 	fmt.Print(prompt)
 	_, err := fmt.Scanln(&output)
-	fmt.Println()
 	return output, err
 }
 

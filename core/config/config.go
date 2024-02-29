@@ -3,6 +3,8 @@ package config
 import (
 	"os"
 	"strings"
+
+	"savesecrets.org/slv/core/input"
 )
 
 func IsAdminModeEnabled() bool {
@@ -37,10 +39,13 @@ func GetEnvSecretPassword() string {
 	return *envSecretPassword
 }
 
-func GetGitHTTPUser() string {
+func GetGitHTTPUsername() string {
 	if gitHTTPUser == nil {
 		gitHTTPUser = new(string)
 		*gitHTTPUser = os.Getenv(envar_SLV_GIT_HTTP_USER)
+		if *gitHTTPUser == "" {
+			*gitHTTPUser, _ = input.VisibleInput("Enter the git username       : ")
+		}
 	}
 	return *gitHTTPUser
 }
@@ -51,6 +56,12 @@ func GetGitHTTPToken() string {
 		*gitHTTPToken = os.Getenv(envar_SLV_GIT_HTTP_TOKEN)
 		if *gitHTTPToken == "" {
 			*gitHTTPToken = os.Getenv(envar_SLV_GIT_HTTP_PASS)
+			if *gitHTTPToken == "" {
+				token, _ := input.HiddenInput("Enter the git token/password : ")
+				if token != nil {
+					*gitHTTPToken = string(token)
+				}
+			}
 		}
 	}
 	return *gitHTTPToken

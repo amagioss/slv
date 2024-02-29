@@ -30,12 +30,12 @@ var (
 
 	profileGitURI = FlagDef{
 		name:  "git",
-		usage: "Profile git URI",
+		usage: "Git URI to clone the profile from",
 	}
 
 	profileGitBranch = FlagDef{
-		name:  "branch",
-		usage: "Profile git branch",
+		name:  "git-branch",
+		usage: "Git branch corresponding to the git URI",
 	}
 
 	profileSetRootEnvFlag = FlagDef{

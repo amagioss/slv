@@ -3,6 +3,8 @@ package profiles
 import (
 	"errors"
 	"time"
+
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
 // Errors and constants used by profiles
@@ -20,6 +22,9 @@ const (
 )
 
 var (
+	gitHttpAuth          *http.BasicAuth
+	gitHttpAuthProcessed = false
+
 	errProfilePathExistsAlready         = errors.New("profile path exists already")
 	errCreatingProfileDir               = errors.New("error creating profile dir")
 	errProfilePathDoesNotExist          = errors.New("profile path does not exist")

@@ -47,7 +47,7 @@ type SLVReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-func (r *SLVReconciler) returnError(ctx context.Context, req ctrl.Request,
+func (r *SLVReconciler) returnError(ctx context.Context,
 	slvObj *slvv1.SLV, logger *logr.Logger, err error, msg string) (ctrl.Result, error) {
 	logger.Error(err, msg, "SLV", slvObj.Name)
 	if slvObj.Status.Error == "" {
@@ -62,7 +62,7 @@ func (r *SLVReconciler) returnError(ctx context.Context, req ctrl.Request,
 	return ctrl.Result{}, err
 }
 
-func (r *SLVReconciler) success(ctx context.Context, req ctrl.Request,
+func (r *SLVReconciler) success(ctx context.Context,
 	slvObj *slvv1.SLV, logger *logr.Logger, msg string) error {
 	logger.Info(msg, "Secret", slvObj.Name)
 	if slvObj.Status.Error != "" {
@@ -103,11 +103,11 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 
 	vault := slvObj.Spec.Vault
 	if err := vault.Unlock(*slvenv.SecretKey); err != nil {
-		return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to unlock vault")
+		return r.returnError(ctx, &slvObj, &logger, err, "Failed to unlock vault")
 	}
 	slvSecretMap, err := vault.GetAllSecrets()
 	if err != nil {
-		return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to get all secrets from vault")
+		return r.returnError(ctx, &slvObj, &logger, err, "Failed to get all secrets from vault")
 	}
 
 	// Check if the secret exists
@@ -136,16 +136,16 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 				Data: slvSecretMap,
 			}
 			if err = controllerutil.SetControllerReference(&slvObj, secret, r.Scheme); err != nil {
-				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set controller reference for secret")
+				return r.returnError(ctx, &slvObj, &logger, err, "Failed to set controller reference for secret")
 			}
 			if err := r.Create(ctx, secret); err != nil {
-				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to create secret")
+				return r.returnError(ctx, &slvObj, &logger, err, "Failed to create secret")
 			}
-			if err := r.success(ctx, req, &slvObj, &logger, "Created secret"); err != nil {
+			if err := r.success(ctx, &slvObj, &logger, "Created secret"); err != nil {
 				return ctrl.Result{}, err
 			}
 		} else {
-			return r.returnError(ctx, req, &slvObj, &logger, err, "Error getting secret for SLV Object")
+			return r.returnError(ctx, &slvObj, &logger, err, "Error getting secret for SLV Object")
 		}
 	} else {
 		// Update secret
@@ -173,17 +173,17 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		if updateRequired {
 			if !controllerutil.HasControllerReference(secret) {
 				if err = controllerutil.SetControllerReference(&slvObj, secret, r.Scheme); err != nil {
-					return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to set controller reference for secret")
+					return r.returnError(ctx, &slvObj, &logger, err, "Failed to set controller reference for secret")
 				}
 			}
 			if err = r.Update(ctx, secret); err != nil {
-				return r.returnError(ctx, req, &slvObj, &logger, err, "Failed to update secret")
+				return r.returnError(ctx, &slvObj, &logger, err, "Failed to update secret")
 			}
 			msg = "Updated secret"
 		} else {
 			msg = "No update required for secret"
 		}
-		if err := r.success(ctx, req, &slvObj, &logger, msg); err != nil {
+		if err := r.success(ctx, &slvObj, &logger, msg); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

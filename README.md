@@ -24,7 +24,7 @@ Created profile:  amagi
 
 #### Create a new environment
 ```sh
-$ slv env new -n alice -e alice@example.com --add
+$ slv env new service -n alice -e alice@example.com --add
 
 ID (Public Key):  SLV_EPK_AEAUKAELRTIL2YIXNP7NYTYQMHUX77BWK2LXSKXN4GHSUECDNEJ7XFECLE
 Name:             alice
@@ -39,9 +39,9 @@ Secret Key: SLV_ESK_AEAEKAHBIONE3QIIWFXFRNJPE6A6AYL527QW4OF4HWWFDOE5E4XR5LO2WI
 #### Create a vault
 - To create a vault and share it with the environment `alice`, use the following command
 ```sh
-$ slv vault new -v test.slv -s alice
+$ slv vault new -v test.slv.yaml -s alice
 
-Created vault: test.slv
+Created vault: test.slv.yaml
 ```
 - To create a K8s compatible vault, use the following command
 ```sh
@@ -52,16 +52,16 @@ Created vault: test.slv.yaml
 
 #### Add secrets to the vault
 ```sh
-$ slv secret put -v test.slv -n db_password -s "super_secret_pwd"
+$ slv secret put -v test.slv.yaml -n db_password -s "super_secret_pwd"
 
-Added secret: db_password to vault: test.slv
+Added secret: db_password to vault: test.slv.yaml
 ```
 
 #### Get secrets from the vault
 Set the environment variable `SLV_ENV_SECRET_KEY` to the secret key generated in the previous step
 ```sh
 $ export SLV_ENV_SECRET_KEY=SLV_ESK_AEAEKAHBIONE3QIIWFXFRNJPE6A6AYL527QW4OF4HWWFDOE5E4XR5LO2WI
-$ slv secret get -v test.slv -n db_password
+$ slv secret get -v test.slv.yaml -n db_password
 
 super_secret_pwd
 ```
@@ -69,9 +69,9 @@ super_secret_pwd
 #### Share the vault with other environments
 Ensure that the current environment has access to the vault in order to share it with other environments
 ```sh
-$ slv vault share -v test.slv -s bob
+$ slv vault share -v test.slv.yaml -s bob
 
-Shared vault: test.slv
+Shared vault: test.slv.yaml
 ```
 Once shared, the other environments can access the vault using their respective secret keys
 
