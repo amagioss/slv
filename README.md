@@ -12,6 +12,10 @@ SLV can also be installed with brew using the following command
 ```zsh
 brew install savesecrets/tap/slv
 ```
+You can also use SLV with Docker by running the following command
+```zsh
+docker run -it --rm -v $PWD:/data ghcr.io/savesecrets/slv:latest
+```
 
 ## Usage
 

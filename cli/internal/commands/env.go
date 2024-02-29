@@ -63,6 +63,7 @@ func envNewCommand() *cobra.Command {
 	envNewCmd.AddCommand(envNewServiceCommand())
 	envNewCmd.AddCommand(envNewUserCommand())
 	envNewCmd.AddCommand(newKMSEnvCommand("aws", "Create an environment that works with AWS KMS", awsARNFlag))
+	envNewCmd.AddCommand(newKMSEnvCommand("gcp", "Create an environment that works with GCP KMS", gcpKmsResNameFlag))
 	return envNewCmd
 }
 

@@ -97,6 +97,11 @@ var (
 		usage: "ARN for the AWS KMS key",
 	}
 
+	gcpKmsResNameFlag = FlagDef{
+		name:  "resource-name",
+		usage: "GCP KMS resource name",
+	}
+
 	kmsRSAPublicKey = FlagDef{
 		name:  "rsa-pubkey",
 		usage: "KMS public key [RSA 4096] as pem file (Recommended to perform offline access binding)",

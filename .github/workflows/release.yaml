@@ -44,8 +44,9 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ env.SLV_VERSION }}
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:latest
       - name: Release SLV K8s Operator Image
         uses: docker/build-push-action@v5
         with:
@@ -54,5 +55,6 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/operator:latest
             ghcr.io/${{ github.repository }}/operator:${{ env.SLV_VERSION }}
+            ghcr.io/${{ github.repository }}/operator:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/operator:latest

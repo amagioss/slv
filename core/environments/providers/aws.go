@@ -64,26 +64,25 @@ func encryptWithAWSKMSAPI(secretKeyBytes []byte, arn string) (sealedSecretKeyByt
 }
 
 func bindWithAWSKMS(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error) {
-	if arn := string(inputs["arn"]); isValidARN(arn) {
+	if arn := string(inputs[awsARNRefName]); isValidARN(arn) {
 		var secretKey *crypto.SecretKey
 		if secretKey, err = crypto.NewSecretKey(environments.EnvironmentKey); err != nil {
 			return nil, nil, err
 		}
 		var sealedSecretKeyBytes []byte
-		rsaPublicKey, ok := inputs["rsa-pubkey"]
+		rsaPublicKey, ok := inputs[rsaPubKeyRefName]
 		ref = make(map[string][]byte)
-		ref["arn"] = []byte(arn)
+		ref[awsARNRefName] = []byte(arn)
 		if !ok || len(rsaPublicKey) == 0 {
 			var algorithm *string
 			if sealedSecretKeyBytes, algorithm, err = encryptWithAWSKMSAPI(secretKey.Bytes(), arn); err != nil {
 				return nil, nil, err
-			} else {
-				ref["alg"] = []byte(*algorithm)
 			}
-		} else if sealedSecretKeyBytes, err = rsaEncrypt(secretKey.Bytes(), rsaPublicKey); err != nil {
-			return nil, nil, err
-		} else {
+			ref["alg"] = []byte(*algorithm)
+		} else if sealedSecretKeyBytes, err = rsaEncrypt(secretKey.Bytes(), rsaPublicKey); err == nil {
 			ref["alg"] = []byte(awsKMSAsymmetricEncryptionAlgorithm)
+		} else {
+			return nil, nil, err
 		}
 		if publicKey, err = secretKey.PublicKey(); err != nil {
 			return nil, nil, err
