@@ -23,6 +23,12 @@ func GetSecretKey() (*crypto.SecretKey, error) {
 	}
 	// Read secret key from secret binding
 	envSecretBindingStr := config.GetEnvSecretBinding()
+	if envSecretBindingStr == "" {
+		selfEnv := environments.GetSelf()
+		if selfEnv != nil {
+			envSecretBindingStr = selfEnv.SecretBinding
+		}
+	}
 	if envSecretBindingStr != "" {
 		secretKey, err = environments.GetSecretKeyFromSecretBinding(envSecretBindingStr)
 	}

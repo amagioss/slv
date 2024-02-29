@@ -3,10 +3,12 @@ package environments
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"gopkg.in/yaml.v3"
 	"savesecrets.org/slv/core/commons"
+	"savesecrets.org/slv/core/config"
 	"savesecrets.org/slv/core/crypto"
 )
 
@@ -119,4 +121,26 @@ func (env *Environment) Search(query string) bool {
 	return strings.Contains(strings.ToLower(fmt.Sprintf("%s\n%s\n%s\n%s", env.Name, env.Email,
 		env.EnvType, strings.Join(env.Tags, "\n"))),
 		strings.ToLower(query))
+}
+
+func GetSelf() *Environment {
+	selfEnvFilePath := filepath.Join(config.GetAppDataDir(), selfEnvFileName)
+	env := &Environment{
+		environment: new(environment),
+	}
+	if err := commons.ReadFromYAML(selfEnvFilePath, env.environment); err != nil {
+		return nil
+	}
+	return env
+}
+
+func (env *Environment) MarkAsSelf() error {
+	if env.SecretBinding == "" {
+		return errMarkingSelfEnvBindingNotFound
+	}
+	if env.EnvType != USER {
+		return errMarkingSelfNonUserEnv
+	}
+	selfEnvFilePath := filepath.Join(config.GetAppDataDir(), selfEnvFileName)
+	return commons.WriteToYAML(selfEnvFilePath, "", env)
 }

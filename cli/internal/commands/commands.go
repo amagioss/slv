@@ -24,10 +24,13 @@ var (
 	profilePushCmd *cobra.Command
 
 	// Environment Commands
-	envCmd     *cobra.Command
-	envNewCmd  *cobra.Command
-	envAddCmd  *cobra.Command
-	envListCmd *cobra.Command
+	envCmd           *cobra.Command
+	envNewCmd        *cobra.Command
+	envNewServiceCmd *cobra.Command
+	envNewUserCmd    *cobra.Command
+	envAddCmd        *cobra.Command
+	envListCmd       *cobra.Command
+	envSelfCmd       *cobra.Command
 
 	// Vault Commands
 	vaultCmd      *cobra.Command

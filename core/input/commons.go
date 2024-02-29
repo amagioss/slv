@@ -9,7 +9,7 @@ import (
 
 func HiddenInput(prompt string) ([]byte, error) {
 	fmt.Print(prompt)
-	input, err := term.ReadPassword(syscall.Stdin)
+	input, err := term.ReadPassword(int(syscall.Stdin))
 	fmt.Println()
 	return input, err
 }
@@ -23,7 +23,7 @@ func VisibleInput(prompt string) (string, error) {
 }
 
 func IsAllowed() error {
-	if !term.IsTerminal(syscall.Stdin) {
+	if !term.IsTerminal(int(syscall.Stdin)) {
 		return errNonInteractiveTerminal
 	}
 	return nil

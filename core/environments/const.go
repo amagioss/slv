@@ -15,6 +15,7 @@ const (
 	SERVICE                EnvType        = "service"
 	ROOT                   EnvType        = "root"
 	slvPrefix                             = config.AppNameUpperCase
+	selfEnvFileName                       = ".self"
 )
 
 var (
@@ -29,4 +30,6 @@ var (
 	errInvalidEnvSecretBindingFormat = errors.New("invalid environment secret binding format")
 	errEnvSecretBindingUnspecified   = errors.New("environment secret binding unspecified")
 	errProviderRegisteredAlready     = errors.New("env secret provider registered already")
+	errMarkingSelfEnvBindingNotFound = errors.New("error in marking environment as self - env secret binding not found")
+	errMarkingSelfNonUserEnv         = errors.New("error in marking environment as self - non user environment")
 )

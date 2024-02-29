@@ -68,12 +68,6 @@ var (
 		usage:     "Environment tags",
 	}
 
-	envSelfFlag = FlagDef{
-		name:      "self",
-		shorthand: "u",
-		usage:     "Creates a user environment for you and registers locally",
-	}
-
 	envAddFlag = FlagDef{
 		name:      "add",
 		shorthand: "a",
@@ -86,9 +80,14 @@ var (
 		usage:     "Searches query to filter environments",
 	}
 
-	// KMS Flags
+	envSetFlag = FlagDef{
+		name:  "set",
+		usage: "Sets the environment as the self environment",
+	}
 
-	kmsAWSARNFlag = FlagDef{
+	// Provider Flags
+
+	awsARNFlag = FlagDef{
 		name:  "arn",
 		usage: "ARN for the AWS KMS key",
 	}

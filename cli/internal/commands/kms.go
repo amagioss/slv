@@ -51,7 +51,6 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef) *cobra
 			safeExit()
 		},
 	}
-
 	newKMSEnvCmd.Flags().StringP(envNameFlag.name, envNameFlag.shorthand, "", envNameFlag.usage)
 	newKMSEnvCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
 	newKMSEnvCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)

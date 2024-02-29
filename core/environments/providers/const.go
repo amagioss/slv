@@ -27,5 +27,6 @@ var (
 	errSealedSecretKeyRef     = errors.New("invalid sealed secret key from provider binding")
 
 	// Password Provider Errors
-	errPasswordNotSet = errors.New("password not set: please set password through the environment variable or use the interactive terminal to enter the password")
+	errPasswordNotSet  = errors.New("password not set: please set password through the environment variable or use the interactive terminal to enter the password")
+	errInvalidPassword = errors.New("invalid password")
 )

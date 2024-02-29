@@ -42,7 +42,7 @@ func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error
 	passwordStr := config.GetEnvSecretPassword()
 	if passwordStr == "" {
 		if input.IsAllowed() == nil {
-			if password, err = input.GetPasswordFromUser(true, input.GetDefaultPasswordPolicy()); err != nil {
+			if password, err = input.GetPasswordFromUser(false, nil); err != nil {
 				return nil, err
 			}
 		}
@@ -54,5 +54,9 @@ func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error
 	if err != nil {
 		return nil, err
 	}
-	return xipherKey.Decrypt(sealedSecretKeyBytes)
+	secretKeyBytes, err = xipherKey.Decrypt(sealedSecretKeyBytes)
+	if err != nil {
+		return nil, errInvalidPassword
+	}
+	return
 }
