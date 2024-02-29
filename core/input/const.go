@@ -8,7 +8,7 @@ var (
 )
 
 const (
-	pwdSpecialCharset         = "!@#$%^&*?"
+	pwdSpecialCharset         = `!@#$%^&*_-+=?:;,.|\/[](){}<>`
 	pwdDefaultMinLength       = 10
 	pwdDefaultMinUppercase    = 1
 	pwdDefaultMinLowercase    = 1
