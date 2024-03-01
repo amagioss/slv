@@ -15,7 +15,7 @@ type PasswordPolicy struct {
 	MinSpecialChars uint8
 }
 
-func GetDefaultPasswordPolicy() *PasswordPolicy {
+func DefaultPasswordPolicy() *PasswordPolicy {
 	if defaultPwdPolicy == nil {
 		defaultPwdPolicy = &PasswordPolicy{
 			MinLength:       pwdDefaultMinLength,
@@ -61,7 +61,7 @@ func (policy *PasswordPolicy) Validate(password string) error {
 }
 
 func GetPasswordFromUser(confirm bool, policy *PasswordPolicy) ([]byte, error) {
-	password, err := HiddenInput("Enter a Password: ")
+	password, err := GetHiddenInput("Enter a Password: ")
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func GetPasswordFromUser(confirm bool, policy *PasswordPolicy) ([]byte, error) {
 		}
 	}
 	if confirm {
-		if confirmPassword, err := HiddenInput("Confirm Password: "); err != nil {
+		if confirmPassword, err := GetHiddenInput("Confirm Password: "); err != nil {
 			return nil, err
 		} else if !bytes.Equal(password, confirmPassword) {
 			return nil, fmt.Errorf("passwords do not match")

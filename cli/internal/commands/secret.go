@@ -58,7 +58,7 @@ func secretPutCommand() *cobra.Command {
 			}
 			forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.name)
 			if !forceUpdate && vault.SecretExists(name) {
-				confirmation, err := input.VisibleInput("Secret already exists. Do you wish to overwrite it? (y/n): ")
+				confirmation, err := input.GetVisibleInput("Secret already exists. Do you wish to overwrite it? (y/n): ")
 				if err != nil {
 					exitOnError(err)
 				}
@@ -69,7 +69,7 @@ func secretPutCommand() *cobra.Command {
 			}
 			var secret []byte
 			if secretStr == "" {
-				secret, err = input.HiddenInput("Enter the secret value for " + name + ": ")
+				secret, err = input.GetHiddenInput("Enter the secret value for " + name + ": ")
 				if err != nil {
 					exitOnError(err)
 				}

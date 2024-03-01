@@ -80,16 +80,6 @@ var (
 		usage:     "Environment definition",
 	}
 
-	envShowBindingFlag = FlagDef{
-		name:  "show-binding",
-		usage: "Show the environment secret binding",
-	}
-
-	envShowDefFlag = FlagDef{
-		name:  "show-def",
-		usage: "Show the environment definition string",
-	}
-
 	// Provider Flags
 
 	awsARNFlag = FlagDef{

@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"savesecrets.org/slv/core/config"
+	"savesecrets.org/slv/core/environments"
 	"savesecrets.org/slv/core/input"
 )
 
@@ -36,13 +37,17 @@ func systemResetCommand() *cobra.Command {
 		Short:   "Reset the system",
 		Long:    `Cleans all existing profiles and any other data`,
 		Run: func(cmd *cobra.Command, args []string) {
+			selfEnv := environments.GetSelf()
 			confirm, _ := cmd.Flags().GetBool(yesFlag.name)
-			if !confirm {
-				confirmation, err := input.VisibleInput("Are you sure you want to proceed? (y/n): ")
-				if err != nil {
+			if !confirm || selfEnv != nil {
+				if selfEnv != nil {
+					fmt.Println(color.YellowString("You have a configured environment which you might have to consider backing up:"))
+					showEnv(*selfEnv, true, true)
+				}
+				var err error
+				if confirm, err = input.GetConfirmation("Are you sure you want to proceed? (y/n): ", "y"); err != nil {
 					exitOnError(err)
 				}
-				confirm = confirmation == "y"
 			}
 			if confirm {
 				err := config.ResetAppDataDir()

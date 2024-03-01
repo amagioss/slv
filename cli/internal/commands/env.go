@@ -32,7 +32,7 @@ func envCommand() *cobra.Command {
 	return envCmd
 }
 
-func showEnv(env environments.Environment, includeEDS bool) {
+func showEnv(env environments.Environment, includeEDS, excludeBindingFromEds bool) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 	fmt.Fprintln(w, "ID (Public Key):\t", env.PublicKey)
 	fmt.Fprintln(w, "Name:\t", env.Name)
@@ -42,9 +42,14 @@ func showEnv(env environments.Environment, includeEDS bool) {
 		fmt.Fprintln(w, "Secret Binding:\t", env.SecretBinding)
 	}
 	if includeEDS {
+		secretBinding := env.SecretBinding
+		if excludeBindingFromEds {
+			env.SecretBinding = ""
+		}
 		if envDef, err := env.ToEnvDef(); err == nil {
 			fmt.Fprintln(w, "\nEnv Definition:\t", color.CyanString(envDef))
 		}
+		env.SecretBinding = secretBinding
 	}
 	w.Flush()
 }
@@ -90,7 +95,7 @@ func envNewServiceCommand() *cobra.Command {
 			}
 			env.SetEmail(email)
 			env.AddTags(tags...)
-			showEnv(*env, true)
+			showEnv(*env, true, false)
 			if secretKey != nil {
 				fmt.Println("\nSecret Key:\t", color.HiBlackString(secretKey.String()))
 			}
@@ -125,6 +130,18 @@ func envNewUserCommand() *cobra.Command {
 		Aliases: []string{"usr", "u"},
 		Short:   "Register as a new user environment",
 		Run: func(cmd *cobra.Command, args []string) {
+			selfEnv := environments.GetSelf()
+			if selfEnv != nil {
+				showEnv(*selfEnv, true, true)
+				confirmed, err := input.GetConfirmation("You are already registered as an environment, this will replace the existing environment. Proceed? (y/n): ", "y")
+				if err != nil {
+					exitOnError(err)
+				}
+				if !confirmed {
+					fmt.Println(color.YellowString("Operation aborted"))
+					safeExit()
+				}
+			}
 			envName, _ := cmd.Flags().GetString(envNameFlag.name)
 			envEmail, _ := cmd.Flags().GetString(envEmailFlag.name)
 			envTags, err := cmd.Flags().GetStringSlice(envTagsFlag.name)
@@ -132,7 +149,7 @@ func envNewUserCommand() *cobra.Command {
 				exitOnError(err)
 			}
 			inputs := make(map[string][]byte)
-			password, err := input.GetPasswordFromUser(true, input.GetDefaultPasswordPolicy())
+			password, err := input.GetPasswordFromUser(true, input.DefaultPasswordPolicy())
 			if err != nil {
 				exitOnError(err)
 			}
@@ -147,8 +164,8 @@ func envNewUserCommand() *cobra.Command {
 			if err = env.MarkAsSelf(); err != nil {
 				exitOnError(err)
 			}
-			env.SecretBinding = ""
-			showEnv(*env, true)
+			secretBinding := env.SecretBinding
+			showEnv(*env, true, true)
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
 			if addToProfileFlag {
 				profile, err := profiles.GetDefaultProfile()
@@ -159,6 +176,11 @@ func envNewUserCommand() *cobra.Command {
 				if err != nil {
 					exitOnError(err)
 				}
+			}
+			fmt.Println(color.GreenString("Successfully registered as self environment"))
+			if secretBinding != "" {
+				fmt.Println(color.YellowString("Please note down the \"Secret Binding\" somewhere safe so that you don't lose it.\n" +
+					"It is required to access your registered environment."))
 			}
 			safeExit()
 		},
@@ -201,7 +223,7 @@ func envListCommand() *cobra.Command {
 				exitOnError(err)
 			}
 			for _, env := range envs {
-				showEnv(*env, false)
+				showEnv(*env, false, false)
 				fmt.Println()
 			}
 			safeExit()
@@ -225,18 +247,11 @@ func envSelfCommand() *cobra.Command {
 			if env == nil {
 				fmt.Println("No environment registered as self.")
 			} else {
-				showBinding, _ := cmd.Flags().GetBool(envShowBindingFlag.name)
-				if !showBinding {
-					env.SecretBinding = ""
-				}
-				showDef, _ := cmd.Flags().GetBool(envShowDefFlag.name)
-				showEnv(*env, showDef)
+				showEnv(*env, true, true)
 			}
 			safeExit()
 		},
 	}
-	envSelfCmd.Flags().BoolP(envShowBindingFlag.name, envShowBindingFlag.shorthand, false, envShowBindingFlag.usage)
-	envSelfCmd.Flags().BoolP(envShowDefFlag.name, envShowDefFlag.shorthand, false, envShowDefFlag.usage)
 	envSelfCmd.AddCommand(envSelfSetCommand())
 	return envSelfCmd
 }
@@ -255,12 +270,18 @@ func envSelfSetCommand() *cobra.Command {
 			if err != nil {
 				exitOnError(err)
 			}
+			if env.SecretBinding == "" {
+				secretBinding, err := input.GetVisibleInput("Enter the secret binding: ")
+				if err != nil {
+					exitOnError(err)
+				}
+				env.SecretBinding = secretBinding
+			}
 			if err = env.MarkAsSelf(); err != nil {
 				exitOnError(err)
 			}
-			env.SecretBinding = ""
-			showEnv(*env, true)
-			fmt.Println(color.GreenString("Successfully registered as self environment"))
+			showEnv(*env, true, true)
+			fmt.Println(color.GreenString("Successfully registered self environment"))
 		},
 	}
 	envSelfSetCmd.Flags().StringP(envDefFlag.name, envDefFlag.shorthand, "", envDefFlag.usage)

@@ -44,7 +44,7 @@ func GetGitHTTPUsername() string {
 		gitHTTPUser = new(string)
 		*gitHTTPUser = os.Getenv(envar_SLV_GIT_HTTP_USER)
 		if *gitHTTPUser == "" {
-			*gitHTTPUser, _ = input.VisibleInput("Enter the git username       : ")
+			*gitHTTPUser, _ = input.GetVisibleInput("Enter the git username       : ")
 		}
 	}
 	return *gitHTTPUser
@@ -57,7 +57,7 @@ func GetGitHTTPToken() string {
 		if *gitHTTPToken == "" {
 			*gitHTTPToken = os.Getenv(envar_SLV_GIT_HTTP_PASS)
 			if *gitHTTPToken == "" {
-				token, _ := input.HiddenInput("Enter the git token/password : ")
+				token, _ := input.GetHiddenInput("Enter the git token/password : ")
 				if token != nil {
 					*gitHTTPToken = string(token)
 				}

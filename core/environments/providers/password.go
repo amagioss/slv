@@ -41,7 +41,7 @@ func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error
 	var password []byte
 	passwordStr := config.GetEnvSecretPassword()
 	if passwordStr == "" {
-		if input.IsAllowed() == nil {
+		if input.IsInteractive() == nil {
 			if password, err = input.GetPasswordFromUser(false, nil); err != nil {
 				return nil, err
 			}
