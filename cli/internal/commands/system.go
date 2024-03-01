@@ -45,7 +45,7 @@ func systemResetCommand() *cobra.Command {
 					showEnv(*selfEnv, true, true)
 				}
 				var err error
-				if confirm, err = input.GetConfirmation("Are you sure you want to proceed? (y/n): ", "y"); err != nil {
+				if confirm, err = input.GetConfirmation("Are you sure you wish to proceed? (yes/no): ", "yes"); err != nil {
 					exitOnError(err)
 				}
 			}

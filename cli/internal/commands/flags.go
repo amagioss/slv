@@ -74,6 +74,11 @@ var (
 		usage:     "Searches query to filter environments",
 	}
 
+	envSelfFlag = FlagDef{
+		name:  "self",
+		usage: "Shares with the environment configured environment as self",
+	}
+
 	envDefFlag = FlagDef{
 		name:      "env-def",
 		shorthand: "e",
