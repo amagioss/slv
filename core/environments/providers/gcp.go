@@ -10,24 +10,24 @@ import (
 	"savesecrets.org/slv/core/environments"
 )
 
-func isValidGCPResourcePath(resourcePath string, symmetricAlgo bool) bool {
+func isValidGCPResourceName(resourcePath string, symmetricAlgo bool) bool {
 	return strings.HasPrefix(resourcePath, "projects/") && strings.Contains(resourcePath, "locations/") &&
 		strings.Contains(resourcePath, "keyRings/") && strings.Contains(resourcePath, "cryptoKeys/") &&
 		(symmetricAlgo != strings.Contains(resourcePath, "cryptoKeyVersions/"))
 }
 
 func bindWithGCP(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error) {
-	if resourceName := string(inputs[gcpResourceNameRef]); isValidGCPResourcePath(resourceName, true) {
+	rsaPublicKey, ok := inputs[rsaPubKeyRefName]
+	symmetricAlgo := !ok || len(rsaPublicKey) == 0
+	if resourceName := string(inputs[gcpResourceNameRef]); isValidGCPResourceName(resourceName, symmetricAlgo) {
 		var secretKey *crypto.SecretKey
 		if secretKey, err = crypto.NewSecretKey(environments.EnvironmentKey); err != nil {
 			return nil, nil, err
 		}
 		var sealedSecretKeyBytes []byte
-		rsaPublicKey, ok := inputs[rsaPubKeyRefName]
 		ref = make(map[string][]byte)
 		ref[gcpResourceNameRef] = []byte(resourceName)
-		symmetricAlgo := false
-		if !ok || len(rsaPublicKey) == 0 {
+		if symmetricAlgo {
 			ctx := context.Background()
 			client, err := kms.NewKeyManagementClient(ctx)
 			if err != nil {
@@ -68,7 +68,7 @@ func unBindWithGCP(ref map[string][]byte) (secretKeyBytes []byte, err error) {
 	}
 	symmetricAlgo := ref[gcpSymmAlgoRef][0] == 1
 	resourceName := string(ref[gcpResourceNameRef])
-	if !isValidGCPResourcePath(resourceName, symmetricAlgo) {
+	if !isValidGCPResourceName(resourceName, symmetricAlgo) {
 		return nil, errInvalidGCPKMSResourceName
 	}
 	sealedSecretKeyBytes := ref["ssk"]
