@@ -49,6 +49,8 @@ func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error
 		if password == nil {
 			return nil, errPasswordNotSet
 		}
+	} else {
+		password = []byte(passwordStr)
 	}
 	xipherKey, err := xipher.NewPrivateKeyForPassword([]byte(password))
 	if err != nil {
