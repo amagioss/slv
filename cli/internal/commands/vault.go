@@ -85,22 +85,21 @@ func vaultInfoCommand() *cobra.Command {
 			if err != nil {
 				exitOnError(err)
 			}
-			profile, err := profiles.GetDefaultProfile()
-			if err != nil {
-				exitOnError(err)
-			}
+			profile, _ := profiles.GetDefaultProfile()
 			envMap := make(map[string]string, len(accessors))
 			for _, accessor := range accessors {
 				var env *environments.Environment
 				envId := accessor.String()
-				env, err := profile.GetEnv(envId)
-				if err != nil {
-					exitOnError(err)
+				if profile != nil {
+					env, err = profile.GetEnv(envId)
+					if err != nil {
+						exitOnError(err)
+					}
 				}
 				if env != nil {
-					envMap[envId] = env.Name
+					envMap[envId] = envId + "\t(" + env.Name + ")"
 				} else {
-					envMap[envId] = ""
+					envMap[envId] = envId
 				}
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
@@ -115,12 +114,8 @@ func vaultInfoCommand() *cobra.Command {
 				}
 			}
 			fmt.Fprintln(w, "Accessible by:")
-			for envId, envName := range envMap {
-				if envName == "" {
-					fmt.Fprintln(w, "  -", envId)
-				} else {
-					fmt.Fprintln(w, "  -", envId, "\t(", envName, ")")
-				}
+			for _, envDesc := range envMap {
+				fmt.Fprintln(w, "  -", envDesc)
 			}
 			w.Flush()
 			safeExit()

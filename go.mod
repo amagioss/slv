@@ -3,7 +3,7 @@ module savesecrets.org/slv
 go 1.21
 
 require (
-	dev.shib.me/xipher v0.9.0
+	dev.shib.me/xipher v0.9.1
 	github.com/aws/aws-sdk-go v1.50.29
 	github.com/fatih/color v1.16.0
 	github.com/go-git/go-git/v5 v5.11.0
