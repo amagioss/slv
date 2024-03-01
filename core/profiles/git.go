@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
+	gitconfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -76,10 +77,20 @@ func (profile *Profile) gitCommit(msg string) error {
 	if _, err = worktree.Add("."); err != nil {
 		return err
 	}
+	signature := &object.Signature{
+		When: time.Now(),
+	}
+	cfg, err := gitconfig.LoadConfig(gitconfig.GlobalScope)
+	if err == nil {
+		if userEmail := cfg.User.Email; userEmail != "" {
+			signature.Email = userEmail
+		}
+		if userName := cfg.User.Name; userName != "" {
+			signature.Name = userName
+		}
+	}
 	_, err = worktree.Commit(msg, &git.CommitOptions{
-		Author: &object.Signature{
-			When: time.Now(),
-		},
+		Author: signature,
 	})
 	return err
 }

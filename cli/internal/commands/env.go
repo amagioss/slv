@@ -47,7 +47,8 @@ func showEnv(env environments.Environment, includeEDS, excludeBindingFromEds boo
 			env.SecretBinding = ""
 		}
 		if envDef, err := env.ToEnvDef(); err == nil {
-			fmt.Fprintln(w, "\nEnv Definition:\t", color.CyanString(envDef))
+			fmt.Fprintln(w, "------------------------------------------------------------")
+			fmt.Fprintln(w, "Env Definition:\t", color.CyanString(envDef))
 		}
 		env.SecretBinding = secretBinding
 	}
@@ -133,7 +134,8 @@ func envNewUserCommand() *cobra.Command {
 			selfEnv := environments.GetSelf()
 			if selfEnv != nil {
 				showEnv(*selfEnv, true, true)
-				confirmed, err := input.GetConfirmation("You are already registered as an environment, this will replace the existing environment. Proceed? (y/n): ", "y")
+				confirmed, err := input.GetConfirmation("You are already registered as an environment, "+
+					"this will replace the existing environment. Proceed? (yes/no): ", "yes")
 				if err != nil {
 					exitOnError(err)
 				}
