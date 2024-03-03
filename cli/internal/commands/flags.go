@@ -63,13 +63,12 @@ var (
 	}
 
 	envAddFlag = FlagDef{
-		name:      "add",
-		shorthand: "a",
-		usage:     "Adds environment to default profile",
+		name:  "add",
+		usage: "Adds environment to default profile",
 	}
 
 	envSearchFlag = FlagDef{
-		name:      "search-env",
+		name:      "search",
 		shorthand: "s",
 		usage:     "Searches query to filter environments",
 	}
@@ -105,20 +104,20 @@ var (
 	// Vault Command Flags
 
 	vaultFileFlag = FlagDef{
-		name:      "vault-file",
+		name:      "vault",
 		shorthand: "v",
-		usage:     "Path to the vault file [Must end with .slv.yml or .slv.yaml]",
+		usage:     "Path to the vault file [Should end with .slv.yml or .slv.yaml]",
 	}
 
 	vaultAccessPublicKeysFlag = FlagDef{
-		name:      "public-keys",
+		name:      "pubkey",
 		shorthand: "k",
-		usage:     "Public keys of environments or groups that can access the vault",
+		usage:     "Public keys of environments that can access the vault",
 	}
 
 	vaultEnableHashingFlag = FlagDef{
-		name:  "enable-hash",
-		usage: "Preserve a partial secret hash for the purpose of validating secret rotation [Not recommended, though it might be resilient from brute-forcing]",
+		name:  "hash",
+		usage: "Enables hashing by preserving a partial hash of the actual secret for the purpose of validating secret rotation [Not recommended, though it might be difficult to brute-force]",
 	}
 
 	vaultK8sFlag = FlagDef{
@@ -135,9 +134,8 @@ var (
 	}
 
 	secretValueFlag = FlagDef{
-		name:      "secret",
-		shorthand: "s",
-		usage:     "Secret to be added to the vault",
+		name:  "secret",
+		usage: "Secret to be added to the vault",
 	}
 
 	secretForceUpdateFlag = FlagDef{
@@ -147,7 +145,7 @@ var (
 
 	secretListFormatFlag = FlagDef{
 		name:  "format",
-		usage: "List secrets as one of [json, yaml, table, envars]. Defaults to table.",
+		usage: "List secrets as one of [json, yaml, table, envar]. Defaults to envar",
 	}
 
 	secretEncodeBase64Flag = FlagDef{
@@ -156,20 +154,17 @@ var (
 	}
 
 	secretRefFileFlag = FlagDef{
-		name:      "file",
-		shorthand: "f",
-		usage:     "Path to the YAML/JSON file",
+		name:  "ref-file",
+		usage: "Path to the YAML/JSON file to be referenced",
 	}
 
 	secretRefTypeFlag = FlagDef{
-		name:      "type",
-		shorthand: "t",
-		usage:     "Data format to be considered for the file to be referenced",
+		name:  "ref-format",
+		usage: "Data serialization format of the referenced file",
 	}
 
 	secretRefPreviewOnlyFlag = FlagDef{
-		name:      "preview",
-		shorthand: "p",
-		usage:     "Preview only mode",
+		name:  "preview",
+		usage: "Preview only mode",
 	}
 )

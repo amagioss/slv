@@ -26,9 +26,9 @@ import (
 )
 
 const (
-	Group   = "slv.savesecrets.org"
-	Version = "v1"
-	Kind    = config.AppNameUpperCase
+	Group   = config.K8SLVGroup
+	Version = config.K8SLVVersion
+	Kind    = config.K8SLVKind
 )
 
 var (

@@ -34,16 +34,16 @@ var (
 	envSelfSetCmd    *cobra.Command
 
 	// Vault Commands
-	vaultCmd      *cobra.Command
-	vaultInfoCmd  *cobra.Command
-	vaultNewCmd   *cobra.Command
-	vaultShareCmd *cobra.Command
+	vaultCmd       *cobra.Command
+	vaultNewCmd    *cobra.Command
+	vaultShareCmd  *cobra.Command
+	vaultInfoCmd   *cobra.Command
+	vaultPutCmd    *cobra.Command
+	vaultGetCmd    *cobra.Command
+	vaultExportCmd *cobra.Command
+	vaultRefCmd    *cobra.Command
+	vaultDerefCmd  *cobra.Command
 
 	// Secret Commands
-	secretCmd       *cobra.Command
-	secretPutCmd    *cobra.Command
-	secretGetCmd    *cobra.Command
-	secretExportCmd *cobra.Command
-	secretRefCmd    *cobra.Command
-	secretDerefCmd  *cobra.Command
+	// secretCmd *cobra.Command
 )

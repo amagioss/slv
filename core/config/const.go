@@ -21,6 +21,11 @@ const (
 	 ___) | |__\ V /  
 	|____/|_____\_/   
 	`
+
+	K8SLVGroup      = "slv.savesecrets.org"
+	K8SLVVersion    = "v1"
+	K8SLVKind       = AppNameUpperCase
+	K8SLVVaultField = "spec"
 )
 
 var (

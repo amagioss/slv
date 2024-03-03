@@ -13,6 +13,8 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef) *cobra
 	newKMSEnvCmd := &cobra.Command{
 		Use:   kmsName,
 		Short: kmsProviderDesc,
+		Long: kmsProviderDesc +
+			" - Uses RSA 4096 key with SHA-256 hashing in case of asymmetric binding. Create a KMS key accordingly.",
 		Run: func(cmd *cobra.Command, args []string) {
 			envName, _ := cmd.Flags().GetString(envNameFlag.name)
 			envEmail, _ := cmd.Flags().GetString(envEmailFlag.name)
