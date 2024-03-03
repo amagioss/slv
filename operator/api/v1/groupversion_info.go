@@ -21,12 +21,14 @@ package v1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"savesecrets.org/slv/core/config"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
 const (
 	Group   = "slv.savesecrets.org"
 	Version = "v1"
+	Kind    = config.AppNameUpperCase
 )
 
 var (

@@ -60,7 +60,7 @@ func (policy *PasswordPolicy) Validate(password string) error {
 	return nil
 }
 
-func GetPasswordFromUser(confirm bool, policy *PasswordPolicy) ([]byte, error) {
+func NewPasswordFromUser(policy *PasswordPolicy) ([]byte, error) {
 	password, err := GetHiddenInput("Enter a Password: ")
 	if err != nil {
 		return nil, err
@@ -70,12 +70,10 @@ func GetPasswordFromUser(confirm bool, policy *PasswordPolicy) ([]byte, error) {
 			return nil, err
 		}
 	}
-	if confirm {
-		if confirmPassword, err := GetHiddenInput("Confirm Password: "); err != nil {
-			return nil, err
-		} else if !bytes.Equal(password, confirmPassword) {
-			return nil, fmt.Errorf("passwords do not match")
-		}
+	if confirmPassword, err := GetHiddenInput("Confirm Password: "); err != nil {
+		return nil, err
+	} else if !bytes.Equal(password, confirmPassword) {
+		return nil, fmt.Errorf("passwords do not match")
 	}
 	return password, nil
 }

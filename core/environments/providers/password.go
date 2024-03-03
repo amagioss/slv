@@ -42,7 +42,7 @@ func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error
 	passwordStr := config.GetEnvSecretPassword()
 	if passwordStr == "" {
 		if input.IsInteractive() == nil {
-			if password, err = input.GetPasswordFromUser(false, nil); err != nil {
+			if password, err = input.GetHiddenInput("Enter Password: "); err != nil {
 				return nil, err
 			}
 		}

@@ -131,8 +131,8 @@ func getPublicKeys(pubKeyStrSlice []string, query string, self bool) (publicKeys
 	rootPublicKey *crypto.PublicKey, err error) {
 	if len(pubKeyStrSlice) == 0 && query == "" && !self {
 		return nil, nil, fmt.Errorf("Specify atleast one of the following flags:\n" +
-			" --" + envSearchFlag.name +
-			" --" + vaultAccessPublicKeysFlag.name +
+			" --" + envSearchFlag.name + "\n" +
+			" --" + vaultAccessPublicKeysFlag.name + "\n" +
 			" --" + envSelfFlag.name)
 	}
 	for _, pubKeyStr := range pubKeyStrSlice {
@@ -195,7 +195,7 @@ func vaultNewCommand() *cobra.Command {
 				exitOnError(err)
 			}
 			query := cmd.Flag(envSearchFlag.name).Value.String()
-			envSelfFlag, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.name)
+			envSelfFlag, _ := cmd.Flags().GetBool(envSelfFlag.name)
 			publicKeys, rootPublicKey, err := getPublicKeys(publicKeyStrings, query, envSelfFlag)
 			if err != nil {
 				exitOnError(err)
@@ -246,7 +246,7 @@ func vaultShareCommand() *cobra.Command {
 				exitOnError(err)
 			}
 			query := cmd.Flag(envSearchFlag.name).Value.String()
-			envSelfFlag, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.name)
+			envSelfFlag, _ := cmd.Flags().GetBool(envSelfFlag.name)
 			publicKeys, _, err := getPublicKeys(publicKeyStrings, query, envSelfFlag)
 			if err != nil {
 				exitOnError(err)

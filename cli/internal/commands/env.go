@@ -27,7 +27,7 @@ func envCommand() *cobra.Command {
 		},
 	}
 	envCmd.AddCommand(envNewCommand())
-	envCmd.AddCommand(envListCommand())
+	envCmd.AddCommand(envListSearchCommand())
 	envCmd.AddCommand(envSelfCommand())
 	return envCmd
 }
@@ -127,8 +127,8 @@ func envNewUserCommand() *cobra.Command {
 		return envNewUserCmd
 	}
 	envNewUserCmd = &cobra.Command{
-		Use:     "user",
-		Aliases: []string{"usr", "u"},
+		Use:     "self",
+		Aliases: []string{"user", "usr", "u"},
 		Short:   "Register as a new user environment",
 		Run: func(cmd *cobra.Command, args []string) {
 			selfEnv := environments.GetSelf()
@@ -151,7 +151,7 @@ func envNewUserCommand() *cobra.Command {
 				exitOnError(err)
 			}
 			inputs := make(map[string][]byte)
-			password, err := input.GetPasswordFromUser(true, input.DefaultPasswordPolicy())
+			password, err := input.NewPasswordFromUser(input.DefaultPasswordPolicy())
 			if err != nil {
 				exitOnError(err)
 			}
@@ -195,13 +195,14 @@ func envNewUserCommand() *cobra.Command {
 	return envNewUserCmd
 }
 
-func envListCommand() *cobra.Command {
-	if envListCmd != nil {
-		return envListCmd
+func envListSearchCommand() *cobra.Command {
+	if envListSearchCmd != nil {
+		return envListSearchCmd
 	}
-	envListCmd = &cobra.Command{
-		Use:   "list",
-		Short: "Lists environments from profile",
+	envListSearchCmd = &cobra.Command{
+		Use:     "list",
+		Aliases: []string{"ls", "search", "find"},
+		Short:   "List/Search environments from profile",
 		Run: func(cmd *cobra.Command, args []string) {
 			profileName := cmd.Flag(profileNameFlag.name).Value.String()
 			var profile *profiles.Profile
@@ -231,9 +232,9 @@ func envListCommand() *cobra.Command {
 			safeExit()
 		},
 	}
-	envListCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
-	envListCmd.Flags().StringP(envSearchFlag.name, envSearchFlag.shorthand, "", envSearchFlag.usage)
-	return envListCmd
+	envListSearchCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
+	envListSearchCmd.Flags().StringP(envSearchFlag.name, envSearchFlag.shorthand, "", envSearchFlag.usage)
+	return envListSearchCmd
 }
 
 func envSelfCommand() *cobra.Command {
@@ -242,8 +243,8 @@ func envSelfCommand() *cobra.Command {
 	}
 	envSelfCmd = &cobra.Command{
 		Use:     "self",
-		Aliases: []string{"me", "my", "current"},
-		Short:   "Shows the current environment if registered",
+		Aliases: []string{"user", "me", "my", "current"},
+		Short:   "Shows the current user environment if registered",
 		Run: func(cmd *cobra.Command, args []string) {
 			env := environments.GetSelf()
 			if env == nil {
@@ -271,6 +272,9 @@ func envSelfSetCommand() *cobra.Command {
 			env, err := environments.FromEnvDef(envDef)
 			if err != nil {
 				exitOnError(err)
+			}
+			if env.EnvType != environments.USER {
+				exitOnError(fmt.Errorf("only user environments can be registered as self"))
 			}
 			if env.SecretBinding == "" {
 				secretBinding, err := input.GetVisibleInput("Enter the secret binding: ")

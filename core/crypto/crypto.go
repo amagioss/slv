@@ -35,17 +35,17 @@ func hash(data []byte, length uint8) []byte {
 	return argon2.IDKey(data, nil, 16, 64, 1, uint32(length))
 }
 
-func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength *uint8) (sealedSecret *SealedSecret, err error) {
+func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength uint8) (sealedSecret *SealedSecret, err error) {
 	ciphered, err := publicKey.encrypt(secret)
 	if err == nil {
 		sealedSecret = &SealedSecret{
 			ciphered: ciphered,
 		}
-		if hashLength != nil && *hashLength > 0 {
-			if *hashLength > hashMaxLength {
-				*hashLength = hashMaxLength
+		if hashLength > 0 {
+			if hashLength > hashMaxLength {
+				hashLength = hashMaxLength
 			}
-			hash := hash(secret, *hashLength)
+			hash := hash(secret, hashLength)
 			sealedSecret.hash = &hash
 		}
 	}

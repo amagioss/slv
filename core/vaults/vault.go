@@ -12,7 +12,7 @@ import (
 
 type vaultConfig struct {
 	PublicKey   string   `json:"publicKey" yaml:"publicKey"`
-	HashLength  *uint8   `json:"hashLength,omitempty" yaml:"hashLength,omitempty"`
+	HashLength  uint8    `json:"hashLength,omitempty" yaml:"hashLength,omitempty"`
 	WrappedKeys []string `json:"wrappedKeys" yaml:"wrappedKeys"`
 }
 
@@ -70,15 +70,11 @@ func New(filePath, objectField string, hashLength uint8, rootPublicKey *crypto.P
 	if err != nil {
 		return nil, err
 	}
-	var hashLen *uint8
-	if hashLength > 0 {
-		hashLen = &hashLength
-	}
 	vlt = &Vault{
 		publicKey: vaultPublicKey,
 		Config: vaultConfig{
 			PublicKey:  vaultPublicKey.String(),
-			HashLength: hashLen,
+			HashLength: hashLength,
 		},
 		path:        filePath,
 		secretKey:   vaultSecretKey,

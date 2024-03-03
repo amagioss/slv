@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"flag"
 	"os"
+	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -34,6 +35,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
+	"savesecrets.org/slv"
 	slvv1 "savesecrets.org/slv/operator/api/v1"
 	"savesecrets.org/slv/operator/internal/controller"
 	"savesecrets.org/slv/operator/slvenv"
@@ -74,6 +76,9 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	setupLog.Info("initializing SLV operator...")
+	setupLog.Info(slv.VersionInfo())
 
 	err := slvenv.InitSLVSecretKey()
 	if err != nil {
@@ -133,12 +138,12 @@ func main() {
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "SLV")
+		setupLog.Error(err, "unable to create controller", "controller", slvv1.Kind)
 		os.Exit(1)
 	}
-	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) == "true" {
 		if err = (&slvv1.SLV{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "SLV")
+			setupLog.Error(err, "unable to create webhook", "webhook", slvv1.Kind)
 			os.Exit(1)
 		}
 	}

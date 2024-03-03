@@ -1,7 +1,10 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv"
 )
 
 func SlvCommand() *cobra.Command {
@@ -14,7 +17,7 @@ func SlvCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			version, _ := cmd.Flags().GetBool(versionFlag.name)
 			if version {
-				showVersionInfo()
+				fmt.Println(slv.VersionInfo())
 			} else {
 				cmd.Help()
 			}

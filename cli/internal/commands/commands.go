@@ -29,7 +29,7 @@ var (
 	envNewServiceCmd *cobra.Command
 	envNewUserCmd    *cobra.Command
 	envAddCmd        *cobra.Command
-	envListCmd       *cobra.Command
+	envListSearchCmd *cobra.Command
 	envSelfCmd       *cobra.Command
 	envSelfSetCmd    *cobra.Command
 

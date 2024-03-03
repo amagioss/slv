@@ -4,6 +4,7 @@ import (
 	"savesecrets.org/slv/core/config"
 	"savesecrets.org/slv/core/crypto"
 	"savesecrets.org/slv/core/environments"
+	"savesecrets.org/slv/core/environments/providers"
 )
 
 func GetSecretKey() (*crypto.SecretKey, error) {
@@ -30,6 +31,7 @@ func GetSecretKey() (*crypto.SecretKey, error) {
 		}
 	}
 	if envSecretBindingStr != "" {
+		providers.LoadDefaultProviders()
 		secretKey, err = environments.GetSecretKeyFromSecretBinding(envSecretBindingStr)
 	}
 	if secretKey == nil && err == nil {

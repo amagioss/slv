@@ -40,6 +40,14 @@ func (r *SLV) SetupWebhookWithManager(mgr ctrl.Manager) error {
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 //+kubebuilder:webhook:path=/validate-slv-savesecrets-com-v1-slv,mutating=false,failurePolicy=fail,sideEffects=None,groups=slv.savesecrets.org,resources=slvs,verbs=create;update,versions=v1,name=vslv.kb.io,admissionReviewVersions=v1
 
+var _ webhook.Defaulter = &SLV{}
+
+// Default implements webhook.Defaulter so a webhook will be registered for the type
+func (r *SLV) Default() {
+	slvlog.Info("default", "name", r.Name)
+	// Set SLV default values - not required for now
+}
+
 var _ webhook.Validator = &SLV{}
 
 func (r *SLV) ValidateSLV() error {

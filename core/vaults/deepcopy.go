@@ -19,9 +19,8 @@ func (v *Vault) DeepCopyInto(out *Vault) {
 	if v.Config.PublicKey != "" {
 		out.Config.PublicKey = v.Config.PublicKey
 	}
-	if v.Config.HashLength != nil {
-		var hashLen uint8 = *v.Config.HashLength
-		out.Config.HashLength = &hashLen
+	if v.Config.HashLength != 0 {
+		out.Config.HashLength = v.Config.HashLength
 	}
 	out.Config.WrappedKeys = make([]string, len(v.Config.WrappedKeys))
 	copy(out.Config.WrappedKeys, v.Config.WrappedKeys)
