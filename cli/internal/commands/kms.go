@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"savesecrets.org/slv/core/environments"
+	"savesecrets.org/slv/core/environments/providers"
 	"savesecrets.org/slv/core/profiles"
 )
 
@@ -30,7 +31,7 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag FlagDef) *cobra
 					inputs[kmsRSAPublicKey.name] = rsaPublicKey
 				}
 			}
-			env, err = environments.NewEnvForProvider(kmsName, envName, environments.SERVICE, inputs)
+			env, err = providers.NewEnvForProvider(kmsName, envName, environments.SERVICE, inputs)
 			if err != nil {
 				exitOnError(err)
 			}

@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"savesecrets.org/slv/core/crypto"
 	"savesecrets.org/slv/core/environments"
+	"savesecrets.org/slv/core/environments/providers"
 	"savesecrets.org/slv/core/input"
 	"savesecrets.org/slv/core/profiles"
 )
@@ -157,7 +158,7 @@ func envNewUserCommand() *cobra.Command {
 			}
 			inputs["password"] = password
 			var env *environments.Environment
-			env, err = environments.NewEnvForProvider("password", envName, environments.USER, inputs)
+			env, err = providers.NewEnvForProvider("password", envName, environments.USER, inputs)
 			if err != nil {
 				exitOnError(err)
 			}

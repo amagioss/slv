@@ -31,8 +31,7 @@ func GetSecretKey() (*crypto.SecretKey, error) {
 		}
 	}
 	if envSecretBindingStr != "" {
-		providers.LoadDefaultProviders()
-		secretKey, err = environments.GetSecretKeyFromSecretBinding(envSecretBindingStr)
+		secretKey, err = providers.GetSecretKeyFromSecretBinding(envSecretBindingStr)
 	}
 	if secretKey == nil && err == nil {
 		err = errEnvironmentAccessNotFound

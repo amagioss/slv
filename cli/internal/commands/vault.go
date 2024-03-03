@@ -178,7 +178,7 @@ func getPublicKeys(pubKeyStrSlice []string, query string, self bool) (publicKeys
 			return nil, nil, err
 		}
 	}
-	return
+	return publicKeys, rootPublicKey, nil
 }
 
 func vaultNewCommand() *cobra.Command {

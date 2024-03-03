@@ -2,9 +2,14 @@ package providers
 
 import (
 	"errors"
+
+	"savesecrets.org/slv/core/config"
 )
 
 const (
+	envSecretBindingAbbrev = "ESB" // Environment Secret Binding
+	slvPrefix              = config.AppNameUpperCase
+
 	// Password Provider Constants
 	passwordProviderName = "password"
 
@@ -25,6 +30,12 @@ const (
 
 var (
 	defaultProvidersRegistered = false
+
+	// Provider Base Errors
+	errProviderUnknown               = errors.New("unknown provider")
+	errInvalidEnvSecretBindingFormat = errors.New("invalid environment secret binding format")
+	errEnvSecretBindingUnspecified   = errors.New("environment secret binding unspecified")
+	errProviderRegisteredAlready     = errors.New("env secret provider registered already")
 
 	// KMS Provider Errors
 	errInvalidRSAPublicKey = errors.New("invalid RSA public key")

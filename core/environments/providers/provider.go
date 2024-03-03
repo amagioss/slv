@@ -1,4 +1,4 @@
-package environments
+package providers
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 
 	"savesecrets.org/slv/core/commons"
 	"savesecrets.org/slv/core/crypto"
+	"savesecrets.org/slv/core/environments"
 )
 
 type Bind func(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error)
@@ -45,21 +46,27 @@ func envSecretBindingFromString(envSecretBindingStr string) (*envSecretBinding, 
 	return binding, nil
 }
 
-func RegisterEnvSecretProvider(name string, bind Bind, unbind UnBind, refRequired bool) error {
-	if _, ok := providerMap[name]; ok {
-		return errProviderRegisteredAlready
-	}
+func registerProvider(name string, bind Bind, unbind UnBind, refRequired bool) {
 	providerMap[name] = &provider{
 		Name:        name,
 		bind:        &bind,
 		unbind:      &unbind,
 		refRequired: refRequired,
 	}
+}
+
+func RegisterEnvSecretProvider(name string, bind Bind, unbind UnBind, refRequired bool) error {
+	loadDefaultProviders()
+	if _, ok := providerMap[name]; ok {
+		return errProviderRegisteredAlready
+	}
+	registerProvider(name, bind, unbind, refRequired)
 	return nil
 }
 
-func NewEnvForProvider(providerName, envName string, envType EnvType,
-	inputs map[string][]byte) (*Environment, error) {
+func NewEnvForProvider(providerName, envName string, envType environments.EnvType,
+	inputs map[string][]byte) (*environments.Environment, error) {
+	loadDefaultProviders()
 	provider, ok := providerMap[providerName]
 	if !ok {
 		return nil, errProviderUnknown
@@ -68,7 +75,7 @@ func NewEnvForProvider(providerName, envName string, envType EnvType,
 	if err != nil {
 		return nil, err
 	}
-	env, err := NewEnvironmentForPublicKey(envName, envType, publicKey)
+	env, err := environments.NewEnvironmentForPublicKey(envName, envType, publicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +93,7 @@ func NewEnvForProvider(providerName, envName string, envType EnvType,
 }
 
 func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypto.SecretKey, err error) {
+	loadDefaultProviders()
 	if envSecretBindingStr == "" {
 		var providersWithoutRef []provider
 		for _, provider := range providerMap {
