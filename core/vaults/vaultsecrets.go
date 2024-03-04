@@ -1,6 +1,9 @@
 package vaults
 
 import (
+	"fmt"
+
+	"gopkg.in/yaml.v3"
 	"savesecrets.org/slv/core/crypto"
 )
 
@@ -28,6 +31,26 @@ func (vlt *Vault) PutSecret(secretName string, secretValue []byte) (err error) {
 		err = vlt.commit()
 	}
 	return
+}
+
+func (vlt *Vault) ImportSecrets(importData []byte, force bool) (err error) {
+	secretsMap := make(map[string]string)
+	if err = yaml.Unmarshal(importData, &secretsMap); err != nil {
+		return errInvalidImportDataFormat
+	}
+	if !force {
+		for secretName := range secretsMap {
+			if vlt.SecretExists(secretName) {
+				return fmt.Errorf("secret %s already exists", secretName)
+			}
+		}
+	}
+	for secretName, secretValue := range secretsMap {
+		if err = vlt.putSecretWithoutCommit(secretName, []byte(secretValue)); err != nil {
+			return err
+		}
+	}
+	return vlt.commit()
 }
 
 func (vlt *Vault) SecretExists(secretName string) (exists bool) {

@@ -14,7 +14,7 @@ brew install savesecrets/tap/slv
 ```
 You can also use SLV with Docker by running the following command
 ```zsh
-docker run -it --rm -v $PWD:/data ghcr.io/savesecrets/slv:latest
+docker run -it --rm -v $PWD:/workspace ghcr.io/savesecrets/slv:latest version
 ```
 
 ## Usage

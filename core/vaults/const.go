@@ -33,4 +33,5 @@ var (
 	errVaultSecretNotFound          = errors.New("no secret found for the given name")
 	errVaultPublicKeyNotFound       = errors.New("vault public key not found")
 	errInvalidReferenceFormat       = errors.New("invalid reference format. references must follow the pattern {{SLV_VSR_VAULTID.secretName}} to allow dereferencing")
+	errInvalidImportDataFormat      = errors.New("invalid import data format - expected a map of string to string [secretName: secretValue] in YAML/JSON format")
 )

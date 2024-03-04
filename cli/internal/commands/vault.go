@@ -70,6 +70,7 @@ func vaultCommand() *cobra.Command {
 	vaultCmd.AddCommand(vaultShareCommand())
 	vaultCmd.AddCommand(vaultInfoCommand())
 	vaultCmd.AddCommand(vaultPutCommand())
+	vaultCmd.AddCommand(vaultImportCommand())
 	vaultCmd.AddCommand(vaultGetCommand())
 	vaultCmd.AddCommand(vaultExportCommand())
 	vaultCmd.AddCommand(vaultRefCommand())
@@ -344,6 +345,43 @@ func vaultPutCommand() *cobra.Command {
 	return vaultPutCmd
 }
 
+func vaultImportCommand() *cobra.Command {
+	if vaultImportCmd != nil {
+		return vaultImportCmd
+	}
+	vaultImportCmd = &cobra.Command{
+		Use:     "import",
+		Aliases: []string{"load", "put-all", "add-all", "set-all", "create-all"},
+		Short:   "Imports secrets into the vault from YAML or JSON",
+		Run: func(cmd *cobra.Command, args []string) {
+			vaultFile := cmd.Flag(vaultFileFlag.name).Value.String()
+			vault, err := getVault(vaultFile)
+			if err != nil {
+				exitOnError(err)
+			}
+			forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.name)
+			importFile := cmd.Flag(vaultImportFileFlag.name).Value.String()
+			var importData []byte
+			if importFile == "" {
+				importData, err = input.GetHiddenInput("Enter the YAML/JSON data to be imported: ")
+			} else {
+				importData, err = os.ReadFile(importFile)
+			}
+			if err != nil {
+				exitOnError(err)
+			}
+			if err = vault.ImportSecrets(importData, forceUpdate); err != nil {
+				exitOnError(err)
+			}
+			fmt.Printf("Successfully imported secrets from %s into the vault %s\n", color.GreenString(importFile), color.GreenString(vaultFile))
+			safeExit()
+		},
+	}
+	vaultImportCmd.Flags().StringP(vaultImportFileFlag.name, vaultImportFileFlag.shorthand, "", vaultImportFileFlag.usage)
+	vaultImportCmd.Flags().Bool(secretForceUpdateFlag.name, false, secretForceUpdateFlag.usage)
+	return vaultImportCmd
+}
+
 func vaultGetCommand() *cobra.Command {
 	if vaultGetCmd != nil {
 		return vaultGetCmd
@@ -421,17 +459,11 @@ func vaultExportCommand() *cobra.Command {
 					secretOutputMap[name] = string(secret)
 				}
 			}
-			exportFormat := cmd.Flag(secretListFormatFlag.name).Value.String()
+			exportFormat := cmd.Flag(vaultExportFormatFlag.name).Value.String()
 			if exportFormat == "" {
-				exportFormat = "env"
+				exportFormat = "envar"
 			}
 			switch exportFormat {
-			case "table":
-				tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
-				for key, value := range secretOutputMap {
-					fmt.Fprintf(tw, "%s\t%s\n", key, value)
-				}
-				tw.Flush()
 			case "json":
 				jsonData, err := json.MarshalIndent(secretOutputMap, "", "  ")
 				if err != nil {
@@ -444,7 +476,7 @@ func vaultExportCommand() *cobra.Command {
 					exitOnError(err)
 				}
 				fmt.Println(string(yamlData))
-			case "envars", "envar", "env":
+			case "envars", "envar", ".env":
 				for key, value := range secretOutputMap {
 					value = strings.ReplaceAll(value, "\\", "\\\\")
 					value = strings.ReplaceAll(value, "\"", "\\\"")
@@ -456,7 +488,7 @@ func vaultExportCommand() *cobra.Command {
 			safeExit()
 		},
 	}
-	vaultExportCmd.Flags().StringP(secretListFormatFlag.name, secretListFormatFlag.shorthand, "", secretListFormatFlag.usage)
+	vaultExportCmd.Flags().StringP(vaultExportFormatFlag.name, vaultExportFormatFlag.shorthand, "", vaultExportFormatFlag.usage)
 	vaultExportCmd.Flags().BoolP(secretEncodeBase64Flag.name, secretEncodeBase64Flag.shorthand, false, secretEncodeBase64Flag.usage)
 	return vaultExportCmd
 }
@@ -475,13 +507,13 @@ func vaultRefCommand() *cobra.Command {
 			if err != nil {
 				exitOnError(err)
 			}
-			refFile := cmd.Flag(secretRefFileFlag.name).Value.String()
+			refFile := cmd.Flag(vaultRefFileFlag.name).Value.String()
 			secretNamePrefix := cmd.Flag(secretNameFlag.name).Value.String()
-			refType := strings.ToLower(cmd.Flag(secretRefTypeFlag.name).Value.String())
+			refType := strings.ToLower(cmd.Flag(vaultRefTypeFlag.name).Value.String())
 			previewOnly, _ := cmd.Flags().GetBool(secretRefPreviewOnlyFlag.name)
 			forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.name)
 			if secretNamePrefix == "" && refType == "" {
-				exitOnErrorWithMessage("please provide at least one of --" + secretNameFlag.name + " or --" + secretRefTypeFlag.name + " flag")
+				exitOnErrorWithMessage("please provide at least one of --" + secretNameFlag.name + " or --" + vaultRefTypeFlag.name + " flag")
 			}
 			if refType != "" && refType != "yaml" {
 				exitOnErrorWithMessage("only yaml auto reference is supported at the moment")
@@ -500,12 +532,12 @@ func vaultRefCommand() *cobra.Command {
 			safeExit()
 		},
 	}
-	vaultRefCmd.Flags().StringP(secretRefFileFlag.name, secretRefFileFlag.shorthand, "", secretRefFileFlag.usage)
+	vaultRefCmd.Flags().StringP(vaultRefFileFlag.name, vaultRefFileFlag.shorthand, "", vaultRefFileFlag.usage)
 	vaultRefCmd.Flags().StringP(secretNameFlag.name, secretNameFlag.shorthand, "", secretNameFlag.usage)
-	vaultRefCmd.Flags().StringP(secretRefTypeFlag.name, secretRefTypeFlag.shorthand, "", secretRefTypeFlag.usage)
+	vaultRefCmd.Flags().StringP(vaultRefTypeFlag.name, vaultRefTypeFlag.shorthand, "", vaultRefTypeFlag.usage)
 	vaultRefCmd.Flags().BoolP(secretRefPreviewOnlyFlag.name, secretRefPreviewOnlyFlag.shorthand, false, secretRefPreviewOnlyFlag.usage)
 	vaultRefCmd.Flags().BoolP(secretForceUpdateFlag.name, secretForceUpdateFlag.shorthand, false, secretForceUpdateFlag.usage)
-	vaultRefCmd.MarkFlagRequired(secretRefFileFlag.name)
+	vaultRefCmd.MarkFlagRequired(vaultRefFileFlag.name)
 	return vaultRefCmd
 }
 
@@ -525,13 +557,9 @@ func vaultDerefCommand() *cobra.Command {
 			if err != nil {
 				exitOnError(err)
 			}
-			files, err := cmd.Flags().GetStringSlice(secretRefFileFlag.name)
+			paths, err := cmd.Flags().GetStringSlice(vaultDerefPathFlag.name)
 			if err != nil {
 				exitOnError(err)
-			}
-			previewOnly := false
-			if len(vaultFiles) > 1 || len(files) > 1 {
-				previewOnly, _ = cmd.Flags().GetBool(secretRefPreviewOnlyFlag.name)
 			}
 			for _, vaultFile := range vaultFiles {
 				vault, err := getVault(vaultFile)
@@ -542,23 +570,18 @@ func vaultDerefCommand() *cobra.Command {
 				if err != nil {
 					exitOnError(err)
 				}
-				for _, file := range files {
-					result, err := vault.DeRefSecrets(file, previewOnly)
-					if err != nil {
+				for _, path := range paths {
+					if err = vault.DeRefSecrets(path); err != nil {
 						exitOnError(err)
 					}
-					if previewOnly {
-						fmt.Println(result)
-					} else {
-						fmt.Println("Dereferenced ", color.GreenString(file), "with the vault", color.GreenString(vaultFile))
-					}
+					fmt.Println("Dereferenced", color.GreenString(path), "with the vault", color.GreenString(vaultFile))
 				}
 			}
 			safeExit()
 		},
 	}
-	vaultDerefCmd.Flags().StringSliceP(secretRefFileFlag.name, secretRefFileFlag.shorthand, []string{}, secretRefFileFlag.usage)
-	vaultDerefCmd.Flags().BoolP(secretRefPreviewOnlyFlag.name, secretRefPreviewOnlyFlag.shorthand, false, secretRefPreviewOnlyFlag.usage)
-	vaultDerefCmd.MarkFlagRequired(secretRefFileFlag.name)
+	vaultDerefCmd.Flags().StringSliceP(vaultFileFlag.name, vaultFileFlag.shorthand, []string{}, vaultFileFlag.usage)
+	vaultDerefCmd.Flags().StringSliceP(vaultDerefPathFlag.name, vaultDerefPathFlag.shorthand, []string{}, vaultDerefPathFlag.usage)
+	vaultDerefCmd.MarkFlagRequired(vaultDerefPathFlag.name)
 	return vaultDerefCmd
 }

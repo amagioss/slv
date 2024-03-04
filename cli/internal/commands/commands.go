@@ -39,6 +39,7 @@ var (
 	vaultShareCmd  *cobra.Command
 	vaultInfoCmd   *cobra.Command
 	vaultPutCmd    *cobra.Command
+	vaultImportCmd *cobra.Command
 	vaultGetCmd    *cobra.Command
 	vaultExportCmd *cobra.Command
 	vaultRefCmd    *cobra.Command

@@ -2,6 +2,7 @@ package vaults
 
 import (
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -39,20 +40,25 @@ func (vlt *Vault) deRefSecretsFromContent(content string) ([]byte, error) {
 	return []byte(content), nil
 }
 
-func (vlt *Vault) DeRefSecrets(file string, previewOnly bool) (dereferncedBytes []byte, err error) {
+func (vlt *Vault) DeRefSecrets(path string) error {
 	if vlt.IsLocked() {
-		return nil, errVaultLocked
+		return errVaultLocked
 	}
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return nil, err
-	}
-	dereferncedBytes, err = vlt.deRefSecretsFromContent(string(data))
-	if err != nil {
-		return nil, err
-	}
-	if !previewOnly {
-		err = os.WriteFile(file, dereferncedBytes, 0644)
-	}
-	return
+	return filepath.WalkDir(path, func(currentPath string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		data, err := os.ReadFile(currentPath)
+		if err != nil {
+			return err
+		}
+		dereferncedBytes, err := vlt.deRefSecretsFromContent(string(data))
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(currentPath, dereferncedBytes, 0644)
+	})
 }

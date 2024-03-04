@@ -125,8 +125,6 @@ var (
 		usage: "Specify a name for the K8s SLV object if the vault is to be used in a K8s environment",
 	}
 
-	// Secret Command Flags
-
 	secretNameFlag = FlagDef{
 		name:      "name",
 		shorthand: "n",
@@ -138,14 +136,19 @@ var (
 		usage: "Secret to be added to the vault",
 	}
 
+	vaultImportFileFlag = FlagDef{
+		name:  "file",
+		usage: "Path to the YAML/JSON file to be imported",
+	}
+
 	secretForceUpdateFlag = FlagDef{
 		name:  "force",
 		usage: "Replaces the secret if it exists already",
 	}
 
-	secretListFormatFlag = FlagDef{
+	vaultExportFormatFlag = FlagDef{
 		name:  "format",
-		usage: "List secrets as one of [json, yaml, table, envar]. Defaults to envar",
+		usage: "List secrets as one of [json, yaml, envar]. Defaults to envar",
 	}
 
 	secretEncodeBase64Flag = FlagDef{
@@ -153,14 +156,19 @@ var (
 		usage: "Encode the returned secret as base64",
 	}
 
-	secretRefFileFlag = FlagDef{
-		name:  "ref-file",
+	vaultRefFileFlag = FlagDef{
+		name:  "file",
 		usage: "Path to the YAML/JSON file to be referenced",
 	}
 
-	secretRefTypeFlag = FlagDef{
-		name:  "ref-format",
+	vaultRefTypeFlag = FlagDef{
+		name:  "format",
 		usage: "Data serialization format of the referenced file",
+	}
+
+	vaultDerefPathFlag = FlagDef{
+		name:  "path",
+		usage: "Path to a file/directory to dereference secrets",
 	}
 
 	secretRefPreviewOnlyFlag = FlagDef{
