@@ -56,7 +56,7 @@ Created vault: test.slv.yaml
 
 #### Add secrets to the vault
 ```sh
-$ slv secret put -v test.slv.yaml -n db_password -s "super_secret_pwd"
+$ slv vault put -v test.slv.yaml -n db_password -s "super_secret_pwd"
 
 Added secret: db_password to vault: test.slv.yaml
 ```
@@ -65,7 +65,7 @@ Added secret: db_password to vault: test.slv.yaml
 Set the environment variable `SLV_ENV_SECRET_KEY` to the secret key generated in the previous step
 ```sh
 $ export SLV_ENV_SECRET_KEY=SLV_ESK_AEAEKAHBIONE3QIIWFXFRNJPE6A6AYL527QW4OF4HWWFDOE5E4XR5LO2WI
-$ slv secret get -v test.slv.yaml -n db_password
+$ slv vault get -v test.slv.yaml -n db_password
 
 super_secret_pwd
 ```

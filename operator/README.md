@@ -26,7 +26,7 @@ kubectl get secret pets -o jsonpath='{.data.supercat}' | base64 --decode
 ```
 - Add any secret using the following commands
 ```sh
-slv secret put -v pets.slv.yaml -n hi -s "Hello World"
+slv vault put -v pets.slv.yaml -n hi -s "Hello World"
 kubectl apply -f pets.slv.yaml
 ```
 - Try reading newly created secret from the cluster
