@@ -15,14 +15,12 @@ func (v *Vault) DeepCopyInto(out *Vault) {
 	for key, val := range v.Secrets {
 		out.Secrets[key] = val
 	}
-	out.Config = vaultConfig{}
-	if v.Config.PublicKey != "" {
-		out.Config.PublicKey = v.Config.PublicKey
+	out.Config = vaultConfig{
+		Id:          v.Config.Id,
+		PublicKey:   v.Config.PublicKey,
+		HashLength:  v.Config.HashLength,
+		WrappedKeys: make([]string, len(v.Config.WrappedKeys)),
 	}
-	if v.Config.HashLength != 0 {
-		out.Config.HashLength = v.Config.HashLength
-	}
-	out.Config.WrappedKeys = make([]string, len(v.Config.WrappedKeys))
 	copy(out.Config.WrappedKeys, v.Config.WrappedKeys)
 	out.vaultSecretRefRegex = v.vaultSecretRefRegex
 }
