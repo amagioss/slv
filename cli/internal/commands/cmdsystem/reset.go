@@ -1,31 +1,15 @@
-package commands
+package cmdsystem
 
 import (
 	"fmt"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv/cli/internal/commands/utils"
 	"savesecrets.org/slv/core/config"
 	"savesecrets.org/slv/core/environments"
 	"savesecrets.org/slv/core/input"
 )
-
-func systemCommand() *cobra.Command {
-	if systemCmd != nil {
-		return systemCmd
-	}
-	systemCmd = &cobra.Command{
-		Use:     "system",
-		Aliases: []string{"systems"},
-		Short:   "System level commands",
-		Long:    `System level operations can be carried out using this command`,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-	systemCmd.AddCommand(systemResetCommand())
-	return systemCmd
-}
 
 func systemResetCommand() *cobra.Command {
 	if systemResetCmd != nil {
@@ -38,15 +22,15 @@ func systemResetCommand() *cobra.Command {
 		Long:    `Cleans all existing profiles and any other data`,
 		Run: func(cmd *cobra.Command, args []string) {
 			selfEnv := environments.GetSelf()
-			confirm, _ := cmd.Flags().GetBool(yesFlag.name)
+			confirm, _ := cmd.Flags().GetBool(yesFlag.Name)
 			if !confirm || selfEnv != nil {
 				if selfEnv != nil {
 					fmt.Println(color.YellowString("You have a configured environment which you might have to consider backing up:"))
-					showEnv(*selfEnv, true, true)
+					utils.ShowEnv(*selfEnv, true, true)
 				}
 				var err error
 				if confirm, err = input.GetConfirmation("Are you sure you wish to proceed? (yes/no): ", "yes"); err != nil {
-					exitOnError(err)
+					utils.ExitOnError(err)
 				}
 			}
 			if confirm {
@@ -54,14 +38,14 @@ func systemResetCommand() *cobra.Command {
 				if err == nil {
 					fmt.Println(color.GreenString("System reset successful"))
 				} else {
-					exitOnError(err)
+					utils.ExitOnError(err)
 				}
 			} else {
 				fmt.Println(color.YellowString("System reset aborted"))
 			}
-			safeExit()
+			utils.SafeExit()
 		},
 	}
-	systemResetCmd.Flags().BoolP(yesFlag.name, yesFlag.shorthand, false, yesFlag.usage)
+	systemResetCmd.Flags().BoolP(yesFlag.Name, yesFlag.Shorthand, false, yesFlag.Usage)
 	return systemResetCmd
 }

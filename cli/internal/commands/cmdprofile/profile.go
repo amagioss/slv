@@ -1,15 +1,16 @@
-package commands
+package cmdprofile
 
 import (
 	"fmt"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv/cli/internal/commands/utils"
 	"savesecrets.org/slv/core/environments"
 	"savesecrets.org/slv/core/profiles"
 )
 
-func profileCommand() *cobra.Command {
+func ProfileCommand() *cobra.Command {
 	if profileCmd != nil {
 		return profileCmd
 	}
@@ -39,22 +40,22 @@ func profileNewCommand() *cobra.Command {
 		Use:   "new",
 		Short: "Creates a new profile",
 		Run: func(cmd *cobra.Command, args []string) {
-			name, _ := cmd.Flags().GetString(profileNameFlag.name)
-			gitURI, _ := cmd.Flags().GetString(profileGitURI.name)
-			gitBranch, _ := cmd.Flags().GetString(profileGitBranch.name)
+			name, _ := cmd.Flags().GetString(profileNameFlag.Name)
+			gitURI, _ := cmd.Flags().GetString(profileGitURI.Name)
+			gitBranch, _ := cmd.Flags().GetString(profileGitBranch.Name)
 			err := profiles.New(name, gitURI, gitBranch)
 			if err == nil {
 				fmt.Println("Created profile: ", color.GreenString(name))
-				safeExit()
+				utils.SafeExit()
 			} else {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 		},
 	}
-	profileNewCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
-	profileNewCmd.Flags().StringP(profileGitURI.name, profileGitURI.shorthand, "", profileGitURI.usage)
-	profileNewCmd.Flags().StringP(profileGitBranch.name, profileGitBranch.shorthand, "", profileGitBranch.usage)
-	profileNewCmd.MarkFlagRequired(profileNameFlag.name)
+	profileNewCmd.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
+	profileNewCmd.Flags().StringP(profileGitURI.Name, profileGitURI.Shorthand, "", profileGitURI.Usage)
+	profileNewCmd.Flags().StringP(profileGitBranch.Name, profileGitBranch.Shorthand, "", profileGitBranch.Usage)
+	profileNewCmd.MarkFlagRequired(profileNameFlag.Name)
 	return profileNewCmd
 }
 
@@ -68,7 +69,7 @@ func profileListCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			profileNames, err := profiles.List()
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			} else {
 				defaultProfileName, _ := profiles.GetDefaultProfileName()
 				for _, profileName := range profileNames {
@@ -95,21 +96,21 @@ func profileDefaultCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			profileNames, err := profiles.List()
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
-			name, _ := cmd.Flags().GetString(profileNameFlag.name)
+			name, _ := cmd.Flags().GetString(profileNameFlag.Name)
 			for _, profileName := range profileNames {
 				if profileName == name {
 					profiles.SetDefault(name)
 					fmt.Printf("Successfully set %s as default profile\n", color.GreenString(name))
-					safeExit()
+					utils.SafeExit()
 				}
 			}
-			exitOnError(fmt.Errorf("profile %s not found", name))
+			utils.ExitOnError(fmt.Errorf("profile %s not found", name))
 		},
 	}
-	profileSetCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
-	profileSetCmd.MarkFlagRequired(profileNameFlag.name)
+	profileSetCmd.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
+	profileSetCmd.MarkFlagRequired(profileNameFlag.Name)
 	return profileSetCmd
 }
 
@@ -122,11 +123,11 @@ func profileAddEnvCommand() *cobra.Command {
 		Aliases: []string{"add-env", "add-environment", "add-environments", "addenvs", "envadd", "env-add", "env-adds", "env-adds"},
 		Short:   "Adds an environment to a profile",
 		Run: func(cmd *cobra.Command, args []string) {
-			envdefs, err := cmd.Flags().GetStringSlice(envDefFlag.name)
+			envdefs, err := cmd.Flags().GetStringSlice(profileEnvDefFlag.Name)
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
-			profileName := cmd.Flag(profileNameFlag.name).Value.String()
+			profileName := cmd.Flag(profileNameFlag.Name).Value.String()
 			var profile *profiles.Profile
 			if profileName != "" {
 				profile, err = profiles.Get(profileName)
@@ -134,11 +135,11 @@ func profileAddEnvCommand() *cobra.Command {
 				profile, err = profiles.GetDefaultProfile()
 			}
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
-			setAsRoot, _ := cmd.Flags().GetBool(profileSetRootEnvFlag.name)
+			setAsRoot, _ := cmd.Flags().GetBool(profileSetRootEnvFlag.Name)
 			if setAsRoot && len(envdefs) > 1 {
-				exitOnError(fmt.Errorf("cannot set more than one environment as root"))
+				utils.ExitOnError(fmt.Errorf("cannot set more than one environment as root"))
 			}
 			var successMessage string
 			for _, envdef := range envdefs {
@@ -152,20 +153,20 @@ func profileAddEnvCommand() *cobra.Command {
 					}
 				}
 				if err != nil {
-					exitOnError(err)
+					utils.ExitOnError(err)
 				}
 			}
 			if successMessage == "" {
 				successMessage = fmt.Sprintf("Successfully added %d environments to profile %s", len(envdefs), color.GreenString(profile.Name()))
 			}
 			fmt.Println(successMessage)
-			safeExit()
+			utils.SafeExit()
 		},
 	}
-	envAddCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
-	envAddCmd.Flags().StringSliceP(envDefFlag.name, envDefFlag.shorthand, []string{}, envDefFlag.usage)
-	envAddCmd.Flags().Bool(profileSetRootEnvFlag.name, false, profileSetRootEnvFlag.usage)
-	envAddCmd.MarkFlagRequired(envDefFlag.name)
+	envAddCmd.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
+	envAddCmd.Flags().StringSliceP(profileEnvDefFlag.Name, profileEnvDefFlag.Shorthand, []string{}, profileEnvDefFlag.Usage)
+	envAddCmd.Flags().Bool(profileSetRootEnvFlag.Name, false, profileSetRootEnvFlag.Usage)
+	envAddCmd.MarkFlagRequired(profileEnvDefFlag.Name)
 	return envAddCmd
 }
 
@@ -178,17 +179,17 @@ func profileDeleteCommand() *cobra.Command {
 		Aliases: []string{"del", "rm", "remove"},
 		Short:   "Deletes a profile",
 		Run: func(cmd *cobra.Command, args []string) {
-			name, _ := cmd.Flags().GetString(profileNameFlag.name)
+			name, _ := cmd.Flags().GetString(profileNameFlag.Name)
 			if err := profiles.Delete(name); err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			} else {
 				fmt.Println("Deleted profile: ", color.GreenString(name))
-				safeExit()
+				utils.SafeExit()
 			}
 		},
 	}
-	profileDelCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
-	profileDelCmd.MarkFlagRequired(profileNameFlag.name)
+	profileDelCmd.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
+	profileDelCmd.MarkFlagRequired(profileNameFlag.Name)
 	return profileDelCmd
 }
 
@@ -203,10 +204,10 @@ func profilePullCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			profile, err := profiles.GetDefaultProfile()
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			if err = profile.Pull(); err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			fmt.Printf("Successfully pulled changes into profile: %s\n", color.GreenString(profile.Name()))
 		},
@@ -224,10 +225,10 @@ func profilePushCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			profile, err := profiles.GetDefaultProfile()
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			if err = profile.Push(); err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			fmt.Printf("Successfully pushed changes from profile: %s\n", color.GreenString(profile.Name()))
 		},

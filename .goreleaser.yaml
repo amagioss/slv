@@ -1,7 +1,7 @@
 builds:
   - id: slv
     binary: slv
-    main: ./cli/main
+    main: ./cli
     env:
       - CGO_ENABLED=0
     ldflags: "-X savesecrets.org/slv.Version={{.Version}} -X savesecrets.org/slv.BuildDate={{.Date}} -X savesecrets.org/slv.Commit={{.Commit}}"

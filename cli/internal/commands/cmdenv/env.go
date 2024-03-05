@@ -1,12 +1,11 @@
-package commands
+package cmdenv
 
 import (
 	"fmt"
-	"os"
-	"text/tabwriter"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"savesecrets.org/slv/cli/internal/commands/utils"
 	"savesecrets.org/slv/core/crypto"
 	"savesecrets.org/slv/core/environments"
 	"savesecrets.org/slv/core/environments/providers"
@@ -14,7 +13,7 @@ import (
 	"savesecrets.org/slv/core/profiles"
 )
 
-func envCommand() *cobra.Command {
+func EnvCommand() *cobra.Command {
 	if envCmd != nil {
 		return envCmd
 	}
@@ -31,29 +30,6 @@ func envCommand() *cobra.Command {
 	envCmd.AddCommand(envListSearchCommand())
 	envCmd.AddCommand(envSelfCommand())
 	return envCmd
-}
-
-func showEnv(env environments.Environment, includeEDS, excludeBindingFromEds bool) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintln(w, "ID (Public Key):\t", env.PublicKey)
-	fmt.Fprintln(w, "Name:\t", env.Name)
-	fmt.Fprintln(w, "Email:\t", env.Email)
-	fmt.Fprintln(w, "Tags:\t", env.Tags)
-	if env.SecretBinding != "" {
-		fmt.Fprintln(w, "Secret Binding:\t", env.SecretBinding)
-	}
-	if includeEDS {
-		secretBinding := env.SecretBinding
-		if excludeBindingFromEds {
-			env.SecretBinding = ""
-		}
-		if envDef, err := env.ToEnvDef(); err == nil {
-			fmt.Fprintln(w, "------------------------------------------------------------")
-			fmt.Fprintln(w, "Env Definition:\t", color.CyanString(envDef))
-		}
-		env.SecretBinding = secretBinding
-	}
-	w.Flush()
 }
 
 func envNewCommand() *cobra.Command {
@@ -83,43 +59,43 @@ func envNewServiceCommand() *cobra.Command {
 		Aliases: []string{"serv", "svc", "s"},
 		Short:   "Creates a new service environment",
 		Run: func(cmd *cobra.Command, args []string) {
-			name, _ := cmd.Flags().GetString(envNameFlag.name)
-			email, _ := cmd.Flags().GetString(envEmailFlag.name)
-			tags, err := cmd.Flags().GetStringSlice(envTagsFlag.name)
+			name, _ := cmd.Flags().GetString(envNameFlag.Name)
+			email, _ := cmd.Flags().GetString(envEmailFlag.Name)
+			tags, err := cmd.Flags().GetStringSlice(envTagsFlag.Name)
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			var env *environments.Environment
 			var secretKey *crypto.SecretKey
 			env, secretKey, err = environments.NewEnvironment(name, environments.SERVICE)
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			env.SetEmail(email)
 			env.AddTags(tags...)
-			showEnv(*env, true, false)
+			utils.ShowEnv(*env, true, false)
 			if secretKey != nil {
 				fmt.Println("\nSecret Key:\t", color.HiBlackString(secretKey.String()))
 			}
-			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
+			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 			if addToProfileFlag {
 				profile, err := profiles.GetDefaultProfile()
 				if err != nil {
-					exitOnError(err)
+					utils.ExitOnError(err)
 				}
 				err = profile.PutEnv(env)
 				if err != nil {
-					exitOnError(err)
+					utils.ExitOnError(err)
 				}
 			}
-			safeExit()
+			utils.SafeExit()
 		},
 	}
-	envNewServiceCmd.Flags().StringP(envNameFlag.name, envNameFlag.shorthand, "", envNameFlag.usage)
-	envNewServiceCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
-	envNewServiceCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
-	envNewServiceCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
-	envNewServiceCmd.MarkFlagRequired(envNameFlag.name)
+	envNewServiceCmd.Flags().StringP(envNameFlag.Name, envNameFlag.Shorthand, "", envNameFlag.Usage)
+	envNewServiceCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
+	envNewServiceCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
+	envNewServiceCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
+	envNewServiceCmd.MarkFlagRequired(envNameFlag.Name)
 	return envNewServiceCmd
 }
 
@@ -134,50 +110,50 @@ func envNewUserCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			selfEnv := environments.GetSelf()
 			if selfEnv != nil {
-				showEnv(*selfEnv, true, true)
+				utils.ShowEnv(*selfEnv, true, true)
 				confirmed, err := input.GetConfirmation("You are already registered as an environment, "+
 					"this will replace the existing environment. Proceed? (yes/no): ", "yes")
 				if err != nil {
-					exitOnError(err)
+					utils.ExitOnError(err)
 				}
 				if !confirmed {
 					fmt.Println(color.YellowString("Operation aborted"))
-					safeExit()
+					utils.SafeExit()
 				}
 			}
-			envName, _ := cmd.Flags().GetString(envNameFlag.name)
-			envEmail, _ := cmd.Flags().GetString(envEmailFlag.name)
-			envTags, err := cmd.Flags().GetStringSlice(envTagsFlag.name)
+			envName, _ := cmd.Flags().GetString(envNameFlag.Name)
+			envEmail, _ := cmd.Flags().GetString(envEmailFlag.Name)
+			envTags, err := cmd.Flags().GetStringSlice(envTagsFlag.Name)
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			inputs := make(map[string][]byte)
 			password, err := input.NewPasswordFromUser(input.DefaultPasswordPolicy())
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			inputs["password"] = password
 			var env *environments.Environment
 			env, err = providers.NewEnvForProvider("password", envName, environments.USER, inputs)
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			env.SetEmail(envEmail)
 			env.AddTags(envTags...)
 			if err = env.MarkAsSelf(); err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			secretBinding := env.SecretBinding
-			showEnv(*env, true, true)
-			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.name)
+			utils.ShowEnv(*env, true, true)
+			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 			if addToProfileFlag {
 				profile, err := profiles.GetDefaultProfile()
 				if err != nil {
-					exitOnError(err)
+					utils.ExitOnError(err)
 				}
 				err = profile.PutEnv(env)
 				if err != nil {
-					exitOnError(err)
+					utils.ExitOnError(err)
 				}
 			}
 			fmt.Println(color.GreenString("Successfully registered as self environment"))
@@ -185,14 +161,14 @@ func envNewUserCommand() *cobra.Command {
 				fmt.Println(color.YellowString("Please note down the \"Secret Binding\" somewhere safe so that you don't lose it.\n" +
 					"It is required to access your registered environment."))
 			}
-			safeExit()
+			utils.SafeExit()
 		},
 	}
-	envNewUserCmd.Flags().StringP(envNameFlag.name, envNameFlag.shorthand, "", envNameFlag.usage)
-	envNewUserCmd.Flags().StringP(envEmailFlag.name, envEmailFlag.shorthand, "", envEmailFlag.usage)
-	envNewUserCmd.Flags().StringSliceP(envTagsFlag.name, envTagsFlag.shorthand, []string{}, envTagsFlag.usage)
-	envNewUserCmd.Flags().BoolP(envAddFlag.name, envAddFlag.shorthand, false, envAddFlag.usage)
-	envNewUserCmd.MarkFlagRequired(envNameFlag.name)
+	envNewUserCmd.Flags().StringP(envNameFlag.Name, envNameFlag.Shorthand, "", envNameFlag.Usage)
+	envNewUserCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
+	envNewUserCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
+	envNewUserCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
+	envNewUserCmd.MarkFlagRequired(envNameFlag.Name)
 	return envNewUserCmd
 }
 
@@ -205,18 +181,11 @@ func envListSearchCommand() *cobra.Command {
 		Aliases: []string{"ls", "search", "find"},
 		Short:   "List/Search environments from profile",
 		Run: func(cmd *cobra.Command, args []string) {
-			profileName := cmd.Flag(profileNameFlag.name).Value.String()
-			var profile *profiles.Profile
-			var err error
-			if profileName != "" {
-				profile, err = profiles.Get(profileName)
-			} else {
-				profile, err = profiles.GetDefaultProfile()
-			}
+			profile, err := profiles.GetDefaultProfile()
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
-			query := cmd.Flag(envSearchFlag.name).Value.String()
+			query := cmd.Flag(EnvSearchFlag.Name).Value.String()
 			var envs []*environments.Environment
 			if query != "" {
 				envs, err = profile.SearchEnvs(query)
@@ -224,17 +193,16 @@ func envListSearchCommand() *cobra.Command {
 				envs, err = profile.ListEnvs()
 			}
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			for _, env := range envs {
-				showEnv(*env, false, false)
+				utils.ShowEnv(*env, false, false)
 				fmt.Println()
 			}
-			safeExit()
+			utils.SafeExit()
 		},
 	}
-	envListSearchCmd.Flags().StringP(profileNameFlag.name, profileNameFlag.shorthand, "", profileNameFlag.usage)
-	envListSearchCmd.Flags().StringP(envSearchFlag.name, envSearchFlag.shorthand, "", envSearchFlag.usage)
+	envListSearchCmd.Flags().StringP(EnvSearchFlag.Name, EnvSearchFlag.Shorthand, "", EnvSearchFlag.Usage)
 	return envListSearchCmd
 }
 
@@ -251,9 +219,9 @@ func envSelfCommand() *cobra.Command {
 			if env == nil {
 				fmt.Println("No environment registered as self.")
 			} else {
-				showEnv(*env, true, true)
+				utils.ShowEnv(*env, true, true)
 			}
-			safeExit()
+			utils.SafeExit()
 		},
 	}
 	envSelfCmd.AddCommand(envSelfSetCommand())
@@ -269,29 +237,29 @@ func envSelfSetCommand() *cobra.Command {
 		Aliases: []string{"save", "put", "store", "s"},
 		Short:   "Shows the current environment if registered",
 		Run: func(cmd *cobra.Command, args []string) {
-			envDef := cmd.Flag(envDefFlag.name).Value.String()
+			envDef := cmd.Flag(envDefFlag.Name).Value.String()
 			env, err := environments.FromEnvDef(envDef)
 			if err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
 			if env.EnvType != environments.USER {
-				exitOnError(fmt.Errorf("only user environments can be registered as self"))
+				utils.ExitOnError(fmt.Errorf("only user environments can be registered as self"))
 			}
 			if env.SecretBinding == "" {
 				secretBinding, err := input.GetVisibleInput("Enter the secret binding: ")
 				if err != nil {
-					exitOnError(err)
+					utils.ExitOnError(err)
 				}
 				env.SecretBinding = secretBinding
 			}
 			if err = env.MarkAsSelf(); err != nil {
-				exitOnError(err)
+				utils.ExitOnError(err)
 			}
-			showEnv(*env, true, true)
+			utils.ShowEnv(*env, true, true)
 			fmt.Println(color.GreenString("Successfully registered self environment"))
 		},
 	}
-	envSelfSetCmd.Flags().StringP(envDefFlag.name, envDefFlag.shorthand, "", envDefFlag.usage)
-	envSelfSetCmd.MarkFlagRequired(envDefFlag.name)
+	envSelfSetCmd.Flags().StringP(envDefFlag.Name, envDefFlag.Shorthand, "", envDefFlag.Usage)
+	envSelfSetCmd.MarkFlagRequired(envDefFlag.Name)
 	return envSelfSetCmd
 }
