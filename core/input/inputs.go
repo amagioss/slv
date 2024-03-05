@@ -2,6 +2,7 @@ package input
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"syscall"
 
@@ -12,6 +13,35 @@ func GetHiddenInput(prompt string) ([]byte, error) {
 	fmt.Print(prompt)
 	input, err := term.ReadPassword(int(syscall.Stdin))
 	fmt.Println()
+	return input, err
+}
+
+func GetMultiLineHiddenInput(prompt string) (input []byte, err error) {
+	fmt.Println(prompt)
+	fmt.Println("Press enter/return twice after finishing your input to submit.")
+	var line []byte
+	emptyLines := 0
+	for {
+		if line, err = term.ReadPassword(int(os.Stdin.Fd())); err != nil {
+			return nil, err
+		}
+		if len(line) == 0 {
+			emptyLines++
+			if emptyLines == 2 {
+				break
+			}
+		} else {
+			for i := 0; i < emptyLines; i++ {
+				input = append(input, '\n')
+			}
+			if len(input) > 0 {
+				input = append(input, '\n')
+			}
+			input = append(input, line...)
+			emptyLines = 0
+		}
+	}
+	fmt.Println(string(input))
 	return input, err
 }
 

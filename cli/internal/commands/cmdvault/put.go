@@ -41,7 +41,7 @@ func vaultPutCommand() *cobra.Command {
 				}
 				var secret []byte
 				if secretValue == "" {
-					secret, err = input.GetHiddenInput("Enter the secret value for " + secretName + ": ")
+					secret, err = input.GetMultiLineHiddenInput("Enter the secret value for " + secretName + ": ")
 					if err != nil {
 						utils.ExitOnError(err)
 					}
@@ -54,10 +54,10 @@ func vaultPutCommand() *cobra.Command {
 				}
 				fmt.Println("Updated secret: ", color.GreenString(secretName), " to vault: ", color.GreenString(vaultFile))
 			}
-			if importFile != "" {
+			if importFile != "" || secretName == "" {
 				var importData []byte
 				if importFile == "" {
-					importData, err = input.GetHiddenInput("Enter the YAML/JSON data to be imported: ")
+					importData, err = input.GetMultiLineHiddenInput("Enter the YAML/JSON data to be imported: ")
 				} else {
 					importData, err = os.ReadFile(importFile)
 				}
