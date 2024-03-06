@@ -7,13 +7,15 @@ import (
 
 var (
 	// Commands
-	vaultCmd      *cobra.Command
-	vaultNewCmd   *cobra.Command
-	vaultShareCmd *cobra.Command
-	vaultPutCmd   *cobra.Command
-	vaultGetCmd   *cobra.Command
-	vaultRefCmd   *cobra.Command
-	vaultDerefCmd *cobra.Command
+	vaultCmd             *cobra.Command
+	vaultNewCmd          *cobra.Command
+	vaultAccessCmd       *cobra.Command
+	vaultAccessAddCmd    *cobra.Command
+	vaultAccessRemoveCmd *cobra.Command
+	vaultPutCmd          *cobra.Command
+	vaultGetCmd          *cobra.Command
+	vaultRefCmd          *cobra.Command
+	vaultDerefCmd        *cobra.Command
 )
 
 var (

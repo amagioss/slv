@@ -26,67 +26,60 @@ func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	return err == nil, err
 }
 
-func (vlt *Vault) Revoke(publicKey *crypto.PublicKey, rotateVaultKeyPair bool) error {
-	if rotateVaultKeyPair {
-		if vlt.IsLocked() {
-			return errVaultLocked
-		}
-		accessors, err := vlt.ListAccessors()
-		if err != nil {
-			return err
-		}
-		var newAccessors []crypto.PublicKey
-		for _, accessor := range accessors {
-			if accessor.String() != publicKey.String() {
-				newAccessors = append(newAccessors, accessor)
+func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey) error {
+	if vlt.IsLocked() {
+		return errVaultLocked
+	}
+	accessors, err := vlt.ListAccessors()
+	if err != nil {
+		return err
+	}
+	var newAccessors []crypto.PublicKey
+	for _, accessor := range accessors {
+		found := false
+		for _, publicKey := range publicKeys {
+			if publicKey.String() == accessor.String() {
+				found = true
+				break
 			}
 		}
-		if len(newAccessors) == len(accessors) {
-			return nil
-		}
-		secretsMap, err := vlt.GetAllSecrets()
-		if err != nil {
-			return err
-		}
-		vaultSecretKey, err := crypto.NewSecretKey(VaultKey)
-		if err != nil {
-			return err
-		}
-		vaultPublicKey, err := vaultSecretKey.PublicKey()
-		if err != nil {
-			return err
-		}
-		vlt.publicKey = vaultPublicKey
-		vlt.Config.PublicKey = vaultPublicKey.String()
-		vlt.secretKey = vaultSecretKey
-		vlt.Config.WrappedKeys = []string{}
-		for _, accessor := range newAccessors {
-			wrappedKey, err := accessor.EncryptKey(*vlt.secretKey)
-			if err == nil {
-				vlt.Config.WrappedKeys = append(vlt.Config.WrappedKeys, wrappedKey.String())
-			} else {
-				return err
-			}
-		}
-		for secretName, secretValue := range secretsMap {
-			if err = vlt.putSecretWithoutCommit(secretName, secretValue); err != nil {
-				return err
-			}
-		}
-		return vlt.commit()
-	} else {
-		for i, wrappedKeyStr := range vlt.Config.WrappedKeys {
-			wrappedKey := &crypto.WrappedKey{}
-			if err := wrappedKey.FromString(wrappedKeyStr); err != nil {
-				return err
-			}
-			if !wrappedKey.IsEncryptedBy(publicKey) {
-				vlt.Config.WrappedKeys = append(vlt.Config.WrappedKeys[:i], vlt.Config.WrappedKeys[i+1:]...)
-				return vlt.commit()
-			}
+		if !found {
+			newAccessors = append(newAccessors, accessor)
 		}
 	}
-	return nil
+	if len(newAccessors) == len(accessors) {
+		return nil
+	}
+	secretsMap, err := vlt.GetAllSecrets()
+	if err != nil {
+		return err
+	}
+	vaultSecretKey, err := crypto.NewSecretKey(VaultKey)
+	if err != nil {
+		return err
+	}
+	vaultPublicKey, err := vaultSecretKey.PublicKey()
+	if err != nil {
+		return err
+	}
+	vlt.publicKey = vaultPublicKey
+	vlt.Config.PublicKey = vaultPublicKey.String()
+	vlt.secretKey = vaultSecretKey
+	vlt.Config.WrappedKeys = []string{}
+	for _, accessor := range newAccessors {
+		wrappedKey, err := accessor.EncryptKey(*vlt.secretKey)
+		if err == nil {
+			vlt.Config.WrappedKeys = append(vlt.Config.WrappedKeys, wrappedKey.String())
+		} else {
+			return err
+		}
+	}
+	for secretName, secretValue := range secretsMap {
+		if err = vlt.putSecretWithoutCommit(secretName, secretValue); err != nil {
+			return err
+		}
+	}
+	return vlt.commit()
 }
 
 func (vlt *Vault) ListAccessors() ([]crypto.PublicKey, error) {
