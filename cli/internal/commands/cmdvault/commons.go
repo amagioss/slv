@@ -7,16 +7,7 @@ import (
 	"savesecrets.org/slv/core/crypto"
 	"savesecrets.org/slv/core/environments"
 	"savesecrets.org/slv/core/profiles"
-	"savesecrets.org/slv/core/vaults"
 )
-
-func getVault(filePath string) (*vaults.Vault, error) {
-	vault, err := vaults.Get(filePath)
-	if err != nil || vault.Config.PublicKey == "" {
-		vault, err = vaults.GetFromField(filePath, k8sVaultField)
-	}
-	return vault, err
-}
 
 func getPublicKeys(pubKeyStrSlice, queries []string, self bool) (publicKeys []*crypto.PublicKey,
 	rootPublicKey *crypto.PublicKey, err error) {
@@ -38,18 +29,16 @@ func getPublicKeys(pubKeyStrSlice, queries []string, self bool) (publicKeys []*c
 		if err != nil {
 			return nil, nil, err
 		}
-		for _, query := range queries {
-			envs, err := profile.SearchEnvs(query)
+		envs, err := profile.SearchEnvsForQueries(queries)
+		if err != nil {
+			return nil, nil, err
+		}
+		for _, env := range envs {
+			publicKey, err := crypto.PublicKeyFromString(env.PublicKey)
 			if err != nil {
 				return nil, nil, err
 			}
-			for _, env := range envs {
-				publicKey, err := crypto.PublicKeyFromString(env.PublicKey)
-				if err != nil {
-					return nil, nil, err
-				}
-				publicKeys = append(publicKeys, publicKey)
-			}
+			publicKeys = append(publicKeys, publicKey)
 		}
 		if len(publicKeys) == 0 {
 			return nil, nil, fmt.Errorf("no matching environments found for the given search queries")

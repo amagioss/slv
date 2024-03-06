@@ -108,7 +108,13 @@ func (vlt *Vault) GetSecret(secretName string) (decryptedSecret []byte, err erro
 }
 
 func (vlt *Vault) DeleteSecret(secretName string) error {
-	delete(vlt.Secrets, secretName)
-	vlt.deleteSecretFromCache(secretName)
+	return vlt.DeleteSecrets([]string{secretName})
+}
+
+func (vlt *Vault) DeleteSecrets(secretNames []string) error {
+	for _, secretName := range secretNames {
+		delete(vlt.Secrets, secretName)
+		vlt.deleteSecretFromCache(secretName)
+	}
 	return vlt.commit()
 }

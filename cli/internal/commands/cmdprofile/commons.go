@@ -14,7 +14,6 @@ var (
 	profileDelCmd  *cobra.Command
 	profilePullCmd *cobra.Command
 	profilePushCmd *cobra.Command
-	envAddCmd      *cobra.Command
 )
 
 var (
@@ -32,16 +31,5 @@ var (
 	profileGitBranch = utils.FlagDef{
 		Name:  "git-branch",
 		Usage: "Git branch corresponding to the git URI",
-	}
-
-	profileSetRootEnvFlag = utils.FlagDef{
-		Name:  "root",
-		Usage: "Set the given environment as root",
-	}
-
-	profileEnvDefFlag = utils.FlagDef{
-		Name:      "env-def",
-		Shorthand: "e",
-		Usage:     "Environment definition",
 	}
 )

@@ -151,6 +151,34 @@ func (profile *Profile) SearchEnvs(query string) ([]*environments.Environment, e
 	return envManifest.SearchEnvs(query), nil
 }
 
+func (profile *Profile) SearchEnvsForQueries(queries []string) ([]*environments.Environment, error) {
+	envManifest, err := profile.getEnvManifest()
+	if err != nil {
+		return nil, err
+	}
+	return envManifest.SearchEnvsForQueries(queries), nil
+}
+
+func (profile *Profile) DeleteEnv(id string) error {
+	if profile.isWriteDenied() {
+		return errChangesNotAllowedInGitProfile
+	}
+	if profile.repo != nil {
+		if err := profile.Pull(); err != nil {
+			return err
+		}
+	}
+	envManifest, err := profile.getEnvManifest()
+	if err != nil {
+		return err
+	}
+	env, err := envManifest.DeleteEnv(id)
+	if err != nil {
+		return err
+	}
+	return profile.commit("Deleting environment: " + env.Id() + " [" + env.Name + "]")
+}
+
 func (profile *Profile) ListEnvs() ([]*environments.Environment, error) {
 	envManifest, err := profile.getEnvManifest()
 	if err != nil {

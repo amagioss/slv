@@ -150,6 +150,11 @@ func (vlt *Vault) UnlockedBy() (id *string) {
 	return vlt.unlockedBy
 }
 
+func (vlt *Vault) Delete() error {
+	vlt.clearSecretCache()
+	return os.Remove(vlt.path)
+}
+
 func (vlt *Vault) commit() error {
 	if vlt.objectField == "" {
 		return commons.WriteToYAML(vlt.path,

@@ -27,4 +27,5 @@ var (
 	errRootExistsAlready             = errors.New("root environment exists already")
 	errMarkingSelfEnvBindingNotFound = errors.New("error in marking environment as self - env secret binding not found")
 	errMarkingSelfNonUserEnv         = errors.New("error in marking environment as self - non user environment")
+	errEnvNotFound                   = errors.New("environment not found")
 )

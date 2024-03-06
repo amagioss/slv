@@ -11,6 +11,7 @@ import (
 	"savesecrets.org/slv/core/config"
 	"savesecrets.org/slv/core/environments"
 	"savesecrets.org/slv/core/profiles"
+	"savesecrets.org/slv/core/vaults"
 )
 
 const (
@@ -19,14 +20,22 @@ const (
 	k8sVaultField = config.K8SLVVaultField
 )
 
+func getVault(filePath string) (*vaults.Vault, error) {
+	vault, err := vaults.Get(filePath)
+	if err != nil || vault.Config.PublicKey == "" {
+		vault, err = vaults.GetFromField(filePath, k8sVaultField)
+	}
+	return vault, err
+}
+
 func VaultCommand() *cobra.Command {
 	if vaultCmd != nil {
 		return vaultCmd
 	}
 	vaultCmd = &cobra.Command{
 		Use:   "vault",
-		Short: "Vault operations in SLV",
-		Long:  `Handles vault operations in SLV. Vaults are used to store secrets.`,
+		Short: "Manage vaults and secrets in them",
+		Long:  `Handle vault operations in SLV. SLV Vaults are files that store secrets.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 			vault, err := getVault(vaultFile)
@@ -91,6 +100,7 @@ func VaultCommand() *cobra.Command {
 	vaultCmd.AddCommand(vaultNewCommand())
 	vaultCmd.AddCommand(vaultPutCommand())
 	vaultCmd.AddCommand(vaultGetCommand())
+	vaultCmd.AddCommand(vaultDeleteCommand())
 	vaultCmd.AddCommand(vaultRefCommand())
 	vaultCmd.AddCommand(vaultDerefCommand())
 	vaultCmd.AddCommand(vaultAccessCommand())

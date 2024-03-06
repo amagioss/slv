@@ -97,6 +97,25 @@ func (envManifest *EnvManifest) SearchEnvs(query string) (environments []*Enviro
 	return
 }
 
+func (envManifest *EnvManifest) SearchEnvsForQueries(queries []string) (environments []*Environment) {
+	for _, query := range queries {
+		environments = append(environments, envManifest.SearchEnvs(query)...)
+	}
+	return
+}
+
+func (envManifest *EnvManifest) DeleteEnv(id string) (env *Environment, err error) {
+	if envManifest.Environments == nil {
+		return nil, errEnvNotFound
+	}
+	if envManifest.Environments[id] == nil {
+		return nil, errEnvNotFound
+	}
+	env = envManifest.Environments[id]
+	delete(envManifest.Environments, id)
+	return env, envManifest.commit()
+}
+
 func (envManifest *EnvManifest) PutEnv(env *Environment) (err error) {
 	if envManifest.Environments == nil {
 		envManifest.Environments = make(map[string]*Environment)

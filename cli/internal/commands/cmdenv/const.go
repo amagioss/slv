@@ -11,7 +11,9 @@ var (
 	envNewCmd        *cobra.Command
 	envNewServiceCmd *cobra.Command
 	envNewUserCmd    *cobra.Command
+	envAddCmd        *cobra.Command
 	envListSearchCmd *cobra.Command
+	envDeleteCmd     *cobra.Command
 	envSelfCmd       *cobra.Command
 	envSelfSetCmd    *cobra.Command
 )
@@ -39,6 +41,11 @@ var (
 	envAddFlag = utils.FlagDef{
 		Name:  "add",
 		Usage: "Adds environment to default profile",
+	}
+
+	envSetRootFlag = utils.FlagDef{
+		Name:  "root",
+		Usage: "Set the given environment as root",
 	}
 
 	EnvSearchFlag = utils.FlagDef{
