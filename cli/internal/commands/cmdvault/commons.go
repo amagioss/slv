@@ -18,9 +18,9 @@ func getVault(filePath string) (*vaults.Vault, error) {
 	return vault, err
 }
 
-func getPublicKeys(pubKeyStrSlice []string, query string, self bool) (publicKeys []*crypto.PublicKey,
+func getPublicKeys(pubKeyStrSlice, queries []string, self bool) (publicKeys []*crypto.PublicKey,
 	rootPublicKey *crypto.PublicKey, err error) {
-	if len(pubKeyStrSlice) == 0 && query == "" && !self {
+	if len(pubKeyStrSlice) == 0 && len(queries) == 0 && !self {
 		return nil, nil, fmt.Errorf("Specify atleast one of the following flags:\n" +
 			" --" + cmdenv.EnvSearchFlag.Name + "\n" +
 			" --" + vaultAccessPublicKeysFlag.Name + "\n" +
@@ -34,23 +34,25 @@ func getPublicKeys(pubKeyStrSlice []string, query string, self bool) (publicKeys
 		publicKeys = append(publicKeys, publicKey)
 	}
 	profile, err := profiles.GetDefaultProfile()
-	if query != "" {
+	if len(queries) > 0 {
 		if err != nil {
 			return nil, nil, err
 		}
-		envs, err := profile.SearchEnvs(query)
-		if err != nil {
-			return nil, nil, err
-		}
-		for _, env := range envs {
-			publicKey, err := crypto.PublicKeyFromString(env.PublicKey)
+		for _, query := range queries {
+			envs, err := profile.SearchEnvs(query)
 			if err != nil {
 				return nil, nil, err
 			}
-			publicKeys = append(publicKeys, publicKey)
+			for _, env := range envs {
+				publicKey, err := crypto.PublicKeyFromString(env.PublicKey)
+				if err != nil {
+					return nil, nil, err
+				}
+				publicKeys = append(publicKeys, publicKey)
+			}
 		}
 		if len(publicKeys) == 0 {
-			return nil, nil, fmt.Errorf("no matching environments found for search query: " + query)
+			return nil, nil, fmt.Errorf("no matching environments found for the given search queries")
 		}
 	}
 	if self {

@@ -185,15 +185,17 @@ func envListSearchCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			query := cmd.Flag(EnvSearchFlag.Name).Value.String()
-			var envs []*environments.Environment
-			if query != "" {
-				envs, err = profile.SearchEnvs(query)
-			} else {
-				envs, err = profile.ListEnvs()
-			}
+			queries, err := cmd.Flags().GetStringSlice(EnvSearchFlag.Name)
 			if err != nil {
 				utils.ExitOnError(err)
+			}
+			var envs []*environments.Environment
+			for _, query := range queries {
+				result, err := profile.SearchEnvs(query)
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				envs = append(envs, result...)
 			}
 			for _, env := range envs {
 				utils.ShowEnv(*env, false, false)
@@ -202,7 +204,7 @@ func envListSearchCommand() *cobra.Command {
 			utils.SafeExit()
 		},
 	}
-	envListSearchCmd.Flags().StringP(EnvSearchFlag.Name, EnvSearchFlag.Shorthand, "", EnvSearchFlag.Usage)
+	envListSearchCmd.Flags().StringSliceP(EnvSearchFlag.Name, EnvSearchFlag.Shorthand, []string{}, EnvSearchFlag.Usage)
 	return envListSearchCmd
 }
 

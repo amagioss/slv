@@ -42,9 +42,12 @@ func vaultNewCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			query := cmd.Flag(cmdenv.EnvSearchFlag.Name).Value.String()
+			queries, err := cmd.Flags().GetStringSlice(cmdenv.EnvSearchFlag.Name)
+			if err != nil {
+				utils.ExitOnError(err)
+			}
 			shareWithSelf, _ := cmd.Flags().GetBool(cmdenv.EnvSelfFlag.Name)
-			publicKeys, rootPublicKey, err := getPublicKeys(publicKeyStrings, query, shareWithSelf)
+			publicKeys, rootPublicKey, err := getPublicKeys(publicKeyStrings, queries, shareWithSelf)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -67,7 +70,7 @@ func vaultNewCommand() *cobra.Command {
 		},
 	}
 	vaultNewCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.Name, vaultAccessPublicKeysFlag.Shorthand, []string{}, vaultAccessPublicKeysFlag.Usage)
-	vaultNewCmd.Flags().StringP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, "", cmdenv.EnvSearchFlag.Usage)
+	vaultNewCmd.Flags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
 	vaultNewCmd.Flags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
 	vaultNewCmd.Flags().StringP(vaultK8sFlag.Name, vaultK8sFlag.Shorthand, "", vaultK8sFlag.Usage)
 	vaultNewCmd.Flags().BoolP(vaultEnableHashingFlag.Name, vaultEnableHashingFlag.Shorthand, false, vaultEnableHashingFlag.Usage)

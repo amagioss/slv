@@ -46,9 +46,12 @@ func vaultAccessAddCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			query := cmd.Flag(cmdenv.EnvSearchFlag.Name).Value.String()
+			queries, err := cmd.Flags().GetStringSlice(cmdenv.EnvSearchFlag.Name)
+			if err != nil {
+				utils.ExitOnError(err)
+			}
 			selfEnv, _ := cmd.Flags().GetBool(cmdenv.EnvSelfFlag.Name)
-			publicKeys, _, err := getPublicKeys(publicKeyStrings, query, selfEnv)
+			publicKeys, _, err := getPublicKeys(publicKeyStrings, queries, selfEnv)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -71,7 +74,7 @@ func vaultAccessAddCommand() *cobra.Command {
 		},
 	}
 	vaultAccessAddCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.Name, vaultAccessPublicKeysFlag.Shorthand, []string{}, vaultAccessPublicKeysFlag.Usage)
-	vaultAccessAddCmd.Flags().StringP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, "", cmdenv.EnvSearchFlag.Usage)
+	vaultAccessAddCmd.Flags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
 	vaultAccessAddCmd.Flags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
 	return vaultAccessAddCmd
 }
@@ -90,9 +93,12 @@ func vaultAccessRemoveCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			query := cmd.Flag(cmdenv.EnvSearchFlag.Name).Value.String()
+			queries, err := cmd.Flags().GetStringSlice(cmdenv.EnvSearchFlag.Name)
+			if err != nil {
+				utils.ExitOnError(err)
+			}
 			selfEnv, _ := cmd.Flags().GetBool(cmdenv.EnvSelfFlag.Name)
-			publicKeys, _, err := getPublicKeys(publicKeyStrings, query, selfEnv)
+			publicKeys, _, err := getPublicKeys(publicKeyStrings, queries, selfEnv)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -113,7 +119,7 @@ func vaultAccessRemoveCommand() *cobra.Command {
 		},
 	}
 	vaultAccessRemoveCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.Name, vaultAccessPublicKeysFlag.Shorthand, []string{}, vaultAccessPublicKeysFlag.Usage)
-	vaultAccessRemoveCmd.Flags().StringP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, "", cmdenv.EnvSearchFlag.Usage)
+	vaultAccessRemoveCmd.Flags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
 	vaultAccessRemoveCmd.Flags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
 	return vaultAccessRemoveCmd
 }
