@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"savesecrets.org/slv/cli/internal/commands/utils"
+	"savesecrets.org/slv/core/environments"
 	"savesecrets.org/slv/core/profiles"
 )
 
@@ -25,7 +26,12 @@ func envListSearchCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			envs, err := profile.SearchEnvsForQueries(queries)
+			var envs []*environments.Environment
+			if len(queries) == 0 {
+				envs, err = profile.ListEnvs()
+			} else {
+				envs, err = profile.SearchEnvs(queries)
+			}
 			if err != nil {
 				utils.ExitOnError(err)
 			}

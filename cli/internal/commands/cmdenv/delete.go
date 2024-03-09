@@ -26,7 +26,7 @@ func envDeleteCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			envs, err := profile.SearchEnvsForQueries(queries)
+			envs, err := profile.SearchEnvs(queries)
 			if err != nil {
 				utils.ExitOnError(err)
 			}

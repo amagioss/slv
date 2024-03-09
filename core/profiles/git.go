@@ -3,6 +3,7 @@ package profiles
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -10,11 +11,37 @@ import (
 	gitconfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	gitssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"github.com/kevinburke/ssh_config"
+	"golang.org/x/crypto/ssh"
 	"savesecrets.org/slv/core/config"
 )
 
-func getGitAuth(gitURI string) *http.BasicAuth {
+func expandTilde(path string) string {
+	if len(path) > 0 && path[0] == '~' {
+		if home, err := os.UserHomeDir(); err == nil {
+			return filepath.Join(home, path[1:])
+		}
+	}
+	return path
+}
+
+func getSSHKeyFiles(uri string) []string {
+	pattern := regexp.MustCompile(`(?:[^@]+@)?([^:/]+)`)
+	matches := pattern.FindStringSubmatch(uri)
+	if len(matches) < 2 {
+		return nil
+	}
+	hostname := matches[1]
+	if hostname != "" {
+		return ssh_config.GetAll(hostname, "IdentityFile")
+	}
+	return nil
+}
+
+func getGitAuth(gitURI string) transport.AuthMethod {
 	if strings.HasPrefix(gitURI, "https://") {
 		if !gitHttpAuthProcessed {
 			gitHttpUsername := config.GetGitHTTPUsername()
@@ -31,10 +58,23 @@ func getGitAuth(gitURI string) *http.BasicAuth {
 		}
 		return gitHttpAuth
 	}
+	if sshKeyFiles := getSSHKeyFiles(gitURI); len(sshKeyFiles) == 1 {
+		keyPath := expandTilde(sshKeyFiles[0])
+		keyBytes, err := os.ReadFile(keyPath)
+		if err == nil {
+			_, err = ssh.ParsePrivateKey(keyBytes)
+			if err == nil {
+				auth, err := gitssh.NewPublicKeysFromFile("git", keyPath, "")
+				if err == nil {
+					return auth
+				}
+			}
+		}
+	}
 	return nil
 }
 
-func (profile *Profile) getGitAuth() (*http.BasicAuth, error) {
+func (profile *Profile) getGitAuth() (transport.AuthMethod, error) {
 	remotes, err := profile.repo.Remotes()
 	if err != nil {
 		return nil, err
@@ -96,19 +136,17 @@ func (profile *Profile) gitCommit(msg string) error {
 }
 
 func gitClone(dir, uri, branch string) (*git.Repository, error) {
-	if branch != "" {
-		return git.PlainClone(dir, false, &git.CloneOptions{
-			URL:           uri,
-			ReferenceName: plumbing.NewBranchReferenceName(branch),
-			SingleBranch:  true,
-			Auth:          getGitAuth(uri),
-		})
-	} else {
-		return git.PlainClone(dir, false, &git.CloneOptions{
-			URL:  uri,
-			Auth: getGitAuth(uri),
-		})
+	cloneOptions := &git.CloneOptions{
+		URL: uri,
 	}
+	if auth := getGitAuth(uri); auth != nil {
+		cloneOptions.Auth = auth
+	}
+	if branch != "" {
+		cloneOptions.ReferenceName = plumbing.NewBranchReferenceName(branch)
+		cloneOptions.SingleBranch = true
+	}
+	return git.PlainClone(dir, false, cloneOptions)
 }
 
 func (profile *Profile) gitMarkPull() error {

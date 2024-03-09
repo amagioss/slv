@@ -29,7 +29,7 @@ func getPublicKeys(pubKeyStrSlice, queries []string, self bool) (publicKeys []*c
 		if err != nil {
 			return nil, nil, err
 		}
-		envs, err := profile.SearchEnvsForQueries(queries)
+		envs, err := profile.SearchEnvs(queries)
 		if err != nil {
 			return nil, nil, err
 		}

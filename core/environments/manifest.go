@@ -87,7 +87,7 @@ func (envManifest *EnvManifest) GetEnv(id string) (env *Environment) {
 	return
 }
 
-func (envManifest *EnvManifest) SearchEnvs(query string) (environments []*Environment) {
+func (envManifest *EnvManifest) searchEnvs(query string) (environments []*Environment) {
 	query = strings.ToLower(query)
 	for _, env := range envManifest.Environments {
 		if env.Search(query) {
@@ -97,9 +97,11 @@ func (envManifest *EnvManifest) SearchEnvs(query string) (environments []*Enviro
 	return
 }
 
-func (envManifest *EnvManifest) SearchEnvsForQueries(queries []string) (environments []*Environment) {
+func (envManifest *EnvManifest) SearchEnvs(queries []string) (environments []*Environment) {
 	for _, query := range queries {
-		environments = append(environments, envManifest.SearchEnvs(query)...)
+		if query != "" {
+			environments = append(environments, envManifest.searchEnvs(query)...)
+		}
 	}
 	return
 }
