@@ -80,8 +80,6 @@ Shared vault: test.slv.yaml
 Once shared, the other environments can access the vault using their respective secret keys
 
 ## Integrations
-Some of the integrations that SLV supports currently are:
-- GitHub Actions
-    - [`slv-setup-action`](https://github.com/savesecrets/slv-setup-action)
-    - [`slv-secrets-action`](https://github.com/savesecrets/slv-secrets-action)
+Some of the integrations that SLV currently supports are:
 - [Kubernetes Operator](/operator/README.md)
+- [GitHub Actions](https://github.com/savesecrets/slv-action)
