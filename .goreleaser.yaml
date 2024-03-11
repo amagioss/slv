@@ -26,6 +26,7 @@ builds:
       - linux
 archives:
   - id: slv
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     format: zip
     builds:
       - slv
@@ -40,6 +41,7 @@ changelog:
 nfpms:
   - builds:
       - slv
+    file_name_template: '{{ .PackageName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     vendor: SaveSecrets
     homepage: https://savesecrets.org/slv
     maintainer: Shibly Meeran <shibme@shib.me>
