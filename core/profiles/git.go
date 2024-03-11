@@ -36,7 +36,17 @@ func getSSHKeyFiles(uri string) []string {
 	}
 	hostname := matches[1]
 	if hostname != "" {
-		return ssh_config.GetAll(hostname, "IdentityFile")
+		allKeyPaths := ssh_config.GetAll(hostname, "IdentityFile")
+		var keyPaths []string
+		keyPathMap := make(map[string]struct{})
+		for _, keyPath := range allKeyPaths {
+			keyPath = expandTilde(keyPath)
+			if _, found := keyPathMap[keyPath]; !found {
+				keyPaths = append(keyPaths, keyPath)
+				keyPathMap[keyPath] = struct{}{}
+			}
+		}
+		return keyPaths
 	}
 	return nil
 }
@@ -58,8 +68,8 @@ func getGitAuth(gitURI string) transport.AuthMethod {
 		}
 		return gitHttpAuth
 	}
-	if sshKeyFiles := getSSHKeyFiles(gitURI); len(sshKeyFiles) == 1 {
-		keyPath := expandTilde(sshKeyFiles[0])
+	if sshKeyFiles := getSSHKeyFiles(gitURI); len(sshKeyFiles) > 0 {
+		keyPath := sshKeyFiles[0]
 		keyBytes, err := os.ReadFile(keyPath)
 		if err == nil {
 			_, err = ssh.ParsePrivateKey(keyBytes)
