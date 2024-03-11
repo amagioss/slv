@@ -8,9 +8,13 @@ SLV is designed based on the following **key principles**
 ## Installation
 Download the latest SLV binary from the [releases](https://github.com/savesecrets/slv/releases/latest) page and add it to your path.
 
-SLV can also be installed with brew using the following command
+SLV can be installed with brew using the following command on macOS and Linux
 ```zsh
 brew install savesecrets/tap/slv
+```
+To quickly install SLV for the local user on macOS and Linux, use the following command
+```sh
+curl -sSL https://savesecrets.org/slv/install.sh | sh
 ```
 You can also use SLV with Docker by running the following command
 ```zsh
