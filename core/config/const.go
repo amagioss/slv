@@ -12,7 +12,7 @@ const (
 
 	AppNameLowerCase = "slv"
 	AppNameUpperCase = "SLV"
-	Description      = "Secure Local Vault | Secrets Launch Vehicle"
+	Description      = AppNameUpperCase + " (Secure Local Vault) : " + "Securely store, share and consume secrets alongside code."
 	Website          = "https://savesecrets.org/slv"
 	Art              = `
 	 ____  _ __     __

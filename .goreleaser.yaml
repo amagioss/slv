@@ -1,10 +1,11 @@
+project_name: slv
 builds:
   - id: slv
     binary: slv
     main: ./cli
     env:
       - CGO_ENABLED=0
-    ldflags: "-X savesecrets.org/slv.Version={{.Version}} -X savesecrets.org/slv.BuildDate={{.Date}} -X savesecrets.org/slv.Commit={{.Commit}}"
+    ldflags: "-X savesecrets.org/slv.Version={{.Version}} -X savesecrets.org/slv.commitDate={{.CommitDate}} -X savesecrets.org/slv.fullCommit={{.FullCommit}} -X savesecrets.org/slv.releaseURL={{.ReleaseURL}}"
     targets:
       - darwin_amd64
       - darwin_arm64

@@ -1,5 +1,5 @@
 # SLV - Secure Local Vault
-Secure Local Vault - SLV (a.k.a Secrets Launch Vehicle 🔐🚀) is a tool to manage secrets locally in a secure manner. It is designed to be used by developers to manage secrets along with their code so that they can be shared with other developers and services in a secure manner.
+Securely store, share and consume secrets alongside code.
 
 SLV is designed based on the following **key principles**
  - Anyone can add or update secrets, however will not be able to read them unless they have access to the vault
