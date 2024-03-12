@@ -34,6 +34,7 @@ jobs:
       - name: Prepare pages directory
         run: |
           cp scripts/install/* pages/
+          sed -i "s/savesecrets\/slv\//savesecrets\/slv-release\//g" pages/install.*
           mkdir -p pages/operator/samples
           cp operator/deploy.yaml pages/operator/samples/deploy.yaml
           cp operator/config/samples/slv_v1_slv.yaml pages/operator/samples/pets.slv.yaml
