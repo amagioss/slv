@@ -8,7 +8,7 @@ if ! command -v unzip >/dev/null && ! command -v 7z >/dev/null; then
 fi
 
 if [ "$OS" = "Windows_NT" ]; then
-	target="x86_64-pc-windows-msvc"
+	target="windows-amd64"
 else
 	case $(uname -sm) in
 	"Darwin x86_64") target="darwin_amd64" ;;
