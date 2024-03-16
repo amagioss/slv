@@ -12,6 +12,7 @@ var (
 	vaultAccessCmd       *cobra.Command
 	vaultAccessAddCmd    *cobra.Command
 	vaultAccessRemoveCmd *cobra.Command
+	vaultSecretsCmd      *cobra.Command
 	vaultPutCmd          *cobra.Command
 	vaultDeleteCmd       *cobra.Command
 	vaultGetCmd          *cobra.Command

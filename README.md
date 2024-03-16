@@ -1,5 +1,5 @@
 # SLV - Secure Local Vault
-Securely store, share and consume secrets alongside code.
+Securely store, share, and access secrets alongside the codebase.
 
 SLV is designed based on the following **key principles**
  - Anyone can add or update secrets, however will not be able to read them unless they have access to the vault
@@ -8,7 +8,7 @@ SLV is designed based on the following **key principles**
 ## Installation
 Download the latest SLV binary from the [releases](https://github.com/savesecrets/slv/releases/latest) page and add it to your path.
 
-#### Homebrew
+### Homebrew
 SLV can be installed with brew using the following command on macOS
 ```zsh
 brew install savesecrets/tap/slv
@@ -36,7 +36,7 @@ curl -fsSL https://savesecrets.org/slv/install.sh | sh -s v0.1.7
 $v="0.1.7"; irm https://savesecrets.org/slv/install.ps1 | iex
 ```
 
-#### Docker
+### Docker
 You can also run SLV without installing using Docker:
 ```zsh
 docker run -it --rm -v $PWD:/workspace ghcr.io/savesecrets/slv:latest version
