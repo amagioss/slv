@@ -41,7 +41,6 @@ func GetMultiLineHiddenInput(prompt string) (input []byte, err error) {
 			emptyLines = 0
 		}
 	}
-	fmt.Println(string(input))
 	return input, err
 }
 

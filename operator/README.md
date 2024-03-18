@@ -6,7 +6,7 @@ SLV operator is a Kubernetes controller that helps in reconciling SLV vaults as 
 ```sh
 kubectl create ns slv
 # Disclaimer: The below secret key is only for demonstration purposes. Please avoid using it in production.
-kubectl create secret generic slv -n slv --from-literal=secretkey=SLV_ESK_AEAEKAHBIONE3QIIWFXFRNJPE6A6AYL527QW4OF4HWWFDOE5E4XR5LO2WI
+kubectl create secret generic slv -n slv --from-literal=secretkey=SLV_ESK_AEAEKAAATI5CXB7QMFSUGY4RUT6UTUSK7SGMIECTJKRTQBFY6BN5ZV5M5XGF6DWLV2RVCJJSMXH43DJ6A5TK7Y6L6PYEMCDGQRBX46GUQPUIYUQ
 ```
 - Install the Kubernetes operator into your cluster
 ```sh

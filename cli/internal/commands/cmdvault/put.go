@@ -69,9 +69,6 @@ func vaultPutCommand() *cobra.Command {
 				}
 				fmt.Printf("Successfully imported secrets from %s into the vault %s\n", color.GreenString(importFile), color.GreenString(vaultFile))
 			}
-			if secretName == "" && importFile == "" {
-				utils.ExitOnErrorWithMessage("secret name or file is required")
-			}
 			utils.SafeExit()
 		},
 	}
