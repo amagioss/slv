@@ -15,8 +15,12 @@ type PublicKey struct {
 	pubKey  *xipher.PublicKey
 }
 
-func (publicKey *PublicKey) toBytes() []byte {
-	return append([]byte{*publicKey.version, 1, byte(*publicKey.keyType)}, publicKey.pubKey.Bytes()...)
+func (publicKey *PublicKey) toBytes() ([]byte, error) {
+	pubKeyBytes, err := publicKey.pubKey.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	return append([]byte{*publicKey.version, 1, byte(*publicKey.keyType)}, pubKeyBytes...), nil
 }
 
 func (publicKey *PublicKey) Type() KeyType {
@@ -43,8 +47,12 @@ func publicKeyFromBytes(bytes []byte) (*PublicKey, error) {
 	}, nil
 }
 
-func (publicKey PublicKey) String() string {
-	return slvPrefix + "_" + string(*publicKey.keyType) + publicKeyAbbrev + "_" + commons.Encode(publicKey.toBytes())
+func (publicKey PublicKey) String() (string, error) {
+	publicKeyBytes, err := publicKey.toBytes()
+	if err != nil {
+		return "", err
+	}
+	return slvPrefix + "_" + string(*publicKey.keyType) + publicKeyAbbrev + "_" + commons.Encode(publicKeyBytes), err
 }
 
 func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
@@ -68,10 +76,11 @@ func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
 }
 
 type SecretKey struct {
-	version   *uint8
-	keyType   *KeyType
-	privKey   *xipher.PrivateKey
-	publicKey *PublicKey
+	version      *uint8
+	keyType      *KeyType
+	privKey      *xipher.PrivateKey
+	pqPublicKey  *PublicKey
+	eccPublicKey *PublicKey
 }
 
 func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
@@ -99,19 +108,35 @@ func newSecretKey(privKey *xipher.PrivateKey, keyType KeyType) *SecretKey {
 	}
 }
 
-func (secretKey *SecretKey) PublicKey() (*PublicKey, error) {
-	if secretKey.publicKey == nil {
-		pubKey, err := secretKey.privKey.PublicKey()
-		if err != nil {
-			return nil, errDerivingPublicKey
-		}
-		secretKey.publicKey = &PublicKey{
-			version: secretKey.version,
-			keyType: secretKey.keyType,
-			pubKey:  pubKey,
-		}
+func (secretKey *SecretKey) getPublicKey(postQuantum bool) (*PublicKey, error) {
+	pubKey, err := secretKey.privKey.PublicKey(postQuantum)
+	if err != nil {
+		return nil, errDerivingPublicKey
 	}
-	return secretKey.publicKey, nil
+	return &PublicKey{
+		version: secretKey.version,
+		keyType: secretKey.keyType,
+		pubKey:  pubKey,
+	}, nil
+}
+
+func (secretKey *SecretKey) PublicKey(postQuantum bool) (publicKey *PublicKey, err error) {
+	if postQuantum {
+		if secretKey.pqPublicKey == nil {
+			if secretKey.pqPublicKey, err = secretKey.getPublicKey(postQuantum); err != nil {
+				return nil, err
+			}
+		}
+		return secretKey.pqPublicKey, nil
+	} else {
+		if secretKey.eccPublicKey == nil {
+			if secretKey.eccPublicKey, err = secretKey.getPublicKey(postQuantum); err != nil {
+				return nil, err
+			}
+		}
+		return secretKey.eccPublicKey, nil
+
+	}
 }
 
 func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {

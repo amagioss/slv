@@ -1,6 +1,8 @@
 package vaults
 
-import "savesecrets.org/slv/core/crypto"
+import (
+	"savesecrets.org/slv/core/crypto"
+)
 
 func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	if vlt.IsLocked() {
@@ -26,7 +28,7 @@ func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	return err == nil, err
 }
 
-func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey) error {
+func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error {
 	if vlt.IsLocked() {
 		return errVaultLocked
 	}
@@ -38,7 +40,15 @@ func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey) error {
 	for _, accessor := range accessors {
 		found := false
 		for _, publicKey := range publicKeys {
-			if publicKey.String() == accessor.String() {
+			publicKeyStr, err := publicKey.String()
+			if err != nil {
+				return err
+			}
+			accessorStr, err := accessor.String()
+			if err != nil {
+				return err
+			}
+			if publicKeyStr == accessorStr {
 				found = true
 				break
 			}
@@ -58,12 +68,16 @@ func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey) error {
 	if err != nil {
 		return err
 	}
-	vaultPublicKey, err := vaultSecretKey.PublicKey()
+	vaultPublicKey, err := vaultSecretKey.PublicKey(quantumSafe)
 	if err != nil {
 		return err
 	}
 	vlt.publicKey = vaultPublicKey
-	vlt.Config.PublicKey = vaultPublicKey.String()
+	vaultPublicKeyStr, err := vaultPublicKey.String()
+	if err != nil {
+		return err
+	}
+	vlt.Config.PublicKey = vaultPublicKeyStr
 	vlt.secretKey = vaultSecretKey
 	vlt.Config.WrappedKeys = []string{}
 	for _, accessor := range newAccessors {
@@ -90,26 +104,27 @@ func (vlt *Vault) ListAccessors() ([]crypto.PublicKey, error) {
 		if err != nil {
 			return nil, err
 		}
-		accessors = append(accessors, wrappedKey.EncryptedBy())
+		encryptedBy, err := wrappedKey.EncryptedByPublicKey()
+		if err != nil {
+			return nil, err
+		}
+		accessors = append(accessors, *encryptedBy)
 	}
 	return accessors, nil
 }
 
 func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
-	publicKey, err := secretKey.PublicKey()
-	if err != nil || (!vlt.IsLocked() && *vlt.unlockedBy == publicKey.String()) {
-		return err
+	if !vlt.IsLocked() {
+		return nil
 	}
 	for _, wrappedKeyStr := range vlt.Config.WrappedKeys {
 		wrappedKey := &crypto.WrappedKey{}
-		if err = wrappedKey.FromString(wrappedKeyStr); err != nil {
+		if err := wrappedKey.FromString(wrappedKeyStr); err != nil {
 			return err
 		}
 		decryptedKey, err := secretKey.DecryptKey(*wrappedKey)
 		if err == nil {
 			vlt.secretKey = decryptedKey
-			vlt.unlockedBy = new(string)
-			*vlt.unlockedBy = publicKey.String()
 			return nil
 		}
 	}

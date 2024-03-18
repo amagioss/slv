@@ -48,7 +48,8 @@ func envNewServiceCommand() *cobra.Command {
 			}
 			var env *environments.Environment
 			var secretKey *crypto.SecretKey
-			env, secretKey, err = environments.NewEnvironment(name, environments.SERVICE)
+			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
+			env, secretKey, err = environments.NewEnvironment(name, environments.SERVICE, pq)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -115,7 +116,8 @@ func envNewUserCommand() *cobra.Command {
 			}
 			inputs["password"] = password
 			var env *environments.Environment
-			env, err = providers.NewEnvForProvider("password", envName, environments.USER, inputs)
+			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
+			env, err = providers.NewEnvForProvider("password", envName, environments.USER, inputs, pq)
 			if err != nil {
 				utils.ExitOnError(err)
 			}

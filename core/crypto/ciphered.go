@@ -13,8 +13,8 @@ type ciphered struct {
 	version     *uint8
 	keyType     *KeyType
 	encryptedAt *time.Time
-	ciphertext  *[]byte
-	encryptedBy *PublicKey
+	ciphertext  []byte
+	encryptedBy []byte
 }
 
 func timeToBytes(t time.Time) []byte {
@@ -29,11 +29,11 @@ func bytesToTime(timeBytes []byte) time.Time {
 
 func (ciph ciphered) toBytes() []byte {
 	keyLenBytes := make([]byte, 2)
-	binary.BigEndian.PutUint16(keyLenBytes, uint16(len(ciph.encryptedBy.toBytes())))
+	binary.BigEndian.PutUint16(keyLenBytes, uint16(len(ciph.encryptedBy)))
 	cipheredBytes := append([]byte{*ciph.version, byte(*ciph.keyType)}, timeToBytes(*ciph.encryptedAt)...)
 	cipheredBytes = append(cipheredBytes, keyLenBytes...)
-	cipheredBytes = append(cipheredBytes, ciph.encryptedBy.toBytes()...)
-	cipheredBytes = append(cipheredBytes, *ciph.ciphertext...)
+	cipheredBytes = append(cipheredBytes, ciph.encryptedBy...)
+	cipheredBytes = append(cipheredBytes, ciph.ciphertext...)
 	return cipheredBytes
 }
 
@@ -48,26 +48,30 @@ func cipheredFromBytes(cipheredBytes []byte) (*ciphered, error) {
 	if len(cipheredBytes) < int(keyLen) {
 		return nil, errInvalidCiphertextFormat
 	}
-	encryptedBy, err := publicKeyFromBytes(cipheredBytes[:keyLen])
-	if err != nil {
-		return nil, err
-	}
+	encryptedBy := cipheredBytes[:keyLen]
 	ciphertext := cipheredBytes[keyLen:]
 	return &ciphered{
 		version:     &version,
 		keyType:     &keyType,
 		encryptedAt: &encryptedAt,
 		encryptedBy: encryptedBy,
-		ciphertext:  &ciphertext,
+		ciphertext:  ciphertext,
 	}, nil
 }
 
 func (ciph *ciphered) IsEncryptedBy(publicKey *PublicKey) bool {
-	return bytes.Equal(ciph.encryptedBy.toBytes(), publicKey.toBytes())
+	if publicKeyBytes, err := publicKey.toBytes(); err == nil {
+		return bytes.Equal(ciph.encryptedBy, publicKeyBytes)
+	}
+	return false
 }
 
-func (ciph *ciphered) EncryptedBy() PublicKey {
-	return *ciph.encryptedBy
+func (ciph *ciphered) EncryptedBy() []byte {
+	return ciph.encryptedBy
+}
+
+func (ciph *ciphered) EncryptedByPublicKey() (*PublicKey, error) {
+	return publicKeyFromBytes(ciph.encryptedBy)
 }
 
 func (ciph *ciphered) EncryptedAt() time.Time {

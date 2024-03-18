@@ -103,13 +103,14 @@ func vaultAccessRemoveCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			vault, err := getVault(vaultFile)
+			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
 			if err == nil {
 				var envSecretKey *crypto.SecretKey
 				if envSecretKey, err = slv.GetSecretKey(); err == nil {
 					err = vault.Unlock(*envSecretKey)
 				}
 				if err == nil {
-					if err = vault.Revoke(publicKeys); err == nil {
+					if err = vault.Revoke(publicKeys, pq); err == nil {
 						fmt.Println("Shared vault:", color.GreenString(vaultFile))
 						utils.SafeExit()
 					}

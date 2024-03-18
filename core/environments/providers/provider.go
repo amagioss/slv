@@ -9,7 +9,7 @@ import (
 	"savesecrets.org/slv/core/environments"
 )
 
-type Bind func(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error)
+type Bind func(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error)
 type UnBind func(ref map[string][]byte) (secretKeyBytes []byte, err error)
 
 var providerMap = make(map[string]*provider)
@@ -65,17 +65,17 @@ func RegisterEnvSecretProvider(name string, bind Bind, unbind UnBind, refRequire
 }
 
 func NewEnvForProvider(providerName, envName string, envType environments.EnvType,
-	inputs map[string][]byte) (*environments.Environment, error) {
+	inputs map[string][]byte, quantumSafe bool) (*environments.Environment, error) {
 	loadDefaultProviders()
 	provider, ok := providerMap[providerName]
 	if !ok {
 		return nil, errProviderUnknown
 	}
-	publicKey, ref, err := (*provider.bind)(inputs)
+	env, sk, err := environments.NewEnvironment(envName, envType, quantumSafe)
 	if err != nil {
 		return nil, err
 	}
-	env, err := environments.NewEnvironmentForPublicKey(envName, envType, publicKey)
+	ref, err := (*provider.bind)(sk.Bytes(), inputs)
 	if err != nil {
 		return nil, err
 	}

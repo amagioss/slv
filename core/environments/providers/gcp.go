@@ -6,8 +6,6 @@ import (
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "cloud.google.com/go/kms/apiv1/kmspb"
-	"savesecrets.org/slv/core/crypto"
-	"savesecrets.org/slv/core/environments"
 )
 
 func isValidGCPResourceName(resourcePath string, symmetricAlgo bool) bool {
@@ -16,14 +14,10 @@ func isValidGCPResourceName(resourcePath string, symmetricAlgo bool) bool {
 		(symmetricAlgo != strings.Contains(resourcePath, "cryptoKeyVersions/"))
 }
 
-func bindWithGCP(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error) {
+func bindWithGCP(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {
 	rsaPublicKey, ok := inputs[rsaPubKeyRefName]
 	symmetricAlgo := !ok || len(rsaPublicKey) == 0
 	if resourceName := string(inputs[gcpResourceNameRef]); isValidGCPResourceName(resourceName, symmetricAlgo) {
-		var secretKey *crypto.SecretKey
-		if secretKey, err = crypto.NewSecretKey(environments.EnvironmentKey); err != nil {
-			return nil, nil, err
-		}
 		var sealedSecretKeyBytes []byte
 		ref = make(map[string][]byte)
 		ref[gcpResourceNameRef] = []byte(resourceName)
@@ -31,23 +25,20 @@ func bindWithGCP(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map
 			ctx := context.Background()
 			client, err := kms.NewKeyManagementClient(ctx)
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 			req := &kmspb.EncryptRequest{
 				Name:      resourceName,
-				Plaintext: secretKey.Bytes(),
+				Plaintext: skBytes,
 			}
 			result, err := client.Encrypt(ctx, req)
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 			sealedSecretKeyBytes = result.Ciphertext
 			symmetricAlgo = true
-		} else if sealedSecretKeyBytes, err = rsaEncrypt(secretKey.Bytes(), rsaPublicKey); err != nil {
-			return nil, nil, err
-		}
-		if publicKey, err = secretKey.PublicKey(); err != nil {
-			return nil, nil, err
+		} else if sealedSecretKeyBytes, err = rsaEncrypt(skBytes, rsaPublicKey); err != nil {
+			return nil, err
 		}
 		var symmetricAlgoByte byte
 		if symmetricAlgo {
@@ -59,7 +50,7 @@ func bindWithGCP(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map
 		ref["ssk"] = sealedSecretKeyBytes
 		return
 	}
-	return nil, nil, errInvalidGCPKMSResourceName
+	return nil, errInvalidGCPKMSResourceName
 }
 
 func unBindWithGCP(ref map[string][]byte) (secretKeyBytes []byte, err error) {

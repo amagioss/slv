@@ -11,13 +11,17 @@ func (publicKey *PublicKey) encrypt(data []byte) (*ciphered, error) {
 	if err != nil {
 		return nil, errEncryptionFailed
 	}
+	pubKeyBytes, err := publicKey.toBytes()
+	if err != nil {
+		return nil, err
+	}
 	currentTime := time.Now()
 	return &ciphered{
 		version:     publicKey.version,
 		keyType:     publicKey.keyType,
 		encryptedAt: &currentTime,
-		encryptedBy: publicKey,
-		ciphertext:  &ciphertext,
+		encryptedBy: pubKeyBytes,
+		ciphertext:  ciphertext,
 	}, nil
 }
 
@@ -53,11 +57,15 @@ func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength uint8) (seal
 }
 
 func (secretKey *SecretKey) decrypt(ciphered *ciphered) (data []byte, err error) {
-	publicKey, err := secretKey.PublicKey()
-	if err != nil || !ciphered.IsEncryptedBy(publicKey) {
+	var pqPubKey, eccPubKey *PublicKey
+	pqPubKey, err = secretKey.PublicKey(true)
+	if err == nil {
+		eccPubKey, err = secretKey.PublicKey(false)
+	}
+	if err != nil || (!ciphered.IsEncryptedBy(pqPubKey) && !ciphered.IsEncryptedBy(eccPubKey)) {
 		return nil, errSecretKeyMismatch
 	}
-	data, err = secretKey.privKey.Decrypt(*ciphered.ciphertext)
+	data, err = secretKey.privKey.Decrypt(ciphered.ciphertext)
 	if err != nil {
 		return nil, errDecryptionFailed
 	}

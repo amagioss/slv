@@ -12,8 +12,8 @@ import (
 	"savesecrets.org/slv/core/vaults"
 )
 
-func newK8sVault(filePath, name string, hashLength uint8, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
-	vault, err := vaults.New(filePath, k8sVaultField, hashLength, rootPublicKey, publicKeys...)
+func newK8sVault(filePath, name string, hashLength uint8, pq bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
+	vault, err := vaults.New(filePath, k8sVaultField, hashLength, pq, rootPublicKey, publicKeys...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,11 +56,12 @@ func vaultNewCommand() *cobra.Command {
 			if enableHash {
 				hashLength = 4
 			}
+			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
 			k8sName := cmd.Flag(vaultK8sFlag.Name).Value.String()
 			if k8sName == "" {
-				_, err = vaults.New(vaultFile, "", hashLength, rootPublicKey, publicKeys...)
+				_, err = vaults.New(vaultFile, "", hashLength, pq, rootPublicKey, publicKeys...)
 			} else {
-				_, err = newK8sVault(vaultFile, k8sName, hashLength, rootPublicKey, publicKeys...)
+				_, err = newK8sVault(vaultFile, k8sName, hashLength, pq, rootPublicKey, publicKeys...)
 			}
 			if err != nil {
 				utils.ExitOnError(err)

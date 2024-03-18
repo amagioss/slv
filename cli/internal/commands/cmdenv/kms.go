@@ -34,7 +34,8 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 					inputs[kmsRSAPublicKey.Name] = rsaPublicKey
 				}
 			}
-			env, err = providers.NewEnvForProvider(kmsName, envName, environments.SERVICE, inputs)
+			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
+			env, err = providers.NewEnvForProvider(kmsName, envName, environments.SERVICE, inputs, pq)
 			if err != nil {
 				utils.ExitOnError(err)
 			}

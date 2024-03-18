@@ -55,25 +55,28 @@ func VaultCommand() *cobra.Command {
 			envMap := make(map[string]string, len(accessors))
 			for _, accessor := range accessors {
 				var env *environments.Environment
-				envId := accessor.String()
+				accessorStr, err := accessor.String()
+				if err != nil {
+					utils.ExitOnError(err)
+				}
 				selfEnv := false
-				if self != nil && self.PublicKey == accessor.String() {
+				if self != nil && self.PublicKey == accessorStr {
 					env = self
 					selfEnv = true
 				} else if profile != nil {
-					env, err = profile.GetEnv(envId)
+					env, err = profile.GetEnv(accessorStr)
 					if err != nil {
 						utils.ExitOnError(err)
 					}
 				}
 				if env != nil {
 					if selfEnv {
-						envMap[envId] = envId + "\t(" + color.CyanString("Self"+": "+env.Name) + ")"
+						envMap[accessorStr] = accessorStr + "\t(" + color.CyanString("Self"+": "+env.Name) + ")"
 					} else {
-						envMap[envId] = envId + "\t(" + env.Name + ")"
+						envMap[accessorStr] = accessorStr + "\t(" + env.Name + ")"
 					}
 				} else {
-					envMap[envId] = envId
+					envMap[accessorStr] = accessorStr
 				}
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
@@ -96,6 +99,7 @@ func VaultCommand() *cobra.Command {
 		},
 	}
 	vaultCmd.PersistentFlags().StringP(vaultFileFlag.Name, vaultFileFlag.Shorthand, "", vaultFileFlag.Usage)
+	vaultCmd.PersistentFlags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	vaultCmd.MarkPersistentFlagRequired(vaultFileFlag.Name)
 	vaultCmd.AddCommand(vaultNewCommand())
 	vaultCmd.AddCommand(vaultSecretsCommand())

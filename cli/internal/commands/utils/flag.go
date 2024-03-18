@@ -5,3 +5,11 @@ type FlagDef struct {
 	Shorthand string
 	Usage     string
 }
+
+var (
+	QuantumSafeFlag = FlagDef{
+		Name:      "quantum-safe",
+		Shorthand: "q",
+		Usage:     "Enable quantum-safe cryptography",
+	}
+)

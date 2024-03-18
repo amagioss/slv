@@ -9,8 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"savesecrets.org/slv/core/commons"
-	"savesecrets.org/slv/core/crypto"
-	"savesecrets.org/slv/core/environments"
 )
 
 func isValidARN(arn string) bool {
@@ -63,34 +61,27 @@ func encryptWithAWSKMSAPI(secretKeyBytes []byte, arn string) (sealedSecretKeyByt
 	return result.CiphertextBlob, algorithm, err
 }
 
-func bindWithAWSKMS(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error) {
+func bindWithAWSKMS(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {
 	if arn := string(inputs[awsARNRefName]); isValidARN(arn) {
-		var secretKey *crypto.SecretKey
-		if secretKey, err = crypto.NewSecretKey(environments.EnvironmentKey); err != nil {
-			return nil, nil, err
-		}
 		var sealedSecretKeyBytes []byte
 		rsaPublicKey, ok := inputs[rsaPubKeyRefName]
 		ref = make(map[string][]byte)
 		ref[awsARNRefName] = []byte(arn)
 		if !ok || len(rsaPublicKey) == 0 {
 			var algorithm *string
-			if sealedSecretKeyBytes, algorithm, err = encryptWithAWSKMSAPI(secretKey.Bytes(), arn); err != nil {
-				return nil, nil, err
+			if sealedSecretKeyBytes, algorithm, err = encryptWithAWSKMSAPI(skBytes, arn); err != nil {
+				return nil, err
 			}
 			ref["alg"] = []byte(*algorithm)
-		} else if sealedSecretKeyBytes, err = rsaEncrypt(secretKey.Bytes(), rsaPublicKey); err == nil {
+		} else if sealedSecretKeyBytes, err = rsaEncrypt(skBytes, rsaPublicKey); err == nil {
 			ref["alg"] = []byte(awsKMSAsymmetricEncryptionAlgorithm)
 		} else {
-			return nil, nil, err
-		}
-		if publicKey, err = secretKey.PublicKey(); err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		ref["ssk"] = sealedSecretKeyBytes
 		return
 	}
-	return nil, nil, errInvalidAWSKMSARN
+	return nil, errInvalidAWSKMSARN
 }
 
 func unBindFromAWSKMS(ref map[string][]byte) (secretKeyBytes []byte, err error) {

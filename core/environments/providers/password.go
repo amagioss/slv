@@ -3,34 +3,25 @@ package providers
 import (
 	"dev.shib.me/xipher"
 	"savesecrets.org/slv/core/config"
-	"savesecrets.org/slv/core/crypto"
-	"savesecrets.org/slv/core/environments"
 	"savesecrets.org/slv/core/input"
 )
 
-func bindWithPassword(inputs map[string][]byte) (publicKey *crypto.PublicKey, ref map[string][]byte, err error) {
+func bindWithPassword(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {
 	password := inputs["password"]
 	if len(password) == 0 {
-		return nil, nil, err
+		return nil, err
 	}
 	xipherKey, err := xipher.NewPrivateKeyForPassword(password)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	var secretKey *crypto.SecretKey
-	if secretKey, err = crypto.NewSecretKey(environments.EnvironmentKey); err != nil {
-		return nil, nil, err
-	}
-	sealedSecretKeyBytes, err := xipherKey.Encrypt(secretKey.Bytes(), false)
+	sealedSecretKeyBytes, err := xipherKey.Encrypt(skBytes, false)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	if publicKey, err = secretKey.PublicKey(); err == nil {
-		ref = make(map[string][]byte)
-		ref["ssk"] = sealedSecretKeyBytes
-		return
-	}
-	return nil, nil, err
+	ref = make(map[string][]byte)
+	ref["ssk"] = sealedSecretKeyBytes
+	return
 }
 
 func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error) {

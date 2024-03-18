@@ -36,19 +36,23 @@ func NewEnvironmentForPublicKey(name string, envType EnvType, publicKey *crypto.
 	if !envType.isValid() {
 		return nil, errInvalidEnvironmentType
 	}
+	publicKeyStr, err := publicKey.String()
+	if err != nil {
+		return nil, err
+	}
 	return &Environment{
 		environment: &environment{
-			PublicKey: publicKey.String(),
+			PublicKey: publicKeyStr,
 			Name:      name,
 			EnvType:   envType,
 		},
 	}, nil
 }
 
-func NewEnvironment(name string, envType EnvType) (*Environment, *crypto.SecretKey, error) {
+func NewEnvironment(name string, envType EnvType, pq bool) (*Environment, *crypto.SecretKey, error) {
 	secretKey, err := crypto.NewSecretKey(EnvironmentKey)
 	if err == nil {
-		publicKey, err := secretKey.PublicKey()
+		publicKey, err := secretKey.PublicKey(pq)
 		if err != nil {
 			return nil, nil, err
 		}

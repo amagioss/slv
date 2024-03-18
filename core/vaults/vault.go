@@ -25,7 +25,6 @@ type Vault struct {
 	path                string            `json:"-"`
 	publicKey           *crypto.PublicKey `json:"-"`
 	secretKey           *crypto.SecretKey `json:"-"`
-	unlockedBy          *string           `json:"-"`
 	decryptedSecrets    map[string][]byte `json:"-"`
 	vaultSecretRefRegex *regexp.Regexp    `json:"-"`
 	objectField         string            `json:"-"`
@@ -63,7 +62,7 @@ func newVaultId() (string, error) {
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yml or .slv.yaml.
-func New(filePath, objectField string, hashLength uint8, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+func New(filePath, objectField string, hashLength uint8, quantumSafe bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
@@ -77,7 +76,7 @@ func New(filePath, objectField string, hashLength uint8, rootPublicKey *crypto.P
 	if err != nil {
 		return nil, err
 	}
-	vaultPublicKey, err := vaultSecretKey.PublicKey()
+	vaultPublicKey, err := vaultSecretKey.PublicKey(quantumSafe)
 	if err != nil {
 		return nil, err
 	}
@@ -85,11 +84,15 @@ func New(filePath, objectField string, hashLength uint8, rootPublicKey *crypto.P
 	if err != nil {
 		return nil, err
 	}
+	vaultPubKeyStr, err := vaultPublicKey.String()
+	if err != nil {
+		return nil, err
+	}
 	vlt = &Vault{
 		publicKey: vaultPublicKey,
 		Config: vaultConfig{
 			Id:         vauldId,
-			PublicKey:  vaultPublicKey.String(),
+			PublicKey:  vaultPubKeyStr,
 			HashLength: hashLength,
 		},
 		path:        filePath,
@@ -144,10 +147,6 @@ func (vlt *Vault) IsLocked() bool {
 func (vlt *Vault) Lock() {
 	vlt.clearSecretCache()
 	vlt.secretKey = nil
-}
-
-func (vlt *Vault) UnlockedBy() (id *string) {
-	return vlt.unlockedBy
 }
 
 func (vlt *Vault) Delete() error {
