@@ -64,14 +64,14 @@ func RegisterEnvSecretProvider(name string, bind Bind, unbind UnBind, refRequire
 	return nil
 }
 
-func NewEnvForProvider(providerName, envName string, envType environments.EnvType,
+func NewEnvForProvider(providerName, id, envName string, envType environments.EnvType,
 	inputs map[string][]byte, quantumSafe bool) (*environments.Environment, error) {
 	loadDefaultProviders()
 	provider, ok := providerMap[providerName]
 	if !ok {
 		return nil, errProviderUnknown
 	}
-	env, sk, err := environments.NewEnvironment(envName, envType, quantumSafe)
+	env, sk, err := environments.NewEnvironment(id, envName, envType, quantumSafe)
 	if err != nil {
 		return nil, err
 	}

@@ -122,6 +122,6 @@ func (envManifest *EnvManifest) PutEnv(env *Environment) (err error) {
 	if envManifest.Environments == nil {
 		envManifest.Environments = make(map[string]*Environment)
 	}
-	envManifest.Environments[env.Id()] = env
+	envManifest.Environments[env.GetId()] = env
 	return envManifest.commit()
 }

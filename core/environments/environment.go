@@ -1,12 +1,10 @@
 package environments
 
 import (
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strings"
 
-	"gopkg.in/yaml.v3"
 	"savesecrets.org/slv/core/commons"
 	"savesecrets.org/slv/core/config"
 	"savesecrets.org/slv/core/crypto"
@@ -15,10 +13,7 @@ import (
 type EnvType string
 
 type Environment struct {
-	*environment
-}
-
-type environment struct {
+	Id            string   `yaml:"id"`
 	PublicKey     string   `yaml:"publicKey"`
 	Name          string   `yaml:"name"`
 	Email         string   `yaml:"email"`
@@ -32,7 +27,7 @@ func (eType *EnvType) isValid() bool {
 	return *eType == SERVICE || *eType == USER || *eType == ROOT
 }
 
-func NewEnvironmentForPublicKey(name string, envType EnvType, publicKey *crypto.PublicKey) (*Environment, error) {
+func newEnvironmentForPublicKey(id, name string, envType EnvType, publicKey *crypto.PublicKey) (*Environment, error) {
 	if !envType.isValid() {
 		return nil, errInvalidEnvironmentType
 	}
@@ -40,23 +35,25 @@ func NewEnvironmentForPublicKey(name string, envType EnvType, publicKey *crypto.
 	if err != nil {
 		return nil, err
 	}
+	if id == "" {
+		id = publicKeyStr
+	}
 	return &Environment{
-		environment: &environment{
-			PublicKey: publicKeyStr,
-			Name:      name,
-			EnvType:   envType,
-		},
+		Id:        id,
+		PublicKey: publicKeyStr,
+		Name:      name,
+		EnvType:   envType,
 	}, nil
 }
 
-func NewEnvironment(name string, envType EnvType, pq bool) (*Environment, *crypto.SecretKey, error) {
+func NewEnvironment(id, name string, envType EnvType, pq bool) (*Environment, *crypto.SecretKey, error) {
 	secretKey, err := crypto.NewSecretKey(EnvironmentKey)
 	if err == nil {
 		publicKey, err := secretKey.PublicKey(pq)
 		if err != nil {
 			return nil, nil, err
 		}
-		env, err := NewEnvironmentForPublicKey(name, envType, publicKey)
+		env, err := newEnvironmentForPublicKey(id, name, envType, publicKey)
 		return env, secretKey, err
 	}
 	return nil, nil, err
@@ -75,8 +72,11 @@ func (env *Environment) getPublicKey() (publicKey *crypto.PublicKey, err error) 
 	return env.publicKey, nil
 }
 
-func (env *Environment) Id() string {
-	return env.PublicKey
+func (env *Environment) GetId() string {
+	if env.Id == "" {
+		env.Id = env.PublicKey
+	}
+	return env.Id
 }
 
 func (env *Environment) SetEmail(email string) {
@@ -104,23 +104,6 @@ func (env *Environment) ToEnvDef() (string, error) {
 	return fmt.Sprintf("%s_%s_%s", slvPrefix, envDefStringAbbrev, data), nil
 }
 
-func (env Environment) MarshalYAML() (interface{}, error) {
-	return env.environment, nil
-}
-
-func (env *Environment) UnmarshalYAML(value *yaml.Node) (err error) {
-	return value.Decode(&env.environment)
-}
-
-func (env *Environment) UnmarshalJSON(data []byte) (err error) {
-	var environment *environment = new(environment)
-	err = json.Unmarshal(data, environment)
-	if err == nil {
-		env.environment = environment
-	}
-	return
-}
-
 func (env *Environment) Search(query string) bool {
 	return strings.Contains(strings.ToLower(fmt.Sprintf("%s\n%s\n%s\n%s", env.Name, env.Email,
 		env.EnvType, strings.Join(env.Tags, "\n"))),
@@ -129,10 +112,8 @@ func (env *Environment) Search(query string) bool {
 
 func GetSelf() *Environment {
 	selfEnvFilePath := filepath.Join(config.GetAppDataDir(), selfEnvFileName)
-	env := &Environment{
-		environment: new(environment),
-	}
-	if err := commons.ReadFromYAML(selfEnvFilePath, env.environment); err != nil {
+	env := &Environment{}
+	if err := commons.ReadFromYAML(selfEnvFilePath, env); err != nil {
 		return nil
 	}
 	return env

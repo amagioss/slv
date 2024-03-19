@@ -30,20 +30,22 @@ func envDeleteCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			for _, env := range envs {
-				utils.ShowEnv(*env, false, false)
-				fmt.Println()
-			}
-			confirm, err := input.GetConfirmation("Are you sure you want to delete the above environment(s) [yes/no]: ", "yes")
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			if confirm {
+			if envs != nil {
 				for _, env := range envs {
-					if profile.DeleteEnv(env.Id()); err != nil {
-						utils.ExitOnError(err)
+					utils.ShowEnv(*env, false, false)
+					fmt.Println()
+				}
+				confirm, err := input.GetConfirmation("Are you sure you want to delete the above environment(s) [yes/no]: ", "yes")
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				if confirm {
+					for _, env := range envs {
+						if profile.DeleteEnv(env.GetId()); err != nil {
+							utils.ExitOnError(err)
+						}
+						fmt.Printf("Environment %s deleted successfully\n", env.Name)
 					}
-					fmt.Printf("Environment %s deleted successfully\n", env.Name)
 				}
 			}
 			utils.SafeExit()

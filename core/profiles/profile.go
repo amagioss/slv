@@ -113,7 +113,7 @@ func (profile *Profile) PutEnv(env *environments.Environment) error {
 	if err = envManifest.PutEnv(env); err != nil {
 		return err
 	}
-	return profile.commit("Adding environment: " + env.Id() + " [" + env.Name + "]")
+	return profile.commit("Adding environment: " + env.GetId() + " [" + env.Name + "]")
 }
 
 func (profile *Profile) RootPublicKey() (*crypto.PublicKey, error) {
@@ -140,7 +140,7 @@ func (profile *Profile) SetRoot(env *environments.Environment) error {
 	if err = envManifest.SetRoot(env); err != nil {
 		return err
 	}
-	return profile.commit("Setting root environment: " + env.Id() + " [" + env.Name + "]")
+	return profile.commit("Setting root environment: " + env.GetId() + " [" + env.Name + "]")
 }
 
 func (profile *Profile) SearchEnvs(queries []string) ([]*environments.Environment, error) {
@@ -168,7 +168,7 @@ func (profile *Profile) DeleteEnv(id string) error {
 	if err != nil {
 		return err
 	}
-	return profile.commit("Deleting environment: " + env.Id() + " [" + env.Name + "]")
+	return profile.commit("Deleting environment: " + env.GetId() + " [" + env.Name + "]")
 }
 
 func (profile *Profile) ListEnvs() ([]*environments.Environment, error) {
