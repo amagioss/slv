@@ -24,6 +24,7 @@ func envNewCommand() *cobra.Command {
 			cmd.Help()
 		},
 	}
+	envNewCmd.PersistentFlags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	envNewCmd.AddCommand(envNewServiceCommand())
 	envNewCmd.AddCommand(envNewUserCommand())
 	envNewCmd.AddCommand(newKMSEnvCommand("aws", "Create an environment that works with AWS KMS", awsARNFlag))

@@ -99,7 +99,6 @@ func VaultCommand() *cobra.Command {
 		},
 	}
 	vaultCmd.PersistentFlags().StringP(vaultFileFlag.Name, vaultFileFlag.Shorthand, "", vaultFileFlag.Usage)
-	vaultCmd.PersistentFlags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	vaultCmd.MarkPersistentFlagRequired(vaultFileFlag.Name)
 	vaultCmd.AddCommand(vaultNewCommand())
 	vaultCmd.AddCommand(vaultSecretsCommand())
