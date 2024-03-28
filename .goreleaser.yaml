@@ -18,7 +18,7 @@ builds:
     main: ./operator/cmd
     env:
       - CGO_ENABLED=0
-    ldflags: "-X savesecrets.org/slv.Version={{.Version}}"
+    ldflags: "-X savesecrets.org/slv.Version={{.Version}} -X savesecrets.org/slv.commitDate={{.CommitDate}} -X savesecrets.org/slv.fullCommit={{.FullCommit}} -X savesecrets.org/slv.releaseURL={{.ReleaseURL}}"
     goarch:
       - amd64
       - arm64
