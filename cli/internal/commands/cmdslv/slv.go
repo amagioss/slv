@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"savesecrets.org/slv"
-	"savesecrets.org/slv/cli/internal/commands/cmdenv"
-	"savesecrets.org/slv/cli/internal/commands/cmdprofile"
-	"savesecrets.org/slv/cli/internal/commands/cmdsystem"
-	"savesecrets.org/slv/cli/internal/commands/cmdvault"
-	"savesecrets.org/slv/cli/internal/commands/utils"
+	"oss.amagi.com/slv"
+	"oss.amagi.com/slv/cli/internal/commands/cmdenv"
+	"oss.amagi.com/slv/cli/internal/commands/cmdprofile"
+	"oss.amagi.com/slv/cli/internal/commands/cmdsystem"
+	"oss.amagi.com/slv/cli/internal/commands/cmdvault"
+	"oss.amagi.com/slv/cli/internal/commands/utils"
 )
 
 var (

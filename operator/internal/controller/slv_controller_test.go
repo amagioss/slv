@@ -27,7 +27,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	slvv1 "savesecrets.org/slv/operator/api/v1"
+	slvv1 "oss.amagi.com/slv/operator/api/v1"
 )
 
 var _ = Describe("SLV Controller", func() {

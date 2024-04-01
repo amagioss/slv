@@ -1,7 +1,7 @@
 package vaults
 
 import (
-	"savesecrets.org/slv/core/crypto"
+	"oss.amagi.com/slv/core/crypto"
 )
 
 func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {

@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: slvs.slv.savesecrets.org
+  name: slvs.slv.oss.amagi.com
 spec:
-  group: slv.savesecrets.org
+  group: slv.oss.amagi.com
   names:
     kind: SLV
     listKind: SLVList
@@ -97,7 +97,7 @@ metadata:
   name: slv-operator-clusterrole
 rules:
 
-  - apiGroups: ["slv.savesecrets.org"]
+  - apiGroups: ["slv.oss.amagi.com"]
     resources: ["slvs"]  # plural of SLV CRD
     verbs:
       - "watch"
@@ -148,7 +148,7 @@ spec:
       serviceAccountName: slv-operator
       containers:
       - name: slv-operator
-        image: ghcr.io/savesecrets/slv/operator:latest # Use a specific version tag corresponding to the version of SLV used with the CR
+        image: ghcr.io/amagioss/slv/operator:latest # Use a specific version tag corresponding to the version of SLV used with the CR
         resources:
           limits:
             cpu: "1" # 1 CPU should be fairly enough for SLV Controller

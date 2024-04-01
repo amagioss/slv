@@ -1,10 +1,10 @@
 package slv
 
 import (
-	"savesecrets.org/slv/core/config"
-	"savesecrets.org/slv/core/crypto"
-	"savesecrets.org/slv/core/environments"
-	"savesecrets.org/slv/core/environments/providers"
+	"oss.amagi.com/slv/core/config"
+	"oss.amagi.com/slv/core/crypto"
+	"oss.amagi.com/slv/core/environments"
+	"oss.amagi.com/slv/core/environments/providers"
 )
 
 func GetSecretKey() (*crypto.SecretKey, error) {

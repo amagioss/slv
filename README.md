@@ -6,12 +6,12 @@ SLV is designed based on the following **key principles**
  - An environment should have a single identity that will give access to all necessary secrets from any vault shared with it
 
 ## Installation
-Download the latest SLV binary from the [releases](https://github.com/savesecrets/slv/releases/latest) page and add it to your path.
+Download the latest SLV binary from the [releases](https://github.com/amagioss/slv/releases/latest) page and add it to your path.
 
 ### Homebrew
 SLV can be installed with brew using the following command on macOS
 ```zsh
-brew install savesecrets/tap/slv
+brew install amagioss/slv/slv
 ```
 
 ### Install Script
@@ -19,27 +19,27 @@ brew install savesecrets/tap/slv
 #### Install Latest Version
 **With Shell (MacOs/Linux):**
 ```sh
-curl -fsSL https://savesecrets.org/slv/install.sh | sh
+curl -fsSL https://oss.amagi.com/slv/install.sh | sh
 ```
 **With PowerShell (Windows):**
 ```powershell
-irm https://savesecrets.org/slv/install.ps1 | iex
+irm https://oss.amagi.com/slv/install.ps1 | iex
 ```
 
 #### Install Specific Version
 **With Shell (MacOs/Linux):**
 ```sh
-curl -fsSL https://savesecrets.org/slv/install.sh | sh -s v0.1.7
+curl -fsSL https://oss.amagi.com/slv/install.sh | sh -s v0.1.7
 ```
 **With PowerShell (Windows):**
 ```powershell
-$v="0.1.7"; irm https://savesecrets.org/slv/install.ps1 | iex
+$v="0.1.7"; irm https://oss.amagi.com/slv/install.ps1 | iex
 ```
 
 ### Docker
 You can also run SLV without installing using Docker:
 ```zsh
-docker run -it --rm -v $PWD:/workspace ghcr.io/savesecrets/slv:latest version
+docker run -it --rm -v $PWD:/workspace ghcr.io/amagioss/slv:latest version
 ```
 
 ## Usage
@@ -107,4 +107,4 @@ Once shared, the other environments can access the vault using their respective 
 ## Integrations
 Some of the integrations that SLV currently supports are:
 - [Kubernetes Operator](/operator/README.md)
-- [GitHub Actions](https://github.com/savesecrets/slv-action)
+- [GitHub Actions](https://github.com/amagioss/slv-action)

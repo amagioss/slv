@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"savesecrets.org/slv/core/commons"
-	"savesecrets.org/slv/core/config"
-	"savesecrets.org/slv/core/crypto"
+	"oss.amagi.com/slv/core/commons"
+	"oss.amagi.com/slv/core/config"
+	"oss.amagi.com/slv/core/crypto"
 )
 
 type EnvType string

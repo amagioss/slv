@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"savesecrets.org/slv"
-	"savesecrets.org/slv/cli/internal/commands/utils"
+	"oss.amagi.com/slv"
+	"oss.amagi.com/slv/cli/internal/commands/utils"
 )
 
 func vaultGetCommand() *cobra.Command {

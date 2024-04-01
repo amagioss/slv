@@ -32,9 +32,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
-	"savesecrets.org/slv"
-	slvv1 "savesecrets.org/slv/operator/api/v1"
-	"savesecrets.org/slv/operator/slvenv"
+	"oss.amagi.com/slv"
+	slvv1 "oss.amagi.com/slv/operator/api/v1"
+	"oss.amagi.com/slv/operator/slvenv"
 )
 
 const (
@@ -75,9 +75,9 @@ func (r *SLVReconciler) success(ctx context.Context,
 	return nil
 }
 
-//+kubebuilder:rbac:groups=slv.savesecrets.org,resources=slvs,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=slv.savesecrets.org,resources=slvs/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=slv.savesecrets.org,resources=slvs/finalizers,verbs=update
+//+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

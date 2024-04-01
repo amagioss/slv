@@ -2,13 +2,13 @@ package settings
 
 import (
 	"gopkg.in/yaml.v3"
-	"savesecrets.org/slv/core/commons"
+	"oss.amagi.com/slv/core/commons"
 )
 
 // import (
 // 	"os"
 
-// 	"savesecrets.org/slv/core/commons"
+// 	"oss.amagi.com/slv/core/commons"
 // )
 
 type Settings struct {

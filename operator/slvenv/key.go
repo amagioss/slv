@@ -1,8 +1,8 @@
 package slvenv
 
 import (
-	"savesecrets.org/slv"
-	"savesecrets.org/slv/core/crypto"
+	"oss.amagi.com/slv"
+	"oss.amagi.com/slv/core/crypto"
 )
 
 var SecretKey *crypto.SecretKey

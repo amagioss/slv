@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"savesecrets.org/slv/core/commons"
+	"oss.amagi.com/slv/core/commons"
 )
 
 func GetAppDataDir() string {

@@ -3,8 +3,8 @@ package environments
 import (
 	"errors"
 
-	"savesecrets.org/slv/core/config"
-	"savesecrets.org/slv/core/crypto"
+	"oss.amagi.com/slv/core/config"
+	"oss.amagi.com/slv/core/crypto"
 )
 
 const (

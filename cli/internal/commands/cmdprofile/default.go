@@ -5,8 +5,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"savesecrets.org/slv/cli/internal/commands/utils"
-	"savesecrets.org/slv/core/profiles"
+	"oss.amagi.com/slv/cli/internal/commands/utils"
+	"oss.amagi.com/slv/core/profiles"
 )
 
 func profileDefaultCommand() *cobra.Command {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"gopkg.in/yaml.v3"
-	"savesecrets.org/slv/core/crypto"
+	"oss.amagi.com/slv/core/crypto"
 )
 
 func (vlt *Vault) putSecretWithoutCommit(secretName string, secretValue []byte) (err error) {

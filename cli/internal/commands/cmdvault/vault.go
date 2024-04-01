@@ -7,11 +7,11 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"savesecrets.org/slv/cli/internal/commands/utils"
-	"savesecrets.org/slv/core/config"
-	"savesecrets.org/slv/core/environments"
-	"savesecrets.org/slv/core/profiles"
-	"savesecrets.org/slv/core/vaults"
+	"oss.amagi.com/slv/cli/internal/commands/utils"
+	"oss.amagi.com/slv/core/config"
+	"oss.amagi.com/slv/core/environments"
+	"oss.amagi.com/slv/core/profiles"
+	"oss.amagi.com/slv/core/vaults"
 )
 
 const (

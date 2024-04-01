@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"savesecrets.org/slv/core/commons"
-	"savesecrets.org/slv/core/config"
+	"oss.amagi.com/slv/core/commons"
+	"oss.amagi.com/slv/core/config"
 )
 
 type profileManager struct {

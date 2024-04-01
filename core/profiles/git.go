@@ -16,7 +16,7 @@ import (
 	gitssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/kevinburke/ssh_config"
 	"golang.org/x/crypto/ssh"
-	"savesecrets.org/slv/core/config"
+	"oss.amagi.com/slv/core/config"
 )
 
 func expandTilde(path string) string {

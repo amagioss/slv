@@ -21,9 +21,9 @@ $SLVExe = "$BinDir\slv.exe"
 $Target = 'windows_amd64'
 
 $DownloadUrl = if (!$Version) {
-  "https://github.com/savesecrets/slv/releases/latest/download/slv_${Target}.zip"
+  "https://github.com/amagioss/slv/releases/latest/download/slv_${Target}.zip"
 } else {
-  "https://github.com/savesecrets/slv/releases/download/${Version}/slv_${Target}.zip"
+  "https://github.com/amagioss/slv/releases/download/${Version}/slv_${Target}.zip"
 }
 
 if (!(Test-Path $BinDir)) {

@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: slvs.slv.savesecrets.org
+  name: slvs.slv.oss.amagi.com
 spec:
-  group: slv.savesecrets.org
+  group: slv.oss.amagi.com
   names:
     kind: SLV
     listKind: SLVList

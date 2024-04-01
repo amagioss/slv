@@ -5,10 +5,10 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"savesecrets.org/slv"
-	"savesecrets.org/slv/cli/internal/commands/cmdenv"
-	"savesecrets.org/slv/cli/internal/commands/utils"
-	"savesecrets.org/slv/core/crypto"
+	"oss.amagi.com/slv"
+	"oss.amagi.com/slv/cli/internal/commands/cmdenv"
+	"oss.amagi.com/slv/cli/internal/commands/utils"
+	"oss.amagi.com/slv/core/crypto"
 )
 
 func vaultAccessCommand() *cobra.Command {

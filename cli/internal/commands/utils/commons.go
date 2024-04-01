@@ -6,7 +6,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/fatih/color"
-	"savesecrets.org/slv/core/environments"
+	"oss.amagi.com/slv/core/environments"
 )
 
 func ExitOnError(err error) {

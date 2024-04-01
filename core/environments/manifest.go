@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
-	"savesecrets.org/slv/core/commons"
-	"savesecrets.org/slv/core/crypto"
+	"oss.amagi.com/slv/core/commons"
+	"oss.amagi.com/slv/core/crypto"
 )
 
 type EnvManifest struct {

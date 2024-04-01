@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"savesecrets.org/slv/operator/test/utils"
+	"oss.amagi.com/slv/operator/test/utils"
 )
 
 const namespace = "operator-system"

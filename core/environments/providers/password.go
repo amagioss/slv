@@ -2,8 +2,8 @@ package providers
 
 import (
 	"dev.shib.me/xipher"
-	"savesecrets.org/slv/core/config"
-	"savesecrets.org/slv/core/input"
+	"oss.amagi.com/slv/core/config"
+	"oss.amagi.com/slv/core/input"
 )
 
 func bindWithPassword(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {

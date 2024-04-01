@@ -10,12 +10,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-slv-savesecrets-com-v1-slv
+      path: /validate-slv-oss-amagi-com-v1-slv
   failurePolicy: Fail
   name: vslv.kb.io
   rules:
   - apiGroups:
-    - slv.savesecrets.org
+    - slv.oss.amagi.com
     apiVersions:
     - v1
     operations:

@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 
 	"github.com/go-git/go-git/v5"
-	"savesecrets.org/slv/core/commons"
-	"savesecrets.org/slv/core/config"
-	"savesecrets.org/slv/core/crypto"
-	"savesecrets.org/slv/core/environments"
-	"savesecrets.org/slv/core/settings"
+	"oss.amagi.com/slv/core/commons"
+	"oss.amagi.com/slv/core/config"
+	"oss.amagi.com/slv/core/crypto"
+	"oss.amagi.com/slv/core/environments"
+	"oss.amagi.com/slv/core/settings"
 )
 
 type Profile struct {

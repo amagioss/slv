@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"savesecrets.org/slv"
+	"oss.amagi.com/slv"
 )
 
 func versionCommand() *cobra.Command {

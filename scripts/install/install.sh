@@ -19,9 +19,9 @@ else
 fi
 
 if [ $# -eq 0 ]; then
-	slv_uri="https://github.com/savesecrets/slv/releases/latest/download/slv_${target}.zip"
+	slv_uri="https://github.com/amagioss/slv/releases/latest/download/slv_${target}.zip"
 else
-	slv_uri="https://github.com/savesecrets/slv/releases/download/${1}/slv_${target}.zip"
+	slv_uri="https://github.com/amagioss/slv/releases/download/${1}/slv_${target}.zip"
 fi
 
 slv_install="${SLV_INSTALL:-$HOME/.slv}"

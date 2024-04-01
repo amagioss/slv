@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"savesecrets.org/slv/core/input"
+	"oss.amagi.com/slv/core/input"
 )
 
 func IsAdminModeEnabled() bool {

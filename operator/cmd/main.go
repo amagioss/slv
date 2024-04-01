@@ -35,10 +35,10 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"savesecrets.org/slv"
-	slvv1 "savesecrets.org/slv/operator/api/v1"
-	"savesecrets.org/slv/operator/internal/controller"
-	"savesecrets.org/slv/operator/slvenv"
+	"oss.amagi.com/slv"
+	slvv1 "oss.amagi.com/slv/operator/api/v1"
+	"oss.amagi.com/slv/operator/internal/controller"
+	"oss.amagi.com/slv/operator/slvenv"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -116,7 +116,7 @@ func main() {
 		WebhookServer:          webhookServer,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "1ba400e0.savesecrets.org",
+		LeaderElectionID:       "736c7673.oss.amagi.com",
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly

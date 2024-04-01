@@ -3,7 +3,7 @@ package providers
 import (
 	"errors"
 
-	"savesecrets.org/slv/core/config"
+	"oss.amagi.com/slv/core/config"
 )
 
 const (

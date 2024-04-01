@@ -3,10 +3,10 @@ package cmdvault
 import (
 	"fmt"
 
-	"savesecrets.org/slv/cli/internal/commands/cmdenv"
-	"savesecrets.org/slv/core/crypto"
-	"savesecrets.org/slv/core/environments"
-	"savesecrets.org/slv/core/profiles"
+	"oss.amagi.com/slv/cli/internal/commands/cmdenv"
+	"oss.amagi.com/slv/core/crypto"
+	"oss.amagi.com/slv/core/environments"
+	"oss.amagi.com/slv/core/profiles"
 )
 
 func getPublicKeys(pubKeyStrSlice, queries []string, self bool) (publicKeys []*crypto.PublicKey,

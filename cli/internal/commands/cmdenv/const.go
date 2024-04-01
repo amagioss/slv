@@ -2,7 +2,7 @@ package cmdenv
 
 import (
 	"github.com/spf13/cobra"
-	"savesecrets.org/slv/cli/internal/commands/utils"
+	"oss.amagi.com/slv/cli/internal/commands/utils"
 )
 
 var (

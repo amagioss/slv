@@ -10,11 +10,11 @@ kubectl create secret generic slv -n slv --from-literal=secretkey=SLV_ESK_AEAEKA
 ```
 - Install the Kubernetes operator into your cluster
 ```sh
-kubectl apply -f https://savesecrets.org/slv/operator/samples/deploy.yaml
+kubectl apply -f https://oss.amagi.com/slv/operator/samples/deploy.yaml
 ```
 - Download this vault and keep it locally
 ```sh
-curl -s https://savesecrets.org/slv/operator/samples/pets.slv.yaml > pets.slv.yaml
+curl -s https://oss.amagi.com/slv/operator/samples/pets.slv.yaml > pets.slv.yaml
 ```
 - Apply the downloaded vault to the cluster
 ```sh

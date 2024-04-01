@@ -5,7 +5,7 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - slv.savesecrets.org
+  - slv.oss.amagi.com
   resources:
   - slvs
   verbs:
@@ -17,13 +17,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - slv.savesecrets.org
+  - slv.oss.amagi.com
   resources:
   - slvs/finalizers
   verbs:
   - update
 - apiGroups:
-  - slv.savesecrets.org
+  - slv.oss.amagi.com
   resources:
   - slvs/status
   verbs:

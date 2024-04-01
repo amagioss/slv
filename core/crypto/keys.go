@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"dev.shib.me/xipher"
-	"savesecrets.org/slv/core/commons"
+	"oss.amagi.com/slv/core/commons"
 )
 
 type KeyType byte

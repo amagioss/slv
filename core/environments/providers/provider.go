@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"savesecrets.org/slv/core/commons"
-	"savesecrets.org/slv/core/crypto"
-	"savesecrets.org/slv/core/environments"
+	"oss.amagi.com/slv/core/commons"
+	"oss.amagi.com/slv/core/crypto"
+	"oss.amagi.com/slv/core/environments"
 )
 
 type Bind func(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error)
