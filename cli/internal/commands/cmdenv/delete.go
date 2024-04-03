@@ -41,7 +41,7 @@ func envDeleteCommand() *cobra.Command {
 				}
 				if confirm {
 					for _, env := range envs {
-						if profile.DeleteEnv(env.GetId()); err != nil {
+						if profile.DeleteEnv(env.PublicKey); err != nil {
 							utils.ExitOnError(err)
 						}
 						fmt.Printf("Environment %s deleted successfully\n", env.Name)

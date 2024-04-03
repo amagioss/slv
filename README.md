@@ -106,5 +106,5 @@ Once shared, the other environments can access the vault using their respective 
 
 ## Integrations
 Some of the integrations that SLV currently supports are:
-- [Kubernetes Operator](/operator/README.md)
+- [Kubernetes](/k8s/README.md)
 - [GitHub Actions](https://github.com/amagioss/slv-action)

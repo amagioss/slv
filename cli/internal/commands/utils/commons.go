@@ -29,7 +29,6 @@ func SafeExit() {
 
 func ShowEnv(env environments.Environment, includeEDS, excludeBindingFromEds bool) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
-	fmt.Fprintln(w, "ID:\t", env.GetId())
 	fmt.Fprintln(w, "Public Key:\t", env.PublicKey)
 	fmt.Fprintln(w, "Name:\t", env.Name)
 	fmt.Fprintln(w, "Email:\t", env.Email)

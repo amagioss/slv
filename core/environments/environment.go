@@ -13,7 +13,6 @@ import (
 type EnvType string
 
 type Environment struct {
-	Id            string   `yaml:"id"`
 	PublicKey     string   `yaml:"publicKey"`
 	Name          string   `yaml:"name"`
 	Email         string   `yaml:"email"`
@@ -39,7 +38,6 @@ func newEnvironmentForPublicKey(id, name string, envType EnvType, publicKey *cry
 		id = publicKeyStr
 	}
 	return &Environment{
-		Id:        id,
 		PublicKey: publicKeyStr,
 		Name:      name,
 		EnvType:   envType,
@@ -70,13 +68,6 @@ func (env *Environment) getPublicKey() (publicKey *crypto.PublicKey, err error) 
 		}
 	}
 	return env.publicKey, nil
-}
-
-func (env *Environment) GetId() string {
-	if env.Id == "" {
-		env.Id = env.PublicKey
-	}
-	return env.Id
 }
 
 func (env *Environment) SetEmail(email string) {

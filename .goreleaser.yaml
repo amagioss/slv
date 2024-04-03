@@ -13,9 +13,20 @@ builds:
       - linux_arm64
       - linux_arm
       - windows_amd64
-  - id: slv-operator
-    binary: slv-operator
-    main: ./operator/cmd
+  - id: slv-k8s-operator
+    binary: slv-k8s-operator
+    main: ./k8s/cmd
+    env:
+      - CGO_ENABLED=0
+    ldflags: "-X oss.amagi.com/slv.Version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
+    goarch:
+      - amd64
+      - arm64
+    goos:
+      - linux
+  - id: slv-k8s-job
+    binary: slv-k8s-job
+    main: ./k8s/job
     env:
       - CGO_ENABLED=0
     ldflags: "-X oss.amagi.com/slv.Version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"

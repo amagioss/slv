@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: slv-job
+automountServiceAccountToken: true
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: slv-job-role
+rules:
+  - apiGroups: ["slv.oss.amagi.com"]
+    resources: ["slvs"]  # plural of SLV CRD
+    verbs:
+      - "get"
+      - "list"
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs:
+      - "get"
+      - "create"
+      - "list"
+      - "update"
+      - "delete"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: slv-job-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: slv-job
+roleRef:
+  kind: Role
+  name: slv-job-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name:  slv-job
+spec:
+  ttlSecondsAfterFinished: 0
+  template:
+    metadata:
+      name: slv-job
+    spec:
+      containers:
+        - name: slv-k8s-job
+          image: ghcr.io/amagioss/slv/slv-k8s-job:latest
+          resources:
+            limits:
+              cpu: "1" # 1 vCPU should be sufficient
+              memory: "500Mi" # 500Mi of memory should be a sufficient for most cases. If you large vaults or large number of them, you may need to increase this.
+          env:
+            - name: SLV_ENV_SECRET_BINDING
+              valueFrom: # SLV Environment Secret Binding from K8s ConfigMap
+                configMapKeyRef:
+                  name: SLV # Name of K8s ConfigMap
+                  key: SecretBinding  # Key within K8s ConfigMap
+            - name: SLV_ENV_SECRET_KEY
+              valueFrom: # SLV Environment Secret Key from K8s Secret
+                secretKeyRef:
+                  name: SLV # Name of K8s Secret
+                  key: SecretKey  # Key within K8s Secret
+      restartPolicy: Never
+      serviceAccountName: slv-job
+  backoffLimit: 4

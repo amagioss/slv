@@ -51,10 +51,21 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
-          file: operator/Dockerfile
+          file: k8s/Dockerfile
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/operator:${{ env.SLV_VERSION }}
-            ghcr.io/${{ github.repository }}/operator:${{ github.ref_name }}
-            ghcr.io/${{ github.repository }}/operator:latest
+            ghcr.io/${{ github.repository }}/slv-k8s-operator:${{ env.SLV_VERSION }}
+            ghcr.io/${{ github.repository }}/slv-k8s-operator:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/slv-k8s-operator:latest
+      - name: Release SLV K8s Job Image
+        uses: docker/build-push-action@v5
+        with:
+          platforms: linux/amd64,linux/arm64
+          file: k8s/job/Dockerfile
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/slv-k8s-job:${{ env.SLV_VERSION }}
+            ghcr.io/${{ github.repository }}/slv-k8s-job:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/slv-k8s-job:latest

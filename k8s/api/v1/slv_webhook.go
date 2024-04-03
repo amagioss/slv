@@ -18,7 +18,7 @@ package v1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime"
-	"oss.amagi.com/slv/operator/slvenv"
+	"oss.amagi.com/slv/k8s/slvenv"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"

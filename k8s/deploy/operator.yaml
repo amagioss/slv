@@ -86,7 +86,7 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: slv-operator
+  name: slv-k8s-operator
   namespace: slv
 automountServiceAccountToken: true
 
@@ -94,20 +94,19 @@ automountServiceAccountToken: true
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: slv-operator-clusterrole
+  name: slv-k8s-operator-clusterrole
 rules:
-
   - apiGroups: ["slv.oss.amagi.com"]
     resources: ["slvs"]  # plural of SLV CRD
     verbs:
-      - "watch"
       - "get"
       - "list"
-
+      - "watch"
   - apiGroups: [""]
     resources: ["secrets"]
     verbs:
       - "create"
+      - "get"
       - "list"
       - "update"
       - "delete" # Delete the secret when corresponding SLV CR is deleted
@@ -117,47 +116,50 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: slv-operator-rolebinding
+  name: slv-k8s-operator-rolebinding
 subjects:
 - kind: ServiceAccount
-  name: slv-operator
+  name: slv-k8s-operator
   namespace: slv
 roleRef:
   kind: ClusterRole
-  name: slv-operator-clusterrole
+  name: slv-k8s-operator-clusterrole
   apiGroup: rbac.authorization.k8s.io
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: slv-operator
+  name: slv-k8s-operator
   namespace: slv
   labels:
-    app: slv-operator
+    app: slv-k8s-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: slv-operator
+      app: slv-k8s-operator
   template:
     metadata:
       labels:
-        app: slv-operator
+        app: slv-k8s-operator
     spec:
-      serviceAccountName: slv-operator
+      serviceAccountName: slv-k8s-operator
       containers:
-      - name: slv-operator
-        image: ghcr.io/amagioss/slv/operator:latest # Use a specific version tag corresponding to the version of SLV used with the CR
+      - name: slv-k8s-operator
+        image: ghcr.io/amagioss/slv/slv-k8s-operator:latest # Use a specific version tag corresponding to the version of SLV used with the CR
         resources:
           limits:
-            cpu: "1" # 1 CPU should be fairly enough for SLV Controller
-            memory: "1Gi" # 1Gi is the minimum memory requirement for SLV Controller
+            cpu: "1" # 1 vCPU should be sufficient
+            memory: "500Mi" # 500Mi of memory should be a sufficient for most cases. If you large vaults or large number of them, you may need to increase this.
         env:
           - name: SLV_ENV_SECRET_BINDING
-            value: "SLV_ESB_ENVSECRETBINDINGSTRINGGOESHERE" # Ensure the appropriate KMS role is attached to the K8s Service Account
+            valueFrom: # SLV Environment Secret Binding from K8s ConfigMap
+              configMapKeyRef:
+                name: SLV # Name of K8s ConfigMap
+                key: SecretBinding  # Key within K8s ConfigMap
           - name: SLV_ENV_SECRET_KEY
-            valueFrom: # SLV Environment Secret Key taken from K8s secret
+            valueFrom: # SLV Environment Secret Key from K8s Secret
               secretKeyRef:
-                name: slv # Name of K8 Secret
-                key: secretkey  # Key within K8 Secret
+                name: SLV # Name of K8s Secret
+                key: SecretKey  # Key within K8s Secret

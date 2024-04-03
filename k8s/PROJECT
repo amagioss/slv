@@ -15,7 +15,7 @@ resources:
   domain: oss.amagi.com
   group: slv
   kind: SLV
-  path: oss.amagi.com/slv/operator/api/v1
+  path: oss.amagi.com/slv/k8s/api/v1
   version: v1
   webhooks:
     validation: true

@@ -10,11 +10,11 @@ kubectl create secret generic slv -n slv --from-literal=secretkey=SLV_ESK_AEAEKA
 ```
 - Install the Kubernetes operator into your cluster
 ```sh
-kubectl apply -f https://oss.amagi.com/slv/operator/samples/deploy.yaml
+kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/operator.yaml
 ```
 - Download this vault and keep it locally
 ```sh
-curl -s https://oss.amagi.com/slv/operator/samples/pets.slv.yaml > pets.slv.yaml
+curl -s https://oss.amagi.com/slv/k8s/samples/pets.slv.yaml > pets.slv.yaml
 ```
 - Apply the downloaded vault to the cluster
 ```sh
@@ -26,7 +26,7 @@ kubectl get secret pets -o jsonpath='{.data.supercat}' | base64 --decode
 ```
 - Add any secret using the following commands
 ```sh
-slv vault put -v pets.slv.yaml -n hi -s "Hello World"
+slv vault secret put -v pets.slv.yaml -n hi --secret "Hello World"
 kubectl apply -f pets.slv.yaml
 ```
 - Try reading newly created secret from the cluster

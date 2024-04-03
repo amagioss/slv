@@ -36,9 +36,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"oss.amagi.com/slv"
-	slvv1 "oss.amagi.com/slv/operator/api/v1"
-	"oss.amagi.com/slv/operator/internal/controller"
-	"oss.amagi.com/slv/operator/slvenv"
+	slvv1 "oss.amagi.com/slv/k8s/api/v1"
+	"oss.amagi.com/slv/k8s/internal/controller"
+	"oss.amagi.com/slv/k8s/slvenv"
 	//+kubebuilder:scaffold:imports
 )
 
