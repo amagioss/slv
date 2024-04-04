@@ -20,7 +20,7 @@ The following example shows how it is achieved using the operator.
 ```sh
 kubectl create ns slv
 # Disclaimer: The below secret key is only for demonstration purposes. Please avoid using it in production.
-kubectl create secret generic SLV -n slv --from-literal=SecretKey=SLV_ESK_AEAEKAAATI5CXB7QMFSUGY4RUT6UTUSK7SGMIECTJKRTQBFY6BN5ZV5M5XGF6DWLV2RVCJJSMXH43DJ6A5TK7Y6L6PYEMCDGQRBX46GUQPUIYUQ
+kubectl create secret generic slv -n slv --from-literal=SecretKey=SLV_ESK_AEAEKAAATI5CXB7QMFSUGY4RUT6UTUSK7SGMIECTJKRTQBFY6BN5ZV5M5XGF6DWLV2RVCJJSMXH43DJ6A5TK7Y6L6PYEMCDGQRBX46GUQPUIYUQ
 ```
 - Install the SLV Kubernetes Operator into your cluster (modify the values in the yaml file based on your requirement)
 ```sh
@@ -57,7 +57,7 @@ The following example shows how SLV objects are reconciled to secrets using the 
 ```sh
 kubectl create ns samplespace
 # Disclaimer: The below secret key is only for demonstration purposes. Please avoid using it in production.
-kubectl create secret generic SLV -n samplespace --from-literal=SecretKey=SLV_ESK_AEAEKAAATI5CXB7QMFSUGY4RUT6UTUSK7SGMIECTJKRTQBFY6BN5ZV5M5XGF6DWLV2RVCJJSMXH43DJ6A5TK7Y6L6PYEMCDGQRBX46GUQPUIYUQ
+kubectl create secret generic slv -n samplespace --from-literal=SecretKey=SLV_ESK_AEAEKAAATI5CXB7QMFSUGY4RUT6UTUSK7SGMIECTJKRTQBFY6BN5ZV5M5XGF6DWLV2RVCJJSMXH43DJ6A5TK7Y6L6PYEMCDGQRBX46GUQPUIYUQ
 ```
 - Download this vault and keep it locally
 ```sh
@@ -73,12 +73,12 @@ kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/job.yaml -n sample
 ```
 - Try reading the processed secret
 ```sh
-kubectl get secret pets -o jsonpath='{.data.mycat}' | base64 --decode
+kubectl get secret pets -o jsonpath='{.data.mycat}' -n samplespace | base64 --decode
 ```
 - Add any secret value using the following command and apply again
 ```sh
 slv vault secret put -v pets.slv.yaml -n hi --secret "Hello World"
-kubectl apply -f pets.slv.yaml
+kubectl apply -f pets.slv.yaml -n samplespace
 ```
 - Run the job again
 ```sh
@@ -86,5 +86,5 @@ kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/job.yaml -n sample
 ```
 - Try again by reading the updated secret
 ```sh
-kubectl get secret pets -o jsonpath='{.data.hi}' | base64 --decode
+kubectl get secret pets -o jsonpath='{.data.hi}' -n samplespace | base64 --decode
 ```
