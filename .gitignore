@@ -3,4 +3,4 @@ dist/
 .DS_Store
 slv-dev
 .vscode
-operator/bin/*
+k8s/bin/*

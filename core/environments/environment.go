@@ -26,16 +26,13 @@ func (eType *EnvType) isValid() bool {
 	return *eType == SERVICE || *eType == USER || *eType == ROOT
 }
 
-func newEnvironmentForPublicKey(id, name string, envType EnvType, publicKey *crypto.PublicKey) (*Environment, error) {
+func newEnvironmentForPublicKey(name string, envType EnvType, publicKey *crypto.PublicKey) (*Environment, error) {
 	if !envType.isValid() {
 		return nil, errInvalidEnvironmentType
 	}
 	publicKeyStr, err := publicKey.String()
 	if err != nil {
 		return nil, err
-	}
-	if id == "" {
-		id = publicKeyStr
 	}
 	return &Environment{
 		PublicKey: publicKeyStr,
@@ -44,14 +41,14 @@ func newEnvironmentForPublicKey(id, name string, envType EnvType, publicKey *cry
 	}, nil
 }
 
-func NewEnvironment(id, name string, envType EnvType, pq bool) (*Environment, *crypto.SecretKey, error) {
+func NewEnvironment(name string, envType EnvType, pq bool) (*Environment, *crypto.SecretKey, error) {
 	secretKey, err := crypto.NewSecretKey(EnvironmentKey)
 	if err == nil {
 		publicKey, err := secretKey.PublicKey(pq)
 		if err != nil {
 			return nil, nil, err
 		}
-		env, err := newEnvironmentForPublicKey(id, name, envType, publicKey)
+		env, err := newEnvironmentForPublicKey(name, envType, publicKey)
 		return env, secretKey, err
 	}
 	return nil, nil, err

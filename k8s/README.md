@@ -1,14 +1,28 @@
-# SLV Operator
-SLV operator is a Kubernetes controller that helps in reconciling SLV vaults as kubernetes secrets into namespaces. This can be achieved by creating a vault with a `--k8s` flag. Doing so will create vaults that are custom resources managed by the SLV operator.
+# SLV - Kuberenetes Integration
+SLV Kubernetes Integration helps in reconciling SLV vaults as kubernetes secrets into namespaces.
+SLV can create SLV's kuberenetes compatible vaults with a `--k8s` flag. Doing this will create vaults that are technically custom resources based on SLV's [CRD](https://oss.amagi.com/slv/k8s/crd.yaml).
 
-### A working example
-- Create a namespace and add SLV_ENV_SECRET_KEY as a secret (recommended to use Access Binding using KMS for cloud environments)
+To get started apply the SLV [CRD](https://oss.amagi.com/slv/k8s/crd.yaml) using the following command.
+```sh
+kubectl apply -f https://oss.amagi.com/slv/k8s/crd.yaml
+```
+
+SLV support two ways to reconcile SLV vaults as kuberenetes secrets:
+1. [Operator](#operator)
+2. [Job](#job)
+
+## Operator
+SLV operator is a kubenetes controller that runs inside a given cluster to write secrets into given namespaces based on changes in SLV objects.
+
+The following example shows how it is achieved using the operator.
+
+- Create a namespace and add SLV environment secret key as a secret (recommended to use Access Binding using KMS for cloud environments)
 ```sh
 kubectl create ns slv
 # Disclaimer: The below secret key is only for demonstration purposes. Please avoid using it in production.
-kubectl create secret generic slv -n slv --from-literal=secretkey=SLV_ESK_AEAEKAAATI5CXB7QMFSUGY4RUT6UTUSK7SGMIECTJKRTQBFY6BN5ZV5M5XGF6DWLV2RVCJJSMXH43DJ6A5TK7Y6L6PYEMCDGQRBX46GUQPUIYUQ
+kubectl create secret generic SLV -n slv --from-literal=SecretKey=SLV_ESK_AEAEKAAATI5CXB7QMFSUGY4RUT6UTUSK7SGMIECTJKRTQBFY6BN5ZV5M5XGF6DWLV2RVCJJSMXH43DJ6A5TK7Y6L6PYEMCDGQRBX46GUQPUIYUQ
 ```
-- Install the Kubernetes operator into your cluster
+- Install the SLV Kubernetes Operator into your cluster (modify the values in the yaml file based on your requirement)
 ```sh
 kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/operator.yaml
 ```
@@ -16,20 +30,61 @@ kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/operator.yaml
 ```sh
 curl -s https://oss.amagi.com/slv/k8s/samples/pets.slv.yaml > pets.slv.yaml
 ```
-- Apply the downloaded vault to the cluster
+- Apply the downloaded vault
 ```sh
 kubectl apply -f pets.slv.yaml
 ```
-- Try reading SLV controller reconciled secrets from the cluster
+- Try reading the processed secret
 ```sh
-kubectl get secret pets -o jsonpath='{.data.supercat}' | base64 --decode
+kubectl get secret pets -o jsonpath='{.data.mycat}' | base64 --decode
 ```
-- Add any secret using the following commands
+- Add any secret value using the following command and apply again
 ```sh
 slv vault secret put -v pets.slv.yaml -n hi --secret "Hello World"
 kubectl apply -f pets.slv.yaml
 ```
-- Try reading newly created secret from the cluster
+- Try again by reading the updated secret
+```sh
+kubectl get secret pets -o jsonpath='{.data.hi}' | base64 --decode
+```
+
+## Job
+SLV job is a one-time job that can reconcile any existing SLV objects as kubernetes secrets. This is useful in environments that can't afford to run a persistent operator or there aren't many secrets to deal with.
+
+The following example shows how SLV objects are reconciled to secrets using the job.
+
+- Create a namespace and add SLV environment secret key as a secret (recommended to use Access Binding using KMS for cloud environments)
+```sh
+kubectl create ns samplespace
+# Disclaimer: The below secret key is only for demonstration purposes. Please avoid using it in production.
+kubectl create secret generic SLV -n samplespace --from-literal=SecretKey=SLV_ESK_AEAEKAAATI5CXB7QMFSUGY4RUT6UTUSK7SGMIECTJKRTQBFY6BN5ZV5M5XGF6DWLV2RVCJJSMXH43DJ6A5TK7Y6L6PYEMCDGQRBX46GUQPUIYUQ
+```
+- Download this vault and keep it locally
+```sh
+curl -s https://oss.amagi.com/slv/k8s/samples/pets.slv.yaml > pets.slv.yaml
+```
+- Apply the downloaded vault to the namespace
+```sh
+kubectl apply -f pets.slv.yaml -n samplespace
+```
+- Run the job in your namespace (modify the values in the yaml file based on your requirement)
+```sh
+kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/job.yaml -n samplespace
+```
+- Try reading the processed secret
+```sh
+kubectl get secret pets -o jsonpath='{.data.mycat}' | base64 --decode
+```
+- Add any secret value using the following command and apply again
+```sh
+slv vault secret put -v pets.slv.yaml -n hi --secret "Hello World"
+kubectl apply -f pets.slv.yaml
+```
+- Run the job again
+```sh
+kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/job.yaml -n samplespace
+```
+- Try again by reading the updated secret
 ```sh
 kubectl get secret pets -o jsonpath='{.data.hi}' | base64 --decode
 ```

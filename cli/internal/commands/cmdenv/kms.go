@@ -17,7 +17,6 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 		Long: kmsProviderDesc +
 			" - Uses RSA 4096 key with SHA-256 hashing in case of asymmetric binding. Create a KMS key accordingly.",
 		Run: func(cmd *cobra.Command, args []string) {
-			envId, _ := cmd.Flags().GetString(envIdFlag.Name)
 			envName, _ := cmd.Flags().GetString(envNameFlag.Name)
 			envEmail, _ := cmd.Flags().GetString(envEmailFlag.Name)
 			envTags, err := cmd.Flags().GetStringSlice(envTagsFlag.Name)
@@ -36,7 +35,7 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 				}
 			}
 			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
-			env, err = providers.NewEnvForProvider(kmsName, envId, envName, environments.SERVICE, inputs, pq)
+			env, err = providers.NewEnvForProvider(kmsName, envName, environments.SERVICE, inputs, pq)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -57,7 +56,6 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 			utils.SafeExit()
 		},
 	}
-	newKMSEnvCmd.Flags().StringP(envIdFlag.Name, envIdFlag.Shorthand, "", envIdFlag.Usage)
 	newKMSEnvCmd.Flags().StringP(envNameFlag.Name, envNameFlag.Shorthand, "", envNameFlag.Usage)
 	newKMSEnvCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
 	newKMSEnvCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)

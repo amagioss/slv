@@ -20,10 +20,6 @@ var (
 
 var (
 	// Flags
-	envIdFlag = utils.FlagDef{
-		Name:  "id",
-		Usage: "Environment Id (if not specified, the public key will be used)",
-	}
 
 	envNameFlag = utils.FlagDef{
 		Name:      "name",

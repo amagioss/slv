@@ -41,7 +41,6 @@ func envNewServiceCommand() *cobra.Command {
 		Aliases: []string{"serv", "svc", "s"},
 		Short:   "Creates a new service environment",
 		Run: func(cmd *cobra.Command, args []string) {
-			envId, _ := cmd.Flags().GetString(envIdFlag.Name)
 			name, _ := cmd.Flags().GetString(envNameFlag.Name)
 			email, _ := cmd.Flags().GetString(envEmailFlag.Name)
 			tags, err := cmd.Flags().GetStringSlice(envTagsFlag.Name)
@@ -51,7 +50,7 @@ func envNewServiceCommand() *cobra.Command {
 			var env *environments.Environment
 			var secretKey *crypto.SecretKey
 			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
-			env, secretKey, err = environments.NewEnvironment(envId, name, environments.SERVICE, pq)
+			env, secretKey, err = environments.NewEnvironment(name, environments.SERVICE, pq)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -75,7 +74,6 @@ func envNewServiceCommand() *cobra.Command {
 			utils.SafeExit()
 		},
 	}
-	envNewServiceCmd.Flags().StringP(envIdFlag.Name, envIdFlag.Shorthand, "", envIdFlag.Usage)
 	envNewServiceCmd.Flags().StringP(envNameFlag.Name, envNameFlag.Shorthand, "", envNameFlag.Usage)
 	envNewServiceCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
 	envNewServiceCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
@@ -106,7 +104,6 @@ func envNewUserCommand() *cobra.Command {
 					utils.SafeExit()
 				}
 			}
-			envId, _ := cmd.Flags().GetString(envIdFlag.Name)
 			envName, _ := cmd.Flags().GetString(envNameFlag.Name)
 			envEmail, _ := cmd.Flags().GetString(envEmailFlag.Name)
 			envTags, err := cmd.Flags().GetStringSlice(envTagsFlag.Name)
@@ -121,7 +118,7 @@ func envNewUserCommand() *cobra.Command {
 			inputs["password"] = password
 			var env *environments.Environment
 			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
-			env, err = providers.NewEnvForProvider("password", envId, envName, environments.USER, inputs, pq)
+			env, err = providers.NewEnvForProvider("password", envName, environments.USER, inputs, pq)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -151,7 +148,6 @@ func envNewUserCommand() *cobra.Command {
 			utils.SafeExit()
 		},
 	}
-	envNewUserCmd.Flags().StringP(envIdFlag.Name, envIdFlag.Shorthand, "", envIdFlag.Usage)
 	envNewUserCmd.Flags().StringP(envNameFlag.Name, envNameFlag.Shorthand, "", envNameFlag.Usage)
 	envNewUserCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
 	envNewUserCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
