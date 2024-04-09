@@ -133,6 +133,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 						},
 					},
 				},
+				Type: slvObj.Type,
 				Data: slvSecretMap,
 			}
 			if err = controllerutil.SetControllerReference(&slvObj, secret, r.Scheme); err != nil {
@@ -167,6 +168,10 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		}
 		if secret.Annotations[slvVersionAnnotationKey] != slv.Version {
 			secret.Annotations[slvVersionAnnotationKey] = slv.Version
+			updateRequired = true
+		}
+		if secret.Type != slvObj.Type {
+			secret.Type = slvObj.Type
 			updateRequired = true
 		}
 		var msg string
