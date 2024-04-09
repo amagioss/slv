@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"oss.amagi.com/slv/core/vaults"
 )
@@ -26,7 +27,7 @@ import (
 
 // SLVSpec defines the desired state of SLV
 type SLVSpec struct {
-	vaults.Vault `json:""`
+	vaults.Vault `json:",inline"`
 }
 
 // SLVStatus defines the observed state of SLV
@@ -42,8 +43,9 @@ type SLV struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   SLVSpec   `json:"spec,omitempty"`
-	Status SLVStatus `json:"status,omitempty"`
+	Type   corev1.SecretType `json:"type,omitempty"`
+	Spec   SLVSpec           `json:"spec"`
+	Status SLVStatus         `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true

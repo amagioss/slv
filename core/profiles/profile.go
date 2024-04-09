@@ -143,6 +143,14 @@ func (profile *Profile) SetRoot(env *environments.Environment) error {
 	return profile.commit("Setting root environment: " + env.PublicKey + " [" + env.Name + "]")
 }
 
+func (profile *Profile) GetRoot() (*environments.Environment, error) {
+	envManifest, err := profile.getEnvManifest()
+	if err != nil {
+		return nil, err
+	}
+	return envManifest.Root, nil
+}
+
 func (profile *Profile) SearchEnvs(queries []string) ([]*environments.Environment, error) {
 	envManifest, err := profile.getEnvManifest()
 	if err != nil {

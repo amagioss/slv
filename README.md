@@ -55,7 +55,7 @@ Created profile:  amagi
 ```sh
 $ slv env new service -n alice -e alice@example.com --add
 
-ID (Public Key):  SLV_EPK_AEAUKAAAAD6XTJCYBCIHYKDPPHQN3YNDEVBOFCOIVDMGESLJFH65KG3VULVBK
+Public Key:       SLV_EPK_AEAUKAAAAD6XTJCYBCIHYKDPPHQN3YNDEVBOFCOIVDMGESLJFH65KG3VULVBK
 Name:             alice
 Email:            alice@example.com
 Tags:             []

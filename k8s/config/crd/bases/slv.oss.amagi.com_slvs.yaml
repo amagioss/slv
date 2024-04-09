@@ -70,6 +70,10 @@ spec:
               error:
                 type: string
             type: object
+          type:
+            type: string
+        required:
+        - spec
         type: object
     served: true
     storage: true

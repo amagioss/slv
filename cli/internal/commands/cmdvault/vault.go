@@ -60,6 +60,7 @@ func VaultCommand() *cobra.Command {
 					utils.ExitOnError(err)
 				}
 				selfEnv := false
+				rootEnv := false
 				if self != nil && self.PublicKey == accessorStr {
 					env = self
 					selfEnv = true
@@ -68,10 +69,22 @@ func VaultCommand() *cobra.Command {
 					if err != nil {
 						utils.ExitOnError(err)
 					}
+					if env == nil {
+						root, err := profile.GetRoot()
+						if err != nil {
+							utils.ExitOnError(err)
+						}
+						if root != nil && root.PublicKey == accessorStr {
+							rootEnv = true
+							env = root
+						}
+					}
 				}
 				if env != nil {
 					if selfEnv {
 						envMap[accessorStr] = accessorStr + "\t(" + color.CyanString("Self"+": "+env.Name) + ")"
+					} else if rootEnv {
+						envMap[accessorStr] = accessorStr + "\t(" + color.CyanString("Root"+": "+env.Name) + ")"
 					} else {
 						envMap[accessorStr] = accessorStr + "\t(" + env.Name + ")"
 					}

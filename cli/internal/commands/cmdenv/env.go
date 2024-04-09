@@ -2,7 +2,6 @@ package cmdenv
 
 import (
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/cli/internal/commands/utils"
 )
 
 func EnvCommand() *cobra.Command {
@@ -18,7 +17,6 @@ func EnvCommand() *cobra.Command {
 			cmd.Help()
 		},
 	}
-	envCmd.PersistentFlags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	envCmd.AddCommand(envNewCommand())
 	envCmd.AddCommand(envAddCommand())
 	envCmd.AddCommand(envListSearchCommand())
