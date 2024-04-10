@@ -1,70 +1,14 @@
 package cmdvault
 
 import (
-	"encoding/base64"
 	"fmt"
-	"io"
-	"os"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"oss.amagi.com/slv/cli/internal/commands/cmdenv"
 	"oss.amagi.com/slv/cli/internal/commands/utils"
-	"oss.amagi.com/slv/core/commons"
-	"oss.amagi.com/slv/core/crypto"
-	"oss.amagi.com/slv/core/input"
 	"oss.amagi.com/slv/core/vaults"
 )
-
-func newK8sVault(filePath, k8sValue string, hashLength uint8, pq bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
-	k8slvName := k8sValue
-	var secretDataMap map[string]string
-	if strings.HasSuffix(k8sValue, ".yaml") || strings.HasSuffix(k8sValue, ".yml") || strings.HasSuffix(k8sValue, ".json") || k8sValue == "-" {
-		var data []byte
-		var err error
-		if k8sValue == "-" {
-			data, err = input.ReadBufferFromStdin("Input the k8s secret object: ")
-		} else {
-			data, err = os.ReadFile(k8sValue)
-		}
-		if err != nil {
-			return nil, err
-		}
-		secret, err := k8sSecretFromData(data)
-		if err != nil {
-			return nil, err
-		}
-		k8slvName = secret.Metadata.Name
-		secretDataMap = secret.Data
-	}
-	vault, err := vaults.New(filePath, k8sVaultField, hashLength, pq, rootPublicKey, publicKeys...)
-	if err != nil {
-		return nil, err
-	}
-	if len(secretDataMap) > 0 {
-		for key, value := range secretDataMap {
-			decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(value))
-			secretValue, err := io.ReadAll(decoder)
-			if err != nil {
-				return nil, err
-			}
-			if err = vault.PutSecret(key, secretValue); err != nil {
-				return nil, err
-			}
-		}
-	}
-	var obj map[string]interface{}
-	if err := commons.ReadFromYAML(filePath, &obj); err != nil {
-		return nil, err
-	}
-	obj["apiVersion"] = k8sApiVersion
-	obj["kind"] = k8sKind
-	obj["metadata"] = map[string]interface{}{
-		"name": k8slvName,
-	}
-	return vault, commons.WriteToYAML(filePath, "", obj)
-}
 
 func vaultNewCommand() *cobra.Command {
 	if vaultNewCmd != nil {

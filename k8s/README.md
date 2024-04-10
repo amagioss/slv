@@ -11,6 +11,15 @@ The `--k8s` flag takes in any of the following arguments and validates them in t
 - An input `-` signifies that you'd like to input the content of the K8s Secret object through stdin
 - Name of the SLV's K8s custom resource which directly translates to the name of the K8s Secret Object. This creates an empty K8s compatible SLV vault file.
 
+For example, to create an k8s SLV vault that would replicate a docker config Secret in k8s, you can do something like this:
+```sh
+kubectl create secret docker-registry secret-tiger-docker \
+  --docker-email=tiger@acme.example \
+  --docker-username=tiger \
+  --docker-password=pass1234 \
+  --docker-server=my-registry.example:5000 --dry-run=client -o yaml | \
+  slv vault new -v test.slv.yaml --search alice@example.com --k8s -
+```
 
 ## Getting Started
 To get started apply the SLV [CRD](https://oss.amagi.com/slv/k8s/crd.yaml) using the following command.
