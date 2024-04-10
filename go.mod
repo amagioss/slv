@@ -1,6 +1,6 @@
 module oss.amagi.com/slv
 
-go 1.21
+go 1.21.0
 
 require (
 	dev.shib.me/xipher v1.1.0
