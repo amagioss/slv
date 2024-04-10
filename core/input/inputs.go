@@ -51,6 +51,20 @@ func GetVisibleInput(prompt string) (string, error) {
 	return input, err
 }
 
+func ReadBufferFromStdin(prompt string) ([]byte, error) {
+	var input []byte
+	buffer := make([]byte, 1024)
+	fmt.Println(prompt)
+	for {
+		n, err := os.Stdin.Read(buffer)
+		if err != nil || n == 0 {
+			break
+		}
+		input = append(input, buffer[:n]...)
+	}
+	return input, nil
+}
+
 func GetConfirmation(prompt, allowFor string) (bool, error) {
 	fmt.Print(prompt)
 	var input string

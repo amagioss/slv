@@ -1,4 +1,4 @@
-## SLV Workflow
+## SLV Workflows
 
 ### User Flow
 
@@ -10,23 +10,19 @@
 **Creating user environment for the current user**
  - User invokes SLV to register current dev machine as a user environment by providing information about the current user
  - SLV generates a new environment key pair
- - Stores the environment secret key in the OS credential store (such as keychain)
- - Serialises the environment metadata (along with the public key) as Serialised Environment Definition string and returns to the user
+ - SLV encrypts the secret key using the user provided password and stores it locally
+ - Serialises the environment metadata (along with the public key) as Environment Definition string and returns to the user
  - User shares the serialised environment definition string with the admin and requests to add it to the remote profile
-
-**Creating/Initializing a Project**
- - User invokes SLV to initialize a specific directory as a project directory
- - SLV creates a .slv directory in the specified directory, thereby marking it as a SLV project
 
 **Creating a Vault**
  - User invokes SLV to create a vault by specifying environments to share it with along with the name of the vault (if it is project bound) or path to the vault file.
  - SLV gets the specified environment public keys and root public key from profile
  - SLV generates a new vault key pair and encrypts the vault private key with the specified environment public keys and root public key
- - SLV then creates a vault file with extension `<vault_name>.vault.slv` and writes the vault public key and the vault private key wrappings.
+ - SLV then creates a vault file with extension `<vault_name>.slv.yaml` and writes the vault public key and the vault private key wrappings.
 
 **Adding Secrets to Vault**
  - User invokes SLV to add a secret (as key:value) to the vault. (Need to specify vault name or vault file path)
- - SLV reads the vault public key from the vault file `<vault_name>.vault.slv`
+ - SLV reads the vault public key from the vault file `<vault_name>.slv.yaml`
  - SLV encrypts the value of the secret using the vault public key and writes the encrypted secret (key:encrypted(value)) to the same vault file
 
 **Sharing an existing Vault with another environment**
@@ -70,12 +66,12 @@ sequenceDiagram
     UserLocalProfile-->>SLV: Reads env1, env2 & root public keys
     SLV-->>SLV: Generate vault key pair
     SLV-->>SLV: Encrypts vault secret key with env1, env2 & root public keys
-    SLV->>LocalDir: Writes it all to abc.vault.slv file under .slv/vaults
+    SLV->>LocalDir: Writes it all to abc.slv.yaml file under .slv/vaults
     Note over User,Admin: Adding secrets to vault
     User->>SLV: Add secret to abc_vault - foo:bar
-    LocalDir-->>SLV: Reads vault public key from .slv/vaults/abc.vault.slv
+    LocalDir-->>SLV: Reads vault public key from .slv/vaults/abc.slv.yaml
     SLV-->>SLV: Encrypts "bar" with vault public key
-    SLV->>LocalDir: Writes back foo:encrypted(bar) to .slv/vaults/abc.vault.slv
+    SLV->>LocalDir: Writes back foo:encrypted(bar) to .slv/vaults/abc.slv.yaml
     Note over User,Admin: Sharing an existing vault to new Environment
     User-->>Admin: Requests admin to share vault with an environment from the remote profile
 ```
