@@ -10,6 +10,6 @@ var (
 	QuantumSafeFlag = FlagDef{
 		Name:      "quantum-safe",
 		Shorthand: "q",
-		Usage:     "Enable quantum-safe cryptography",
+		Usage:     "Use post-quantum cryptography (Kyber1024)",
 	}
 )

@@ -82,11 +82,16 @@ func VaultCommand() *cobra.Command {
 				}
 				if env != nil {
 					if selfEnv {
-						envMap[accessorStr] = accessorStr + "\t(" + color.CyanString("Self"+": "+env.Name) + ")"
+						envMap[accessorStr] = accessorStr + "\t(" + color.CyanString("Self   "+": "+env.Name) + ")"
 					} else if rootEnv {
-						envMap[accessorStr] = accessorStr + "\t(" + color.CyanString("Root"+": "+env.Name) + ")"
+						envMap[accessorStr] = accessorStr + "\t(" + color.CyanString("Root   "+": "+env.Name) + ")"
 					} else {
-						envMap[accessorStr] = accessorStr + "\t(" + env.Name + ")"
+						if env.EnvType == environments.USER {
+							envMap[accessorStr] = accessorStr + "\t(" + "User   " + ": " + env.Name + ")"
+						} else {
+							envMap[accessorStr] = accessorStr + "\t(" + "Service" + ": " + env.Name + ")"
+						}
+						// envMap[accessorStr] = accessorStr + "\t(" + env.Name + ")"
 					}
 				} else {
 					envMap[accessorStr] = accessorStr
