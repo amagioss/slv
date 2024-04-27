@@ -6,7 +6,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+	"oss.amagi.com/slv/cli/internal/commands/utils"
 	"oss.amagi.com/slv/core/commons"
 	"oss.amagi.com/slv/core/crypto"
 	"oss.amagi.com/slv/core/input"
@@ -24,12 +26,26 @@ type k8Secret struct {
 	Type       string            `yaml:"type"`
 }
 
-func k8sSecretFromData(data []byte) (*k8Secret, error) {
+func parseK8sSecret(data []byte) (*k8Secret, error) {
 	seceret := &k8Secret{}
 	if err := yaml.Unmarshal(data, seceret); err != nil {
 		return nil, err
 	}
 	return seceret, nil
+}
+
+func toK8slvVaultFile(vault *vaults.Vault, vaultFilePath, k8slvName, k8sSecretType string) error {
+	obj := make(map[string]interface{})
+	obj[k8sVaultField] = vault
+	obj["apiVersion"] = k8sApiVersion
+	obj["kind"] = k8sKind
+	obj["metadata"] = map[string]interface{}{
+		"name": k8slvName,
+	}
+	if k8sSecretType != "" {
+		obj["type"] = k8sSecretType
+	}
+	return commons.WriteToYAML(vaultFilePath, "", obj)
 }
 
 func newK8sVault(filePath, k8sValue string, hashLength uint8, pq bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
@@ -47,7 +63,7 @@ func newK8sVault(filePath, k8sValue string, hashLength uint8, pq bool, rootPubli
 		if err != nil {
 			return nil, err
 		}
-		secret, err := k8sSecretFromData(data)
+		secret, err := parseK8sSecret(data)
 		if err != nil {
 			return nil, err
 		}
@@ -81,15 +97,30 @@ func newK8sVault(filePath, k8sValue string, hashLength uint8, pq bool, rootPubli
 			}
 		}
 	}
-	var obj map[string]interface{}
-	if err := commons.ReadFromYAML(filePath, &obj); err != nil {
-		return nil, err
+	return vault, toK8slvVaultFile(vault, filePath, k8slvName, k8sSecretType)
+}
+
+func vaultToK8sCommand() *cobra.Command {
+	if vaultToK8sCmd != nil {
+		return vaultToK8sCmd
 	}
-	obj["apiVersion"] = k8sApiVersion
-	obj["kind"] = k8sKind
-	obj["metadata"] = map[string]interface{}{
-		"name": k8slvName,
+	vaultToK8sCmd = &cobra.Command{
+		Use:     "tok8s",
+		Aliases: []string{"k8s", "tok8slv"},
+		Short:   "Transform an existing SLV vault file to a K8s compatible one",
+		Run: func(cmd *cobra.Command, args []string) {
+			vaultFilePath := cmd.Flag(vaultFileFlag.Name).Value.String()
+			k8sResourceName := cmd.Flag(vaultK8sNameFlag.Name).Value.String()
+			vault, err := getVault(vaultFilePath)
+			if err != nil {
+				utils.ExitOnError(err)
+			}
+			if err = toK8slvVaultFile(vault, vaultFilePath, k8sResourceName, ""); err != nil {
+				utils.ExitOnError(err)
+			}
+		},
 	}
-	obj["type"] = k8sSecretType
-	return vault, commons.WriteToYAML(filePath, "", obj)
+	vaultToK8sCmd.Flags().StringP(vaultK8sNameFlag.Name, vaultK8sNameFlag.Shorthand, "", vaultK8sNameFlag.Usage)
+	vaultToK8sCmd.MarkFlagRequired(vaultK8sNameFlag.Name)
+	return vaultToK8sCmd
 }

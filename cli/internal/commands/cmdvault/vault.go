@@ -33,9 +33,10 @@ func VaultCommand() *cobra.Command {
 		return vaultCmd
 	}
 	vaultCmd = &cobra.Command{
-		Use:   "vault",
-		Short: "Manage vaults and secrets in them",
-		Long:  `Handle vault operations in SLV. SLV Vaults are files that store secrets.`,
+		Use:     "vault",
+		Aliases: []string{"v", "vaults", "secret", "secrets"},
+		Short:   "Manage vaults/secrets with SLV",
+		Long:    `Manage vaults/secrets using SLV. SLV Vaults are files that store secrets in a key-value format.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 			vault, err := getVault(vaultFile)
@@ -119,7 +120,7 @@ func VaultCommand() *cobra.Command {
 	vaultCmd.PersistentFlags().StringP(vaultFileFlag.Name, vaultFileFlag.Shorthand, "", vaultFileFlag.Usage)
 	vaultCmd.MarkPersistentFlagRequired(vaultFileFlag.Name)
 	vaultCmd.AddCommand(vaultNewCommand())
-	vaultCmd.AddCommand(vaultSecretsCommand())
+	vaultCmd.AddCommand(vaultToK8sCommand())
 	vaultCmd.AddCommand(vaultPutCommand())
 	vaultCmd.AddCommand(vaultGetCommand())
 	vaultCmd.AddCommand(vaultDeleteCommand())

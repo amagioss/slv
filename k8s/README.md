@@ -3,13 +3,13 @@ SLV Kubernetes Integration helps in reconciling SLV vaults as kubernetes secrets
 SLV can create SLV's kuberenetes compatible vaults with a `--k8s` flag. Doing this will create vaults that are technically custom resources based on SLV's [CRD](https://oss.amagi.com/slv/k8s/crd.yaml).
 
 ```sh
-slv vault new -v [vault-file.yaml] --k [public_key] --search [env_key_word] --k8s [k8s-secret-file-path | - | k8s-slv-object-name]
+slv vault new -v [vault-file.yaml] -k [public_key] --search [env_key_word] --k8s [k8s-secret-file-path | - | k8s-slv-object-name]
 ```
 
 The `--k8s` flag takes in any of the following arguments and validates them in the following order
 - An existing K8s Secret object stored as plaintext K8s Secret yaml file
 - An input `-` signifies that you'd like to input the content of the K8s Secret object through stdin
-- Name of the SLV's K8s custom resource which directly translates to the name of the K8s Secret Object. This creates an empty K8s compatible SLV vault file.
+- Name of the SLV's K8s resource which directly translates to the name of the K8s Secret. This creates an empty K8s compatible SLV vault file.
 
 For example, to create an k8s SLV vault that would replicate a docker config Secret in k8s, you can do something like this:
 ```sh

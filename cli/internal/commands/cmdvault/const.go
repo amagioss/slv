@@ -9,10 +9,10 @@ var (
 	// Commands
 	vaultCmd             *cobra.Command
 	vaultNewCmd          *cobra.Command
+	vaultToK8sCmd        *cobra.Command
 	vaultAccessCmd       *cobra.Command
 	vaultAccessAddCmd    *cobra.Command
 	vaultAccessRemoveCmd *cobra.Command
-	vaultSecretsCmd      *cobra.Command
 	vaultPutCmd          *cobra.Command
 	vaultDeleteCmd       *cobra.Command
 	vaultGetCmd          *cobra.Command
@@ -41,7 +41,13 @@ var (
 
 	vaultK8sFlag = utils.FlagDef{
 		Name:  "k8s",
-		Usage: "Specify a name for the K8s SLV object if the vault is to be used in a K8s environment",
+		Usage: "Specify a name for the K8s SLV resource or path to an existing K8s Secret stored as a yaml config if the vault has to be used in a K8s environment",
+	}
+
+	vaultK8sNameFlag = utils.FlagDef{
+		Name:      "name",
+		Shorthand: "n",
+		Usage:     "Name of the K8s SLV resource that needs to be created. This will also be the name of the corresponding K8s Secret",
 	}
 
 	secretNameFlag = utils.FlagDef{
