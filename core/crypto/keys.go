@@ -78,13 +78,13 @@ func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
 type SecretKey struct {
 	version      *uint8
 	keyType      *KeyType
-	privKey      *xipher.PrivateKey
+	privKey      *xipher.SecretKey
 	pqPublicKey  *PublicKey
 	eccPublicKey *PublicKey
 }
 
 func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
-	privKey, err := xipher.NewPrivateKey()
+	privKey, err := xipher.NewSecretKey()
 	if err != nil {
 		return nil, errGeneratingSecretKey
 	}
@@ -92,14 +92,14 @@ func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
 }
 
 func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *SecretKey, err error) {
-	privKey, err := xipher.NewPrivateKeyForPassword(password)
+	privKey, err := xipher.NewSecretKeyForPassword(password)
 	if err != nil {
 		return nil, err
 	}
 	return newSecretKey(privKey, keyType), nil
 }
 
-func newSecretKey(privKey *xipher.PrivateKey, keyType KeyType) *SecretKey {
+func newSecretKey(privKey *xipher.SecretKey, keyType KeyType) *SecretKey {
 	version := cryptoVersion
 	return &SecretKey{
 		version: &version,
@@ -148,7 +148,7 @@ func SecretKeyFromBytes(bytes []byte) (*SecretKey, error) {
 	}
 	var version uint8 = bytes[0]
 	var keyType KeyType = KeyType(bytes[2])
-	privKey, err := xipher.ParsePrivateKey(bytes[3:])
+	privKey, err := xipher.ParseSecretKey(bytes[3:])
 	if err != nil {
 		return nil, errInvalidSecretKeyFormat
 	}

@@ -11,7 +11,7 @@ func bindWithPassword(skBytes []byte, inputs map[string][]byte) (ref map[string]
 	if len(password) == 0 {
 		return nil, err
 	}
-	xipherKey, err := xipher.NewPrivateKeyForPassword(password)
+	xipherKey, err := xipher.NewSecretKeyForPassword(password)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error
 	} else {
 		password = []byte(passwordStr)
 	}
-	xipherKey, err := xipher.NewPrivateKeyForPassword([]byte(password))
+	xipherKey, err := xipher.NewSecretKeyForPassword([]byte(password))
 	if err != nil {
 		return nil, err
 	}
