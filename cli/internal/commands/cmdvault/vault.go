@@ -123,6 +123,7 @@ func VaultCommand() *cobra.Command {
 	vaultCmd.AddCommand(vaultToK8sCommand())
 	vaultCmd.AddCommand(vaultPutCommand())
 	vaultCmd.AddCommand(vaultGetCommand())
+	vaultCmd.AddCommand(vaultShellCommand())
 	vaultCmd.AddCommand(vaultDeleteCommand())
 	vaultCmd.AddCommand(vaultRefCommand())
 	vaultCmd.AddCommand(vaultDerefCommand())

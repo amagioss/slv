@@ -20,6 +20,7 @@ type vaultConfig struct {
 }
 
 type Vault struct {
+	Version             uint8             `json:"version" yaml:"version"`
 	Secrets             map[string]string `json:"slvSecrets" yaml:"slvSecrets"`
 	Config              vaultConfig       `json:"slvConfig" yaml:"slvConfig"`
 	path                string            `json:"-"`
@@ -89,6 +90,7 @@ func New(filePath, objectField string, hashLength uint8, quantumSafe bool, rootP
 		return nil, err
 	}
 	vlt = &Vault{
+		Version:   vaultVersion,
 		publicKey: vaultPublicKey,
 		Config: vaultConfig{
 			Id:         vauldId,
@@ -137,6 +139,9 @@ func GetFromField(filePath, fieldName string) (vlt *Vault, err error) {
 		vlt.objectField = fieldName
 	}
 	vlt.path = filePath
+	if vlt.Version > vaultVersion {
+		return nil, errUnsupportedVaultVersion
+	}
 	return vlt, nil
 }
 

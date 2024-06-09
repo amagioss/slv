@@ -16,6 +16,7 @@ var (
 	vaultPutCmd          *cobra.Command
 	vaultDeleteCmd       *cobra.Command
 	vaultGetCmd          *cobra.Command
+	vaultShellCmd        *cobra.Command
 	vaultRefCmd          *cobra.Command
 	vaultDerefCmd        *cobra.Command
 )
@@ -48,6 +49,11 @@ var (
 		Name:      "name",
 		Shorthand: "n",
 		Usage:     "Name of the K8s SLV resource that needs to be created. This will also be the name of the corresponding K8s Secret",
+	}
+
+	secretNamePrefixFlag = utils.FlagDef{
+		Name:  "prefix",
+		Usage: "Prefix to set to the secret name while setting it as the environment variable",
 	}
 
 	secretNameFlag = utils.FlagDef{

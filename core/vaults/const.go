@@ -16,12 +16,14 @@ const (
 	secretNamePattern                   = "[a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?"
 	secretRefPatternBase                = `\{\{\s*VAULTID\.` + secretNamePattern + `\s*\}\}`
 	vaultIdAbbrev                       = "VID"
+	vaultVersion         uint8          = 1
 )
 
 var (
 	secretNameRegex = regexp.MustCompile(secretNamePattern)
 	secretRefRegex  = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", config.AppNameUpperCase+"_"+vaultIdAbbrev+"_[A-Za-z0-9]+"))
 
+	errUnsupportedVaultVersion      = errors.New("unsupported vault version")
 	errGeneratingVaultId            = errors.New("error in generating a new vault id")
 	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameEnding + ".yml or " + vaultFileNameEnding + ".yaml]")
 	errVaultDirPathCreation         = errors.New("error in creating a new vault directory path")
