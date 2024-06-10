@@ -1,14 +1,18 @@
 package cmdvault
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"syscall"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"oss.amagi.com/slv"
 	"oss.amagi.com/slv/cli/internal/commands/utils"
+	"oss.amagi.com/slv/core/config"
 )
 
 func vaultShellCommand() *cobra.Command {
@@ -20,6 +24,14 @@ func vaultShellCommand() *cobra.Command {
 		Aliases: []string{"venv", "sh", "getshell", "vitualenv"},
 		Short:   "Opens a shell with secrets loaded as environment variables",
 		Run: func(cmd *cobra.Command, args []string) {
+			shell := os.Getenv("SHELL")
+			if shell == "" {
+				if runtime.GOOS == "windows" {
+					shell = "cmd"
+				} else {
+					utils.ExitOnErrorWithMessage("Not a supported shell")
+				}
+			}
 			envSecretKey, err := slv.GetSecretKey()
 			if err != nil {
 				utils.ExitOnError(err)
@@ -38,10 +50,6 @@ func vaultShellCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			prefix := cmd.Flag(secretNamePrefixFlag.Name).Value.String()
-			shell := os.Getenv("SHELL")
-			if shell == "" {
-				utils.ExitOnErrorWithMessage("Not a supported shell")
-			}
 			slvShell := exec.Command(shell)
 			for _, envar := range os.Environ() {
 				if !strings.HasPrefix(envar, "SLV_ENV_SECRET_") {
@@ -57,6 +65,11 @@ func vaultShellCommand() *cobra.Command {
 			slvShell.Stdin = os.Stdin
 			slvShell.Stdout = os.Stdout
 			slvShell.Stderr = os.Stderr
+			fmt.Printf("Initializing %s shell with secrets loaded into environment variables from %s...\n",
+				config.AppNameUpperCase, color.CyanString(vaultFile))
+			if prefix != "" {
+				fmt.Printf("Please note that the secret names are prefixed with %s\n", color.CyanString(prefix))
+			}
 			if err = slvShell.Run(); err != nil {
 				if exitError, ok := err.(*exec.ExitError); ok {
 					if status, ok := exitError.Sys().(syscall.WaitStatus); ok {
