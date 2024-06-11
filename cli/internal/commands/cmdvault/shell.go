@@ -21,7 +21,7 @@ func vaultShellCommand() *cobra.Command {
 	}
 	vaultShellCmd = &cobra.Command{
 		Use:     "shell",
-		Aliases: []string{"venv", "sh", "getshell", "vitualenv"},
+		Aliases: []string{"session", "sh", "venv", "vitualenv"},
 		Short:   "Opens a shell with secrets loaded as environment variables",
 		Run: func(cmd *cobra.Command, args []string) {
 			shell := os.Getenv("SHELL")
@@ -65,7 +65,7 @@ func vaultShellCommand() *cobra.Command {
 			slvShell.Stdin = os.Stdin
 			slvShell.Stdout = os.Stdout
 			slvShell.Stderr = os.Stderr
-			fmt.Printf("Initializing %s shell with secrets loaded into environment variables from %s...\n",
+			fmt.Printf("Initializing %s session with secrets loaded into environment variables from the vault %s...\n",
 				config.AppNameUpperCase, color.CyanString(vaultFile))
 			if prefix != "" {
 				fmt.Printf("Please note that the secret names are prefixed with %s\n", color.CyanString(prefix))
@@ -73,11 +73,14 @@ func vaultShellCommand() *cobra.Command {
 			if err = slvShell.Run(); err != nil {
 				if exitError, ok := err.(*exec.ExitError); ok {
 					if status, ok := exitError.Sys().(syscall.WaitStatus); ok {
+						fmt.Printf(color.RedString("%s session for the vault %s terminated with exit code %d\n"), config.AppNameUpperCase, vaultFile, status.ExitStatus())
 						os.Exit(status.ExitStatus())
 					}
 				} else {
 					utils.ExitOnError(err)
 				}
+			} else {
+				fmt.Printf("%s session for the vault %s has been closed\n", config.AppNameUpperCase, color.CyanString(vaultFile))
 			}
 		},
 	}
