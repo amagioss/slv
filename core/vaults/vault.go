@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 
+	"golang.org/x/mod/semver"
+	"oss.amagi.com/slv"
 	"oss.amagi.com/slv/core/commons"
 	"oss.amagi.com/slv/core/config"
 	"oss.amagi.com/slv/core/crypto"
@@ -20,7 +22,7 @@ type vaultConfig struct {
 }
 
 type Vault struct {
-	Version             uint8             `json:"version" yaml:"version"`
+	Version             string            `json:"version,omitempty" yaml:"version,omitempty"`
 	Secrets             map[string]string `json:"slvSecrets" yaml:"slvSecrets"`
 	Config              vaultConfig       `json:"slvConfig" yaml:"slvConfig"`
 	path                string            `json:"-"`
@@ -28,7 +30,7 @@ type Vault struct {
 	secretKey           *crypto.SecretKey `json:"-"`
 	decryptedSecrets    map[string][]byte `json:"-"`
 	vaultSecretRefRegex *regexp.Regexp    `json:"-"`
-	objectField         string            `json:"-"`
+	k8s                 *k8slv            `json:"-"`
 }
 
 func (vlt *Vault) Id() string {
@@ -63,7 +65,7 @@ func newVaultId() (string, error) {
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yml or .slv.yaml.
-func New(filePath, objectField string, hashLength uint8, quantumSafe bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+func New(filePath, k8sName, k8SecretFile string, hashLength uint8, quantumSafe bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
@@ -90,16 +92,15 @@ func New(filePath, objectField string, hashLength uint8, quantumSafe bool, rootP
 		return nil, err
 	}
 	vlt = &Vault{
-		Version:   vaultVersion,
+		Version:   slv.Version,
 		publicKey: vaultPublicKey,
 		Config: vaultConfig{
 			Id:         vauldId,
 			PublicKey:  vaultPubKeyStr,
 			HashLength: hashLength,
 		},
-		path:        filePath,
-		secretKey:   vaultSecretKey,
-		objectField: objectField,
+		path:      filePath,
+		secretKey: vaultSecretKey,
 	}
 	if rootPublicKey != nil {
 		if _, err := vlt.Share(rootPublicKey); err != nil {
@@ -111,36 +112,49 @@ func New(filePath, objectField string, hashLength uint8, quantumSafe bool, rootP
 			return nil, err
 		}
 	}
-	return vlt, vlt.commit()
+	if k8sName == "" && k8SecretFile == "" {
+		return vlt, vlt.commit()
+	} else {
+		return vlt, vlt.ToK8s(k8sName, k8SecretFile)
+	}
 }
 
 // Returns the vault instance from a given yaml. The vault file name must end with .slv.yml or .slv.yaml.
 func Get(filePath string) (vlt *Vault, err error) {
-	return GetFromField(filePath, "")
+	obj := make(map[string]interface{})
+	if err := commons.ReadFromYAML(filePath, &obj); err != nil {
+		return nil, err
+	}
+	if obj[k8sVaultField] != nil {
+		return getFromField(filePath, true)
+	}
+	return getFromField(filePath, false)
 }
 
-// Returns the vault instance from a given yaml file considering a field as vault. The vault file name must end with .slv.yml or .slv.yaml.
-func GetFromField(filePath, fieldName string) (vlt *Vault, err error) {
+func getFromField(filePath string, k8s bool) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
 	if !commons.FileExists(filePath) {
 		return nil, errVaultNotFound
 	}
-	vlt = &Vault{}
-	if fieldName == "" {
-		if err = commons.ReadFromYAML(filePath, &vlt); err != nil {
+	if k8s {
+		k8sVault := &k8slv{}
+		if err = commons.ReadFromYAML(filePath, k8sVault); err != nil {
 			return nil, err
 		}
+		vlt = &k8sVault.Spec
+		vlt.k8s = k8sVault
 	} else {
-		if err = commons.ReadChildFromYAML(filePath, fieldName, &vlt); err != nil {
+		vlt = &Vault{}
+		if err = commons.ReadFromYAML(filePath, vlt); err != nil {
 			return nil, err
 		}
-		vlt.objectField = fieldName
 	}
 	vlt.path = filePath
-	if vlt.Version > vaultVersion {
-		return nil, errUnsupportedVaultVersion
+	vaultVersion := vlt.Version
+	if vaultVersion != "" && (!semver.IsValid(vaultVersion) || semver.Compare(slv.Version, vaultVersion) < 0) {
+		return nil, errVaultVersionNotRecognized
 	}
 	return vlt, nil
 }
@@ -160,22 +174,14 @@ func (vlt *Vault) Delete() error {
 }
 
 func (vlt *Vault) commit() error {
-	if vlt.objectField == "" {
-		return commons.WriteToYAML(vlt.path,
-			"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" as placeholder to reference secrets from this vault into files\n", vlt)
+	var data interface{}
+	if vlt.k8s != nil {
+		data = vlt.k8s
 	} else {
-		var obj map[string]interface{}
-		if commons.FileExists(vlt.path) {
-			if err := commons.ReadFromYAML(vlt.path, &obj); err != nil {
-				return err
-			}
-		} else {
-			obj = make(map[string]interface{})
-		}
-		obj[vlt.objectField] = vlt
-		return commons.WriteToYAML(vlt.path,
-			"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" as placeholder to reference secrets from this vault into files\n", obj)
+		data = vlt
 	}
+	return commons.WriteToYAML(vlt.path,
+		"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" as placeholder to reference secrets from this vault into files\n", data)
 }
 
 func (vlt *Vault) reset() error {

@@ -39,7 +39,8 @@ func VersionInfo() string {
 }
 
 var (
-	Version    = ""
+	Version    = "v" + version
+	version    = "777.77.77"
 	fullCommit = ""
 	commitDate = ""
 	releaseURL = ""

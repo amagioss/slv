@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	"oss.amagi.com/slv/cli/internal/commands/cmdenv"
 	"oss.amagi.com/slv/cli/internal/commands/utils"
-	"oss.amagi.com/slv/core/vaults"
 )
 
 func vaultNewCommand() *cobra.Command {
@@ -39,12 +38,7 @@ func vaultNewCommand() *cobra.Command {
 			}
 			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
 			k8sName := cmd.Flag(vaultK8sFlag.Name).Value.String()
-			if k8sName == "" {
-				_, err = vaults.New(vaultFile, "", hashLength, pq, rootPublicKey, publicKeys...)
-			} else {
-				_, err = newK8sVault(vaultFile, k8sName, hashLength, pq, rootPublicKey, publicKeys...)
-			}
-			if err != nil {
+			if _, err = newK8sVault(vaultFile, k8sName, hashLength, pq, rootPublicKey, publicKeys...); err != nil {
 				utils.ExitOnError(err)
 			}
 			fmt.Println("Created vault:", color.GreenString(vaultFile))

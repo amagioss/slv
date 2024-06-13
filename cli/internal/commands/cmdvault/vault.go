@@ -8,24 +8,13 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"oss.amagi.com/slv/cli/internal/commands/utils"
-	"oss.amagi.com/slv/core/config"
 	"oss.amagi.com/slv/core/environments"
 	"oss.amagi.com/slv/core/profiles"
 	"oss.amagi.com/slv/core/vaults"
 )
 
-const (
-	k8sApiVersion = config.K8SLVGroup + "/" + config.K8SLVVersion
-	k8sKind       = config.K8SLVKind
-	k8sVaultField = config.K8SLVVaultField
-)
-
 func getVault(filePath string) (*vaults.Vault, error) {
-	vault, err := vaults.Get(filePath)
-	if err != nil || vault.Config.PublicKey == "" {
-		vault, err = vaults.GetFromField(filePath, k8sVaultField)
-	}
-	return vault, err
+	return vaults.Get(filePath)
 }
 
 func VaultCommand() *cobra.Command {

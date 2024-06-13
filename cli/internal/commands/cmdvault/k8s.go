@@ -1,103 +1,23 @@
 package cmdvault
 
 import (
-	"encoding/base64"
-	"io"
-	"os"
+	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 	"oss.amagi.com/slv/cli/internal/commands/utils"
-	"oss.amagi.com/slv/core/commons"
 	"oss.amagi.com/slv/core/crypto"
-	"oss.amagi.com/slv/core/input"
 	"oss.amagi.com/slv/core/vaults"
 )
 
-type k8Secret struct {
-	ApiVersion string `yaml:"apiVersion"`
-	Kind       string `yaml:"kind"`
-	Metadata   struct {
-		Name string `yaml:"name"`
-	} `yaml:"metadata"`
-	Data       map[string]string `yaml:"data"`
-	StringData map[string]string `yaml:"stringData"`
-	Type       string            `yaml:"type"`
-}
-
-func parseK8sSecret(data []byte) (*k8Secret, error) {
-	seceret := &k8Secret{}
-	if err := yaml.Unmarshal(data, seceret); err != nil {
-		return nil, err
+func newK8sVault(filePath, k8sNameOrSecretFile string, hashLength uint8, pq bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
+	if strings.HasSuffix(k8sNameOrSecretFile, ".yaml") || strings.HasSuffix(k8sNameOrSecretFile, ".yml") ||
+		strings.HasSuffix(k8sNameOrSecretFile, ".json") || k8sNameOrSecretFile == "-" {
+		return vaults.New(filePath, "", k8sNameOrSecretFile, hashLength, pq, rootPublicKey, publicKeys...)
+	} else {
+		return vaults.New(filePath, k8sNameOrSecretFile, "", hashLength, pq, rootPublicKey, publicKeys...)
 	}
-	return seceret, nil
-}
-
-func toK8slvVaultFile(vault *vaults.Vault, vaultFilePath, k8slvName, k8sSecretType string) error {
-	obj := make(map[string]interface{})
-	obj[k8sVaultField] = vault
-	obj["apiVersion"] = k8sApiVersion
-	obj["kind"] = k8sKind
-	obj["metadata"] = map[string]interface{}{
-		"name": k8slvName,
-	}
-	if k8sSecretType != "" {
-		obj["type"] = k8sSecretType
-	}
-	return commons.WriteToYAML(vaultFilePath, "", obj)
-}
-
-func newK8sVault(filePath, k8sValue string, hashLength uint8, pq bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
-	k8slvName := k8sValue
-	var secretDataMap map[string][]byte
-	var k8sSecretType string
-	if strings.HasSuffix(k8sValue, ".yaml") || strings.HasSuffix(k8sValue, ".yml") || strings.HasSuffix(k8sValue, ".json") || k8sValue == "-" {
-		var data []byte
-		var err error
-		if k8sValue == "-" {
-			data, err = input.ReadBufferFromStdin("Input the k8s secret object as yaml/json: ")
-		} else {
-			data, err = os.ReadFile(k8sValue)
-		}
-		if err != nil {
-			return nil, err
-		}
-		secret, err := parseK8sSecret(data)
-		if err != nil {
-			return nil, err
-		}
-		k8slvName = secret.Metadata.Name
-		secretDataMap = make(map[string][]byte)
-		if secret.Data != nil {
-			for key, value := range secret.Data {
-				decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(value))
-				secretValue, err := io.ReadAll(decoder)
-				if err != nil {
-					return nil, err
-				}
-				secretDataMap[key] = secretValue
-			}
-		}
-		if secret.StringData != nil {
-			for key, value := range secret.StringData {
-				secretDataMap[key] = []byte(value)
-			}
-		}
-		k8sSecretType = secret.Type
-	}
-	vault, err := vaults.New(filePath, k8sVaultField, hashLength, pq, rootPublicKey, publicKeys...)
-	if err != nil {
-		return nil, err
-	}
-	if len(secretDataMap) > 0 {
-		for key, value := range secretDataMap {
-			if err = vault.PutSecret(key, value); err != nil {
-				return nil, err
-			}
-		}
-	}
-	return vault, toK8slvVaultFile(vault, filePath, k8slvName, k8sSecretType)
 }
 
 func vaultToK8sCommand() *cobra.Command {
@@ -115,9 +35,10 @@ func vaultToK8sCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			if err = toK8slvVaultFile(vault, vaultFilePath, k8sResourceName, ""); err != nil {
+			if err = vault.ToK8s(k8sResourceName, ""); err != nil {
 				utils.ExitOnError(err)
 			}
+			fmt.Printf("Vault %s transformed to K8s resource %s\n", color.GreenString(vaultFilePath), color.GreenString(k8sResourceName))
 		},
 	}
 	vaultToK8sCmd.Flags().StringP(vaultK8sNameFlag.Name, vaultK8sNameFlag.Shorthand, "", vaultK8sNameFlag.Usage)

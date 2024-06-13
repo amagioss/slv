@@ -5,7 +5,7 @@ builds:
     main: ./cli
     env:
       - CGO_ENABLED=0
-    ldflags: "-X oss.amagi.com/slv.Version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
+    ldflags: "-X oss.amagi.com/slv.version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
     targets:
       - darwin_amd64
       - darwin_arm64
@@ -18,7 +18,7 @@ builds:
     main: ./k8s/cmd
     env:
       - CGO_ENABLED=0
-    ldflags: "-X oss.amagi.com/slv.Version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
+    ldflags: "-X oss.amagi.com/slv.version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
     goarch:
       - amd64
       - arm64
@@ -29,7 +29,7 @@ builds:
     main: ./k8s/job
     env:
       - CGO_ENABLED=0
-    ldflags: "-X oss.amagi.com/slv.Version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
+    ldflags: "-X oss.amagi.com/slv.version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
     goarch:
       - amd64
       - arm64
