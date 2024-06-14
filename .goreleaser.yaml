@@ -1,7 +1,7 @@
 version: 2
 project_name: slv
 builds:
-  - id: slv
+  - id: slv-cli
     binary: slv
     main: ./internal/cli
     env:
@@ -38,11 +38,11 @@ builds:
     goos:
       - linux
 archives:
-  - id: slv
+  - id: slv-cli
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     format: zip
     builds:
-      - slv
+      - slv-cli
 checksum:
   name_template: "{{ .ProjectName }}_checksums.txt"
 snapshot:
@@ -55,7 +55,7 @@ changelog:
       - '^test:'
 nfpms:
   - builds:
-      - slv
+      - slv-cli
     file_name_template: '{{ .PackageName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     vendor: Amagi Media Labs
     homepage: https://oss.amagi.com/slv
@@ -66,7 +66,7 @@ nfpms:
       - rpm
 brews:
   - ids:
-      - slv
+      - slv-cli
     name: slv
     homepage: "https://oss.amagi.com/slv"
     commit_author:
