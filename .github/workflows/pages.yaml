@@ -27,10 +27,10 @@ jobs:
         run: |
           cp scripts/install/* pages/
           mkdir -p pages/k8s/samples/deploy
-          cp k8s/config/crd/bases/slv.oss.amagi.com_slvs.yaml pages/k8s/crd.yaml
-          cp k8s/deploy/operator.yaml pages/k8s/samples/deploy/operator.yaml
-          cp k8s/deploy/job.yaml pages/k8s/samples/deploy/job.yaml
-          cp k8s/config/samples/slv_v1_slv.yaml pages/k8s/samples/pets.slv.yaml
+          cp internal/k8s/config/crd/bases/slv.oss.amagi.com_slvs.yaml pages/k8s/crd.yaml
+          cp internal/k8s/deploy/operator.yaml pages/k8s/samples/deploy/operator.yaml
+          cp internal/k8s/deploy/job.yaml pages/k8s/samples/deploy/job.yaml
+          cp internal/k8s/config/samples/slv_v1_slv.yaml pages/k8s/samples/pets.slv.yaml
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact

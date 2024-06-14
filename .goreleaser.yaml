@@ -1,11 +1,12 @@
+version: 2
 project_name: slv
 builds:
   - id: slv
     binary: slv
-    main: ./cli
+    main: ./internal/cli
     env:
       - CGO_ENABLED=0
-    ldflags: "-X oss.amagi.com/slv.version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
+    ldflags: "-X oss.amagi.com/slv/internal/core/config.version={{.Version}} -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}} -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}} -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}"
     targets:
       - darwin_amd64
       - darwin_arm64
@@ -13,12 +14,13 @@ builds:
       - linux_arm64
       - linux_arm
       - windows_amd64
+      - windows_arm64
   - id: slv-k8s-operator
     binary: slv-k8s-operator
-    main: ./k8s/cmd
+    main: ./internal/k8s/cmd
     env:
       - CGO_ENABLED=0
-    ldflags: "-X oss.amagi.com/slv.version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
+    ldflags: "-X oss.amagi.com/slv/internal/core/config.version={{.Version}} -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}} -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}} -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}"
     goarch:
       - amd64
       - arm64
@@ -26,10 +28,10 @@ builds:
       - linux
   - id: slv-k8s-job
     binary: slv-k8s-job
-    main: ./k8s/job
+    main: ./internal/k8s/job
     env:
       - CGO_ENABLED=0
-    ldflags: "-X oss.amagi.com/slv.version={{.Version}} -X oss.amagi.com/slv.commitDate={{.CommitDate}} -X oss.amagi.com/slv.fullCommit={{.FullCommit}} -X oss.amagi.com/slv.releaseURL={{.ReleaseURL}}"
+    ldflags: "-X oss.amagi.com/slv/internal/core/config.version={{.Version}} -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}} -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}} -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}"
     goarch:
       - amd64
       - arm64
