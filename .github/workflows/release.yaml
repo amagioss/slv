@@ -56,6 +56,7 @@ jobs:
 
   release-k8s:
     name: Release K8s Operator & Job Images
+    needs: release-core
     runs-on: ubuntu-latest
     steps:
       - name: Setting SLV Version
@@ -102,3 +103,38 @@ jobs:
             ghcr.io/${{ github.repository }}/slv-k8s-job:${{ env.SLV_VERSION }}
             ghcr.io/${{ github.repository }}/slv-k8s-job:${{ github.ref_name }}
             ghcr.io/${{ github.repository }}/slv-k8s-job:latest
+
+  pages:
+    name: Deploy to GitHub Pages
+    needs: release-core
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare pages directory
+        run: |
+          cp scripts/install/* pages/
+          mkdir -p pages/k8s/samples/deploy
+          cp internal/k8s/config/crd/bases/slv.oss.amagi.com_slvs.yaml pages/k8s/crd.yaml
+          cp internal/k8s/deploy/operator.yaml pages/k8s/samples/deploy/operator.yaml
+          cp internal/k8s/deploy/job.yaml pages/k8s/samples/deploy/job.yaml
+          cp internal/k8s/config/samples/slv_v1_slv.yaml pages/k8s/samples/pets.slv.yaml
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
