@@ -1,7 +1,10 @@
 version: 2
+
 project_name: slv-k8s
+
 env:
   - CGO_ENABLED=0
+
 builds:
 
   - id: slv-k8s-operator

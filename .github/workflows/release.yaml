@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  release-cli:
+  release-core:
     name: Release CLI & Library
     runs-on: ubuntu-latest
     steps:
@@ -34,7 +34,7 @@ jobs:
           -e GITHUB_TOKEN \
           -e HOMEBREW_SSH_KEY \
           goreleaser:local release \
-          -f .goreleaser/slv-cli.yaml \
+          -f .goreleaser/slv-core.yaml \
           --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -55,7 +55,7 @@ jobs:
             ghcr.io/${{ github.repository }}:latest
 
   release-k8s:
-    name: Release SLV K8s Images
+    name: Release K8s Operator & Job Images
     runs-on: ubuntu-latest
     steps:
       - name: Setting SLV Version

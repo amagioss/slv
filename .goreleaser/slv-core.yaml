@@ -1,8 +1,11 @@
 version: 2
+
 project_name: slv
+
 env:
   - GO111MODULE=on
   - CGO_ENABLED=1
+
 builds:
 
 # Build for CLI
@@ -26,7 +29,7 @@ builds:
       - -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}}
       - -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}
 
-#Builds for shared library 
+# Builds for Shared Library
   - id: slv-shared-lib-darwin-amd64
     binary: slv
     main: ./internal/sharedlib
