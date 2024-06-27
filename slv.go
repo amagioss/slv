@@ -37,3 +37,12 @@ func GetSecret(vaultFile, secretName string) ([]byte, error) {
 	}
 	return vault.GetSecret(secretName)
 }
+
+// PutSecret writes a secret to the vault
+func PutSecret(vaultFile, secretName string, secretValue []byte) error {
+	vault, err := vaults.Get(vaultFile)
+	if err != nil {
+		return err
+	}
+	return vault.PutSecret(secretName, secretValue)
+}

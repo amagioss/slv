@@ -19,6 +19,18 @@ const (
 	slvVersionAnnotationKey = slvv1.Group + "/version"
 )
 
+func isAnnotationUpdateRequred(slvAnnotations, secretAnnotations map[string]string) bool {
+	if len(secretAnnotations) != (len(slvAnnotations) + 1) {
+		return true
+	}
+	for k, v := range slvAnnotations {
+		if secretAnnotations[k] != v {
+			return true
+		}
+	}
+	return secretAnnotations[slvVersionAnnotationKey] != config.Version
+}
+
 func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvObj slvv1.SLV) error {
 	if err := slvObj.Spec.Unlock(*secretKey); err != nil {
 		return err
@@ -32,15 +44,17 @@ func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvO
 		if errors.IsNotFound(err) {
 			secret := &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      slvObj.Name,
-					Namespace: slvObj.Namespace,
-					Annotations: map[string]string{
-						slvVersionAnnotationKey: config.Version,
-					},
+					Name:        slvObj.Name,
+					Namespace:   slvObj.Namespace,
+					Annotations: slvObj.Annotations,
 				},
 				Type: slvObj.Type,
 				Data: slvSecretMap,
 			}
+			if secret.Annotations == nil {
+				secret.Annotations = make(map[string]string)
+			}
+			secret.Annotations[slvVersionAnnotationKey] = config.Version
 			if _, err = clientset.CoreV1().Secrets(slvObj.Namespace).Create(context.Background(), secret, metav1.CreateOptions{}); err != nil {
 				return err
 			}
@@ -62,10 +76,11 @@ func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvO
 				}
 			}
 		}
-		if secret.Annotations == nil {
-			secret.Annotations = make(map[string]string)
-		}
-		if secret.Annotations[slvVersionAnnotationKey] != config.Version {
+		if isAnnotationUpdateRequred(slvObj.Annotations, secret.Annotations) {
+			secret.Annotations = slvObj.Annotations
+			if secret.Annotations == nil {
+				secret.Annotations = make(map[string]string)
+			}
 			secret.Annotations[slvVersionAnnotationKey] = config.Version
 			updateRequired = true
 		}

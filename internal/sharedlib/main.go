@@ -18,4 +18,11 @@ func SLVGetAllSecrets(vaultPath *C.char, secretsJson **C.char, secretsJsonLength
 	getAllSecrets(vaultPath, secretsJson, secretsJsonLength, errMessage, errLength)
 }
 
+// SLVPutSecret writes a secret to the vault
+//
+//export SLVPutSecret
+func SLVPutSecret(vaultPath *C.char, secretName *C.char, secretValue *C.char, errMessage **C.char, errLength *C.int) {
+	putSecret(vaultPath, secretName, secretValue, errMessage, errLength)
+}
+
 func main() {}

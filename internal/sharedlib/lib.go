@@ -5,9 +5,12 @@ import (
 
 	"oss.amagi.com/slv"
 )
-import "encoding/json"
+import (
+	"encoding/json"
+	"unsafe"
+)
 
-func getSecret(vaultPath *C.char, secretName *C.char, secretValue **C.char, secretLength *C.int, errMessage **C.char, errLength *C.int) {
+func getSecret(vaultPath, secretName *C.char, secretValue **C.char, secretLength *C.int, errMessage **C.char, errLength *C.int) {
 	vaultFile := C.GoString(vaultPath)
 	name := C.GoString(secretName)
 	if value, err := slv.GetSecret(vaultFile, name); err != nil {
@@ -40,4 +43,17 @@ func getAllSecrets(vaultPath *C.char, secretsJson **C.char, secretsJsonLength *C
 	*secretsJsonLength = 0
 	*errMessage = C.CString(err.Error())
 	*errLength = C.int(len(err.Error()))
+}
+
+func putSecret(vaultPath, secretName, secretValue *C.char, errMessage **C.char, errLength *C.int) {
+	vaultFile := C.GoString(vaultPath)
+	name := C.GoString(secretName)
+	value := C.GoBytes(unsafe.Pointer(secretValue), C.int(len(C.GoString(secretValue))))
+	if err := slv.PutSecret(vaultFile, name, value); err != nil {
+		*errMessage = C.CString(err.Error())
+		*errLength = C.int(len(err.Error()))
+	} else {
+		*errMessage = nil
+		*errLength = 0
+	}
 }

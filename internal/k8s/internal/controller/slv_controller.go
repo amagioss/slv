@@ -75,6 +75,18 @@ func (r *SLVReconciler) success(ctx context.Context,
 	return nil
 }
 
+func isAnnotationUpdateRequred(slvAnnotations, secretAnnotations map[string]string) bool {
+	if len(secretAnnotations) != (len(slvAnnotations) + 1) {
+		return true
+	}
+	for k, v := range slvAnnotations {
+		if secretAnnotations[k] != v {
+			return true
+		}
+	}
+	return secretAnnotations[slvVersionAnnotationKey] != config.Version
+}
+
 //+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs/finalizers,verbs=update
@@ -118,11 +130,9 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			// Create secret
 			secret := &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      slvObj.Name,
-					Namespace: req.Namespace,
-					Annotations: map[string]string{
-						slvVersionAnnotationKey: config.Version,
-					},
+					Name:        slvObj.Name,
+					Namespace:   req.Namespace,
+					Annotations: slvObj.Annotations,
 					OwnerReferences: []metav1.OwnerReference{
 						{
 							APIVersion: slvObj.APIVersion,
@@ -136,6 +146,10 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 				Type: slvObj.Type,
 				Data: slvSecretMap,
 			}
+			if secret.Annotations == nil {
+				secret.Annotations = make(map[string]string)
+			}
+			secret.Annotations[slvVersionAnnotationKey] = config.Version
 			if err = controllerutil.SetControllerReference(&slvObj, secret, r.Scheme); err != nil {
 				return r.returnError(ctx, &slvObj, &logger, err, "Failed to set controller reference for secret")
 			}
@@ -163,10 +177,11 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 				}
 			}
 		}
-		if secret.Annotations == nil {
-			secret.Annotations = make(map[string]string)
-		}
-		if secret.Annotations[slvVersionAnnotationKey] != config.Version {
+		if isAnnotationUpdateRequred(slvObj.Annotations, secret.Annotations) {
+			secret.Annotations = slvObj.Annotations
+			if secret.Annotations == nil {
+				secret.Annotations = make(map[string]string)
+			}
 			secret.Annotations[slvVersionAnnotationKey] = config.Version
 			updateRequired = true
 		}
