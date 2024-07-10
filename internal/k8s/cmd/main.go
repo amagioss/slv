@@ -38,7 +38,7 @@ import (
 	"oss.amagi.com/slv/internal/core/config"
 	slvv1 "oss.amagi.com/slv/internal/k8s/api/v1"
 	"oss.amagi.com/slv/internal/k8s/internal/controller"
-	"oss.amagi.com/slv/internal/k8s/slvenv"
+	"oss.amagi.com/slv/internal/k8s/utils"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -80,8 +80,7 @@ func main() {
 	setupLog.Info("initializing SLV operator...")
 	setupLog.Info(config.VersionInfo())
 
-	err := slvenv.InitSLVSecretKey()
-	if err != nil {
+	if err := utils.InitSecretKey(); err != nil {
 		setupLog.Error(err, "unable to initialize SLV Environment Secret Key")
 		os.Exit(1)
 	}

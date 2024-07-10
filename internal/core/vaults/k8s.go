@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"oss.amagi.com/slv/internal/core/commons"
+	"gopkg.in/yaml.v3"
 )
 
 type k8sMeta struct {
@@ -29,8 +29,8 @@ type k8Secret struct {
 	Type       string            `yaml:"type"`
 }
 
-func (vlt *Vault) ToK8s(k8sName, k8SecretFile string) (err error) {
-	if k8sName == "" && k8SecretFile == "" {
+func (vlt *Vault) ToK8s(k8sName string, k8SecretContent []byte) (err error) {
+	if k8sName == "" && k8SecretContent == nil {
 		return errK8sNameRequired
 	}
 	if vlt.k8s == nil {
@@ -43,9 +43,9 @@ func (vlt *Vault) ToK8s(k8sName, k8SecretFile string) (err error) {
 	if k8sName != "" {
 		vlt.k8s.Metadata = k8sMeta{Name: k8sName}
 	}
-	if k8SecretFile != "" {
+	if k8SecretContent != nil {
 		k8secret := &k8Secret{}
-		if err = commons.ReadFromYAML(k8SecretFile, k8secret); err != nil {
+		if err = yaml.Unmarshal(k8SecretContent, k8secret); err != nil {
 			return err
 		}
 		if k8secret.Metadata.Name != "" {

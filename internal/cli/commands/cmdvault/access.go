@@ -23,6 +23,11 @@ func vaultAccessCommand() *cobra.Command {
 			cmd.Help()
 		},
 	}
+	vaultAccessCmd.PersistentFlags().StringSliceP(vaultAccessPublicKeysFlag.Name, vaultAccessPublicKeysFlag.Shorthand, []string{}, vaultAccessPublicKeysFlag.Usage)
+	vaultAccessCmd.PersistentFlags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
+	vaultAccessCmd.PersistentFlags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
+	vaultAccessCmd.PersistentFlags().BoolP(cmdenv.EnvK8sClusterFlag.Name, cmdenv.EnvK8sClusterFlag.Shorthand, false, cmdenv.EnvK8sClusterFlag.Usage)
+	vaultAccessCmd.PersistentFlags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage+" (used with k8s environment)")
 	vaultAccessCmd.AddCommand(vaultAccessAddCommand())
 	vaultAccessCmd.AddCommand(vaultAccessRemoveCommand())
 	return vaultAccessCmd
@@ -51,7 +56,9 @@ func vaultAccessAddCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			selfEnv, _ := cmd.Flags().GetBool(cmdenv.EnvSelfFlag.Name)
-			publicKeys, _, err := getPublicKeys(publicKeyStrings, queries, selfEnv)
+			k8sEnv, _ := cmd.Flags().GetBool(cmdenv.EnvK8sClusterFlag.Name)
+			k8sPQ, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
+			publicKeys, _, err := getPublicKeys(publicKeyStrings, queries, selfEnv, k8sEnv, k8sPQ)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -73,9 +80,6 @@ func vaultAccessAddCommand() *cobra.Command {
 			utils.ExitOnError(err)
 		},
 	}
-	vaultAccessAddCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.Name, vaultAccessPublicKeysFlag.Shorthand, []string{}, vaultAccessPublicKeysFlag.Usage)
-	vaultAccessAddCmd.Flags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
-	vaultAccessAddCmd.Flags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
 	return vaultAccessAddCmd
 }
 
@@ -98,7 +102,9 @@ func vaultAccessRemoveCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			selfEnv, _ := cmd.Flags().GetBool(cmdenv.EnvSelfFlag.Name)
-			publicKeys, _, err := getPublicKeys(publicKeyStrings, queries, selfEnv)
+			k8sEnv, _ := cmd.Flags().GetBool(cmdenv.EnvK8sClusterFlag.Name)
+			k8sPQ, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
+			publicKeys, _, err := getPublicKeys(publicKeyStrings, queries, selfEnv, k8sEnv, k8sPQ)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -119,8 +125,5 @@ func vaultAccessRemoveCommand() *cobra.Command {
 			utils.ExitOnError(err)
 		},
 	}
-	vaultAccessRemoveCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.Name, vaultAccessPublicKeysFlag.Shorthand, []string{}, vaultAccessPublicKeysFlag.Usage)
-	vaultAccessRemoveCmd.Flags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
-	vaultAccessRemoveCmd.Flags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
 	return vaultAccessRemoveCmd
 }

@@ -27,8 +27,6 @@ func envNewCommand() *cobra.Command {
 	envNewCmd.PersistentFlags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	envNewCmd.AddCommand(envNewServiceCommand())
 	envNewCmd.AddCommand(envNewUserCommand())
-	envNewCmd.AddCommand(newKMSEnvCommand("aws", "Create an environment that works with AWS KMS", awsARNFlag))
-	envNewCmd.AddCommand(newKMSEnvCommand("gcp", "Create an environment that works with GCP KMS", gcpKmsResNameFlag))
 	return envNewCmd
 }
 
@@ -79,6 +77,8 @@ func envNewServiceCommand() *cobra.Command {
 	envNewServiceCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
 	envNewServiceCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 	envNewServiceCmd.MarkFlagRequired(envNameFlag.Name)
+	envNewServiceCmd.AddCommand(newKMSEnvCommand("aws", "Create a service environment for AWS KMS", awsARNFlag))
+	envNewServiceCmd.AddCommand(newKMSEnvCommand("gcp", "Create a service environment for GCP KMS", gcpKmsResNameFlag))
 	return envNewServiceCmd
 }
 

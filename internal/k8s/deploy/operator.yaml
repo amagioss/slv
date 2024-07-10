@@ -13,11 +13,12 @@ metadata:
   name: slv-k8s-operator-clusterrole
 rules:
   - apiGroups: ["slv.oss.amagi.com"]
-    resources: ["slvs"]  # plural of SLV CRD
+    resources: ["slvs"]
     verbs:
       - "get"
       - "list"
       - "watch"
+      - "update"
   - apiGroups: [""]
     resources: ["secrets"]
     verbs:
@@ -25,8 +26,14 @@ rules:
       - "get"
       - "list"
       - "update"
-      - "delete" # Delete the secret when corresponding SLV CR is deleted
-      - "watch"  # Watching secrets annotated by SLV being modified and reverse sync for reverting to original state.
+      - "delete"
+      - "watch"
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs:
+      - "get"
+      - "create"
+      - "update"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -74,8 +81,8 @@ spec:
               secretKeyRef:
                 name: slv # Name of K8s Secret
                 key: SecretKey  # Key within K8s Secret
-          # - name: SLV_ENV_SECRET_BINDING
-          #   valueFrom: # SLV Environment Secret Binding from K8s ConfigMap
-          #     configMapKeyRef:
-          #       name: slv # Name of K8s ConfigMap
-          #       key: SecretBinding  # Key within K8s ConfigMap
+        #   - name: SLV_ENV_SECRET_BINDING
+        #     valueFrom: # SLV Environment Secret Binding from K8s ConfigMap
+        #       configMapKeyRef:
+        #         name: slv # Name of K8s ConfigMap
+        #         key: SecretBinding  # Key within K8s ConfigMap

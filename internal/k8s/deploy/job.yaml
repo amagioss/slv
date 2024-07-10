@@ -12,10 +12,11 @@ metadata:
   name: slv-k8s-job-role
 rules:
   - apiGroups: ["slv.oss.amagi.com"]
-    resources: ["slvs"]  # plural of SLV CRD
+    resources: ["slvs"]
     verbs:
       - "get"
       - "list"
+      - "update"
   - apiGroups: [""]
     resources: ["secrets"]
     verbs:
@@ -24,6 +25,12 @@ rules:
       - "list"
       - "update"
       - "delete"
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs:
+      - "get"
+      - "create"
+      - "update"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -51,7 +58,7 @@ spec:
     spec:
       containers:
         - name: slv-k8s-job
-          image: ghcr.io/amagioss/slv/slv-k8s-job:latest
+          image: ghcr.io/amagioss/slv/slv-k8s-operator:latest
           resources:
             limits:
               cpu: "1" # 1 vCPU should be sufficient
@@ -62,11 +69,11 @@ spec:
                 secretKeyRef:
                   name: slv # Name of K8s Secret
                   key: SecretKey  # Key within K8s Secret
-            # - name: SLV_ENV_SECRET_BINDING
-            #   valueFrom: # SLV Environment Secret Binding from K8s ConfigMap
-            #     configMapKeyRef:
-            #       name: slv # Name of K8s ConfigMap
-            #       key: SecretBinding  # Key within K8s ConfigMap
+          #   - name: SLV_ENV_SECRET_BINDING
+          #     valueFrom: # SLV Environment Secret Binding from K8s ConfigMap
+          #       configMapKeyRef:
+          #         name: slv # Name of K8s ConfigMap
+          #         key: SecretBinding  # Key within K8s ConfigMap
       restartPolicy: Never
       serviceAccountName: slv-k8s-job
   backoffLimit: 4

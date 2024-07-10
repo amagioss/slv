@@ -14,8 +14,8 @@ func profileDefaultCommand() *cobra.Command {
 		return profileSetCmd
 	}
 	profileSetCmd = &cobra.Command{
-		Use:     "default",
-		Aliases: []string{"set-default"},
+		Use:     "set",
+		Aliases: []string{"set-default", "default"},
 		Short:   "Set a profile as default",
 		Run: func(cmd *cobra.Command, args []string) {
 			profileNames, err := profiles.List()

@@ -4,18 +4,21 @@ import (
 	"fmt"
 
 	"oss.amagi.com/slv/internal/cli/commands/cmdenv"
+	"oss.amagi.com/slv/internal/core/config"
 	"oss.amagi.com/slv/internal/core/crypto"
 	"oss.amagi.com/slv/internal/core/environments"
 	"oss.amagi.com/slv/internal/core/profiles"
+	k8sutils "oss.amagi.com/slv/internal/k8s/utils"
 )
 
-func getPublicKeys(pubKeyStrSlice, queries []string, self bool) (publicKeys []*crypto.PublicKey,
+func getPublicKeys(pubKeyStrSlice, queries []string, self, k8sCluster, k8sPQ bool) (publicKeys []*crypto.PublicKey,
 	rootPublicKey *crypto.PublicKey, err error) {
-	if len(pubKeyStrSlice) == 0 && len(queries) == 0 && !self {
+	if len(pubKeyStrSlice) == 0 && len(queries) == 0 && !self && !k8sCluster {
 		return nil, nil, fmt.Errorf("Specify atleast one of the following flags:\n" +
 			" --" + cmdenv.EnvSearchFlag.Name + "\n" +
 			" --" + vaultAccessPublicKeysFlag.Name + "\n" +
-			" --" + cmdenv.EnvSelfFlag.Name)
+			" --" + cmdenv.EnvSelfFlag.Name + "\n" +
+			" --" + cmdenv.EnvK8sClusterFlag.Name)
 	}
 	for _, pubKeyStr := range pubKeyStrSlice {
 		publicKey, err := crypto.PublicKeyFromString(pubKeyStr)
@@ -53,6 +56,17 @@ func getPublicKeys(pubKeyStrSlice, queries []string, self bool) (publicKeys []*c
 			}
 			publicKeys = append(publicKeys, publicKey)
 		}
+	}
+	if k8sCluster {
+		pk, err := k8sutils.GetPublicKeyFromK8s(config.AppNameLowerCase, k8sPQ)
+		if err != nil {
+			return nil, nil, err
+		}
+		publicKey, err := crypto.PublicKeyFromString(pk)
+		if err != nil {
+			return nil, nil, err
+		}
+		publicKeys = append(publicKeys, publicKey)
 	}
 	if profile != nil {
 		rootPublicKey, err = profile.RootPublicKey()

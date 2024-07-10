@@ -34,7 +34,7 @@ import (
 	"github.com/go-logr/logr"
 	"oss.amagi.com/slv/internal/core/config"
 	slvv1 "oss.amagi.com/slv/internal/k8s/api/v1"
-	"oss.amagi.com/slv/internal/k8s/slvenv"
+	"oss.amagi.com/slv/internal/k8s/utils"
 )
 
 const (
@@ -114,7 +114,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	}
 
 	vault := slvObj.Spec.Vault
-	if err := vault.Unlock(*slvenv.SecretKey); err != nil {
+	if err := vault.Unlock(*utils.SecretKey()); err != nil {
 		return r.returnError(ctx, &slvObj, &logger, err, "Failed to unlock vault")
 	}
 	slvSecretMap, err := vault.GetAllSecrets()

@@ -17,7 +17,9 @@ func GetHiddenInput(prompt string) ([]byte, error) {
 }
 
 func GetMultiLineHiddenInput(prompt string) (input []byte, err error) {
-	fmt.Println(prompt)
+	if prompt != "" {
+		fmt.Println(prompt)
+	}
 	fmt.Println("Press enter/return twice after finishing your input to submit.")
 	var line []byte
 	emptyLines := 0
@@ -46,7 +48,9 @@ func GetMultiLineHiddenInput(prompt string) (input []byte, err error) {
 
 func GetVisibleInput(prompt string) (string, error) {
 	var input string
-	fmt.Print(prompt)
+	if prompt != "" {
+		fmt.Print(prompt)
+	}
 	_, err := fmt.Scanln(&input)
 	return input, err
 }
@@ -54,7 +58,9 @@ func GetVisibleInput(prompt string) (string, error) {
 func ReadBufferFromStdin(prompt string) ([]byte, error) {
 	var input []byte
 	buffer := make([]byte, 1024)
-	fmt.Println(prompt)
+	if prompt != "" {
+		fmt.Println(prompt)
+	}
 	for {
 		n, err := os.Stdin.Read(buffer)
 		if err != nil || n == 0 {

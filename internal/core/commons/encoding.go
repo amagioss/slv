@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 )
 
+var (
+	base32Encoding = base32.StdEncoding.WithPadding(base32.NoPadding)
+)
+
 func jsonSerialize(data interface{}) (dataBytes []byte, err error) {
 	dataBytes, err = json.Marshal(data)
 	if err != nil {
@@ -46,9 +50,9 @@ func Deserialize(serialized string, data interface{}) (err error) {
 }
 
 func Encode(data []byte) (encoded string) {
-	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(data)
+	return base32Encoding.EncodeToString(data)
 }
 
 func Decode(encoded string) (data []byte, err error) {
-	return base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(encoded)
+	return base32Encoding.DecodeString(encoded)
 }

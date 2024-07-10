@@ -1,37 +1,16 @@
 package main
 
 import (
-	"os"
-
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"oss.amagi.com/slv/internal/core/secretkey"
+	"oss.amagi.com/slv/internal/k8s/utils"
 )
 
-var namespace *string
-
-func getNamespace() string {
-	if namespace == nil {
-		ns := os.Getenv("NAMESPACE")
-		if ns == "" {
-			namespaceBytes, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-			if err != nil {
-				panic(err)
-			}
-			ns = string(namespaceBytes)
-		}
-		namespace = &ns
-	}
-	return *namespace
-}
-
 func main() {
-	secretKey, err := secretkey.Get()
-	if err != nil {
-		panic(err)
+	if err := utils.InitSecretKey(); err != nil {
+		panic(err.Error())
 	}
 
-	config, err := clientcmd.BuildConfigFromFlags("", "")
+	config, err := utils.GetKubeClientConfig()
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +25,7 @@ func main() {
 		panic(err)
 	}
 
-	if err = slvsToSecrets(clientset, secretKey, slvObjs); err != nil {
+	if err = slvsToSecrets(clientset, utils.SecretKey(), slvObjs); err != nil {
 		panic(err)
 	}
 }

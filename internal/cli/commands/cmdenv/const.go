@@ -16,6 +16,7 @@ var (
 	envDeleteCmd     *cobra.Command
 	envSelfCmd       *cobra.Command
 	envSelfSetCmd    *cobra.Command
+	envK8sCmd        *cobra.Command
 )
 
 var (
@@ -57,7 +58,12 @@ var (
 
 	EnvSelfFlag = utils.FlagDef{
 		Name:  "self",
-		Usage: "Shares with the environment configured environment as self",
+		Usage: "References to the self environment (the current local environment where the command is executed)",
+	}
+
+	EnvK8sClusterFlag = utils.FlagDef{
+		Name:  "k8s-cluster",
+		Usage: "References the accessible k8s cluster",
 	}
 
 	envDefFlag = utils.FlagDef{

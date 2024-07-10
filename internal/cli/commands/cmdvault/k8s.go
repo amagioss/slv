@@ -2,21 +2,33 @@ package cmdvault
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"oss.amagi.com/slv/internal/cli/commands/utils"
 	"oss.amagi.com/slv/internal/core/crypto"
+	"oss.amagi.com/slv/internal/core/input"
 	"oss.amagi.com/slv/internal/core/vaults"
 )
 
 func newK8sVault(filePath, k8sNameOrSecretFile string, hashLength uint8, pq bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
 	if strings.HasSuffix(k8sNameOrSecretFile, ".yaml") || strings.HasSuffix(k8sNameOrSecretFile, ".yml") ||
 		strings.HasSuffix(k8sNameOrSecretFile, ".json") || k8sNameOrSecretFile == "-" {
-		return vaults.New(filePath, "", k8sNameOrSecretFile, hashLength, pq, rootPublicKey, publicKeys...)
+		var data []byte
+		var err error
+		if k8sNameOrSecretFile == "-" {
+			data, err = input.ReadBufferFromStdin("Input the k8s secret object as yaml/json: ")
+		} else {
+			data, err = os.ReadFile(k8sNameOrSecretFile)
+		}
+		if err != nil {
+			return nil, err
+		}
+		return vaults.New(filePath, "", data, hashLength, pq, rootPublicKey, publicKeys...)
 	} else {
-		return vaults.New(filePath, k8sNameOrSecretFile, "", hashLength, pq, rootPublicKey, publicKeys...)
+		return vaults.New(filePath, k8sNameOrSecretFile, nil, hashLength, pq, rootPublicKey, publicKeys...)
 	}
 }
 
@@ -35,7 +47,7 @@ func vaultToK8sCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			if err = vault.ToK8s(k8sResourceName, ""); err != nil {
+			if err = vault.ToK8s(k8sResourceName, nil); err != nil {
 				utils.ExitOnError(err)
 			}
 			fmt.Printf("Vault %s transformed to K8s resource %s\n", color.GreenString(vaultFilePath), color.GreenString(k8sResourceName))

@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/rest"
 	"oss.amagi.com/slv/internal/core/config"
 	slvv1 "oss.amagi.com/slv/internal/k8s/api/v1"
+	"oss.amagi.com/slv/internal/k8s/utils"
 )
 
 func listSLVs(cfg *rest.Config) ([]slvv1.SLV, error) {
@@ -22,7 +23,7 @@ func listSLVs(cfg *rest.Config) ([]slvv1.SLV, error) {
 			Group:    config.K8SLVGroup,
 			Version:  config.K8SLVVersion,
 			Resource: "slvs",
-		}).Namespace(getNamespace()).List(context.Background(), metav1.ListOptions{})
+		}).Namespace(utils.GetCurrentNamespace()).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}

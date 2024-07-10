@@ -18,7 +18,8 @@ package v1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime"
-	"oss.amagi.com/slv/internal/k8s/slvenv"
+	"oss.amagi.com/slv/internal/core/config"
+	"oss.amagi.com/slv/internal/k8s/utils"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -26,7 +27,7 @@ import (
 )
 
 // log is for logging in this package.
-var slvlog = logf.Log.WithName("slv-resource")
+var slvlog = logf.Log.WithName(config.AppNameLowerCase)
 
 // SetupWebhookWithManager will setup the manager to manage the webhooks
 func (r *SLV) SetupWebhookWithManager(mgr ctrl.Manager) error {
@@ -50,9 +51,9 @@ func (r *SLV) Default() {
 
 var _ webhook.Validator = &SLV{}
 
-func (r *SLV) ValidateSLV() error {
+func (r *SLV) validateSLV() error {
 	vault := r.Spec.Vault
-	if err := vault.Unlock(*slvenv.SecretKey); err != nil {
+	if err := vault.Unlock(*utils.SecretKey()); err != nil {
 		slvlog.Error(err, "failed to unlock vault", "name", r.Name)
 		return err
 	}
@@ -66,13 +67,13 @@ func (r *SLV) ValidateSLV() error {
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *SLV) ValidateCreate() (admission.Warnings, error) {
 	slvlog.Info("Validating create", "name", r.Name)
-	return nil, r.ValidateSLV()
+	return nil, r.validateSLV()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (r *SLV) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	slvlog.Info("Validating update", "name", r.Name)
-	return nil, r.ValidateSLV()
+	return nil, r.validateSLV()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
