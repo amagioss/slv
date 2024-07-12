@@ -1,7 +1,8 @@
-package cmdslv
+package cli
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"oss.amagi.com/slv/internal/cli/commands/cmdenv"
@@ -46,4 +47,10 @@ func slvCommand() *cobra.Command {
 	slvCmd.AddCommand(cmdprofile.ProfileCommand())
 	slvCmd.AddCommand(cmdvault.VaultCommand())
 	return slvCmd
+}
+
+func Run() {
+	if err := slvCommand().Execute(); err != nil {
+		os.Exit(1)
+	}
 }

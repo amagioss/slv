@@ -70,12 +70,14 @@ spec:
       serviceAccountName: slv-k8s-operator
       containers:
       - name: slv-k8s-operator
-        image: ghcr.io/amagioss/slv/slv-k8s-operator:latest # Use a specific version tag corresponding to the version of SLV used with the CR
+        image: ghcr.io/amagioss/slv:latest
         resources:
           limits:
-            cpu: "1" # 1 vCPU should be sufficient
-            memory: "500Mi" # 500Mi of memory should be a sufficient for most cases. If you large vaults or large number of them, you may need to increase this.
+            cpu: "500m"
+            memory: "500Mi" # 500Mi of memory should be a sufficient for most cases.
         env:
+          - name: SLV_MODE
+            value: "k8s_operator"
           - name: SLV_ENV_SECRET_KEY
             valueFrom: # SLV Environment Secret Key from K8s Secret
               secretKeyRef:

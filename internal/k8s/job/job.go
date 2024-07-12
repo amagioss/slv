@@ -1,11 +1,11 @@
-package main
+package job
 
 import (
 	"k8s.io/client-go/kubernetes"
 	"oss.amagi.com/slv/internal/k8s/utils"
 )
 
-func main() {
+func Run() {
 	if err := utils.InitSecretKey(); err != nil {
 		panic(err.Error())
 	}

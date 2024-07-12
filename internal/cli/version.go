@@ -1,4 +1,4 @@
-package cmdslv
+package cli
 
 import (
 	"fmt"
