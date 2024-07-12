@@ -204,6 +204,17 @@ nfpms:
       - deb
       - rpm
 
+release:
+  extra_files:
+    - glob: ./internal/k8s/config/crd/bases/slv.oss.amagi.com_slvs.yaml
+      name_template: slv_k8s_crd.yaml
+    - glob: ./internal/k8s/deploy/operator.yaml
+      name_template: slv_k8s_operator.yaml
+    - glob: ./internal/k8s/deploy/job.yaml
+      name_template: slv_k8s_job.yaml
+    - glob: ./internal/k8s/config/samples/slv_v1_slv.yaml
+      name_template: slv_k8s_sample.yaml
+
 brews:
   - ids:
       - slv
