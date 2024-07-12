@@ -34,7 +34,6 @@ jobs:
           -e GITHUB_TOKEN \
           -e HOMEBREW_SSH_KEY \
           goreleaser:local release \
-          -f .goreleaser/slv-core.yaml \
           --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
