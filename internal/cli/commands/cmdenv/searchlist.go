@@ -36,7 +36,7 @@ func envListSearchCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			for _, env := range envs {
-				utils.ShowEnv(*env, false, false)
+				ShowEnv(*env, false, false)
 				fmt.Println()
 			}
 			utils.SafeExit()

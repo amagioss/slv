@@ -102,12 +102,12 @@ func New(filePath, k8sName string, k8SecretContent []byte, hashLength uint8, qua
 		secretKey: vaultSecretKey,
 	}
 	if rootPublicKey != nil {
-		if _, err := vlt.Share(rootPublicKey); err != nil {
+		if _, err := vlt.share(rootPublicKey, false); err != nil {
 			return nil, err
 		}
 	}
 	for _, pubKey := range publicKeys {
-		if _, err := vlt.Share(pubKey); err != nil {
+		if _, err := vlt.share(pubKey, false); err != nil {
 			return nil, err
 		}
 	}
@@ -142,7 +142,7 @@ func getFromField(filePath string, k8s bool) (vlt *Vault, err error) {
 		if err = commons.ReadFromYAML(filePath, k8sVault); err != nil {
 			return nil, err
 		}
-		vlt = &k8sVault.Spec
+		vlt = k8sVault.Spec
 		vlt.k8s = k8sVault
 	} else {
 		vlt = &Vault{}

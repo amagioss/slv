@@ -14,9 +14,12 @@ var (
 	envAddCmd        *cobra.Command
 	envListSearchCmd *cobra.Command
 	envDeleteCmd     *cobra.Command
-	envSelfCmd       *cobra.Command
-	envSelfSetCmd    *cobra.Command
-	envK8sCmd        *cobra.Command
+	envSetSCmd       *cobra.Command
+	envSetSelfSCmd   *cobra.Command
+	envShowCmd       *cobra.Command
+	envShowRootCmd   *cobra.Command
+	envShowSelfCmd   *cobra.Command
+	envShowK8sCmd    *cobra.Command
 )
 
 var (
@@ -51,19 +54,14 @@ var (
 	}
 
 	EnvSearchFlag = utils.FlagDef{
-		Name:      "search",
+		Name:      "env-search",
 		Shorthand: "s",
 		Usage:     "Searches query to filter environments",
 	}
 
 	EnvSelfFlag = utils.FlagDef{
-		Name:  "self",
+		Name:  "env-self",
 		Usage: "References to the self environment (the current local environment where the command is executed)",
-	}
-
-	EnvK8sClusterFlag = utils.FlagDef{
-		Name:  "k8s-cluster",
-		Usage: "References the accessible k8s cluster",
 	}
 
 	envDefFlag = utils.FlagDef{

@@ -54,7 +54,7 @@ func envNewServiceCommand() *cobra.Command {
 			}
 			env.SetEmail(email)
 			env.AddTags(tags...)
-			utils.ShowEnv(*env, true, false)
+			ShowEnv(*env, true, false)
 			if secretKey != nil {
 				fmt.Println("\nSecret Key:\t", color.HiBlackString(secretKey.String()))
 			}
@@ -93,7 +93,7 @@ func envNewUserCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			selfEnv := environments.GetSelf()
 			if selfEnv != nil {
-				utils.ShowEnv(*selfEnv, true, true)
+				ShowEnv(*selfEnv, true, true)
 				confirmed, err := input.GetConfirmation("You are already registered as an environment, "+
 					"this will replace the existing environment. Proceed? (yes/no): ", "yes")
 				if err != nil {
@@ -128,7 +128,7 @@ func envNewUserCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			secretBinding := env.SecretBinding
-			utils.ShowEnv(*env, true, true)
+			ShowEnv(*env, true, true)
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 			if addToProfileFlag {
 				profile, err := profiles.GetDefaultProfile()

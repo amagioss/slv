@@ -17,7 +17,7 @@ type k8slv struct {
 	Kind       string  `yaml:"kind"`
 	Metadata   k8sMeta `yaml:"metadata"`
 	Type       string  `yaml:"type,omitempty"`
-	Spec       Vault   `yaml:"spec"`
+	Spec       *Vault  `yaml:"spec"`
 }
 
 type k8Secret struct {
@@ -37,7 +37,7 @@ func (vlt *Vault) ToK8s(k8sName string, k8SecretContent []byte) (err error) {
 		vlt.k8s = &k8slv{
 			ApiVersion: k8sApiVersion,
 			Kind:       k8sKind,
-			Spec:       *vlt,
+			Spec:       vlt,
 		}
 	}
 	if k8sName != "" {
@@ -72,7 +72,7 @@ func (vlt *Vault) ToK8s(k8sName string, k8SecretContent []byte) (err error) {
 		}
 		if len(secretDataMap) > 0 {
 			for key, value := range secretDataMap {
-				if err = vlt.PutSecret(key, value); err != nil {
+				if err = vlt.putSecretWithoutCommit(key, value); err != nil {
 					return err
 				}
 			}

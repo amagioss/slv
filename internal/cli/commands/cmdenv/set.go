@@ -10,33 +10,27 @@ import (
 	"oss.amagi.com/slv/internal/core/input"
 )
 
-func envSelfCommand() *cobra.Command {
-	if envSelfCmd != nil {
-		return envSelfCmd
+func envSetCommand() *cobra.Command {
+	if envSetSCmd != nil {
+		return envSetSCmd
 	}
-	envSelfCmd = &cobra.Command{
-		Use:     "self",
-		Aliases: []string{"user", "me", "my", "current"},
-		Short:   "Shows the current user environment if registered",
+	envSetSCmd = &cobra.Command{
+		Use:     "set",
+		Aliases: []string{"put", "update"},
+		Short:   "Set/update an environments",
 		Run: func(cmd *cobra.Command, args []string) {
-			env := environments.GetSelf()
-			if env == nil {
-				fmt.Println("No environment registered as self.")
-			} else {
-				utils.ShowEnv(*env, true, true)
-			}
-			utils.SafeExit()
+			cmd.Help()
 		},
 	}
-	envSelfCmd.AddCommand(envSelfSetCommand())
-	return envSelfCmd
+	envSetSCmd.AddCommand(envSetSelfCommand())
+	return envSetSCmd
 }
 
-func envSelfSetCommand() *cobra.Command {
-	if envSelfSetCmd != nil {
-		return envSelfSetCmd
+func envSetSelfCommand() *cobra.Command {
+	if envSetSelfSCmd != nil {
+		return envSetSelfSCmd
 	}
-	envSelfSetCmd = &cobra.Command{
+	envSetSelfSCmd = &cobra.Command{
 		Use:     "set",
 		Aliases: []string{"save", "put", "store", "s"},
 		Short:   "Sets a given environment as self",
@@ -59,11 +53,11 @@ func envSelfSetCommand() *cobra.Command {
 			if err = env.MarkAsSelf(); err != nil {
 				utils.ExitOnError(err)
 			}
-			utils.ShowEnv(*env, true, true)
+			ShowEnv(*env, true, true)
 			fmt.Println(color.GreenString("Successfully registered self environment"))
 		},
 	}
-	envSelfSetCmd.Flags().StringP(envDefFlag.Name, envDefFlag.Shorthand, "", envDefFlag.Usage)
-	envSelfSetCmd.MarkFlagRequired(envDefFlag.Name)
-	return envSelfSetCmd
+	envSetSelfSCmd.Flags().StringP(envDefFlag.Name, envDefFlag.Shorthand, "", envDefFlag.Usage)
+	envSetSelfSCmd.MarkFlagRequired(envDefFlag.Name)
+	return envSetSelfSCmd
 }

@@ -5,6 +5,10 @@ import (
 )
 
 func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
+	return vlt.share(publicKey, true)
+}
+
+func (vlt *Vault) share(publicKey *crypto.PublicKey, commit bool) (bool, error) {
 	if vlt.IsLocked() {
 		return false, errVaultLocked
 	}
@@ -23,7 +27,9 @@ func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
 	wrappedKey, err := publicKey.EncryptKey(*vlt.secretKey)
 	if err == nil {
 		vlt.Config.WrappedKeys = append(vlt.Config.WrappedKeys, wrappedKey.String())
-		err = vlt.commit()
+		if commit {
+			err = vlt.commit()
+		}
 	}
 	return err == nil, err
 }

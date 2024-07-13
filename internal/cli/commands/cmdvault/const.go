@@ -30,9 +30,14 @@ var (
 	}
 
 	vaultAccessPublicKeysFlag = utils.FlagDef{
-		Name:      "pubkey",
+		Name:      "env-pubkey",
 		Shorthand: "k",
 		Usage:     "Public keys of environments that can access the vault",
+	}
+
+	vaultAccessK8sFlag = utils.FlagDef{
+		Name:  "env-k8s",
+		Usage: "Shares vault access with the accessible k8s cluster",
 	}
 
 	vaultEnableHashingFlag = utils.FlagDef{

@@ -32,7 +32,7 @@ func envDeleteCommand() *cobra.Command {
 			}
 			if envs != nil {
 				for _, env := range envs {
-					utils.ShowEnv(*env, false, false)
+					ShowEnv(*env, false, false)
 					fmt.Println()
 				}
 				confirm, err := input.GetConfirmation("Are you sure you want to delete the above environment(s) [yes/no]: ", "yes")

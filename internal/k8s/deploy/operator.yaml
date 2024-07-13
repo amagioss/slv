@@ -78,13 +78,13 @@ spec:
         env:
           - name: SLV_MODE
             value: "k8s_operator"
-          - name: SLV_ENV_SECRET_KEY
-            valueFrom: # SLV Environment Secret Key from K8s Secret
-              secretKeyRef:
-                name: slv # Name of K8s Secret
-                key: SecretKey  # Key within K8s Secret
-        #   - name: SLV_ENV_SECRET_BINDING
-        #     valueFrom: # SLV Environment Secret Binding from K8s ConfigMap
-        #       configMapKeyRef:
-        #         name: slv # Name of K8s ConfigMap
-        #         key: SecretBinding  # Key within K8s ConfigMap
+          # - name: SLV_ENV_SECRET_KEY
+          #   valueFrom: # SLV Environment Secret Key from K8s Secret
+          #     secretKeyRef:
+          #       name: slv # Name of K8s Secret
+          #       key: SecretKey  # Key within K8s Secret
+          # - name: SLV_ENV_SECRET_BINDING
+          #   valueFrom: # SLV Environment Secret Binding from K8s ConfigMap
+          #     configMapKeyRef:
+          #       name: slv # Name of K8s ConfigMap
+          #       key: SecretBinding  # Key within K8s ConfigMap

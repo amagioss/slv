@@ -1,14 +1,16 @@
 # SLV - Kuberenetes Integration
+
 SLV Kubernetes Integration helps in reconciling SLV vaults as kubernetes secrets into namespaces.
-SLV can create SLV's kuberenetes compatible vaults with a `--k8s` flag. Doing this will create vaults that are technically custom resources based on SLV's [CRD](https://oss.amagi.com/slv/k8s/crd.yaml).
+- SLV can create SLV's kuberenetes compatible vaults with a `--k8s` flag.
+- Doing so creates vaults that are custom resources based on SLV's [CRD](https://oss.amagi.com/slv/k8s/crd.yaml).
 
 ```sh
-slv vault new -v [vault-file.yaml] -k [public_key] --search [env_key_word] --k8s [k8s-secret-file-path | - | k8s-slv-object-name]
+slv vault new -v [vault-file.yaml] -k [public_key] --search [env_key_word] --k8s [k8s-secret-file-path | - | k8s-slv-resource-name]
 ```
 
 The `--k8s` flag takes in any of the following arguments and validates them in the following order
-- An existing K8s Secret object stored as plaintext K8s Secret yaml file
-- An input `-` signifies that you'd like to input the content of the K8s Secret object through stdin
+- An existing K8s Secret resource stored as plaintext K8s Secret yaml file
+- The value `-` signifies that you'd like to input the contents of the K8s Secret resource through stdin
 - Name of the SLV's K8s resource which directly translates to the name of the K8s Secret. This creates an empty K8s compatible SLV vault file.
 
 For example, to create an k8s SLV vault that would replicate a docker config Secret in k8s, you can do something like this:
@@ -27,18 +29,22 @@ To get started apply the SLV [CRD](https://oss.amagi.com/slv/k8s/crd.yaml) using
 kubectl apply -f https://oss.amagi.com/slv/k8s/crd.yaml
 ```
 
-SLV support two ways to reconcile SLV vaults as kuberenetes secrets:
+SLV supports two ways to reconcile SLV vaults as kuberenetes secrets:
 1. [Operator](#operator)
 2. [Job](#job)
 
 ## Operator
-SLV operator is a kubenetes controller that runs inside a given cluster to write secrets into given namespaces based on changes in SLV objects.
+SLV operator is a kubenetes controller that runs inside a given cluster to write secrets into given namespaces based on changes in SLV resources.
 
 The following example shows how it is achieved using the operator.
 
-- Create a namespace and add SLV environment secret key as a secret (recommended to use Access Binding using KMS for cloud environments)
+- Create a namespace for the operator
 ```sh
 kubectl create ns slv
+```
+- Add SLV environment secret key as a secret (recommended to use Access Binding with KMS for cloud environments)
+```sh
+# Note: You can skip this step if you wish SLV to automatically create a secret key for you (suitable for test environments).
 # Disclaimer: The below secret key is only for demonstration purposes. Please avoid using it in production.
 kubectl create secret generic slv -n slv --from-literal=SecretKey=SLV_ESK_AEAEKAAATI5CXB7QMFSUGY4RUT6UTUSK7SGMIECTJKRTQBFY6BN5ZV5M5XGF6DWLV2RVCJJSMXH43DJ6A5TK7Y6L6PYEMCDGQRBX46GUQPUIYUQ
 ```
@@ -67,11 +73,21 @@ kubectl apply -f pets.slv.yaml
 ```sh
 kubectl get secret pets -o jsonpath='{.data.hi}' | base64 --decode
 ```
+### Creating vaults shared with the deployed operator
+- To show the public key of the operator
+```sh
+slv env show k8s
+```
+- Create a vault with the public key of the operator
+```sh
+slv vault new -v test.slv.yaml --env-k8s
+```
+
 
 ## Job
-SLV job is a one-time job that can reconcile any existing SLV objects as kubernetes secrets. This is useful in environments that can't afford to run a persistent operator or there aren't many secrets to deal with.
+SLV job is a one-time job that can reconcile any existing SLV resources as kubernetes secrets. This is useful in environments that can't afford to run a persistent operator or there aren't many secrets to deal with.
 
-The following example shows how SLV objects are reconciled to secrets using the job.
+The following example shows how SLV resources are reconciled to secrets using the job.
 
 - Create a namespace and add SLV environment secret key as a secret (recommended to use Access Binding using KMS for cloud environments)
 ```sh

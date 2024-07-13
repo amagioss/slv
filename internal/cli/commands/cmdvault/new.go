@@ -27,7 +27,7 @@ func vaultNewCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			shareWithSelf, _ := cmd.Flags().GetBool(cmdenv.EnvSelfFlag.Name)
-			shareWithK8s, _ := cmd.Flags().GetBool(cmdenv.EnvK8sClusterFlag.Name)
+			shareWithK8s, _ := cmd.Flags().GetBool(vaultAccessK8sFlag.Name)
 			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
 			publicKeys, rootPublicKey, err := getPublicKeys(publicKeyStrings, queries, shareWithSelf, shareWithK8s, pq)
 			if err != nil {
@@ -49,7 +49,7 @@ func vaultNewCommand() *cobra.Command {
 	vaultNewCmd.Flags().StringSliceP(vaultAccessPublicKeysFlag.Name, vaultAccessPublicKeysFlag.Shorthand, []string{}, vaultAccessPublicKeysFlag.Usage)
 	vaultNewCmd.Flags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
 	vaultNewCmd.Flags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
-	vaultNewCmd.Flags().BoolP(cmdenv.EnvK8sClusterFlag.Name, cmdenv.EnvK8sClusterFlag.Shorthand, false, cmdenv.EnvK8sClusterFlag.Usage)
+	vaultNewCmd.Flags().BoolP(vaultAccessK8sFlag.Name, vaultAccessK8sFlag.Shorthand, false, vaultAccessK8sFlag.Usage)
 	vaultNewCmd.Flags().StringP(vaultK8sFlag.Name, vaultK8sFlag.Shorthand, "", vaultK8sFlag.Usage)
 	vaultNewCmd.Flags().BoolP(vaultEnableHashingFlag.Name, vaultEnableHashingFlag.Shorthand, false, vaultEnableHashingFlag.Usage)
 	vaultNewCmd.Flags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)

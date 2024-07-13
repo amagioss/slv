@@ -15,10 +15,10 @@ func getPublicKeys(pubKeyStrSlice, queries []string, self, k8sCluster, k8sPQ boo
 	rootPublicKey *crypto.PublicKey, err error) {
 	if len(pubKeyStrSlice) == 0 && len(queries) == 0 && !self && !k8sCluster {
 		return nil, nil, fmt.Errorf("Specify atleast one of the following flags:\n" +
-			" --" + cmdenv.EnvSearchFlag.Name + "\n" +
-			" --" + vaultAccessPublicKeysFlag.Name + "\n" +
+			" --" + cmdenv.EnvSearchFlag.Name + " [search keyword]\n" +
+			" --" + vaultAccessPublicKeysFlag.Name + " [env public key]\n" +
 			" --" + cmdenv.EnvSelfFlag.Name + "\n" +
-			" --" + cmdenv.EnvK8sClusterFlag.Name)
+			" --" + vaultAccessK8sFlag.Name)
 	}
 	for _, pubKeyStr := range pubKeyStrSlice {
 		publicKey, err := crypto.PublicKeyFromString(pubKeyStr)

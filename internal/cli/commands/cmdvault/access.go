@@ -26,7 +26,7 @@ func vaultAccessCommand() *cobra.Command {
 	vaultAccessCmd.PersistentFlags().StringSliceP(vaultAccessPublicKeysFlag.Name, vaultAccessPublicKeysFlag.Shorthand, []string{}, vaultAccessPublicKeysFlag.Usage)
 	vaultAccessCmd.PersistentFlags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
 	vaultAccessCmd.PersistentFlags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
-	vaultAccessCmd.PersistentFlags().BoolP(cmdenv.EnvK8sClusterFlag.Name, cmdenv.EnvK8sClusterFlag.Shorthand, false, cmdenv.EnvK8sClusterFlag.Usage)
+	vaultAccessCmd.PersistentFlags().BoolP(vaultAccessK8sFlag.Name, vaultAccessK8sFlag.Shorthand, false, vaultAccessK8sFlag.Usage)
 	vaultAccessCmd.PersistentFlags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage+" (used with k8s environment)")
 	vaultAccessCmd.AddCommand(vaultAccessAddCommand())
 	vaultAccessCmd.AddCommand(vaultAccessRemoveCommand())
@@ -56,7 +56,7 @@ func vaultAccessAddCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			selfEnv, _ := cmd.Flags().GetBool(cmdenv.EnvSelfFlag.Name)
-			k8sEnv, _ := cmd.Flags().GetBool(cmdenv.EnvK8sClusterFlag.Name)
+			k8sEnv, _ := cmd.Flags().GetBool(vaultAccessK8sFlag.Name)
 			k8sPQ, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
 			publicKeys, _, err := getPublicKeys(publicKeyStrings, queries, selfEnv, k8sEnv, k8sPQ)
 			if err != nil {
@@ -102,7 +102,7 @@ func vaultAccessRemoveCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			selfEnv, _ := cmd.Flags().GetBool(cmdenv.EnvSelfFlag.Name)
-			k8sEnv, _ := cmd.Flags().GetBool(cmdenv.EnvK8sClusterFlag.Name)
+			k8sEnv, _ := cmd.Flags().GetBool(vaultAccessK8sFlag.Name)
 			k8sPQ, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
 			publicKeys, _, err := getPublicKeys(publicKeyStrings, queries, selfEnv, k8sEnv, k8sPQ)
 			if err != nil {

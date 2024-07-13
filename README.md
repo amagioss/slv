@@ -106,5 +106,5 @@ Once shared, the other environments can access the vault using their respective 
 
 ## Integrations
 Some of the integrations that SLV currently supports are:
-- [Kubernetes](/internal/k8s/README.md)
+- [Kubernetes](/docs/KUBERNETES.md)
 - [GitHub Actions](https://github.com/amagioss/slv-action)

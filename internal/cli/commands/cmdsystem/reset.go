@@ -5,6 +5,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"oss.amagi.com/slv/internal/cli/commands/cmdenv"
 	"oss.amagi.com/slv/internal/cli/commands/utils"
 	"oss.amagi.com/slv/internal/core/config"
 	"oss.amagi.com/slv/internal/core/environments"
@@ -26,7 +27,7 @@ func systemResetCommand() *cobra.Command {
 			if !confirm || selfEnv != nil {
 				if selfEnv != nil {
 					fmt.Println(color.YellowString("You have a configured environment which you might have to consider backing up:"))
-					utils.ShowEnv(*selfEnv, true, true)
+					cmdenv.ShowEnv(*selfEnv, true, true)
 				}
 				var err error
 				if confirm, err = input.GetConfirmation("Are you sure you wish to proceed? (yes/no): ", "yes"); err != nil {
