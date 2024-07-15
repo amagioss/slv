@@ -22,15 +22,13 @@ func InitSecretKey() (err error) {
 				}
 			}
 			if err == nil && sKey != nil {
-				if err = putSecretKeyToSecret(clientset, sKey.String()); err == nil {
-					var pKeyEC, pKeyPQ *crypto.PublicKey
-					if pKeyEC, err = sKey.PublicKey(false); err == nil {
-						if pKeyPQ, err = sKey.PublicKey(true); err == nil {
-							var pkStrEC, pkStrPQ string
-							if pkStrEC, err = pKeyEC.String(); err == nil {
-								if pkStrPQ, err = pKeyPQ.String(); err == nil {
-									err = putPublicKeyToConfigMap(clientset, pkStrEC, pkStrPQ)
-								}
+				var pkEC, pkPQ *crypto.PublicKey
+				if pkEC, err = sKey.PublicKey(false); err == nil {
+					if pkPQ, err = sKey.PublicKey(true); err == nil {
+						var publicKeyEC, publicKeyPQ string
+						if publicKeyEC, err = pkEC.String(); err == nil {
+							if publicKeyPQ, err = pkPQ.String(); err == nil {
+								err = putPublicKeyToConfigMap(clientset, publicKeyEC, publicKeyPQ)
 							}
 						}
 					}

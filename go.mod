@@ -29,7 +29,7 @@ require (
 	cloud.google.com/go/iam v1.1.11 // indirect
 	cloud.google.com/go/longrunning v0.5.10 // indirect
 	github.com/alessio/shellescape v1.4.2 // indirect
-	github.com/danieljoos/wincred v1.2.1 // indirect
+	github.com/danieljoos/wincred v1.2.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect

@@ -26,7 +26,11 @@ func (publicKey *PublicKey) encrypt(data []byte) (*ciphered, error) {
 }
 
 func (publicKey *PublicKey) EncryptKey(secretKey SecretKey) (wrappedKey *WrappedKey, err error) {
-	ciphered, err := publicKey.encrypt(secretKey.Bytes())
+	secretKeyBytes, err := secretKey.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	ciphered, err := publicKey.encrypt(secretKeyBytes)
 	if err == nil {
 		wrappedKey = &WrappedKey{
 			ciphered: ciphered,

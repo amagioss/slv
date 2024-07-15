@@ -75,7 +75,11 @@ func NewEnvForProvider(providerName, envName string, envType environments.EnvTyp
 	if err != nil {
 		return nil, err
 	}
-	ref, err := (*provider.bind)(sk.Bytes(), inputs)
+	skBytes, err := sk.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	ref, err := (*provider.bind)(skBytes, inputs)
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +96,17 @@ func NewEnvForProvider(providerName, envName string, envType environments.EnvTyp
 	return env, nil
 }
 
+func getSecretKeyFromBytesForBinding(skBytes []byte) (secretKey *crypto.SecretKey, err error) {
+	if secretKey, err = crypto.SecretKeyFromBytes(skBytes); err == nil {
+		secretKey.RestrictSerialization()
+	}
+	return
+}
+
 func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypto.SecretKey, err error) {
 	loadDefaultProviders()
+	var secretKeyBytes []byte
+	var esb *envSecretBinding
 	if envSecretBindingStr == "" {
 		var providersWithoutRef []provider
 		for _, provider := range providerMap {
@@ -102,24 +115,17 @@ func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypt
 			}
 		}
 		for _, provider := range providersWithoutRef {
-			secretKeyBytes, err := (*provider.unbind)(nil)
-			if err == nil {
-				return crypto.SecretKeyFromBytes(secretKeyBytes)
+			if secretKeyBytes, err = (*provider.unbind)(nil); err == nil {
+				return getSecretKeyFromBytesForBinding(secretKeyBytes)
 			}
 		}
 		return nil, errEnvSecretBindingUnspecified
-	}
-	esb, err := envSecretBindingFromString(envSecretBindingStr)
-	if err != nil {
-		return nil, err
-	}
-	provider, ok := providerMap[esb.Provider]
-	if !ok {
-		return nil, errProviderUnknown
-	}
-	secretKeyBytes, err := (*provider.unbind)(esb.Ref)
-	if err == nil {
-		return crypto.SecretKeyFromBytes(secretKeyBytes)
+	} else if esb, err = envSecretBindingFromString(envSecretBindingStr); err == nil {
+		if provider, ok := providerMap[esb.Provider]; !ok {
+			return nil, errProviderUnknown
+		} else if secretKeyBytes, err = (*provider.unbind)(esb.Ref); err == nil {
+			return getSecretKeyFromBytesForBinding(secretKeyBytes)
+		}
 	}
 	return nil, err
 }

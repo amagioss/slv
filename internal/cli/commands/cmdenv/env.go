@@ -23,6 +23,5 @@ func EnvCommand() *cobra.Command {
 	envCmd.AddCommand(envDeleteCommand())
 	envCmd.AddCommand(envSetCommand())
 	envCmd.AddCommand(envShowCommand())
-	envCmd.AddCommand(envShowK8sCommand())
 	return envCmd
 }

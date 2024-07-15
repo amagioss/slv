@@ -81,6 +81,7 @@ type SecretKey struct {
 	privKey      *xipher.SecretKey
 	pqPublicKey  *PublicKey
 	eccPublicKey *PublicKey
+	restricted   bool
 }
 
 func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
@@ -88,7 +89,7 @@ func NewSecretKey(keyType KeyType) (secretKey *SecretKey, err error) {
 	if err != nil {
 		return nil, errGeneratingSecretKey
 	}
-	return newSecretKey(privKey, keyType), nil
+	return newSecretKey(privKey, keyType, false), nil
 }
 
 func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *SecretKey, err error) {
@@ -96,15 +97,16 @@ func NewSecretKeyForPassword(password []byte, keyType KeyType) (secretKey *Secre
 	if err != nil {
 		return nil, err
 	}
-	return newSecretKey(privKey, keyType), nil
+	return newSecretKey(privKey, keyType, true), nil
 }
 
-func newSecretKey(privKey *xipher.SecretKey, keyType KeyType) *SecretKey {
+func newSecretKey(privKey *xipher.SecretKey, keyType KeyType, restricted bool) *SecretKey {
 	version := cryptoVersion
 	return &SecretKey{
-		version: &version,
-		keyType: &keyType,
-		privKey: privKey,
+		version:    &version,
+		keyType:    &keyType,
+		privKey:    privKey,
+		restricted: restricted,
 	}
 }
 
@@ -179,18 +181,29 @@ func SecretKeyFromString(secretKeyStr string) (*SecretKey, error) {
 	return secretKey, nil
 }
 
-func (secretKey *SecretKey) Bytes() []byte {
+func (secretKey *SecretKey) Bytes() ([]byte, error) {
 	if privKeyBytes, err := secretKey.privKey.Bytes(); err != nil {
-		return nil
+		return nil, err
 	} else {
-		return append([]byte{*secretKey.version, 0, byte(*secretKey.keyType)}, privKeyBytes...)
+		return append([]byte{*secretKey.version, 0, byte(*secretKey.keyType)}, privKeyBytes...), nil
 	}
 }
 
-func (secretKey SecretKey) String() string {
-	if secretKeyBytes := secretKey.Bytes(); secretKeyBytes == nil {
-		return ""
+func (secretKey *SecretKey) RestrictSerialization() {
+	secretKey.restricted = true
+}
+
+func (secretKey *SecretKey) IsSerializationRestricted() bool {
+	return secretKey.restricted
+}
+
+func (secretKey SecretKey) String() (string, error) {
+	if secretKey.restricted {
+		return "", errRestrictedSecretKey
+	}
+	if secretKeyBytes, err := secretKey.Bytes(); err != nil {
+		return "", err
 	} else {
-		return slvPrefix + "_" + string(*secretKey.keyType) + secretKeyAbbrev + "_" + commons.Encode(secretKeyBytes)
+		return slvPrefix + "_" + string(*secretKey.keyType) + secretKeyAbbrev + "_" + commons.Encode(secretKeyBytes), nil
 	}
 }

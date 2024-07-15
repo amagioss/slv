@@ -16,10 +16,12 @@ import (
 )
 
 const (
-	resourceName    = config.AppNameLowerCase
-	secretKeyName   = "SecretKey"
-	publicKeyNameEC = "PublicKeyEC"
-	publicKeyNamePQ = "PublicKeyPQ"
+	resourceName            = config.AppNameLowerCase
+	secretKeyName           = "SecretKey"
+	publicKeyNameEC         = "PublicKeyEC"
+	publicKeyNamePQ         = "PublicKeyPQ"
+	envar_NAMESPACE         = "NAMESPACE"
+	envar_SLV_K8S_NAMESPACE = "SLV_K8S_NAMESPACE"
 )
 
 func getKubeClientSet() (*kubernetes.Clientset, error) {
@@ -58,47 +60,6 @@ func getSecretKeyFromCluster(clientset *kubernetes.Clientset) (*crypto.SecretKey
 	return nil, fmt.Errorf("secret key not found")
 }
 
-func putSecretKeyToSecret(clientset *kubernetes.Clientset, secretKeyStr string) error {
-	namespace := GetCurrentNamespace()
-	secret, err := clientset.CoreV1().Secrets(namespace).Get(context.Background(), resourceName, metav1.GetOptions{})
-	if err != nil {
-		if errors.IsNotFound(err) {
-			secret = &corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
-					Namespace: namespace,
-				},
-				Data: map[string][]byte{
-					secretKeyName: []byte(secretKeyStr),
-				},
-			}
-			_, err = clientset.CoreV1().Secrets(namespace).Create(context.Background(), secret, metav1.CreateOptions{})
-		}
-	} else {
-		updated := false
-		if secret.Data == nil {
-			secret.Data = make(map[string][]byte)
-		}
-		for k, v := range secret.Data {
-			lowerCaseKey := strings.ToLower(k)
-			if lowerCaseKey == "secretkey" || lowerCaseKey == "secret_key" {
-				if string(v) != secretKeyStr {
-					secret.Data[k] = []byte(secretKeyStr)
-					updated = true
-				}
-			}
-		}
-		if string(secret.Data[secretKeyName]) != secretKeyStr {
-			secret.Data[secretKeyName] = []byte(secretKeyStr)
-			updated = true
-		}
-		if updated {
-			_, err = clientset.CoreV1().Secrets(namespace).Update(context.Background(), secret, metav1.UpdateOptions{})
-		}
-	}
-	return err
-}
-
 func putPublicKeyToConfigMap(clientset *kubernetes.Clientset, publicKeyStrEC, publicKeyStrPQ string) error {
 	namespace := GetCurrentNamespace()
 	configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), resourceName, metav1.GetOptions{})
@@ -131,7 +92,10 @@ func putPublicKeyToConfigMap(clientset *kubernetes.Clientset, publicKeyStrEC, pu
 
 func GetCurrentNamespace() string {
 	if namespace == nil {
-		ns := os.Getenv("NAMESPACE")
+		ns := os.Getenv(envar_NAMESPACE)
+		if ns == "" {
+			ns = os.Getenv(envar_SLV_K8S_NAMESPACE)
+		}
 		if ns == "" {
 			namespaceBytes, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 			if err != nil {
