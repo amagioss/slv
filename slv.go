@@ -14,7 +14,7 @@ func getVaultUnlocked(vaultFile string) (*vaults.Vault, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = vault.Unlock(*secretKey); err != nil {
+	if err = vault.Unlock(secretKey); err != nil {
 		return nil, err
 	}
 	return vault, nil

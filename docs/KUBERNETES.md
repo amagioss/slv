@@ -33,6 +33,11 @@ SLV supports two ways to reconcile SLV vaults as kuberenetes secrets:
 1. [Operator](#operator)
 2. [Job](#job)
 
+SLV is compiled as a single binary, meaning the same binary can act as the CLI, K8s Operator, and K8s Job. Set the respective values to the environment variable `SLV_MODE` to make the SLV container act as an operator or job.
+
+- For Operator Mode set `SLV_MODE=k8s_operator`
+- For Job Mode set `SLV_MODE=k8s_job`
+
 ## Operator
 SLV operator is a kubenetes controller that runs inside a given cluster to write secrets into given namespaces based on changes in SLV resources.
 

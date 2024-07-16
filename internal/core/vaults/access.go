@@ -119,7 +119,7 @@ func (vlt *Vault) ListAccessors() ([]crypto.PublicKey, error) {
 	return accessors, nil
 }
 
-func (vlt *Vault) Unlock(secretKey crypto.SecretKey) error {
+func (vlt *Vault) Unlock(secretKey *crypto.SecretKey) error {
 	if !vlt.IsLocked() {
 		return nil
 	}

@@ -62,7 +62,7 @@ func listSLVs(cfg *rest.Config) ([]slvv1.SLV, error) {
 }
 
 func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvObj slvv1.SLV) error {
-	if err := slvObj.Spec.Unlock(*secretKey); err != nil {
+	if err := slvObj.Spec.Unlock(secretKey); err != nil {
 		return err
 	}
 	slvSecretMap, err := slvObj.Spec.GetAllSecrets()

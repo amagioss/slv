@@ -64,7 +64,7 @@ func vaultAccessAddCommand() *cobra.Command {
 			}
 			vault, err := getVault(vaultFile)
 			if err == nil {
-				err = vault.Unlock(*envSecretKey)
+				err = vault.Unlock(envSecretKey)
 				if err == nil {
 					for _, publicKey := range publicKeys {
 						if _, err = vault.Share(publicKey); err != nil {
@@ -113,7 +113,7 @@ func vaultAccessRemoveCommand() *cobra.Command {
 			if err == nil {
 				var envSecretKey *crypto.SecretKey
 				if envSecretKey, err = secretkey.Get(); err == nil {
-					err = vault.Unlock(*envSecretKey)
+					err = vault.Unlock(envSecretKey)
 				}
 				if err == nil {
 					if err = vault.Revoke(publicKeys, pq); err == nil {

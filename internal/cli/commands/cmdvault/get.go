@@ -31,7 +31,7 @@ func vaultGetCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			err = vault.Unlock(*envSecretKey)
+			err = vault.Unlock(envSecretKey)
 			if err != nil {
 				utils.ExitOnError(err)
 			}

@@ -10,21 +10,26 @@ import (
 	"oss.amagi.com/slv/internal/core/secretkey"
 )
 
-var sKey *crypto.SecretKey
+var (
+	sKey            *crypto.SecretKey
+	sKeyInitialized bool
+)
 
-func InitSecretKey() (err error) {
-	if sKey == nil {
-		sKey, _ = secretkey.Get()
+func SecretKey() (secretKey *crypto.SecretKey, err error) {
+	if sKey == nil && !sKeyInitialized {
+		sKeyInitialized = true
+		sk, _ := secretkey.Get()
 		if clientset, _ := getKubeClientSet(); clientset != nil {
-			if sKey == nil {
-				if sKey, err = getSecretKeyFromCluster(clientset); err != nil && isEnvGenEnabled() {
-					sKey, err = crypto.NewSecretKey(environments.EnvironmentKey)
+			if sk == nil {
+				if sk, err = getSecretKeyFromCluster(clientset); err != nil && isEnvGenEnabled() {
+					sk, err = crypto.NewSecretKey(environments.EnvironmentKey)
 				}
 			}
-			if err == nil && sKey != nil {
+			if err == nil && sk != nil {
+				sKey = sk
 				var pkEC, pkPQ *crypto.PublicKey
-				if pkEC, err = sKey.PublicKey(false); err == nil {
-					if pkPQ, err = sKey.PublicKey(true); err == nil {
+				if pkEC, err = sk.PublicKey(false); err == nil {
+					if pkPQ, err = sk.PublicKey(true); err == nil {
 						var publicKeyEC, publicKeyPQ string
 						if publicKeyEC, err = pkEC.String(); err == nil {
 							if publicKeyPQ, err = pkPQ.String(); err == nil {
@@ -39,14 +44,7 @@ func InitSecretKey() (err error) {
 			sKey = nil
 		}
 	}
-	return err
-}
-
-func SecretKey() *crypto.SecretKey {
-	if err := InitSecretKey(); err != nil {
-		panic(err.Error())
-	}
-	return sKey
+	return sKey, err
 }
 
 func GetPublicKeyFromK8s(namespace string, pq bool) (string, error) {

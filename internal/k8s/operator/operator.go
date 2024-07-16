@@ -80,7 +80,7 @@ func Run() {
 	setupLog.Info("initializing SLV operator...")
 	setupLog.Info(config.VersionInfo())
 
-	if err := utils.InitSecretKey(); err != nil {
+	if _, err := utils.SecretKey(); err != nil {
 		setupLog.Error(err, "unable to initialize SLV Environment Secret Key")
 		os.Exit(1)
 	}

@@ -114,7 +114,11 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	}
 
 	vault := slvObj.Spec.Vault
-	if err := vault.Unlock(*utils.SecretKey()); err != nil {
+	secretKey, err := utils.SecretKey()
+	if err != nil {
+		return r.returnError(ctx, &slvObj, &logger, err, "Failed to get secret key")
+	}
+	if err := vault.Unlock(secretKey); err != nil {
 		return r.returnError(ctx, &slvObj, &logger, err, "Failed to unlock vault")
 	}
 	slvSecretMap, err := vault.GetAllSecrets()

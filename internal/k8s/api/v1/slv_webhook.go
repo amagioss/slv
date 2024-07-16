@@ -53,7 +53,12 @@ var _ webhook.Validator = &SLV{}
 
 func (r *SLV) validateSLV() error {
 	vault := r.Spec.Vault
-	if err := vault.Unlock(*utils.SecretKey()); err != nil {
+	secretKey, err := utils.SecretKey()
+	if err != nil {
+		slvlog.Error(err, "failed to get secret key", "name", r.Name)
+		return err
+	}
+	if err := vault.Unlock(secretKey); err != nil {
 		slvlog.Error(err, "failed to unlock vault", "name", r.Name)
 		return err
 	}

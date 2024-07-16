@@ -6,8 +6,9 @@ import (
 )
 
 func Run() {
-	if err := utils.InitSecretKey(); err != nil {
-		panic(err.Error())
+	secretKey, err := utils.SecretKey()
+	if err != nil {
+		panic(err)
 	}
 
 	config, err := utils.GetKubeClientConfig()
@@ -25,7 +26,7 @@ func Run() {
 		panic(err)
 	}
 
-	if err = slvsToSecrets(clientset, utils.SecretKey(), slvObjs); err != nil {
+	if err = slvsToSecrets(clientset, secretKey, slvObjs); err != nil {
 		panic(err)
 	}
 }
