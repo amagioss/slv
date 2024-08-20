@@ -10,9 +10,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-slv-oss-amagi-com-v1-slv
+      path: /validate
   failurePolicy: Fail
-  name: vslv.kb.io
+  name: vslv.oss.amagi.com
   rules:
   - apiGroups:
     - slv.oss.amagi.com

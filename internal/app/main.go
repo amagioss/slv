@@ -10,14 +10,12 @@ import (
 )
 
 const (
-	slvModeEnvar       = "SLV_MODE"
-	slvModeK8sOperator = "k8s_operator"
-	slvModeK8sJob      = "k8s_job"
+	slvModeK8sOperator = "K8S_OPERATOR"
+	slvModeK8sJob      = "K8S_JOB"
 )
 
 func main() {
-	slvMode := strings.ToLower(os.Getenv(slvModeEnvar))
-	switch slvMode {
+	switch strings.ToUpper(os.Getenv("SLV_MODE")) {
 	case slvModeK8sOperator:
 		operator.Run()
 	case slvModeK8sJob:

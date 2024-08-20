@@ -39,7 +39,7 @@ func (r *SLV) SetupWebhookWithManager(mgr ctrl.Manager) error {
 // TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-//+kubebuilder:webhook:path=/validate-slv-oss-amagi-com-v1-slv,mutating=false,failurePolicy=fail,sideEffects=None,groups=slv.oss.amagi.com,resources=slvs,verbs=create;update,versions=v1,name=vslv.kb.io,admissionReviewVersions=v1
+//+kubebuilder:webhook:path=/validate,mutating=false,failurePolicy=fail,sideEffects=None,groups=slv.oss.amagi.com,resources=slvs,verbs=create;update,versions=v1,name=vslv.oss.amagi.com,admissionReviewVersions=v1
 
 var _ webhook.Defaulter = &SLV{}
 

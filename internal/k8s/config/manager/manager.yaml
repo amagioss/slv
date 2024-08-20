@@ -66,11 +66,14 @@ spec:
         # seccompProfile:
         #   type: RuntimeDefault
       containers:
-      - command:
-        - /manager
-        args:
+      - args:
         - --leader-elect
         image: controller:latest
+        env:
+          - name: SLV_MODE
+            value: "k8s_operator"
+          - name: SLV_K8S_ENABLE_WEBHOOKS
+            value: "true"
         name: manager
         securityContext:
           allowPrivilegeEscalation: false

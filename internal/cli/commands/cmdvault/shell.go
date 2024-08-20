@@ -32,12 +32,12 @@ func vaultShellCommand() *cobra.Command {
 					utils.ExitOnErrorWithMessage("Not a supported shell")
 				}
 			}
-			envSecretKey, err := secretkey.Get()
+			vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
+			vault, err := getVault(vaultFile)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
-			vault, err := getVault(vaultFile)
+			envSecretKey, err := secretkey.Get()
 			if err != nil {
 				utils.ExitOnError(err)
 			}

@@ -42,6 +42,11 @@ import (
 	//+kubebuilder:scaffold:imports
 )
 
+const (
+	envar_SLV_K8S_ENABLE_WEBHOOKS = "SLV_K8S_ENABLE_WEBHOOKS"
+	envar_ENABLE_WEBHOOKS         = "ENABLE_WEBHOOKS"
+)
+
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
@@ -140,7 +145,9 @@ func Run() {
 		setupLog.Error(err, "unable to create controller", "controller", slvv1.Kind)
 		os.Exit(1)
 	}
-	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) == "true" {
+	if strings.ToLower(os.Getenv(envar_SLV_K8S_ENABLE_WEBHOOKS)) == "true" ||
+		strings.ToLower(os.Getenv(envar_ENABLE_WEBHOOKS)) == "true" {
+		setupLog.Info("setting up webhooks")
 		if err = (&slvv1.SLV{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", slvv1.Kind)
 			os.Exit(1)
