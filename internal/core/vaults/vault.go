@@ -2,6 +2,7 @@ package vaults
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"os"
 	"path"
 	"regexp"
@@ -16,7 +17,7 @@ import (
 type vaultConfig struct {
 	Id          string   `json:"id" yaml:"id"`
 	PublicKey   string   `json:"publicKey" yaml:"publicKey"`
-	HashLength  uint8    `json:"hashLength,omitempty" yaml:"hashLength,omitempty"`
+	Hash        bool     `json:"hash,omitempty" yaml:"hash,omitempty"`
 	WrappedKeys []string `json:"wrappedKeys" yaml:"wrappedKeys"`
 }
 
@@ -64,7 +65,7 @@ func newVaultId() (string, error) {
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yml or .slv.yaml.
-func New(filePath, k8sName string, k8SecretContent []byte, hashLength uint8, quantumSafe bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+func New(filePath, k8sName string, k8SecretContent []byte, hash, quantumSafe bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
@@ -94,9 +95,9 @@ func New(filePath, k8sName string, k8SecretContent []byte, hashLength uint8, qua
 		Version:   config.Version,
 		publicKey: vaultPublicKey,
 		Config: vaultConfig{
-			Id:         vauldId,
-			PublicKey:  vaultPubKeyStr,
-			HashLength: hashLength,
+			Id:        vauldId,
+			PublicKey: vaultPubKeyStr,
+			Hash:      hash,
 		},
 		path:      filePath,
 		secretKey: vaultSecretKey,
@@ -120,33 +121,34 @@ func New(filePath, k8sName string, k8SecretContent []byte, hashLength uint8, qua
 
 // Returns the vault instance from a given yaml. The vault file name must end with .slv.yml or .slv.yaml.
 func Get(filePath string) (vlt *Vault, err error) {
-	obj := make(map[string]interface{})
-	if err := commons.ReadFromYAML(filePath, &obj); err != nil {
-		return nil, err
-	}
-	if obj[k8sVaultField] != nil {
-		return getFromField(filePath, true)
-	}
-	return getFromField(filePath, false)
-}
-
-func getFromField(filePath string, k8s bool) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
 	if !commons.FileExists(filePath) {
 		return nil, errVaultNotFound
 	}
+	obj := make(map[string]interface{})
+	if err := commons.ReadFromYAML(filePath, &obj); err != nil {
+		return nil, err
+	}
+	jsonData, err := json.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+	return getFromField(jsonData, filePath, obj[k8sVaultField] != nil)
+}
+
+func getFromField(jsonData []byte, filePath string, k8s bool) (vlt *Vault, err error) {
 	if k8s {
 		k8sVault := &k8slv{}
-		if err = commons.ReadFromYAML(filePath, k8sVault); err != nil {
+		if err = json.Unmarshal(jsonData, k8sVault); err != nil {
 			return nil, err
 		}
 		vlt = k8sVault.Spec
 		vlt.k8s = k8sVault
 	} else {
 		vlt = &Vault{}
-		if err = commons.ReadFromYAML(filePath, vlt); err != nil {
+		if err = json.Unmarshal(jsonData, vlt); err != nil {
 			return nil, err
 		}
 	}
@@ -173,9 +175,18 @@ func (vlt *Vault) Delete() error {
 }
 
 func (vlt *Vault) commit() error {
+	if err := vlt.validate(); err != nil {
+		return err
+	}
 	var data interface{}
 	if vlt.k8s != nil {
-		data = vlt.k8s
+		jsonData, err := json.Marshal(vlt.k8s)
+		if err != nil {
+			return err
+		}
+		if err = json.Unmarshal(jsonData, &data); err != nil {
+			return err
+		}
 	} else {
 		data = vlt
 	}
@@ -186,4 +197,14 @@ func (vlt *Vault) commit() error {
 func (vlt *Vault) reset() error {
 	vlt.clearSecretCache()
 	return commons.ReadFromYAML(vlt.path, &vlt)
+}
+
+func (vlt *Vault) validate() error {
+	if vlt.Config.PublicKey == "" {
+		return errVaultPublicKeyNotFound
+	}
+	if len(vlt.Config.WrappedKeys) == 0 {
+		return errVaultWrappedKeysNotFound
+	}
+	return nil
 }

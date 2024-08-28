@@ -56,11 +56,7 @@ func envNewServiceCommand() *cobra.Command {
 			env.AddTags(tags...)
 			ShowEnv(*env, true, false)
 			if secretKey != nil {
-				if skStr, err := secretKey.String(); err == nil {
-					fmt.Println("\nSecret Key:\t", color.HiBlackString(skStr))
-				} else {
-					utils.ExitOnError(err)
-				}
+				fmt.Println("\nSecret Key:\t", color.HiBlackString(secretKey.String()))
 			}
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 			if addToProfileFlag {

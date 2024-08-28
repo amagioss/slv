@@ -1,32 +1,18 @@
 package vaults
 
 import (
-	"encoding/base64"
-	"io"
-	"strings"
+	"encoding/json"
 
 	"gopkg.in/yaml.v3"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type k8sMeta struct {
-	Name string `yaml:"name"`
-}
-
 type k8slv struct {
-	ApiVersion string  `yaml:"apiVersion"`
-	Kind       string  `yaml:"kind"`
-	Metadata   k8sMeta `yaml:"metadata"`
-	Type       string  `yaml:"type,omitempty"`
-	Spec       *Vault  `yaml:"spec"`
-}
-
-type k8Secret struct {
-	ApiVersion string            `yaml:"apiVersion"`
-	Kind       string            `yaml:"kind"`
-	Metadata   k8sMeta           `yaml:"metadata"`
-	Data       map[string]string `yaml:"data"`
-	StringData map[string]string `yaml:"stringData"`
-	Type       string            `yaml:"type"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Type              corev1.SecretType `json:"type,omitempty"`
+	Spec              *Vault            `json:"spec" yaml:"spec"`
 }
 
 func (vlt *Vault) ToK8s(k8sName string, k8SecretContent []byte) (err error) {
@@ -35,34 +21,42 @@ func (vlt *Vault) ToK8s(k8sName string, k8SecretContent []byte) (err error) {
 	}
 	if vlt.k8s == nil {
 		vlt.k8s = &k8slv{
-			ApiVersion: k8sApiVersion,
-			Kind:       k8sKind,
-			Spec:       vlt,
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: k8sApiVersion,
+				Kind:       k8sKind,
+			},
+			Spec: vlt,
 		}
 	}
 	if k8sName != "" {
-		vlt.k8s.Metadata = k8sMeta{Name: k8sName}
+		vlt.k8s.ObjectMeta = metav1.ObjectMeta{
+			Name: k8sName,
+		}
 	}
 	if k8SecretContent != nil {
-		k8secret := &k8Secret{}
-		if err = yaml.Unmarshal(k8SecretContent, k8secret); err != nil {
+		var secretResource interface{}
+		if err = yaml.Unmarshal(k8SecretContent, &secretResource); err != nil {
 			return err
 		}
-		if k8secret.Metadata.Name != "" {
-			vlt.k8s.Metadata.Name = k8secret.Metadata.Name
+		jsonData, err := json.Marshal(secretResource)
+		if err != nil {
+			return err
 		}
-		if vlt.k8s.Metadata.Name == "" {
+		k8secret := &corev1.Secret{}
+		if err = json.Unmarshal(jsonData, k8secret); err != nil {
+			return err
+		}
+		if k8secret.Name != "" {
+			vlt.k8s.Name = k8secret.Name
+		}
+		if vlt.k8s.Name == "" {
 			return errK8sNameRequired
 		}
+		vlt.k8s.ObjectMeta = k8secret.ObjectMeta
 		secretDataMap := make(map[string][]byte)
 		if k8secret.Data != nil {
 			for key, value := range k8secret.Data {
-				decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(value))
-				secretValue, err := io.ReadAll(decoder)
-				if err != nil {
-					return err
-				}
-				secretDataMap[key] = secretValue
+				secretDataMap[key] = value
 			}
 		}
 		if k8secret.StringData != nil {
@@ -100,7 +94,7 @@ func (v *Vault) DeepCopyInto(out *Vault) {
 	out.Config = vaultConfig{
 		Id:          v.Config.Id,
 		PublicKey:   v.Config.PublicKey,
-		HashLength:  v.Config.HashLength,
+		Hash:        v.Config.Hash,
 		WrappedKeys: make([]string, len(v.Config.WrappedKeys)),
 	}
 	copy(out.Config.WrappedKeys, v.Config.WrappedKeys)

@@ -34,12 +34,8 @@ func vaultNewCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			enableHash, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.Name)
-			var hashLength uint8 = 0
-			if enableHash {
-				hashLength = 4
-			}
 			k8sName := cmd.Flag(vaultK8sFlag.Name).Value.String()
-			if _, err = newK8sVault(vaultFile, k8sName, hashLength, pq, rootPublicKey, publicKeys...); err != nil {
+			if _, err = newK8sVault(vaultFile, k8sName, enableHash, pq, rootPublicKey, publicKeys...); err != nil {
 				utils.ExitOnError(err)
 			}
 			fmt.Println("Created vault:", color.GreenString(vaultFile))

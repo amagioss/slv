@@ -39,21 +39,18 @@ func (publicKey *PublicKey) EncryptKey(secretKey SecretKey) (wrappedKey *Wrapped
 	return
 }
 
-func hash(data []byte, length uint8) []byte {
-	return argon2.IDKey(data, nil, 16, 64, 1, uint32(length))
+func hash(data []byte) []byte {
+	return argon2.IDKey(data, nil, 16, 64, 1, uint32(hashMaxLength))
 }
 
-func (publicKey *PublicKey) EncryptSecret(secret []byte, hashLength uint8) (sealedSecret *SealedSecret, err error) {
+func (publicKey *PublicKey) EncryptSecret(secret []byte, hashEnabled bool) (sealedSecret *SealedSecret, err error) {
 	ciphered, err := publicKey.encrypt(secret)
 	if err == nil {
 		sealedSecret = &SealedSecret{
 			ciphered: ciphered,
 		}
-		if hashLength > 0 {
-			if hashLength > hashMaxLength {
-				hashLength = hashMaxLength
-			}
-			hash := hash(secret, hashLength)
+		if hashEnabled {
+			hash := hash(secret)
 			sealedSecret.hash = &hash
 		}
 	}

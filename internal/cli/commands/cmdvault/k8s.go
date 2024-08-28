@@ -13,7 +13,7 @@ import (
 	"oss.amagi.com/slv/internal/core/vaults"
 )
 
-func newK8sVault(filePath, k8sNameOrSecretFile string, hashLength uint8, pq bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
+func newK8sVault(filePath, k8sNameOrSecretFile string, hash, pq bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
 	if strings.HasSuffix(k8sNameOrSecretFile, ".yaml") || strings.HasSuffix(k8sNameOrSecretFile, ".yml") ||
 		strings.HasSuffix(k8sNameOrSecretFile, ".json") || k8sNameOrSecretFile == "-" {
 		var data []byte
@@ -26,9 +26,9 @@ func newK8sVault(filePath, k8sNameOrSecretFile string, hashLength uint8, pq bool
 		if err != nil {
 			return nil, err
 		}
-		return vaults.New(filePath, "", data, hashLength, pq, rootPublicKey, publicKeys...)
+		return vaults.New(filePath, "", data, hash, pq, rootPublicKey, publicKeys...)
 	} else {
-		return vaults.New(filePath, k8sNameOrSecretFile, nil, hashLength, pq, rootPublicKey, publicKeys...)
+		return vaults.New(filePath, k8sNameOrSecretFile, nil, hash, pq, rootPublicKey, publicKeys...)
 	}
 }
 

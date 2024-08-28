@@ -23,9 +23,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Preparing GoReleaser Builder
-        run: |
-          docker build -t goreleaser:local -f .goreleaser_Dockerfile .
       - name: Releasing SLV
         run: |
           docker run --rm \
@@ -33,7 +30,7 @@ jobs:
           -v $PWD:/workspace \
           -e GITHUB_TOKEN \
           -e HOMEBREW_SSH_KEY \
-          goreleaser:local release \
+          ghcr.io/goreleaser/goreleaser-cross:latest release \
           --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

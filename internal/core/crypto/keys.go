@@ -197,13 +197,13 @@ func (secretKey *SecretKey) IsSerializationRestricted() bool {
 	return secretKey.restricted
 }
 
-func (secretKey SecretKey) String() (string, error) {
+func (secretKey SecretKey) String() string {
 	if secretKey.restricted {
-		return "", errRestrictedSecretKey
+		return ""
 	}
 	if secretKeyBytes, err := secretKey.Bytes(); err != nil {
-		return "", err
+		return ""
 	} else {
-		return slvPrefix + "_" + string(*secretKey.keyType) + secretKeyAbbrev + "_" + commons.Encode(secretKeyBytes), nil
+		return slvPrefix + "_" + string(*secretKey.keyType) + secretKeyAbbrev + "_" + commons.Encode(secretKeyBytes)
 	}
 }
