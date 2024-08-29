@@ -65,7 +65,7 @@ func newVaultId() (string, error) {
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yml or .slv.yaml.
-func New(filePath, k8sName string, k8SecretContent []byte, hash, quantumSafe bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+func New(filePath, k8sName, k8sNamespace string, k8SecretContent []byte, hash, quantumSafe bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
@@ -115,7 +115,7 @@ func New(filePath, k8sName string, k8SecretContent []byte, hash, quantumSafe boo
 	if k8sName == "" && k8SecretContent == nil {
 		return vlt, vlt.commit()
 	} else {
-		return vlt, vlt.ToK8s(k8sName, k8SecretContent)
+		return vlt, vlt.ToK8s(k8sName, k8sNamespace, k8SecretContent)
 	}
 }
 

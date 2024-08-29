@@ -15,8 +15,8 @@ type k8slv struct {
 	Spec              *Vault            `json:"spec" yaml:"spec"`
 }
 
-func (vlt *Vault) ToK8s(k8sName string, k8SecretContent []byte) (err error) {
-	if k8sName == "" && k8SecretContent == nil {
+func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err error) {
+	if name == "" && k8SecretContent == nil {
 		return errK8sNameRequired
 	}
 	if vlt.k8s == nil {
@@ -26,11 +26,6 @@ func (vlt *Vault) ToK8s(k8sName string, k8SecretContent []byte) (err error) {
 				Kind:       k8sKind,
 			},
 			Spec: vlt,
-		}
-	}
-	if k8sName != "" {
-		vlt.k8s.ObjectMeta = metav1.ObjectMeta{
-			Name: k8sName,
 		}
 	}
 	if k8SecretContent != nil {
@@ -72,6 +67,12 @@ func (vlt *Vault) ToK8s(k8sName string, k8SecretContent []byte) (err error) {
 			}
 			vlt.k8s.Type = k8secret.Type
 		}
+	}
+	if name != "" {
+		vlt.k8s.Name = name
+	}
+	if namespace != "" {
+		vlt.k8s.Namespace = namespace
 	}
 	return vlt.commit()
 }

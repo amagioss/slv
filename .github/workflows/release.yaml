@@ -51,36 +51,7 @@ jobs:
             ghcr.io/${{ github.repository }}:latest
 
   pages:
-    name: Deploy to GitHub Pages
+    name: Deploy Static Assets to GitHub Pages
     needs: release
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    concurrency:
-      group: "pages"
-      cancel-in-progress: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Prepare pages directory
-        run: |
-          cp scripts/install/* pages/
-          mkdir -p pages/k8s/samples/deploy
-          cp internal/k8s/config/crd/bases/slv.oss.amagi.com_slvs.yaml pages/k8s/crd.yaml
-          cp internal/k8s/deploy/operator.yaml pages/k8s/samples/deploy/operator.yaml
-          cp internal/k8s/deploy/job.yaml pages/k8s/samples/deploy/job.yaml
-          cp internal/k8s/config/samples/slv_v1_slv.yaml pages/k8s/samples/pets.slv.yaml
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: pages
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    uses: ./.github/workflows/pages.yaml
+    secrets: inherit

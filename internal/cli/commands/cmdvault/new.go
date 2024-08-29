@@ -34,8 +34,10 @@ func vaultNewCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			enableHash, _ := cmd.Flags().GetBool(vaultEnableHashingFlag.Name)
-			k8sName := cmd.Flag(vaultK8sFlag.Name).Value.String()
-			if _, err = newK8sVault(vaultFile, k8sName, enableHash, pq, rootPublicKey, publicKeys...); err != nil {
+			k8sName := cmd.Flag(vaultK8sNameFlag.Name).Value.String()
+			k8sNamespace := cmd.Flag(vaultK8sNamespaceFlag.Name).Value.String()
+			k8sSecret := cmd.Flag(vaultK8sSecretFlag.Name).Value.String()
+			if _, err = newK8sVault(vaultFile, k8sName, k8sNamespace, k8sSecret, enableHash, pq, rootPublicKey, publicKeys...); err != nil {
 				utils.ExitOnError(err)
 			}
 			fmt.Println("Created vault:", color.GreenString(vaultFile))
@@ -46,7 +48,9 @@ func vaultNewCommand() *cobra.Command {
 	vaultNewCmd.Flags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
 	vaultNewCmd.Flags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
 	vaultNewCmd.Flags().BoolP(vaultAccessK8sFlag.Name, vaultAccessK8sFlag.Shorthand, false, vaultAccessK8sFlag.Usage)
-	vaultNewCmd.Flags().StringP(vaultK8sFlag.Name, vaultK8sFlag.Shorthand, "", vaultK8sFlag.Usage)
+	vaultNewCmd.Flags().StringP(vaultK8sNameFlag.Name, vaultK8sNameFlag.Shorthand, "", vaultK8sNameFlag.Usage)
+	vaultNewCmd.Flags().StringP(vaultK8sNamespaceFlag.Name, vaultK8sNamespaceFlag.Shorthand, "", vaultK8sNamespaceFlag.Usage)
+	vaultNewCmd.Flags().StringP(vaultK8sSecretFlag.Name, vaultK8sSecretFlag.Shorthand, "", vaultK8sSecretFlag.Usage)
 	vaultNewCmd.Flags().BoolP(vaultEnableHashingFlag.Name, vaultEnableHashingFlag.Shorthand, false, vaultEnableHashingFlag.Usage)
 	vaultNewCmd.Flags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	return vaultNewCmd

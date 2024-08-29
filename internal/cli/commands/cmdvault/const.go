@@ -45,15 +45,19 @@ var (
 		Usage: "Enables hashing by preserving a partial hash of the actual secret for the purpose of validating secret rotation [Not recommended, though it might be difficult to brute-force]",
 	}
 
-	vaultK8sFlag = utils.FlagDef{
-		Name:  "k8s",
-		Usage: "Specify a name for the K8s SLV resource or path to an existing K8s Secret stored as a yaml config if the vault has to be used in a K8s environment",
+	vaultK8sNameFlag = utils.FlagDef{
+		Name:  "k8s-name",
+		Usage: "Name for the K8s SLV resource",
 	}
 
-	vaultK8sNameFlag = utils.FlagDef{
-		Name:      "name",
-		Shorthand: "n",
-		Usage:     "Name of the K8s SLV resource that needs to be created. This will also be the name of the corresponding K8s Secret",
+	vaultK8sNamespaceFlag = utils.FlagDef{
+		Name:  "k8s-namespace",
+		Usage: "Namespace for the K8s SLV resource",
+	}
+
+	vaultK8sSecretFlag = utils.FlagDef{
+		Name:  "k8s-secret",
+		Usage: "A K8s Secret that needs to be transformed to an SLV vault",
 	}
 
 	secretNamePrefixFlag = utils.FlagDef{
