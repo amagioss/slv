@@ -41,11 +41,13 @@ spec:
             properties:
               slvConfig:
                 properties:
-                  hashLength:
-                    type: integer
+                  hash:
+                    type: boolean
                   id:
                     type: string
                   publicKey:
+                    type: string
+                  version:
                     type: string
                   wrappedKeys:
                     items:
@@ -60,11 +62,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
-              version:
-                type: string
             required:
             - slvConfig
-            - slvSecrets
             type: object
           status:
             description: SLVStatus defines the observed state of SLV

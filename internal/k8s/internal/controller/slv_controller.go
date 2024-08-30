@@ -147,7 +147,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 						},
 					},
 				},
-				Type: slvObj.Type,
+				Type: corev1.SecretType(slvObj.Type),
 				Data: slvSecretMap,
 			}
 			if secret.Annotations == nil {
@@ -189,8 +189,8 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			secret.Annotations[slvVersionAnnotationKey] = config.Version
 			updateRequired = true
 		}
-		if secret.Type != slvObj.Type {
-			secret.Type = slvObj.Type
+		if string(secret.Type) != slvObj.Type {
+			secret.Type = corev1.SecretType(slvObj.Type)
 			updateRequired = true
 		}
 		var msg string

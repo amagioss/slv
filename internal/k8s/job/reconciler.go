@@ -78,7 +78,7 @@ func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvO
 					Namespace:   slvObj.Namespace,
 					Annotations: slvObj.Annotations,
 				},
-				Type: slvObj.Type,
+				Type: corev1.SecretType(slvObj.Type),
 				Data: slvSecretMap,
 			}
 			if secret.Annotations == nil {
@@ -114,8 +114,8 @@ func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvO
 			secret.Annotations[slvVersionAnnotationKey] = config.Version
 			updateRequired = true
 		}
-		if secret.Type != slvObj.Type {
-			secret.Type = slvObj.Type
+		if string(secret.Type) != slvObj.Type {
+			secret.Type = corev1.SecretType(slvObj.Type)
 			updateRequired = true
 		}
 		var msg string

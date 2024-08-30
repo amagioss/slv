@@ -15,6 +15,7 @@ import (
 )
 
 type vaultConfig struct {
+	Version     string   `json:"version,omitempty" yaml:"version,omitempty"`
 	Id          string   `json:"id" yaml:"id"`
 	PublicKey   string   `json:"publicKey" yaml:"publicKey"`
 	Hash        bool     `json:"hash,omitempty" yaml:"hash,omitempty"`
@@ -22,8 +23,7 @@ type vaultConfig struct {
 }
 
 type Vault struct {
-	Version             string            `json:"version,omitempty" yaml:"version,omitempty"`
-	Secrets             map[string]string `json:"slvSecrets" yaml:"slvSecrets"`
+	Secrets             map[string]string `json:"slvSecrets,omitempty" yaml:"slvSecrets,omitempty"`
 	Config              vaultConfig       `json:"slvConfig" yaml:"slvConfig"`
 	path                string            `json:"-"`
 	publicKey           *crypto.PublicKey `json:"-"`
@@ -92,9 +92,9 @@ func New(filePath, k8sName, k8sNamespace string, k8SecretContent []byte, hash, q
 		return nil, err
 	}
 	vlt = &Vault{
-		Version:   config.Version,
 		publicKey: vaultPublicKey,
 		Config: vaultConfig{
+			Version:   semver.MajorMinor(config.Version),
 			Id:        vauldId,
 			PublicKey: vaultPubKeyStr,
 			Hash:      hash,
@@ -153,8 +153,9 @@ func getFromField(jsonData []byte, filePath string, k8s bool) (vlt *Vault, err e
 		}
 	}
 	vlt.path = filePath
-	vaultVersion := vlt.Version
-	if vaultVersion != "" && (!semver.IsValid(vaultVersion) || semver.Compare(config.Version, vaultVersion) < 0) {
+	if vlt.Config.Version != "" && config.Version != "" &&
+		(!semver.IsValid(vlt.Config.Version) || !semver.IsValid(config.Version) ||
+			semver.Compare(semver.MajorMinor(config.Version), semver.MajorMinor(vlt.Config.Version)) < 0) {
 		return nil, errVaultVersionNotRecognized
 	}
 	return vlt, nil
@@ -180,13 +181,7 @@ func (vlt *Vault) commit() error {
 	}
 	var data interface{}
 	if vlt.k8s != nil {
-		jsonData, err := json.Marshal(vlt.k8s)
-		if err != nil {
-			return err
-		}
-		if err = json.Unmarshal(jsonData, &data); err != nil {
-			return err
-		}
+		data = vlt.k8s
 	} else {
 		data = vlt
 	}
