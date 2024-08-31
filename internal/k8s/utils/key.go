@@ -21,7 +21,7 @@ func SecretKey() (secretKey *crypto.SecretKey, err error) {
 		sk, _ := secretkey.Get()
 		if clientset, _ := getKubeClientSet(); clientset != nil {
 			if sk == nil {
-				if sk, err = getSecretKeyFromCluster(clientset); err != nil && isEnvGenEnabled() {
+				if sk, err = GetSecretKeyFor(clientset, GetCurrentNamespace()); err != nil && isEnvGenEnabled() {
 					sk, err = crypto.NewSecretKey(environments.EnvironmentKey)
 				}
 			}

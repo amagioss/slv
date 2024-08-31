@@ -61,11 +61,19 @@ func listSLVs(cfg *rest.Config) ([]slvv1.SLV, error) {
 	return slvObjList.Items, nil
 }
 
-func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvObj slvv1.SLV) error {
-	if err := slvObj.Spec.Unlock(secretKey); err != nil {
-		return err
+func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvObj slvv1.SLV) (err error) {
+	vault := slvObj.Spec.Vault
+	if utils.IsNamespacedMode() && slvObj.Namespace != utils.GetCurrentNamespace() {
+		if namespacedSecretKey, _ := utils.GetSecretKeyFor(clientset, slvObj.Namespace); namespacedSecretKey != nil {
+			vault.Unlock(namespacedSecretKey)
+		}
 	}
-	slvSecretMap, err := slvObj.Spec.GetAllSecrets()
+	if vault.IsLocked() {
+		if err = vault.Unlock(secretKey); err != nil {
+			return err
+		}
+	}
+	slvSecretMap, err := vault.GetAllSecrets()
 	if err != nil {
 		return err
 	}

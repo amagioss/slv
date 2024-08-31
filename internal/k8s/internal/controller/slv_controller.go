@@ -33,12 +33,14 @@ import (
 
 	"github.com/go-logr/logr"
 	"oss.amagi.com/slv/internal/core/config"
+	"oss.amagi.com/slv/internal/core/crypto"
 	slvv1 "oss.amagi.com/slv/internal/k8s/api/v1"
 	"oss.amagi.com/slv/internal/k8s/utils"
 )
 
 const (
 	slvVersionAnnotationKey = slvv1.Group + "/version"
+	slvResourceName         = config.AppNameLowerCase
 )
 
 // SLVReconciler reconciles a SLV object
@@ -87,6 +89,22 @@ func isAnnotationUpdateRequred(slvAnnotations, secretAnnotations map[string]stri
 	return secretAnnotations[slvVersionAnnotationKey] != config.Version
 }
 
+func (r *SLVReconciler) getSecretKeyForNamespace(ctx context.Context, namespace string) (secretKey *crypto.SecretKey) {
+	slvSecret := &corev1.Secret{}
+	if err := r.Get(ctx, types.NamespacedName{Name: slvResourceName, Namespace: namespace}, slvSecret); err == nil {
+		if secretKey, _ = utils.ExtractSecretKeyFromSecret(slvSecret); secretKey != nil {
+			return secretKey
+		}
+	}
+	slvConfigMap := &corev1.ConfigMap{}
+	if err := r.Get(ctx, types.NamespacedName{Name: slvResourceName, Namespace: namespace}, slvConfigMap); err == nil {
+		if secretKey, _ = utils.ExtractSecretKeyFromConfigMapBinding(slvConfigMap); secretKey != nil {
+			return secretKey
+		}
+	}
+	return nil
+}
+
 //+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs/finalizers,verbs=update
@@ -114,12 +132,19 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	}
 
 	vault := slvObj.Spec.Vault
-	secretKey, err := utils.SecretKey()
-	if err != nil {
-		return r.returnError(ctx, &slvObj, &logger, err, "Failed to get secret key")
+	if utils.IsNamespacedMode() && slvObj.Namespace != utils.GetCurrentNamespace() {
+		if namespaceSecretKey := r.getSecretKeyForNamespace(ctx, req.Namespace); namespaceSecretKey != nil {
+			vault.Unlock(namespaceSecretKey)
+		}
 	}
-	if err := vault.Unlock(secretKey); err != nil {
-		return r.returnError(ctx, &slvObj, &logger, err, "Failed to unlock vault")
+	if vault.IsLocked() {
+		if secretKey, err := utils.SecretKey(); err != nil {
+			return r.returnError(ctx, &slvObj, &logger, err, "Failed to get secret key")
+		} else {
+			if err = vault.Unlock(secretKey); err != nil {
+				return r.returnError(ctx, &slvObj, &logger, err, "Failed to unlock vault")
+			}
+		}
 	}
 	slvSecretMap, err := vault.GetAllSecrets()
 	if err != nil {

@@ -19,6 +19,7 @@ package v1
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"oss.amagi.com/slv/internal/core/config"
+	"oss.amagi.com/slv/internal/core/crypto"
 	"oss.amagi.com/slv/internal/k8s/utils"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -51,18 +52,24 @@ func (r *SLV) Default() {
 
 var _ webhook.Validator = &SLV{}
 
-func (r *SLV) validateSLV() error {
+func (r *SLV) validateSLV() (err error) {
 	vault := r.Spec.Vault
-	secretKey, err := utils.SecretKey()
-	if err != nil {
-		slvlog.Error(err, "failed to get secret key", "name", r.Name)
-		return err
+	if utils.IsNamespacedMode() && r.Namespace != utils.GetCurrentNamespace() {
+		if namespacedSecretKey, _ := utils.GetSecretKeyFor(nil, r.Namespace); namespacedSecretKey != nil {
+			vault.Unlock(namespacedSecretKey)
+		}
 	}
-	if err := vault.Unlock(secretKey); err != nil {
-		slvlog.Error(err, "failed to unlock vault", "name", r.Name)
-		return err
+	if vault.IsLocked() {
+		var secretKey *crypto.SecretKey
+		if secretKey, err = utils.SecretKey(); err != nil {
+			slvlog.Error(err, "failed to get secret key", "name", r.Name)
+		}
+		if err = vault.Unlock(secretKey); err != nil {
+			slvlog.Error(err, "failed to unlock vault", "name", r.Name)
+			return err
+		}
 	}
-	if _, err := vault.GetAllSecrets(); err != nil {
+	if _, err = vault.GetAllSecrets(); err != nil {
 		slvlog.Error(err, "failed to get all secrets", "name", r.Name)
 		return err
 	}

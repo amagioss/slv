@@ -32,13 +32,29 @@ func getKubeClientSet() (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-func getSecretKeyFromCluster(clientset *kubernetes.Clientset) (*crypto.SecretKey, error) {
-	namespace := GetCurrentNamespace()
+func GetSecretKeyFor(clientset *kubernetes.Clientset, namespace string) (secretKey *crypto.SecretKey, err error) {
+	if clientset == nil {
+		if clientset, err = getKubeClientSet(); err != nil {
+			return nil, fmt.Errorf("failed to get k8s clientset: %w", err)
+		}
+	}
 	secret, err := clientset.CoreV1().Secrets(namespace).Get(context.Background(), resourceName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
-	for k, v := range secret.Data {
+	if secretKey, err = ExtractSecretKeyFromSecret(secret); secretKey != nil {
+		return secretKey, err
+	}
+	if configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), resourceName, metav1.GetOptions{}); err == nil {
+		if secretKey, err = ExtractSecretKeyFromConfigMapBinding(configMap); secretKey != nil {
+			return secretKey, err
+		}
+	}
+	return nil, fmt.Errorf("secret key not found")
+}
+
+func ExtractSecretKeyFromSecret(slvSecret *corev1.Secret) (*crypto.SecretKey, error) {
+	for k, v := range slvSecret.Data {
 		lowerCaseKey := strings.ToLower(k)
 		if lowerCaseKey == "secretkey" || lowerCaseKey == "secret_key" {
 			return crypto.SecretKeyFromString(string(v))
@@ -47,17 +63,17 @@ func getSecretKeyFromCluster(clientset *kubernetes.Clientset) (*crypto.SecretKey
 			return providers.GetSecretKeyFromSecretBinding(string(v))
 		}
 	}
-	configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), resourceName, metav1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
+	return nil, nil
+}
+
+func ExtractSecretKeyFromConfigMapBinding(configMap *corev1.ConfigMap) (*crypto.SecretKey, error) {
 	for k, v := range configMap.Data {
 		lowerCaseKey := strings.ToLower(k)
 		if lowerCaseKey == "secretbinding" || lowerCaseKey == "secret_binding" {
 			return providers.GetSecretKeyFromSecretBinding(v)
 		}
 	}
-	return nil, fmt.Errorf("secret key not found")
+	return nil, nil
 }
 
 func putPublicKeyToConfigMap(clientset *kubernetes.Clientset, publicKeyStrEC, publicKeyStrPQ string) error {
@@ -91,7 +107,7 @@ func putPublicKeyToConfigMap(clientset *kubernetes.Clientset, publicKeyStrEC, pu
 }
 
 func GetCurrentNamespace() string {
-	if namespace == nil {
+	if currentNamespace == nil {
 		ns := os.Getenv(envar_NAMESPACE)
 		if ns == "" {
 			ns = os.Getenv(envar_SLV_K8S_NAMESPACE)
@@ -103,7 +119,7 @@ func GetCurrentNamespace() string {
 			}
 			ns = string(namespaceBytes)
 		}
-		namespace = &ns
+		currentNamespace = &ns
 	}
-	return *namespace
+	return *currentNamespace
 }

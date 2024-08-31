@@ -82,7 +82,7 @@ func (vlt *Vault) GetAllSecrets() (secretsMap map[string][]byte, err error) {
 		if decryptedSecret, err = vlt.GetSecret(secretName); err == nil {
 			secretsMap[secretName] = decryptedSecret
 		} else {
-			return nil, err
+			return nil, fmt.Errorf("error decrypting secret %s: %w", secretName, err)
 		}
 	}
 	return
