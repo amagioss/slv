@@ -48,7 +48,7 @@ func vaultPutCommand() *cobra.Command {
 				} else {
 					secret = []byte(secretValue)
 				}
-				err = vault.Put(secretName, secret)
+				err = vault.Put(secretName, secret, true)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -64,7 +64,7 @@ func vaultPutCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				if err = vault.Import(importData, forceUpdate); err != nil {
+				if err = vault.Import(importData, forceUpdate, true); err != nil {
 					utils.ExitOnError(err)
 				}
 				fmt.Printf("Successfully imported secrets from %s into the vault %s\n", color.GreenString(importFile), color.GreenString(vaultFile))

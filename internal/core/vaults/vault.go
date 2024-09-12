@@ -23,15 +23,28 @@ type vaultConfig struct {
 }
 
 type Vault struct {
-	Secrets             map[string]string `json:"slvSecrets,omitempty" yaml:"slvSecrets,omitempty"`
-	Data                map[string]string `json:"slvData,omitempty" yaml:"slvData,omitempty"`
-	Config              vaultConfig       `json:"slvConfig" yaml:"slvConfig"`
-	path                string            `json:"-"`
-	publicKey           *crypto.PublicKey `json:"-"`
-	secretKey           *crypto.SecretKey `json:"-"`
-	decryptedSecrets    map[string][]byte `json:"-"`
-	vaultSecretRefRegex *regexp.Regexp    `json:"-"`
-	k8s                 *k8slv            `json:"-"`
+	Secrets             map[string]string     `json:"slvSecrets,omitempty" yaml:"slvSecrets,omitempty"`
+	Data                map[string]string     `json:"slvData,omitempty" yaml:"slvData,omitempty"`
+	Config              vaultConfig           `json:"slvConfig" yaml:"slvConfig"`
+	path                string                `json:"-"`
+	publicKey           *crypto.PublicKey     `json:"-"`
+	secretKey           *crypto.SecretKey     `json:"-"`
+	cache               map[string]*VaultData `json:"-"`
+	vaultSecretRefRegex *regexp.Regexp        `json:"-"`
+	k8s                 *k8slv                `json:"-"`
+}
+
+type VaultData struct {
+	value    []byte `json:"-"`
+	isSecret bool   `json:"-"`
+}
+
+func (vd *VaultData) Value() []byte {
+	return vd.value
+}
+
+func (vd *VaultData) IsSecret() bool {
+	return vd.isSecret
 }
 
 func (vlt *Vault) Id() string {

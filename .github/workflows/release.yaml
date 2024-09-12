@@ -30,7 +30,7 @@ jobs:
           -v $PWD:/workspace \
           -e GITHUB_TOKEN \
           -e HOMEBREW_SSH_KEY \
-          ghcr.io/goreleaser/goreleaser-cross:v1.23 release \
+          ghcr.io/goreleaser/goreleaser-cross:latest release \
           --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

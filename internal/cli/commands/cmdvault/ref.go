@@ -34,7 +34,7 @@ func vaultRefCommand() *cobra.Command {
 			if refType != "" && refType != "yaml" {
 				utils.ExitOnErrorWithMessage("only yaml auto reference is supported at the moment")
 			}
-			result, conflicting, err := vault.RefSecrets(refType, refFile, secretNamePrefix, forceUpdate, previewOnly)
+			result, conflicting, err := vault.RefSecrets(refType, refFile, secretNamePrefix, forceUpdate, true, previewOnly)
 			if conflicting {
 				utils.ExitOnErrorWithMessage("conflict found. please use the --" + secretNameFlag.Name + " flag to set a different name or --" + secretForceUpdateFlag.Name + " flag to overwrite them.")
 			} else if err != nil {

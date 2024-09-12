@@ -1,25 +1,25 @@
 package vaults
 
-func (vlt *Vault) getFromCache(secretName string) (decryptedSecret []byte) {
-	if vlt.decryptedSecrets != nil {
-		decryptedSecret = vlt.decryptedSecrets[secretName]
+func (vlt *Vault) getFromCache(name string) (data *VaultData) {
+	if vlt.cache != nil {
+		data = vlt.cache[name]
 	}
 	return
 }
 
-func (vlt *Vault) putToCache(secretName string, secretValue []byte) {
-	if vlt.decryptedSecrets == nil {
-		vlt.decryptedSecrets = make(map[string][]byte)
+func (vlt *Vault) putToCache(name string, data *VaultData) {
+	if vlt.cache == nil {
+		vlt.cache = make(map[string]*VaultData)
 	}
-	vlt.decryptedSecrets[secretName] = secretValue
+	vlt.cache[name] = data
 }
 
-func (vlt *Vault) deleteFromCache(secretName string) {
-	if vlt.decryptedSecrets != nil {
-		delete(vlt.decryptedSecrets, secretName)
+func (vlt *Vault) deleteFromCache(name string) {
+	if vlt.cache != nil {
+		delete(vlt.cache, name)
 	}
 }
 
 func (vlt *Vault) clearSecretCache() {
-	vlt.decryptedSecrets = nil
+	vlt.cache = nil
 }

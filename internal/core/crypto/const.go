@@ -27,5 +27,4 @@ var (
 	errDecryptionFailed         = errors.New("decryption failed")
 	errSecretKeyMismatch        = errors.New("given secret key cannot decrypt the data")
 	errInvalidCiphertextFormat  = errors.New("invalid ciphertext format")
-	errRestrictedSecretKey      = errors.New("secret key is restricted and cannot be serialized")
 )

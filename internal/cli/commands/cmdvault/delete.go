@@ -32,7 +32,7 @@ func vaultDeleteCommand() *cobra.Command {
 				}
 				fmt.Printf(color.GreenString("Successfully deleted the vault: %s\n"), vaultFile)
 			} else {
-				if err = vault.DeleteSecrets(secretNames); err != nil {
+				if err = vault.DeleteItems(secretNames); err != nil {
 					utils.ExitOnError(err)
 				}
 				fmt.Printf(color.GreenString("Successfully deleted the secrets: %v from the vault: %s\n"), secretNames, vaultFile)

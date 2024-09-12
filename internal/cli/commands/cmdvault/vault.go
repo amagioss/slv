@@ -31,10 +31,6 @@ func VaultCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			vaultDataMap, err := vault.List()
-			if err != nil {
-				utils.ExitOnError(err)
-			}
 			accessors, err := vault.ListAccessors()
 			if err != nil {
 				utils.ExitOnError(err)
@@ -47,7 +43,6 @@ func VaultCommand() *cobra.Command {
 			accessorTable.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor},
 				tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor},
 				tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor})
-			accessorTable.SetRowLine(true)
 			for _, accessor := range accessors {
 				var env *environments.Environment
 				accessorPK, err := accessor.String()
@@ -100,21 +95,19 @@ func VaultCommand() *cobra.Command {
 			tableHeaderColors := []tablewriter.Colors{{tablewriter.Bold, tablewriter.FgHiWhiteColor},
 				{tablewriter.Bold, tablewriter.FgHiWhiteColor},
 				{tablewriter.Bold, tablewriter.FgHiWhiteColor}}
-			dataTable.SetRowLine(true)
 			hashAdded := false
 			rows := [][]string{}
-			for name, vdv := range vaultDataMap {
-				if vdv.SealedSecret != nil {
-					row := []string{name, "(Encrypted)",
-						vdv.SealedSecret.EncryptedAt().Format("02-Jan-2006 15:04:05")}
-					if hash := vdv.SealedSecret.Hash(); hash != "" {
-						row = append(row, hash)
-						hashAdded = true
-					}
-					rows = append(rows, row)
-				} else {
-					rows = append(rows, []string{name, string(vdv.PlainText), "N/A"})
+			secretsMap, ptMap := vault.List()
+			for name, sealedSecret := range secretsMap {
+				row := []string{name, "(Encrypted)", sealedSecret.EncryptedAt().Format("02-Jan-2006 15:04:05")}
+				if hash := sealedSecret.Hash(); hash != "" {
+					row = append(row, hash)
+					hashAdded = true
 				}
+				rows = append(rows, row)
+			}
+			for name, value := range ptMap {
+				rows = append(rows, []string{name, value, "N/A"})
 			}
 			header := []string{"Name", "Value", "Created At"}
 			if hashAdded {

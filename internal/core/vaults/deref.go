@@ -7,13 +7,14 @@ import (
 	"strings"
 )
 
-func (vlt *Vault) getSecretByReference(secretRef string) (secret []byte, err error) {
+func (vlt *Vault) getSecretByReference(secretRef string) ([]byte, error) {
 	sliced := strings.Split(secretRef, vlt.Id()+".")
 	if len(sliced) != 2 {
 		return nil, errInvalidReferenceFormat
 	}
 	secretName := strings.Trim(sliced[1], " }")
-	return vlt.Get(secretName)
+	vd, err := vlt.Get(secretName)
+	return vd.value, err
 }
 
 func (vlt *Vault) getVaultSecretRefRegex() *regexp.Regexp {

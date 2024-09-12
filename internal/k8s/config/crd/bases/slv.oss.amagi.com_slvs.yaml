@@ -58,6 +58,10 @@ spec:
                 - publicKey
                 - wrappedKeys
                 type: object
+              slvData:
+                additionalProperties:
+                  type: string
+                type: object
               slvSecrets:
                 additionalProperties:
                   type: string

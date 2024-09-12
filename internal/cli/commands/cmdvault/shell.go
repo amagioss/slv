@@ -56,11 +56,11 @@ func vaultShellCommand() *cobra.Command {
 					slvShell.Env = append(slvShell.Env, envar)
 				}
 			}
-			for name, secret := range secrets {
+			for name, data := range secrets {
 				if prefix != "" {
 					name = prefix + name
 				}
-				slvShell.Env = append(slvShell.Env, name+"="+string(secret))
+				slvShell.Env = append(slvShell.Env, name+"="+string(data.Value()))
 			}
 			slvShell.Stdin = os.Stdin
 			slvShell.Stdout = os.Stdout

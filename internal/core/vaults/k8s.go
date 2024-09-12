@@ -81,7 +81,7 @@ func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err err
 		}
 		if len(secretDataMap) > 0 {
 			for key, value := range secretDataMap {
-				if err = vlt.putWithoutCommit(key, value); err != nil {
+				if err = vlt.putWithoutCommit(key, value, true); err != nil {
 					return err
 				}
 			}

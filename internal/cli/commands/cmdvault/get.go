@@ -39,7 +39,7 @@ func vaultGetCommand() *cobra.Command {
 			exportFormat := cmd.Flag(vaultExportFormatFlag.Name).Value.String()
 			secretMap := make(map[string]string)
 			if name == "" {
-				secrets, err := vault.GetAll()
+				secrets, err := vault.GetAllValues()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -51,14 +51,14 @@ func vaultGetCommand() *cobra.Command {
 					}
 				}
 			} else {
-				secret, err := vault.Get(name)
+				data, err := vault.Get(name)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
 				if encodeToBase64 {
-					secretMap[name] = base64.StdEncoding.EncodeToString(secret)
+					secretMap[name] = base64.StdEncoding.EncodeToString(data.Value())
 				} else {
-					secretMap[name] = string(secret)
+					secretMap[name] = string(data.Value())
 				}
 			}
 			if exportFormat == "" {

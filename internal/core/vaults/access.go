@@ -66,7 +66,7 @@ func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error
 	if len(newAccessors) == len(accessors) {
 		return nil
 	}
-	secretsMap, err := vlt.GetAll()
+	vaultDataMap, err := vlt.GetAll()
 	if err != nil {
 		return err
 	}
@@ -94,8 +94,8 @@ func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error
 			return err
 		}
 	}
-	for secretName, secretValue := range secretsMap {
-		if err = vlt.putWithoutCommit(secretName, secretValue); err != nil {
+	for name, vaultData := range vaultDataMap {
+		if err = vlt.putWithoutCommit(name, vaultData.value, vaultData.isSecret); err != nil {
 			return err
 		}
 	}
