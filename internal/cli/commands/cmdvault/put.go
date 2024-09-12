@@ -29,7 +29,7 @@ func vaultPutCommand() *cobra.Command {
 			}
 			forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.Name)
 			if secretName != "" {
-				if !forceUpdate && vault.SecretExists(secretName) {
+				if !forceUpdate && vault.Exists(secretName) {
 					confirmation, err := input.GetVisibleInput("Secret already exists. Do you wish to overwrite it? (y/n): ")
 					if err != nil {
 						utils.ExitOnError(err)
@@ -48,7 +48,7 @@ func vaultPutCommand() *cobra.Command {
 				} else {
 					secret = []byte(secretValue)
 				}
-				err = vault.PutSecret(secretName, secret)
+				err = vault.Put(secretName, secret)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -64,7 +64,7 @@ func vaultPutCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				if err = vault.ImportSecrets(importData, forceUpdate); err != nil {
+				if err = vault.Import(importData, forceUpdate); err != nil {
 					utils.ExitOnError(err)
 				}
 				fmt.Printf("Successfully imported secrets from %s into the vault %s\n", color.GreenString(importFile), color.GreenString(vaultFile))

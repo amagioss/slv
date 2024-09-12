@@ -146,7 +146,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			}
 		}
 	}
-	slvSecretMap, err := vault.GetAllSecrets()
+	slvSecretMap, err := vault.GetAll()
 	if err != nil {
 		return r.returnError(ctx, &slvObj, &logger, err, "Failed to get all secrets from vault")
 	}

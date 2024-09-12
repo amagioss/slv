@@ -7,7 +7,12 @@ import (
 	"oss.amagi.com/slv/internal/core/crypto"
 )
 
-func (vlt *Vault) putSecretWithoutCommit(secretName string, secretValue []byte) (err error) {
+type vaultDataValue struct {
+	SealedSecret *crypto.SealedSecret
+	PlainText    []byte
+}
+
+func (vlt *Vault) putWithoutCommit(secretName string, secretValue []byte) (err error) {
 	if !secretNameRegex.MatchString(secretName) {
 		return errInvalidSecretName
 	}
@@ -18,68 +23,73 @@ func (vlt *Vault) putSecretWithoutCommit(secretName string, secretValue []byte) 
 	}
 	sealedSecret, err = vaultPublicKey.EncryptSecret(secretValue, vlt.Config.Hash)
 	if err == nil {
-		if vlt.Secrets == nil {
-			vlt.Secrets = make(map[string]string)
+		if vlt.Data == nil {
+			vlt.Data = make(map[string]string)
 		}
-		vlt.Secrets[secretName] = sealedSecret.String()
+		vlt.Data[secretName] = sealedSecret.String()
 	}
 	return
 }
 
-func (vlt *Vault) PutSecret(secretName string, secretValue []byte) (err error) {
-	if err = vlt.putSecretWithoutCommit(secretName, secretValue); err == nil {
+func (vlt *Vault) Put(secretName string, secretValue []byte) (err error) {
+	if err = vlt.putWithoutCommit(secretName, secretValue); err == nil {
 		err = vlt.commit()
 	}
 	return
 }
 
-func (vlt *Vault) ImportSecrets(importData []byte, force bool) (err error) {
+func (vlt *Vault) Import(importData []byte, force bool) (err error) {
 	secretsMap := make(map[string]string)
 	if err = yaml.Unmarshal(importData, &secretsMap); err != nil {
 		return errInvalidImportDataFormat
 	}
 	if !force {
 		for secretName := range secretsMap {
-			if vlt.SecretExists(secretName) {
+			if vlt.Exists(secretName) {
 				return fmt.Errorf("secret %s already exists", secretName)
 			}
 		}
 	}
 	for secretName, secretValue := range secretsMap {
-		if err = vlt.putSecretWithoutCommit(secretName, []byte(secretValue)); err != nil {
+		if err = vlt.putWithoutCommit(secretName, []byte(secretValue)); err != nil {
 			return err
 		}
 	}
 	return vlt.commit()
 }
 
-func (vlt *Vault) SecretExists(secretName string) (exists bool) {
-	if vlt.Secrets != nil {
-		_, exists = vlt.Secrets[secretName]
+func (vlt *Vault) Exists(secretName string) (exists bool) {
+	if vlt.Data != nil {
+		_, exists = vlt.Data[secretName]
 	}
 	return exists
 }
 
-func (vlt *Vault) ListSealedSecrets() (map[string]crypto.SealedSecret, error) {
-	sealedSecretsMap := make(map[string]crypto.SealedSecret)
-	for name, value := range vlt.Secrets {
+func (vlt *Vault) List() (map[string]vaultDataValue, error) {
+	sealedSecretsMap := make(map[string]vaultDataValue)
+	for name, value := range vlt.Data {
 		sealedSecret := crypto.SealedSecret{}
 		if err := sealedSecret.FromString(value); err != nil {
-			return nil, err
+			sealedSecretsMap[name] = vaultDataValue{
+				PlainText: []byte(value),
+			}
+		} else {
+			sealedSecretsMap[name] = vaultDataValue{
+				SealedSecret: &sealedSecret,
+			}
 		}
-		sealedSecretsMap[name] = sealedSecret
 	}
 	return sealedSecretsMap, nil
 }
 
-func (vlt *Vault) GetAllSecrets() (secretsMap map[string][]byte, err error) {
+func (vlt *Vault) GetAll() (secretsMap map[string][]byte, err error) {
 	if vlt.IsLocked() {
 		return secretsMap, errVaultLocked
 	}
 	secretsMap = make(map[string][]byte)
-	for secretName := range vlt.Secrets {
+	for secretName := range vlt.Data {
 		var decryptedSecret []byte
-		if decryptedSecret, err = vlt.GetSecret(secretName); err == nil {
+		if decryptedSecret, err = vlt.Get(secretName); err == nil {
 			secretsMap[secretName] = decryptedSecret
 		} else {
 			return nil, fmt.Errorf("error decrypting secret %s: %w", secretName, err)
@@ -88,21 +98,26 @@ func (vlt *Vault) GetAllSecrets() (secretsMap map[string][]byte, err error) {
 	return
 }
 
-func (vlt *Vault) GetSecret(secretName string) (decryptedSecret []byte, err error) {
+func (vlt *Vault) Get(name string) (value []byte, err error) {
 	if vlt.IsLocked() {
-		return decryptedSecret, errVaultLocked
+		return nil, errVaultLocked
 	}
-	sealedSecretData := vlt.Secrets[secretName]
-	if sealedSecretData == "" {
+	rawValue := vlt.Data[name]
+	if rawValue == "" {
 		return nil, errVaultSecretNotFound
 	}
-	if decryptedSecret = vlt.getSecretFromCache(secretName); decryptedSecret == nil {
+	if value = vlt.getFromCache(name); value == nil {
 		sealedSecret := &crypto.SealedSecret{}
-		if err = sealedSecret.FromString(sealedSecretData); err == nil {
-			if decryptedSecret, err = vlt.secretKey.DecryptSecret(*sealedSecret); err == nil {
-				vlt.putSecretToCache(secretName, decryptedSecret)
+		if err = sealedSecret.FromString(rawValue); err == nil {
+			if value, err = vlt.secretKey.DecryptSecret(*sealedSecret); err != nil {
+				return nil, err
 			}
 		}
+		if value == nil {
+			value = []byte(rawValue)
+			err = nil
+		}
+		vlt.putToCache(name, value)
 	}
 	return
 }
@@ -113,8 +128,8 @@ func (vlt *Vault) DeleteSecret(secretName string) error {
 
 func (vlt *Vault) DeleteSecrets(secretNames []string) error {
 	for _, secretName := range secretNames {
-		delete(vlt.Secrets, secretName)
-		vlt.deleteSecretFromCache(secretName)
+		delete(vlt.Data, secretName)
+		vlt.deleteFromCache(secretName)
 	}
 	return vlt.commit()
 }

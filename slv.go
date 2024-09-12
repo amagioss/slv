@@ -26,7 +26,7 @@ func GetAllSecrets(vaultFile string) (map[string][]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return vault.GetAllSecrets()
+	return vault.GetAll()
 }
 
 // GetSecret returns a named secret from the vault
@@ -35,7 +35,7 @@ func GetSecret(vaultFile, secretName string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return vault.GetSecret(secretName)
+	return vault.Get(secretName)
 }
 
 // PutSecret writes a secret to the vault
@@ -44,5 +44,5 @@ func PutSecret(vaultFile, secretName string, secretValue []byte) error {
 	if err != nil {
 		return err
 	}
-	return vault.PutSecret(secretName, secretValue)
+	return vault.Put(secretName, secretValue)
 }

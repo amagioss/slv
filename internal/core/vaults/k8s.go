@@ -81,7 +81,7 @@ func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err err
 		}
 		if len(secretDataMap) > 0 {
 			for key, value := range secretDataMap {
-				if err = vlt.putSecretWithoutCommit(key, value); err != nil {
+				if err = vlt.putWithoutCommit(key, value); err != nil {
 					return err
 				}
 			}
@@ -108,9 +108,9 @@ func (v *Vault) DeepCopy() *Vault {
 
 func (v *Vault) DeepCopyInto(out *Vault) {
 	*out = *v
-	out.Secrets = make(map[string]string, len(v.Secrets))
-	for key, val := range v.Secrets {
-		out.Secrets[key] = val
+	out.Data = make(map[string]string, len(v.Data))
+	for key, val := range v.Data {
+		out.Data[key] = val
 	}
 	out.Config = vaultConfig{
 		Version:     v.Config.Version,

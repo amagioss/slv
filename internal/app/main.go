@@ -9,16 +9,11 @@ import (
 	"oss.amagi.com/slv/internal/k8s/operator"
 )
 
-const (
-	slvModeK8sOperator = "K8S_OPERATOR"
-	slvModeK8sJob      = "K8S_JOB"
-)
-
 func main() {
-	switch strings.ToUpper(os.Getenv("SLV_MODE")) {
-	case slvModeK8sOperator:
+	switch strings.ToLower(os.Getenv("SLV_MODE")) {
+	case "k8s_operator", "k8s-operator":
 		operator.Run()
-	case slvModeK8sJob:
+	case "k8s_job", "k8s-job":
 		job.Run()
 	default:
 		cli.Run()

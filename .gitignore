@@ -1,6 +1,7 @@
 local_test
-dist/
+dist/*
 .DS_Store
 slv-dev
 .vscode
 internal/k8s/bin/*
+.ignore/*

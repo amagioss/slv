@@ -9,27 +9,16 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-const (
-	envar_SLV_K8S_SKIP_ENVAUTOGEN = "SLV_K8S_SKIP_ENVAUTOGEN"
-	envar_SLV_K8S_NAMESPACED_MODE = "SLV_K8S_NAMESPACED_MODE"
-)
-
 var (
 	currentNamespace *string
 	kubeConfig       *clientcmd.ClientConfig
-	nameSpacedMode   *bool
+
+	envGenEnabled  = strings.ToLower(os.Getenv("SLV_K8S_SKIP_ENVAUTOGEN")) != "true"
+	nameSpacedMode = strings.ToLower(os.Getenv("SLV_K8S_NAMESPACED_MODE")) == "true"
 )
 
-func isEnvGenEnabled() bool {
-	return strings.ToLower(os.Getenv(envar_SLV_K8S_SKIP_ENVAUTOGEN)) != "true"
-}
-
 func IsNamespacedMode() bool {
-	if nameSpacedMode == nil {
-		nameSpacedMode = new(bool)
-		*nameSpacedMode = strings.ToLower(os.Getenv(envar_SLV_K8S_NAMESPACED_MODE)) == "true"
-	}
-	return *nameSpacedMode
+	return nameSpacedMode
 }
 
 func getKubeConfig() clientcmd.ClientConfig {

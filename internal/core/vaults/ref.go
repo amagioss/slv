@@ -10,10 +10,10 @@ func (vlt *Vault) getSecretRef(secretName string) string {
 }
 
 func (vlt *Vault) refBlob(data []byte, secretName string, forceUpdate bool) (result string, conflicting bool, err error) {
-	if !forceUpdate && vlt.SecretExists(secretName) {
+	if !forceUpdate && vlt.Exists(secretName) {
 		return "", true, errVaultSecretExistsAlready
 	}
-	return vlt.getSecretRef(secretName), false, vlt.putSecretWithoutCommit(secretName, data)
+	return vlt.getSecretRef(secretName), false, vlt.putWithoutCommit(secretName, data)
 }
 
 func (vlt *Vault) RefSecrets(refType, file, name string, forceUpdate, dryRun bool) (result string, conflicting bool, err error) {

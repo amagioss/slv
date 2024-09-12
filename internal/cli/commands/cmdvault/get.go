@@ -39,7 +39,7 @@ func vaultGetCommand() *cobra.Command {
 			exportFormat := cmd.Flag(vaultExportFormatFlag.Name).Value.String()
 			secretMap := make(map[string]string)
 			if name == "" {
-				secrets, err := vault.GetAllSecrets()
+				secrets, err := vault.GetAll()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -51,7 +51,7 @@ func vaultGetCommand() *cobra.Command {
 					}
 				}
 			} else {
-				secret, err := vault.GetSecret(name)
+				secret, err := vault.Get(name)
 				if err != nil {
 					utils.ExitOnError(err)
 				}

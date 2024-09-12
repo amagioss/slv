@@ -73,7 +73,7 @@ func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvO
 			return err
 		}
 	}
-	slvSecretMap, err := vault.GetAllSecrets()
+	slvSecretMap, err := vault.GetAll()
 	if err != nil {
 		return err
 	}

@@ -24,6 +24,7 @@ type vaultConfig struct {
 
 type Vault struct {
 	Secrets             map[string]string `json:"slvSecrets,omitempty" yaml:"slvSecrets,omitempty"`
+	Data                map[string]string `json:"slvData,omitempty" yaml:"slvData,omitempty"`
 	Config              vaultConfig       `json:"slvConfig" yaml:"slvConfig"`
 	path                string            `json:"-"`
 	publicKey           *crypto.PublicKey `json:"-"`
@@ -157,6 +158,15 @@ func getFromField(jsonData []byte, filePath string, k8s bool) (vlt *Vault, err e
 		(!semver.IsValid(vlt.Config.Version) || !semver.IsValid(config.Version) ||
 			semver.Compare(semver.MajorMinor(config.Version), semver.MajorMinor(vlt.Config.Version)) < 0) {
 		return nil, errVaultVersionNotRecognized
+	}
+	if vlt.Secrets != nil {
+		if vlt.Data != nil {
+			for key, value := range vlt.Data {
+				vlt.Secrets[key] = value
+			}
+		}
+		vlt.Data = vlt.Secrets
+		vlt.Secrets = nil
 	}
 	return vlt, nil
 }
