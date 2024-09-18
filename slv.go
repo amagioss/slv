@@ -26,7 +26,7 @@ func GetAllVaultData(vaultFile string) (map[string]*vaults.VaultData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return vault.GetAll()
+	return vault.List(true)
 }
 
 // GetVaultData returns a named secret from the vault

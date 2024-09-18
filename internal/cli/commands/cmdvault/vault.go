@@ -9,11 +9,125 @@ import (
 	"oss.amagi.com/slv/internal/cli/commands/utils"
 	"oss.amagi.com/slv/internal/core/environments"
 	"oss.amagi.com/slv/internal/core/profiles"
+	"oss.amagi.com/slv/internal/core/secretkey"
 	"oss.amagi.com/slv/internal/core/vaults"
 )
 
 func getVault(filePath string) (*vaults.Vault, error) {
 	return vaults.Get(filePath)
+}
+
+func showVaultData(vault *vaults.Vault) {
+	accessors, err := vault.ListAccessors()
+	if err != nil {
+		utils.ExitOnError(err)
+	}
+	profile, _ := profiles.GetDefaultProfile()
+	self := environments.GetSelf()
+	accessorTable := tablewriter.NewWriter(os.Stdout)
+	accessorTable.SetHeader([]string{"Public Key", "Type", "Name"})
+	accessorTable.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor})
+	for _, accessor := range accessors {
+		var env *environments.Environment
+		accessorPK, err := accessor.String()
+		if err != nil {
+			utils.ExitOnError(err)
+		}
+		row := []string{accessorPK}
+		selfEnv := false
+		rootEnv := false
+		if self != nil && self.PublicKey == accessorPK {
+			env = self
+			selfEnv = true
+		} else if profile != nil {
+			env, err = profile.GetEnv(accessorPK)
+			if err != nil {
+				utils.ExitOnError(err)
+			}
+			if env == nil {
+				root, err := profile.GetRoot()
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				if root != nil && root.PublicKey == accessorPK {
+					rootEnv = true
+					env = root
+				}
+			}
+		}
+		if env != nil {
+			if selfEnv {
+				row = append(row, "Self")
+			} else if rootEnv {
+				row = append(row, "Root")
+			} else {
+				if env.EnvType == environments.USER {
+					row = append(row, "User")
+				} else {
+					row = append(row, "Service")
+				}
+			}
+			row = append(row, env.Name)
+		} else {
+			row = append(row, "Unknown", "")
+		}
+		accessorTable.Append(row)
+	}
+	fmt.Println("Vault ID: ", vault.Config.PublicKey)
+	fmt.Println("Vault Data:")
+	dataTable := tablewriter.NewWriter(os.Stdout)
+	tableHeaderColors := []tablewriter.Colors{{tablewriter.Bold, tablewriter.FgHiWhiteColor},
+		{tablewriter.Bold, tablewriter.FgHiWhiteColor},
+		{tablewriter.Bold, tablewriter.FgHiWhiteColor},
+		{tablewriter.Bold, tablewriter.FgHiWhiteColor}}
+	hashAdded := false
+	rows := [][]string{}
+	dataMap, err := vault.List(!vault.IsLocked())
+	if err != nil {
+		utils.ExitOnError(err)
+	}
+	for name, data := range dataMap {
+		row := []string{name}
+		if data.Value() == nil {
+			row = append(row, "(Locked)")
+		} else {
+			row = append(row, string(data.Value()))
+		}
+		if data.IsSecret() {
+			row = append(row, "Secret")
+		} else {
+			row = append(row, "Plain Text")
+		}
+		if data.UpdatedAt() != nil {
+			row = append(row, data.UpdatedAt().Format("02-Jan-2006 15:04:05"))
+		} else {
+			row = append(row, "N/A")
+		}
+		if data.Hash() != "" {
+			row = append(row, data.Hash())
+			hashAdded = true
+		}
+		rows = append(rows, row)
+	}
+	header := []string{"Name", "Value", "Type", "Updated At"}
+	if hashAdded {
+		header = append(header, "Hash")
+		for i := range rows {
+			if len(rows[i]) < 4 {
+				rows[i] = append(rows[i], "")
+			}
+		}
+		tableHeaderColors = append(tableHeaderColors, tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor})
+	}
+	dataTable.SetHeader(header)
+	dataTable.SetHeaderColor(tableHeaderColors...)
+	dataTable.AppendBulk(rows)
+	dataTable.Render()
+	fmt.Println("Accessible by:")
+	accessorTable.Render()
+	utils.SafeExit()
 }
 
 func VaultCommand() *cobra.Command {
@@ -31,101 +145,11 @@ func VaultCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			accessors, err := vault.ListAccessors()
-			if err != nil {
-				utils.ExitOnError(err)
+			envSecretKey, _ := secretkey.Get()
+			if envSecretKey != nil {
+				vault.Unlock(envSecretKey)
 			}
-			profile, _ := profiles.GetDefaultProfile()
-			self := environments.GetSelf()
-
-			accessorTable := tablewriter.NewWriter(os.Stdout)
-			accessorTable.SetHeader([]string{"Public Key", "Type", "Name"})
-			accessorTable.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor},
-				tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor},
-				tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor})
-			for _, accessor := range accessors {
-				var env *environments.Environment
-				accessorPK, err := accessor.String()
-				if err != nil {
-					utils.ExitOnError(err)
-				}
-				row := []string{accessorPK}
-				selfEnv := false
-				rootEnv := false
-				if self != nil && self.PublicKey == accessorPK {
-					env = self
-					selfEnv = true
-				} else if profile != nil {
-					env, err = profile.GetEnv(accessorPK)
-					if err != nil {
-						utils.ExitOnError(err)
-					}
-					if env == nil {
-						root, err := profile.GetRoot()
-						if err != nil {
-							utils.ExitOnError(err)
-						}
-						if root != nil && root.PublicKey == accessorPK {
-							rootEnv = true
-							env = root
-						}
-					}
-				}
-				if env != nil {
-					if selfEnv {
-						row = append(row, "Self")
-					} else if rootEnv {
-						row = append(row, "Root")
-					} else {
-						if env.EnvType == environments.USER {
-							row = append(row, "User")
-						} else {
-							row = append(row, "Service")
-						}
-					}
-					row = append(row, env.Name)
-				} else {
-					row = append(row, "Unknown", "")
-				}
-				accessorTable.Append(row)
-			}
-			fmt.Println("Vault ID: ", vault.Config.PublicKey)
-			fmt.Println("Vault Data:")
-			dataTable := tablewriter.NewWriter(os.Stdout)
-			tableHeaderColors := []tablewriter.Colors{{tablewriter.Bold, tablewriter.FgHiWhiteColor},
-				{tablewriter.Bold, tablewriter.FgHiWhiteColor},
-				{tablewriter.Bold, tablewriter.FgHiWhiteColor}}
-			hashAdded := false
-			rows := [][]string{}
-			secretsMap, ptMap := vault.List()
-			for name, sealedSecret := range secretsMap {
-				row := []string{name, "(Encrypted)", sealedSecret.EncryptedAt().Format("02-Jan-2006 15:04:05")}
-				if hash := sealedSecret.Hash(); hash != "" {
-					row = append(row, hash)
-					hashAdded = true
-				}
-				rows = append(rows, row)
-			}
-			for name, value := range ptMap {
-				rows = append(rows, []string{name, value, "N/A"})
-			}
-			header := []string{"Name", "Value", "Created At"}
-			if hashAdded {
-				header = append(header, "Hash")
-				for i := range rows {
-					if len(rows[i]) < 4 {
-						rows[i] = append(rows[i], "")
-					}
-				}
-				tableHeaderColors = append(tableHeaderColors, tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor})
-			}
-			dataTable.SetHeader(header)
-			dataTable.SetHeaderColor(tableHeaderColors...)
-			dataTable.AppendBulk(rows)
-			dataTable.Render()
-			fmt.Println("Accessible by:")
-			accessorTable.Render()
-			utils.SafeExit()
+			showVaultData(vault)
 		},
 	}
 	vaultCmd.PersistentFlags().StringP(vaultFileFlag.Name, vaultFileFlag.Shorthand, "", vaultFileFlag.Usage)

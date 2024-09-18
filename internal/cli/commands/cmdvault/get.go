@@ -5,12 +5,61 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"oss.amagi.com/slv/internal/cli/commands/utils"
 	"oss.amagi.com/slv/internal/core/secretkey"
+	"oss.amagi.com/slv/internal/core/vaults"
 )
+
+func getDecryptedDataMap(vault *vaults.Vault, itemName string, encodeToBase64, withMetadata bool) map[string]any {
+	type vaultItem struct {
+		Value     string `json:"value,omitempty" yaml:"value,omitempty"`
+		Secret    bool   `json:"secret,omitempty" yaml:"secret,omitempty"`
+		UpdatedAt string `json:"updatedAt,omitempty" yaml:"updatedAt,omitempty"`
+		Hash      string `json:"hash,omitempty" yaml:"hash,omitempty"`
+	}
+	dataMap := make(map[string]any)
+	var vaultData map[string]*vaults.VaultData
+	var err error
+	if itemName == "" {
+		if vaultData, err = vault.List(true); err != nil {
+			utils.ExitOnError(err)
+		}
+	} else {
+		var item *vaults.VaultData
+		if item, err = vault.Get(itemName); err != nil {
+			utils.ExitOnError(err)
+		}
+		vaultData = map[string]*vaults.VaultData{itemName: item}
+	}
+	for name, value := range vaultData {
+		var val string
+		if encodeToBase64 {
+			val = base64.StdEncoding.EncodeToString(value.Value())
+		} else {
+			val = string(value.Value())
+		}
+		if withMetadata {
+			vi := vaultItem{
+				Value:  val,
+				Secret: value.IsSecret(),
+			}
+			if value.UpdatedAt() != nil {
+				vi.UpdatedAt = value.UpdatedAt().Format(time.RFC3339)
+			}
+			if value.Hash() != "" {
+				vi.Hash = value.Hash()
+			}
+			dataMap[name] = vi
+		} else {
+			dataMap[name] = val
+		}
+	}
+	return dataMap
+}
 
 func vaultGetCommand() *cobra.Command {
 	if vaultGetCmd != nil {
@@ -26,7 +75,7 @@ func vaultGetCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
-			name := cmd.Flag(secretNameFlag.Name).Value.String()
+			itemName := cmd.Flag(secretNameFlag.Name).Value.String()
 			vault, err := getVault(vaultFile)
 			if err != nil {
 				utils.ExitOnError(err)
@@ -35,66 +84,49 @@ func vaultGetCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			encodeToBase64, _ := cmd.Flags().GetBool(secretEncodeBase64Flag.Name)
+			encodeToBase64, _ := cmd.Flags().GetBool(valueEncodeBase64Flag.Name)
+			withMetadata, _ := cmd.Flags().GetBool(valueWithMetadata.Name)
 			exportFormat := cmd.Flag(vaultExportFormatFlag.Name).Value.String()
-			secretMap := make(map[string]string)
-			if name == "" {
-				secrets, err := vault.GetAllValues()
-				if err != nil {
-					utils.ExitOnError(err)
-				}
-				for name, secret := range secrets {
-					if encodeToBase64 {
-						secretMap[name] = base64.StdEncoding.EncodeToString(secret)
-					} else {
-						secretMap[name] = string(secret)
-					}
-				}
-			} else {
-				data, err := vault.Get(name)
-				if err != nil {
-					utils.ExitOnError(err)
-				}
-				if encodeToBase64 {
-					secretMap[name] = base64.StdEncoding.EncodeToString(data.Value())
-				} else {
-					secretMap[name] = string(data.Value())
-				}
-			}
-			if exportFormat == "" {
-				if name != "" {
-					fmt.Println(secretMap[name])
-					utils.SafeExit()
-				}
-				exportFormat = "envar"
-			}
 			switch exportFormat {
 			case "json":
-				jsonData, err := json.MarshalIndent(secretMap, "", "  ")
+				dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, withMetadata)
+				jsonData, err := json.MarshalIndent(dataMap, "", "  ")
 				if err != nil {
 					utils.ExitOnError(err)
 				}
 				fmt.Println(string(jsonData))
 			case "yaml", "yml":
-				yamlData, err := yaml.Marshal(secretMap)
+				dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, withMetadata)
+				yamlData, err := yaml.Marshal(dataMap)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
 				fmt.Println(string(yamlData))
-			case "envars", "envar", ".env":
-				for key, value := range secretMap {
-					value = strings.ReplaceAll(value, "\\", "\\\\")
-					value = strings.ReplaceAll(value, "\"", "\\\"")
-					fmt.Printf("%s=\"%s\"\n", key, value)
+			case "envars", "envar", "env", ".env":
+				dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, false)
+				for key, value := range dataMap {
+					strValue := value.(string)
+					strValue = strings.ReplaceAll(strValue, "\\", "\\\\")
+					strValue = strings.ReplaceAll(strValue, "\"", "\\\"")
+					fmt.Printf("%s=\"%s\"\n", key, strValue)
 				}
 			default:
-				utils.ExitOnErrorWithMessage("invalid format: " + exportFormat)
+				if itemName == "" {
+					showVaultData(vault)
+				} else {
+					if item, err := vault.Get(itemName); err != nil {
+						utils.ExitOnError(err)
+					} else {
+						fmt.Println(string(item.Value()))
+					}
+				}
 			}
 			utils.SafeExit()
 		},
 	}
 	vaultGetCmd.Flags().StringP(secretNameFlag.Name, secretNameFlag.Shorthand, "", secretNameFlag.Usage)
-	vaultGetCmd.Flags().BoolP(secretEncodeBase64Flag.Name, secretEncodeBase64Flag.Shorthand, false, secretEncodeBase64Flag.Usage)
+	vaultGetCmd.Flags().BoolP(valueEncodeBase64Flag.Name, valueEncodeBase64Flag.Shorthand, false, valueEncodeBase64Flag.Usage)
+	vaultGetCmd.Flags().BoolP(valueWithMetadata.Name, valueWithMetadata.Shorthand, false, valueWithMetadata.Usage)
 	vaultGetCmd.Flags().StringP(vaultExportFormatFlag.Name, vaultExportFormatFlag.Shorthand, "", vaultExportFormatFlag.Usage)
 	return vaultGetCmd
 }

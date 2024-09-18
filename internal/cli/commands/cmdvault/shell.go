@@ -45,7 +45,7 @@ func vaultShellCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			secrets, err := vault.GetAll()
+			secrets, err := vault.List(true)
 			if err != nil {
 				utils.ExitOnError(err)
 			}

@@ -7,6 +7,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
 
 	"golang.org/x/mod/semver"
 	"oss.amagi.com/slv/internal/core/commons"
@@ -35,8 +36,10 @@ type Vault struct {
 }
 
 type VaultData struct {
-	value    []byte `json:"-"`
-	isSecret bool   `json:"-"`
+	value     []byte     `json:"-"`
+	isSecret  bool       `json:"-"`
+	updatedAt *time.Time `json:"-"`
+	hash      string     `json:"-"`
 }
 
 func (vd *VaultData) Value() []byte {
@@ -45,6 +48,14 @@ func (vd *VaultData) Value() []byte {
 
 func (vd *VaultData) IsSecret() bool {
 	return vd.isSecret
+}
+
+func (vd *VaultData) UpdatedAt() *time.Time {
+	return vd.updatedAt
+}
+
+func (vd *VaultData) Hash() string {
+	return vd.hash
 }
 
 func (vlt *Vault) Id() string {

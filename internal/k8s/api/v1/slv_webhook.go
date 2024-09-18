@@ -69,7 +69,7 @@ func (r *SLV) validateSLV() (err error) {
 			return err
 		}
 	}
-	if _, err = vault.GetAll(); err != nil {
+	if _, err = vault.List(true); err != nil {
 		slvlog.Error(err, "failed to get all secrets", "name", r.Name)
 		return err
 	}

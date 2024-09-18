@@ -35,8 +35,9 @@ func (vlt *Vault) share(publicKey *crypto.PublicKey, commit bool) (bool, error) 
 }
 
 func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error {
-	if vlt.IsLocked() {
-		return errVaultLocked
+	vaultDataMap, err := vlt.List(true)
+	if err != nil {
+		return err
 	}
 	accessors, err := vlt.ListAccessors()
 	if err != nil {
@@ -65,10 +66,6 @@ func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error
 	}
 	if len(newAccessors) == len(accessors) {
 		return nil
-	}
-	vaultDataMap, err := vlt.GetAll()
-	if err != nil {
-		return err
 	}
 	vaultSecretKey, err := crypto.NewSecretKey(VaultKey)
 	if err != nil {

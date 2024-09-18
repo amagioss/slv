@@ -88,12 +88,17 @@ var (
 
 	vaultExportFormatFlag = utils.FlagDef{
 		Name:  "format",
-		Usage: "List secrets as one of [json, yaml, envar]. Defaults to envar",
+		Usage: "List secrets as one of [json, yaml, envar]",
 	}
 
-	secretEncodeBase64Flag = utils.FlagDef{
+	valueWithMetadata = utils.FlagDef{
+		Name:  "with-metadata",
+		Usage: "Returns the vault values with metadata",
+	}
+
+	valueEncodeBase64Flag = utils.FlagDef{
 		Name:  "base64",
-		Usage: "Encode the returned secret as base64",
+		Usage: "Encode the returned value as base64",
 	}
 
 	vaultRefFileFlag = utils.FlagDef{
