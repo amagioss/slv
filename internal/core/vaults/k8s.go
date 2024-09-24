@@ -108,6 +108,7 @@ func (v *Vault) DeepCopy() *Vault {
 
 func (v *Vault) DeepCopyInto(out *Vault) {
 	*out = *v
+	v.init()
 	out.Data = make(map[string]string, len(v.Data))
 	for key, val := range v.Data {
 		out.Data[key] = val

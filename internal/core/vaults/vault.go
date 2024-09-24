@@ -160,10 +160,10 @@ func Get(filePath string) (vlt *Vault, err error) {
 	if err != nil {
 		return nil, err
 	}
-	return getFromField(jsonData, filePath, obj[k8sVaultField] != nil)
+	return get(jsonData, filePath, obj[k8sVaultField] != nil)
 }
 
-func getFromField(jsonData []byte, filePath string, k8s bool) (vlt *Vault, err error) {
+func get(jsonData []byte, filePath string, k8s bool) (vlt *Vault, err error) {
 	if k8s {
 		k8sVault := &k8slv{}
 		if err = json.Unmarshal(jsonData, k8sVault); err != nil {
@@ -183,6 +183,11 @@ func getFromField(jsonData []byte, filePath string, k8s bool) (vlt *Vault, err e
 			semver.Compare(semver.MajorMinor(config.Version), semver.MajorMinor(vlt.Config.Version)) < 0) {
 		return nil, errVaultVersionNotRecognized
 	}
+	vlt.init()
+	return vlt, nil
+}
+
+func (vlt *Vault) init() {
 	if vlt.Secrets != nil {
 		if vlt.Data != nil {
 			for key, value := range vlt.Data {
@@ -192,7 +197,6 @@ func getFromField(jsonData []byte, filePath string, k8s bool) (vlt *Vault, err e
 		vlt.Data = vlt.Secrets
 		vlt.Secrets = nil
 	}
-	return vlt, nil
 }
 
 func (vlt *Vault) IsLocked() bool {

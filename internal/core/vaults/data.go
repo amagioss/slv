@@ -25,6 +25,7 @@ func (vlt *Vault) putWithoutCommit(name string, value []byte, encrypt bool) (err
 		finalValue = string(value)
 	}
 	if err == nil {
+		vlt.init()
 		if vlt.Data == nil {
 			vlt.Data = make(map[string]string)
 		}
@@ -61,6 +62,7 @@ func (vlt *Vault) Import(importData []byte, force, encrypt bool) (err error) {
 }
 
 func (vlt *Vault) Exists(name string) (exists bool) {
+	vlt.init()
 	if vlt.Data != nil {
 		_, exists = vlt.Data[name]
 	}
@@ -68,6 +70,7 @@ func (vlt *Vault) Exists(name string) (exists bool) {
 }
 
 func (vlt *Vault) List(decrypt bool) (map[string]*VaultData, error) {
+	vlt.init()
 	dataMap := make(map[string]*VaultData)
 	for name := range vlt.Data {
 		if data, err := vlt.get(name, decrypt); err == nil {
@@ -92,6 +95,7 @@ func (vlt *Vault) GetAllValues() (map[string][]byte, error) {
 }
 
 func (vlt *Vault) get(name string, decrypt bool) (*VaultData, error) {
+	vlt.init()
 	rawValue := vlt.Data[name]
 	if rawValue == "" {
 		return nil, errVaultDataNotFound
@@ -135,6 +139,7 @@ func (vlt *Vault) DeleteItem(name string) error {
 }
 
 func (vlt *Vault) DeleteItems(names []string) error {
+	vlt.init()
 	for _, name := range names {
 		delete(vlt.Data, name)
 		vlt.deleteFromCache(name)
