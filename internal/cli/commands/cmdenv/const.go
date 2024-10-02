@@ -14,7 +14,6 @@ var (
 	envAddCmd        *cobra.Command
 	envListSearchCmd *cobra.Command
 	envDeleteCmd     *cobra.Command
-	envSetSCmd       *cobra.Command
 	envSetSelfSCmd   *cobra.Command
 	envShowCmd       *cobra.Command
 	envShowRootCmd   *cobra.Command

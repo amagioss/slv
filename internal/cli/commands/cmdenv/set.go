@@ -10,28 +10,12 @@ import (
 	"oss.amagi.com/slv/internal/core/input"
 )
 
-func envSetCommand() *cobra.Command {
-	if envSetSCmd != nil {
-		return envSetSCmd
-	}
-	envSetSCmd = &cobra.Command{
-		Use:     "set",
-		Aliases: []string{"put", "update"},
-		Short:   "Set/update an environments",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-	envSetSCmd.AddCommand(envSetSelfCommand())
-	return envSetSCmd
-}
-
 func envSetSelfCommand() *cobra.Command {
 	if envSetSelfSCmd != nil {
 		return envSetSelfSCmd
 	}
 	envSetSelfSCmd = &cobra.Command{
-		Use:     "set",
+		Use:     "set-self",
 		Aliases: []string{"save", "put", "store", "s"},
 		Short:   "Sets a given environment as self",
 		Run: func(cmd *cobra.Command, args []string) {
