@@ -2,38 +2,17 @@ package vaults
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 )
 
 type k8slv struct {
-	Kind       string                 `json:"kind,omitempty" yaml:"kind,omitempty"`
-	APIVersion string                 `json:"apiVersion,omitempty" yaml:"apiVersion,omitempty"`
-	Metadata   map[string]interface{} `json:"metadata,omitempty" yaml:"metadata,omitempty"`
-	Type       corev1.SecretType      `json:"type,omitempty" yaml:"type,omitempty"`
-	Spec       *Vault                 `json:"spec" yaml:"spec"`
-}
-
-func structToMap(obj interface{}, toMap map[string]interface{}) {
-	val := reflect.ValueOf(obj)
-	typ := reflect.TypeOf(obj)
-
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-		typ = typ.Elem()
-	}
-
-	if toMap == nil {
-		toMap = make(map[string]interface{})
-	}
-
-	for i := 0; i < val.NumField(); i++ {
-		field := typ.Field(i)
-		value := val.Field(i)
-		toMap[field.Name] = value.Interface()
-	}
+	Kind       string            `json:"kind,omitempty" yaml:"kind,omitempty"`
+	APIVersion string            `json:"apiVersion,omitempty" yaml:"apiVersion,omitempty"`
+	Metadata   map[string]any    `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Type       corev1.SecretType `json:"type,omitempty" yaml:"type,omitempty"`
+	Spec       *Vault            `json:"spec" yaml:"spec"`
 }
 
 func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err error) {
@@ -44,12 +23,12 @@ func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err err
 		vlt.k8s = &k8slv{
 			APIVersion: k8sApiVersion,
 			Kind:       k8sKind,
-			Metadata:   make(map[string]interface{}),
+			Metadata:   make(map[string]any),
 			Spec:       vlt,
 		}
 	}
 	if k8SecretContent != nil {
-		var secretResource interface{}
+		var secretResource any
 		if err = yaml.Unmarshal(k8SecretContent, &secretResource); err != nil {
 			return err
 		}
@@ -61,13 +40,18 @@ func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err err
 		if err = json.Unmarshal(jsonData, k8secret); err != nil {
 			return err
 		}
-		if k8secret.Name != "" {
-			vlt.k8s.Metadata["name"] = k8secret.Name
+		metaJson, err := json.Marshal(k8secret.ObjectMeta)
+		if err != nil {
+			return err
 		}
-		if vlt.k8s.Metadata["name"] == "" {
-			return errK8sNameRequired
+		if err = json.Unmarshal(metaJson, &vlt.k8s.Metadata); err != nil {
+			return err
 		}
-		structToMap(k8secret.ObjectMeta, vlt.k8s.Metadata)
+		for key, value := range vlt.k8s.Metadata {
+			if value == nil {
+				delete(vlt.k8s.Metadata, key)
+			}
+		}
 		secretDataMap := make(map[string][]byte)
 		if k8secret.Data != nil {
 			for key, value := range k8secret.Data {
@@ -90,6 +74,9 @@ func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err err
 	}
 	if name != "" {
 		vlt.k8s.Metadata["name"] = name
+	}
+	if vlt.k8s.Metadata["name"] == "" {
+		return errK8sNameRequired
 	}
 	if namespace != "" {
 		vlt.k8s.Metadata["namespace"] = namespace

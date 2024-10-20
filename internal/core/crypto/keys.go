@@ -62,7 +62,7 @@ func PublicKeyFromString(publicKeyStr string) (*PublicKey, error) {
 	}
 	decoded, err := commons.Decode(sliced[2])
 	if err != nil {
-		return nil, err
+		return nil, errInvalidPublicKeyFormat
 	}
 	publicKey, err := publicKeyFromBytes(decoded)
 	if err != nil {

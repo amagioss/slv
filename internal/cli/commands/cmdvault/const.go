@@ -29,17 +29,6 @@ var (
 		Usage:     "Path to the vault file [Should end with .slv.yml or .slv.yaml]",
 	}
 
-	vaultAccessPublicKeysFlag = utils.FlagDef{
-		Name:      "env-pubkey",
-		Shorthand: "k",
-		Usage:     "Public keys of environments that can access the vault",
-	}
-
-	vaultAccessK8sFlag = utils.FlagDef{
-		Name:  "env-k8s",
-		Usage: "Shares vault access with the accessible k8s cluster",
-	}
-
 	vaultEnableHashingFlag = utils.FlagDef{
 		Name:  "hash",
 		Usage: "Enables hashing by preserving a partial hash of the actual secret for the purpose of validating secret rotation [Not recommended, though it might be difficult to brute-force]",

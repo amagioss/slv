@@ -35,7 +35,7 @@ func envDeleteCommand() *cobra.Command {
 					ShowEnv(*env, false, false)
 					fmt.Println()
 				}
-				confirm, err := input.GetConfirmation("Are you sure you want to delete the above environment(s) [yes/no]: ", "yes")
+				confirm, err := input.GetConfirmation("Are you sure you wish to delete the above environment(s) [yes/no]: ", "yes")
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -52,6 +52,9 @@ func envDeleteCommand() *cobra.Command {
 		},
 	}
 	envDeleteCmd.Flags().StringSliceP(EnvSearchFlag.Name, EnvSearchFlag.Shorthand, []string{}, EnvSearchFlag.Usage)
-	envDeleteCmd.MarkFlagRequired(EnvSearchFlag.Name)
+	envDeleteCmd.Flags().StringSliceP(EnvPublicKeysFlag.Name, EnvPublicKeysFlag.Shorthand, []string{}, EnvPublicKeysFlag.Usage)
+	envDeleteCmd.Flags().BoolP(EnvSelfFlag.Name, EnvSelfFlag.Shorthand, false, EnvSelfFlag.Usage)
+	envDeleteCmd.Flags().BoolP(EnvK8sFlag.Name, EnvK8sFlag.Shorthand, false, EnvK8sFlag.Usage)
+	envDeleteCmd.Flags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	return envDeleteCmd
 }

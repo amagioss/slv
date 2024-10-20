@@ -13,7 +13,7 @@ import (
 	"oss.amagi.com/slv/internal/core/vaults"
 )
 
-func newK8sVault(filePath, k8sName, k8sNamespace, k8sSecret string, hash, pq bool, rootPublicKey *crypto.PublicKey, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
+func newK8sVault(filePath, k8sName, k8sNamespace, k8sSecret string, hash, pq bool, publicKeys ...*crypto.PublicKey) (*vaults.Vault, error) {
 	var data []byte
 	if k8sSecret != "" {
 		var err error
@@ -29,7 +29,7 @@ func newK8sVault(filePath, k8sName, k8sNamespace, k8sSecret string, hash, pq boo
 			return nil, err
 		}
 	}
-	return vaults.New(filePath, k8sName, k8sNamespace, data, hash, pq, rootPublicKey, publicKeys...)
+	return vaults.New(filePath, k8sName, k8sNamespace, data, hash, pq, publicKeys...)
 }
 
 func vaultToK8sCommand() *cobra.Command {

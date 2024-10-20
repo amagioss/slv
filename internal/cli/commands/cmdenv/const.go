@@ -69,6 +69,17 @@ var (
 		Usage:     "Environment definition",
 	}
 
+	EnvPublicKeysFlag = utils.FlagDef{
+		Name:      "env-pubkey",
+		Shorthand: "k",
+		Usage:     "Public keys of environments that can access the vault",
+	}
+
+	EnvK8sFlag = utils.FlagDef{
+		Name:  "env-k8s",
+		Usage: "Shares vault access with the accessible k8s cluster",
+	}
+
 	// Provider Flags
 	awsARNFlag = utils.FlagDef{
 		Name:  "arn",
