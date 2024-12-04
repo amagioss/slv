@@ -22,7 +22,7 @@ func vaultDeleteCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			secretNames, err := cmd.Flags().GetStringSlice(secretNameFlag.Name)
+			secretNames, err := cmd.Flags().GetStringSlice(itemNameFlag.Name)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -39,6 +39,6 @@ func vaultDeleteCommand() *cobra.Command {
 			}
 		},
 	}
-	vaultDeleteCmd.Flags().StringSliceP(secretNameFlag.Name, secretNameFlag.Shorthand, []string{}, secretNameFlag.Usage)
+	vaultDeleteCmd.Flags().StringSliceP(itemNameFlag.Name, itemNameFlag.Shorthand, []string{}, itemNameFlag.Usage)
 	return vaultDeleteCmd
 }

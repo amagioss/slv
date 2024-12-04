@@ -24,19 +24,19 @@ func vaultRefCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			refFile := cmd.Flag(vaultRefFileFlag.Name).Value.String()
-			secretNamePrefix := cmd.Flag(secretNameFlag.Name).Value.String()
+			secretNamePrefix := cmd.Flag(itemNameFlag.Name).Value.String()
 			refType := strings.ToLower(cmd.Flag(vaultRefTypeFlag.Name).Value.String())
 			previewOnly, _ := cmd.Flags().GetBool(secretRefPreviewOnlyFlag.Name)
 			forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.Name)
 			if secretNamePrefix == "" && refType == "" {
-				utils.ExitOnErrorWithMessage("please provide at least one of --" + secretNameFlag.Name + " or --" + vaultRefTypeFlag.Name + " flag")
+				utils.ExitOnErrorWithMessage("please provide at least one of --" + itemNameFlag.Name + " or --" + vaultRefTypeFlag.Name + " flag")
 			}
 			if refType != "" && refType != "yaml" {
 				utils.ExitOnErrorWithMessage("only yaml auto reference is supported at the moment")
 			}
 			result, conflicting, err := vault.RefSecrets(refType, refFile, secretNamePrefix, forceUpdate, true, previewOnly)
 			if conflicting {
-				utils.ExitOnErrorWithMessage("conflict found. please use the --" + secretNameFlag.Name + " flag to set a different name or --" + secretForceUpdateFlag.Name + " flag to overwrite them.")
+				utils.ExitOnErrorWithMessage("conflict found. please use the --" + itemNameFlag.Name + " flag to set a different name or --" + secretForceUpdateFlag.Name + " flag to overwrite them.")
 			} else if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -49,7 +49,7 @@ func vaultRefCommand() *cobra.Command {
 		},
 	}
 	vaultRefCmd.Flags().StringP(vaultRefFileFlag.Name, vaultRefFileFlag.Shorthand, "", vaultRefFileFlag.Usage)
-	vaultRefCmd.Flags().StringP(secretNameFlag.Name, secretNameFlag.Shorthand, "", secretNameFlag.Usage)
+	vaultRefCmd.Flags().StringP(itemNameFlag.Name, itemNameFlag.Shorthand, "", itemNameFlag.Usage)
 	vaultRefCmd.Flags().StringP(vaultRefTypeFlag.Name, vaultRefTypeFlag.Shorthand, "", vaultRefTypeFlag.Usage)
 	vaultRefCmd.Flags().BoolP(secretRefPreviewOnlyFlag.Name, secretRefPreviewOnlyFlag.Shorthand, false, secretRefPreviewOnlyFlag.Usage)
 	vaultRefCmd.Flags().BoolP(secretForceUpdateFlag.Name, secretForceUpdateFlag.Shorthand, false, secretForceUpdateFlag.Usage)

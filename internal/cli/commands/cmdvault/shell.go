@@ -49,7 +49,7 @@ func vaultShellCommand() *cobra.Command {
 			if err != nil {
 				utils.ExitOnError(err)
 			}
-			prefix := cmd.Flag(secretNamePrefixFlag.Name).Value.String()
+			prefix := cmd.Flag(varNamePrefixFlag.Name).Value.String()
 			slvShell := exec.Command(shell)
 			for _, envar := range os.Environ() {
 				if !strings.HasPrefix(envar, "SLV_ENV_SECRET_") {
@@ -84,6 +84,6 @@ func vaultShellCommand() *cobra.Command {
 			}
 		},
 	}
-	vaultShellCmd.Flags().StringP(secretNamePrefixFlag.Name, secretNamePrefixFlag.Shorthand, "", secretNamePrefixFlag.Usage)
+	vaultShellCmd.Flags().StringP(varNamePrefixFlag.Name, varNamePrefixFlag.Shorthand, "", varNamePrefixFlag.Usage)
 	return vaultShellCmd
 }

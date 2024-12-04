@@ -75,7 +75,7 @@ func vaultGetCommand() *cobra.Command {
 				utils.ExitOnError(err)
 			}
 			vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
-			itemName := cmd.Flag(secretNameFlag.Name).Value.String()
+			itemName := cmd.Flag(itemNameFlag.Name).Value.String()
 			vault, err := getVault(vaultFile)
 			if err != nil {
 				utils.ExitOnError(err)
@@ -124,7 +124,7 @@ func vaultGetCommand() *cobra.Command {
 			utils.SafeExit()
 		},
 	}
-	vaultGetCmd.Flags().StringP(secretNameFlag.Name, secretNameFlag.Shorthand, "", secretNameFlag.Usage)
+	vaultGetCmd.Flags().StringP(itemNameFlag.Name, itemNameFlag.Shorthand, "", itemNameFlag.Usage)
 	vaultGetCmd.Flags().BoolP(valueEncodeBase64Flag.Name, valueEncodeBase64Flag.Shorthand, false, valueEncodeBase64Flag.Usage)
 	vaultGetCmd.Flags().BoolP(valueWithMetadata.Name, valueWithMetadata.Shorthand, false, valueWithMetadata.Usage)
 	vaultGetCmd.Flags().StringP(vaultExportFormatFlag.Name, vaultExportFormatFlag.Shorthand, "", vaultExportFormatFlag.Usage)

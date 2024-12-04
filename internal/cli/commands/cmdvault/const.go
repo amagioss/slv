@@ -46,28 +46,38 @@ var (
 
 	vaultK8sSecretFlag = utils.FlagDef{
 		Name:  "k8s-secret",
-		Usage: "A K8s Secret that needs to be transformed to an SLV vault",
+		Usage: "A K8s Secret that needs to be transformed to an SLV vault (Use - to read from stdin)",
 	}
 
-	secretNamePrefixFlag = utils.FlagDef{
+	varNamePrefixFlag = utils.FlagDef{
 		Name:  "prefix",
 		Usage: "Prefix to set to the secret name while setting it as the environment variable",
 	}
 
-	secretNameFlag = utils.FlagDef{
+	itemNameFlag = utils.FlagDef{
 		Name:      "name",
 		Shorthand: "n",
-		Usage:     "Name of the secret",
+		Usage:     "Name of the item",
 	}
 
-	secretValueFlag = utils.FlagDef{
+	itemValueFlag = utils.FlagDef{
+		Name:  "value",
+		Usage: "Value of the item to be used (Use - to read from stdin)",
+	}
+
+	itemValueFlagDeprecated = utils.FlagDef{
 		Name:  "secret",
-		Usage: "Secret to be added to the vault",
+		Usage: "Secret to be added to the vault (Deprecated: Use --value instead)",
 	}
 
 	vaultImportFileFlag = utils.FlagDef{
 		Name:  "file",
 		Usage: "Path to the YAML/JSON file to be imported",
+	}
+
+	plaintextValueFlag = utils.FlagDef{
+		Name:  "plaintext",
+		Usage: "Indicates that the value will be stored as plaintext (use only for config values that are not sensitive)",
 	}
 
 	secretForceUpdateFlag = utils.FlagDef{
