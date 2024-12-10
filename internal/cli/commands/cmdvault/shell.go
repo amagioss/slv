@@ -42,7 +42,13 @@ func execVaultShellCommand(vaultFile, prefix, command string) {
 	if err != nil {
 		utils.ExitOnError(err)
 	}
-	slvShell := exec.Command(command)
+	commandArr := strings.Fields(command)
+	var slvShell *exec.Cmd
+	if len(commandArr) == 1 {
+		slvShell = exec.Command(commandArr[0])
+	} else {
+		slvShell = exec.Command(commandArr[0], commandArr[1:]...)
+	}
 	for _, envar := range os.Environ() {
 		if !strings.HasPrefix(envar, "SLV_ENV_SECRET_") {
 			slvShell.Env = append(slvShell.Env, envar)
