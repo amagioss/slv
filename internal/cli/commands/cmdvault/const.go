@@ -54,6 +54,12 @@ var (
 		Usage: "Prefix to set to the secret name while setting it as the environment variable",
 	}
 
+	vaultShellCommandFlag = utils.FlagDef{
+		Name:      "command",
+		Shorthand: "c",
+		Usage:     "Command to run in the shell",
+	}
+
 	itemNameFlag = utils.FlagDef{
 		Name:      "name",
 		Shorthand: "n",
