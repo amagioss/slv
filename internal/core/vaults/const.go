@@ -26,7 +26,7 @@ var (
 	secretNameRegex = regexp.MustCompile(secretNamePattern)
 	secretRefRegex  = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", config.AppNameUpperCase+"_"+vaultIdAbbrev+"_[A-Za-z0-9]+"))
 
-	errVaultVersionNotRecognized    = errors.New("vault version not recognized")
+	errVaultVersionNotRecognized    = errors.New("unsupported version - please upgrade to the latest version of slv or use a version that matches the vault")
 	errGeneratingVaultId            = errors.New("error in generating a new vault id")
 	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameEnding + ".yml or " + vaultFileNameEnding + ".yaml]")
 	errVaultDirPathCreation         = errors.New("error in creating a new vault directory path")
