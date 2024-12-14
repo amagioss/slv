@@ -119,7 +119,7 @@ func New(filePath, k8sName, k8sNamespace string, k8SecretContent []byte, hash, q
 	vlt = &Vault{
 		publicKey: vaultPublicKey,
 		Config: vaultConfig{
-			Version:   semver.MajorMinor(config.Version),
+			Version:   semver.Major(config.Version),
 			Id:        vauldId,
 			PublicKey: vaultPubKeyStr,
 			Hash:      hash,
@@ -175,7 +175,7 @@ func get(jsonData []byte, filePath string, k8s bool) (vlt *Vault, err error) {
 	vlt.path = filePath
 	if vlt.Config.Version != "" && config.Version != "" &&
 		(!semver.IsValid(vlt.Config.Version) || !semver.IsValid(config.Version) ||
-			semver.Compare(semver.MajorMinor(config.Version), semver.MajorMinor(vlt.Config.Version)) < 0) {
+			semver.Compare(semver.Major(config.Version), semver.Major(vlt.Config.Version)) < 0) {
 		return nil, errVaultVersionNotRecognized
 	}
 	vlt.init()
