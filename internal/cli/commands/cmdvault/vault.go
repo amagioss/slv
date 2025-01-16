@@ -131,37 +131,36 @@ func showVaultData(vault *vaults.Vault) {
 }
 
 func VaultCommand() *cobra.Command {
-	if vaultCmd != nil {
-		return vaultCmd
+	if vaultCmd == nil {
+		vaultCmd = &cobra.Command{
+			Use:     "vault",
+			Aliases: []string{"v", "vaults", "secret", "secrets"},
+			Short:   "Manage vaults/secrets with SLV",
+			Long:    `Manage vaults/secrets using SLV. SLV Vaults are files that store secrets in a key-value format.`,
+			Run: func(cmd *cobra.Command, args []string) {
+				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
+				vault, err := getVault(vaultFile)
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				envSecretKey, _ := secretkey.Get()
+				if envSecretKey != nil {
+					vault.Unlock(envSecretKey)
+				}
+				showVaultData(vault)
+			},
+		}
+		vaultCmd.PersistentFlags().StringP(vaultFileFlag.Name, vaultFileFlag.Shorthand, "", vaultFileFlag.Usage)
+		vaultCmd.MarkPersistentFlagRequired(vaultFileFlag.Name)
+		vaultCmd.AddCommand(vaultNewCommand())
+		vaultCmd.AddCommand(vaultToK8sCommand())
+		vaultCmd.AddCommand(vaultPutCommand())
+		vaultCmd.AddCommand(vaultGetCommand())
+		vaultCmd.AddCommand(vaultRunCommand())
+		vaultCmd.AddCommand(vaultDeleteCommand())
+		vaultCmd.AddCommand(vaultRefCommand())
+		vaultCmd.AddCommand(vaultDerefCommand())
+		vaultCmd.AddCommand(vaultAccessCommand())
 	}
-	vaultCmd = &cobra.Command{
-		Use:     "vault",
-		Aliases: []string{"v", "vaults", "secret", "secrets"},
-		Short:   "Manage vaults/secrets with SLV",
-		Long:    `Manage vaults/secrets using SLV. SLV Vaults are files that store secrets in a key-value format.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
-			vault, err := getVault(vaultFile)
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			envSecretKey, _ := secretkey.Get()
-			if envSecretKey != nil {
-				vault.Unlock(envSecretKey)
-			}
-			showVaultData(vault)
-		},
-	}
-	vaultCmd.PersistentFlags().StringP(vaultFileFlag.Name, vaultFileFlag.Shorthand, "", vaultFileFlag.Usage)
-	vaultCmd.MarkPersistentFlagRequired(vaultFileFlag.Name)
-	vaultCmd.AddCommand(vaultNewCommand())
-	vaultCmd.AddCommand(vaultToK8sCommand())
-	vaultCmd.AddCommand(vaultPutCommand())
-	vaultCmd.AddCommand(vaultGetCommand())
-	vaultCmd.AddCommand(vaultShellCommand())
-	vaultCmd.AddCommand(vaultDeleteCommand())
-	vaultCmd.AddCommand(vaultRefCommand())
-	vaultCmd.AddCommand(vaultDerefCommand())
-	vaultCmd.AddCommand(vaultAccessCommand())
 	return vaultCmd
 }

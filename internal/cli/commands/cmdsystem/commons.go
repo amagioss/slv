@@ -11,7 +11,6 @@ var (
 )
 
 var (
-	// Common Flags
 	yesFlag = utils.FlagDef{
 		Name:      "yes",
 		Shorthand: "y",

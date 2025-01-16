@@ -16,7 +16,7 @@ var (
 	vaultPutCmd          *cobra.Command
 	vaultDeleteCmd       *cobra.Command
 	vaultGetCmd          *cobra.Command
-	vaultShellCmd        *cobra.Command
+	vaultRunCmd          *cobra.Command
 	vaultRefCmd          *cobra.Command
 	vaultDerefCmd        *cobra.Command
 )

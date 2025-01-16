@@ -5,18 +5,17 @@ import (
 )
 
 func SystemCommand() *cobra.Command {
-	if systemCmd != nil {
-		return systemCmd
+	if systemCmd == nil {
+		systemCmd = &cobra.Command{
+			Use:     "system",
+			Aliases: []string{"systems"},
+			Short:   "System level commands",
+			Long:    `System level operations can be carried out using this command`,
+			Run: func(cmd *cobra.Command, args []string) {
+				cmd.Help()
+			},
+		}
+		systemCmd.AddCommand(systemResetCommand())
 	}
-	systemCmd = &cobra.Command{
-		Use:     "system",
-		Aliases: []string{"systems"},
-		Short:   "System level commands",
-		Long:    `System level operations can be carried out using this command`,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-	systemCmd.AddCommand(systemResetCommand())
 	return systemCmd
 }

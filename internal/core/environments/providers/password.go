@@ -4,10 +4,10 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"dev.shib.me/xipher"
 	"github.com/zalando/go-keyring"
 	"oss.amagi.com/slv/internal/core/commons"
 	"oss.amagi.com/slv/internal/core/input"
+	"xipher.org/xipher"
 )
 
 func bindWithPassword(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {

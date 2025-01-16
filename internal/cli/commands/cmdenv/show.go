@@ -38,103 +38,99 @@ func ShowEnv(env environments.Environment, includeEDS, excludeBindingFromEds boo
 }
 
 func envShowCommand() *cobra.Command {
-	if envShowCmd != nil {
-		return envShowCmd
+	if envShowCmd == nil {
+		envShowCmd = &cobra.Command{
+			Use:     "show",
+			Aliases: []string{"desc", "describe", "view", "display"},
+			Short:   "Shows the requested environment",
+			Run: func(cmd *cobra.Command, args []string) {
+				cmd.Help()
+			},
+		}
+		envShowCmd.AddCommand(envShowRootCommand())
+		envShowCmd.AddCommand(envShowSelfCommand())
+		envShowCmd.AddCommand(envShowK8sCommand())
 	}
-	envShowCmd = &cobra.Command{
-		Use:     "show",
-		Aliases: []string{"desc", "describe", "view", "display"},
-		Short:   "Shows the requested environment",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-	envShowCmd.AddCommand(envShowRootCommand())
-	envShowCmd.AddCommand(envShowSelfCommand())
-	envShowCmd.AddCommand(envShowK8sCommand())
 	return envShowCmd
 }
 
 func envShowRootCommand() *cobra.Command {
-	if envShowRootCmd != nil {
-		return envShowRootCmd
-	}
-	envShowRootCmd = &cobra.Command{
-		Use:   "root",
-		Short: "Shows the current root environment from the profile if registered",
-		Run: func(cmd *cobra.Command, args []string) {
-			profile, err := profiles.GetDefaultProfile()
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			env, err := profile.GetRoot()
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			if env == nil {
-				fmt.Println("No environment registered as root.")
-			} else {
-				ShowEnv(*env, true, false)
-			}
-		},
+	if envShowRootCmd == nil {
+		envShowRootCmd = &cobra.Command{
+			Use:   "root",
+			Short: "Shows the current root environment from the profile if registered",
+			Run: func(cmd *cobra.Command, args []string) {
+				profile, err := profiles.GetDefaultProfile()
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				env, err := profile.GetRoot()
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				if env == nil {
+					fmt.Println("No environment registered as root.")
+				} else {
+					ShowEnv(*env, true, false)
+				}
+			},
+		}
 	}
 	return envShowRootCmd
 }
 
 func envShowSelfCommand() *cobra.Command {
-	if envShowSelfCmd != nil {
-		return envShowSelfCmd
-	}
-	envShowSelfCmd = &cobra.Command{
-		Use:     "self",
-		Aliases: []string{"user", "me", "my", "current"},
-		Short:   "Shows the current user environment if registered in the host",
-		Run: func(cmd *cobra.Command, args []string) {
-			env := environments.GetSelf()
-			if env == nil {
-				fmt.Println("No environment registered as self.")
-			} else {
-				ShowEnv(*env, true, true)
-			}
-		},
+	if envShowSelfCmd == nil {
+		envShowSelfCmd = &cobra.Command{
+			Use:     "self",
+			Aliases: []string{"user", "me", "my", "current"},
+			Short:   "Shows the current user environment if registered in the host",
+			Run: func(cmd *cobra.Command, args []string) {
+				env := environments.GetSelf()
+				if env == nil {
+					fmt.Println("No environment registered as self.")
+				} else {
+					ShowEnv(*env, true, true)
+				}
+			},
+		}
 	}
 	return envShowSelfCmd
 }
 
 func envShowK8sCommand() *cobra.Command {
-	if envShowK8sCmd != nil {
-		return envShowK8sCmd
+	if envShowK8sCmd == nil {
+		envShowK8sCmd = &cobra.Command{
+			Use:     "k8s",
+			Aliases: []string{"k8s-cluster"},
+			Short:   "Shows the environment registered with the accessible k8s cluster",
+			Run: func(cmd *cobra.Command, args []string) {
+				name, address, user, err := k8sutils.GetClusterInfo()
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
+				pk, err := k8sutils.GetPublicKeyFromK8s(config.AppNameLowerCase, pq)
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				var env *environments.Environment
+				profile, err := profiles.GetDefaultProfile()
+				if err == nil {
+					env, _ = profile.GetEnv(pk)
+				}
+				if env == nil {
+					fmt.Printf("Public Key: %s\n", pk)
+				} else {
+					ShowEnv(*env, false, false)
+				}
+				fmt.Println("\nK8s Cluster Info:")
+				fmt.Printf("Name   : %s\n", name)
+				fmt.Printf("Address: %s\n", address)
+				fmt.Printf("User   : %s\n", user)
+			},
+		}
+		envShowK8sCmd.Flags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	}
-	envShowK8sCmd = &cobra.Command{
-		Use:     "k8s",
-		Aliases: []string{"k8s-cluster"},
-		Short:   "Shows the environment registered with the accessible k8s cluster",
-		Run: func(cmd *cobra.Command, args []string) {
-			name, address, user, err := k8sutils.GetClusterInfo()
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
-			pk, err := k8sutils.GetPublicKeyFromK8s(config.AppNameLowerCase, pq)
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			var env *environments.Environment
-			profile, err := profiles.GetDefaultProfile()
-			if err == nil {
-				env, _ = profile.GetEnv(pk)
-			}
-			if env == nil {
-				fmt.Printf("Public Key: %s\n", pk)
-			} else {
-				ShowEnv(*env, false, false)
-			}
-			fmt.Println("\nK8s Cluster Info:")
-			fmt.Printf("Name   : %s\n", name)
-			fmt.Printf("Address: %s\n", address)
-			fmt.Printf("User   : %s\n", user)
-		},
-	}
-	envShowK8sCmd.Flags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	return envShowK8sCmd
 }

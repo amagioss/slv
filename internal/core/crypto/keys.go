@@ -3,8 +3,8 @@ package crypto
 import (
 	"strings"
 
-	"dev.shib.me/xipher"
 	"oss.amagi.com/slv/internal/core/commons"
+	"xipher.org/xipher"
 )
 
 type KeyType byte

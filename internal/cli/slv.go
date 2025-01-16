@@ -25,27 +25,26 @@ var (
 )
 
 func slvCommand() *cobra.Command {
-	if slvCmd != nil {
-		return slvCmd
+	if slvCmd == nil {
+		slvCmd = &cobra.Command{
+			Use:   "slv",
+			Short: "SLV is a tool to encrypt secrets locally",
+			Run: func(cmd *cobra.Command, args []string) {
+				version, _ := cmd.Flags().GetBool(versionFlag.Name)
+				if version {
+					fmt.Println(config.VersionInfo())
+				} else {
+					cmd.Help()
+				}
+			},
+		}
+		slvCmd.Flags().BoolP(versionFlag.Name, versionFlag.Shorthand, false, versionFlag.Usage)
+		slvCmd.AddCommand(versionCommand())
+		slvCmd.AddCommand(cmdsystem.SystemCommand())
+		slvCmd.AddCommand(cmdenv.EnvCommand())
+		slvCmd.AddCommand(cmdprofile.ProfileCommand())
+		slvCmd.AddCommand(cmdvault.VaultCommand())
 	}
-	slvCmd = &cobra.Command{
-		Use:   "slv",
-		Short: "SLV is a tool to encrypt secrets locally",
-		Run: func(cmd *cobra.Command, args []string) {
-			version, _ := cmd.Flags().GetBool(versionFlag.Name)
-			if version {
-				fmt.Println(config.VersionInfo())
-			} else {
-				cmd.Help()
-			}
-		},
-	}
-	slvCmd.Flags().BoolP(versionFlag.Name, versionFlag.Shorthand, false, versionFlag.Usage)
-	slvCmd.AddCommand(versionCommand())
-	slvCmd.AddCommand(cmdsystem.SystemCommand())
-	slvCmd.AddCommand(cmdenv.EnvCommand())
-	slvCmd.AddCommand(cmdprofile.ProfileCommand())
-	slvCmd.AddCommand(cmdvault.VaultCommand())
 	return slvCmd
 }
 

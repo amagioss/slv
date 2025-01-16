@@ -62,71 +62,70 @@ func getDecryptedDataMap(vault *vaults.Vault, itemName string, encodeToBase64, w
 }
 
 func vaultGetCommand() *cobra.Command {
-	if vaultGetCmd != nil {
-		return vaultGetCmd
-	}
-	vaultGetCmd = &cobra.Command{
-		Use:     "get",
-		Aliases: []string{"show", "view", "read", "export", "dump"},
-		Short:   "Get a secret from the vault",
-		Run: func(cmd *cobra.Command, args []string) {
-			envSecretKey, err := secretkey.Get()
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
-			itemName := cmd.Flag(itemNameFlag.Name).Value.String()
-			vault, err := getVault(vaultFile)
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			err = vault.Unlock(envSecretKey)
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			encodeToBase64, _ := cmd.Flags().GetBool(valueEncodeBase64Flag.Name)
-			withMetadata, _ := cmd.Flags().GetBool(valueWithMetadata.Name)
-			exportFormat := cmd.Flag(vaultExportFormatFlag.Name).Value.String()
-			switch exportFormat {
-			case "json":
-				dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, withMetadata)
-				jsonData, err := json.MarshalIndent(dataMap, "", "  ")
+	if vaultGetCmd == nil {
+		vaultGetCmd = &cobra.Command{
+			Use:     "get",
+			Aliases: []string{"show", "view", "read", "export", "dump"},
+			Short:   "Get a secret from the vault",
+			Run: func(cmd *cobra.Command, args []string) {
+				envSecretKey, err := secretkey.Get()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				fmt.Println(string(jsonData))
-			case "yaml", "yml":
-				dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, withMetadata)
-				yamlData, err := yaml.Marshal(dataMap)
+				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
+				itemName := cmd.Flag(itemNameFlag.Name).Value.String()
+				vault, err := getVault(vaultFile)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				fmt.Println(string(yamlData))
-			case "envars", "envar", "env", ".env":
-				dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, false)
-				for key, value := range dataMap {
-					strValue := value.(string)
-					strValue = strings.ReplaceAll(strValue, "\\", "\\\\")
-					strValue = strings.ReplaceAll(strValue, "\"", "\\\"")
-					fmt.Printf("%s=\"%s\"\n", key, strValue)
+				err = vault.Unlock(envSecretKey)
+				if err != nil {
+					utils.ExitOnError(err)
 				}
-			default:
-				if itemName == "" {
-					showVaultData(vault)
-				} else {
-					if item, err := vault.Get(itemName); err != nil {
+				encodeToBase64, _ := cmd.Flags().GetBool(valueEncodeBase64Flag.Name)
+				withMetadata, _ := cmd.Flags().GetBool(valueWithMetadata.Name)
+				exportFormat := cmd.Flag(vaultExportFormatFlag.Name).Value.String()
+				switch exportFormat {
+				case "json":
+					dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, withMetadata)
+					jsonData, err := json.MarshalIndent(dataMap, "", "  ")
+					if err != nil {
 						utils.ExitOnError(err)
+					}
+					fmt.Println(string(jsonData))
+				case "yaml", "yml":
+					dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, withMetadata)
+					yamlData, err := yaml.Marshal(dataMap)
+					if err != nil {
+						utils.ExitOnError(err)
+					}
+					fmt.Println(string(yamlData))
+				case "envars", "envar", "env", ".env":
+					dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, false)
+					for key, value := range dataMap {
+						strValue := value.(string)
+						strValue = strings.ReplaceAll(strValue, "\\", "\\\\")
+						strValue = strings.ReplaceAll(strValue, "\"", "\\\"")
+						fmt.Printf("%s=\"%s\"\n", key, strValue)
+					}
+				default:
+					if itemName == "" {
+						showVaultData(vault)
 					} else {
-						fmt.Println(string(item.Value()))
+						if item, err := vault.Get(itemName); err != nil {
+							utils.ExitOnError(err)
+						} else {
+							fmt.Println(string(item.Value()))
+						}
 					}
 				}
-			}
-			utils.SafeExit()
-		},
+				utils.SafeExit()
+			},
+		}
+		vaultGetCmd.Flags().StringP(itemNameFlag.Name, itemNameFlag.Shorthand, "", itemNameFlag.Usage)
+		vaultGetCmd.Flags().BoolP(valueEncodeBase64Flag.Name, valueEncodeBase64Flag.Shorthand, false, valueEncodeBase64Flag.Usage)
+		vaultGetCmd.Flags().BoolP(valueWithMetadata.Name, valueWithMetadata.Shorthand, false, valueWithMetadata.Usage)
+		vaultGetCmd.Flags().StringP(vaultExportFormatFlag.Name, vaultExportFormatFlag.Shorthand, "", vaultExportFormatFlag.Usage)
 	}
-	vaultGetCmd.Flags().StringP(itemNameFlag.Name, itemNameFlag.Shorthand, "", itemNameFlag.Usage)
-	vaultGetCmd.Flags().BoolP(valueEncodeBase64Flag.Name, valueEncodeBase64Flag.Shorthand, false, valueEncodeBase64Flag.Usage)
-	vaultGetCmd.Flags().BoolP(valueWithMetadata.Name, valueWithMetadata.Shorthand, false, valueWithMetadata.Usage)
-	vaultGetCmd.Flags().StringP(vaultExportFormatFlag.Name, vaultExportFormatFlag.Shorthand, "", vaultExportFormatFlag.Usage)
 	return vaultGetCmd
 }

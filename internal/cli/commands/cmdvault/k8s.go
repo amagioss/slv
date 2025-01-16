@@ -33,29 +33,28 @@ func newK8sVault(filePath, k8sName, k8sNamespace, k8sSecret string, hash, pq boo
 }
 
 func vaultToK8sCommand() *cobra.Command {
-	if vaultToK8sCmd != nil {
-		return vaultToK8sCmd
+	if vaultToK8sCmd == nil {
+		vaultToK8sCmd = &cobra.Command{
+			Use:     "tok8s",
+			Aliases: []string{"k8s", "tok8slv"},
+			Short:   "Transform an existing SLV vault file to a K8s compatible one",
+			Run: func(cmd *cobra.Command, args []string) {
+				vaultFilePath := cmd.Flag(vaultFileFlag.Name).Value.String()
+				name := cmd.Flag(vaultK8sNameFlag.Name).Value.String()
+				namespace := cmd.Flag(vaultK8sNamespaceFlag.Name).Value.String()
+				vault, err := getVault(vaultFilePath)
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				if err = vault.ToK8s(name, namespace, nil); err != nil {
+					utils.ExitOnError(err)
+				}
+				fmt.Printf("Vault %s transformed to K8s resource %s\n", color.GreenString(vaultFilePath), color.GreenString(name))
+			},
+		}
+		vaultToK8sCmd.Flags().StringP(vaultK8sNameFlag.Name, vaultK8sNameFlag.Shorthand, "", vaultK8sNameFlag.Usage)
+		vaultToK8sCmd.Flags().StringP(vaultK8sNamespaceFlag.Name, vaultK8sNamespaceFlag.Shorthand, "", vaultK8sNamespaceFlag.Usage)
+		vaultToK8sCmd.MarkFlagRequired(vaultK8sNameFlag.Name)
 	}
-	vaultToK8sCmd = &cobra.Command{
-		Use:     "tok8s",
-		Aliases: []string{"k8s", "tok8slv"},
-		Short:   "Transform an existing SLV vault file to a K8s compatible one",
-		Run: func(cmd *cobra.Command, args []string) {
-			vaultFilePath := cmd.Flag(vaultFileFlag.Name).Value.String()
-			name := cmd.Flag(vaultK8sNameFlag.Name).Value.String()
-			namespace := cmd.Flag(vaultK8sNamespaceFlag.Name).Value.String()
-			vault, err := getVault(vaultFilePath)
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			if err = vault.ToK8s(name, namespace, nil); err != nil {
-				utils.ExitOnError(err)
-			}
-			fmt.Printf("Vault %s transformed to K8s resource %s\n", color.GreenString(vaultFilePath), color.GreenString(name))
-		},
-	}
-	vaultToK8sCmd.Flags().StringP(vaultK8sNameFlag.Name, vaultK8sNameFlag.Shorthand, "", vaultK8sNameFlag.Usage)
-	vaultToK8sCmd.Flags().StringP(vaultK8sNamespaceFlag.Name, vaultK8sNamespaceFlag.Shorthand, "", vaultK8sNamespaceFlag.Usage)
-	vaultToK8sCmd.MarkFlagRequired(vaultK8sNameFlag.Name)
 	return vaultToK8sCmd
 }

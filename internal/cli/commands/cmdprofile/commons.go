@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	// Commands
 	profileCmd     *cobra.Command
 	profileNewCmd  *cobra.Command
 	profileListCmd *cobra.Command

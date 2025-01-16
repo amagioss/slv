@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	// Commands
 	envCmd           *cobra.Command
 	envNewCmd        *cobra.Command
 	envNewServiceCmd *cobra.Command
@@ -22,8 +21,6 @@ var (
 )
 
 var (
-	// Flags
-
 	envNameFlag = utils.FlagDef{
 		Name:      "name",
 		Shorthand: "n",

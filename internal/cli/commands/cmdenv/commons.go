@@ -24,11 +24,8 @@ func GetPublicKeys(cmd *cobra.Command, root, pq bool) (publicKeys []*crypto.Publ
 	shareWithSelf, _ := cmd.Flags().GetBool(EnvSelfFlag.Name)
 	shareWithK8s, _ := cmd.Flags().GetBool(EnvK8sFlag.Name)
 	if len(publicKeyStrings) == 0 && len(queries) == 0 && !shareWithSelf && !shareWithK8s {
-		return nil, fmt.Errorf("Specify atleast one of the following flags:\n" +
-			" --" + EnvSearchFlag.Name + " [search keyword]\n" +
-			" --" + EnvPublicKeysFlag.Name + " [env public key]\n" +
-			" --" + EnvSelfFlag.Name + "\n" +
-			" --" + EnvK8sFlag.Name)
+		return nil, fmt.Errorf("specify at least one of the following flags:\n --%s [search keyword]\n --%s [env public key]\n --%s\n --%s",
+			EnvSearchFlag.Name, EnvPublicKeysFlag.Name, EnvSelfFlag.Name, EnvK8sFlag.Name)
 	}
 	for _, pubKeyStr := range publicKeyStrings {
 		publicKey, err := crypto.PublicKeyFromString(pubKeyStr)
