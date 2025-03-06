@@ -134,6 +134,13 @@ func (vlt *Vault) Get(name string) (data *VaultData, err error) {
 	return vlt.get(name, true)
 }
 
+func (vlt *Vault) IsSecret(name string) (isSecret bool, err error) {
+	if data, err := vlt.get(name, false); err == nil {
+		isSecret = data.isSecret
+	}
+	return
+}
+
 func (vlt *Vault) DeleteItem(name string) error {
 	return vlt.DeleteItems([]string{name})
 }

@@ -14,7 +14,18 @@ import (
 	"oss.amagi.com/slv/internal/core/vaults"
 )
 
-func getDecryptedDataMap(vault *vaults.Vault, itemName string, encodeToBase64, withMetadata bool) map[string]any {
+func unlockVault(vault *vaults.Vault) {
+	envSecretKey, err := secretkey.Get()
+	if err != nil {
+		utils.ExitOnError(err)
+	}
+	err = vault.Unlock(envSecretKey)
+	if err != nil {
+		utils.ExitOnError(err)
+	}
+}
+
+func getVaultDataMap(vault *vaults.Vault, itemName string, encodeToBase64, withMetadata bool) map[string]any {
 	type vaultItem struct {
 		Value     string `json:"value,omitempty" yaml:"value,omitempty"`
 		Secret    bool   `json:"secret,omitempty" yaml:"secret,omitempty"`
@@ -22,20 +33,27 @@ func getDecryptedDataMap(vault *vaults.Vault, itemName string, encodeToBase64, w
 		Hash      string `json:"hash,omitempty" yaml:"hash,omitempty"`
 	}
 	dataMap := make(map[string]any)
-	var vaultData map[string]*vaults.VaultData
+	var vaultDataMap map[string]*vaults.VaultData
 	var err error
 	if itemName == "" {
-		if vaultData, err = vault.List(true); err != nil {
+		unlockVault(vault)
+		if vaultDataMap, err = vault.List(true); err != nil {
 			utils.ExitOnError(err)
 		}
 	} else {
 		var item *vaults.VaultData
+		if !vault.Exists(itemName) {
+			utils.ExitOnError(fmt.Errorf("item %s not found", itemName))
+		}
+		if secretItem, _ := vault.IsSecret(itemName); secretItem {
+			unlockVault(vault)
+		}
 		if item, err = vault.Get(itemName); err != nil {
 			utils.ExitOnError(err)
 		}
-		vaultData = map[string]*vaults.VaultData{itemName: item}
+		vaultDataMap = map[string]*vaults.VaultData{itemName: item}
 	}
-	for name, value := range vaultData {
+	for name, value := range vaultDataMap {
 		var val string
 		if encodeToBase64 {
 			val = base64.StdEncoding.EncodeToString(value.Value())
@@ -68,17 +86,9 @@ func vaultGetCommand() *cobra.Command {
 			Aliases: []string{"show", "view", "read", "export", "dump"},
 			Short:   "Get a secret from the vault",
 			Run: func(cmd *cobra.Command, args []string) {
-				envSecretKey, err := secretkey.Get()
-				if err != nil {
-					utils.ExitOnError(err)
-				}
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 				itemName := cmd.Flag(itemNameFlag.Name).Value.String()
 				vault, err := getVault(vaultFile)
-				if err != nil {
-					utils.ExitOnError(err)
-				}
-				err = vault.Unlock(envSecretKey)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -87,21 +97,21 @@ func vaultGetCommand() *cobra.Command {
 				exportFormat := cmd.Flag(vaultExportFormatFlag.Name).Value.String()
 				switch exportFormat {
 				case "json":
-					dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, withMetadata)
+					dataMap := getVaultDataMap(vault, itemName, encodeToBase64, withMetadata)
 					jsonData, err := json.MarshalIndent(dataMap, "", "  ")
 					if err != nil {
 						utils.ExitOnError(err)
 					}
 					fmt.Println(string(jsonData))
 				case "yaml", "yml":
-					dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, withMetadata)
+					dataMap := getVaultDataMap(vault, itemName, encodeToBase64, withMetadata)
 					yamlData, err := yaml.Marshal(dataMap)
 					if err != nil {
 						utils.ExitOnError(err)
 					}
 					fmt.Println(string(yamlData))
 				case "envars", "envar", "env", ".env":
-					dataMap := getDecryptedDataMap(vault, itemName, encodeToBase64, false)
+					dataMap := getVaultDataMap(vault, itemName, encodeToBase64, false)
 					for key, value := range dataMap {
 						strValue := value.(string)
 						strValue = strings.ReplaceAll(strValue, "\\", "\\\\")
@@ -110,8 +120,15 @@ func vaultGetCommand() *cobra.Command {
 					}
 				default:
 					if itemName == "" {
+						unlockVault(vault)
 						showVaultData(vault)
 					} else {
+						if !vault.Exists(itemName) {
+							utils.ExitOnError(fmt.Errorf("item %s not found", itemName))
+						}
+						if secretItem, _ := vault.IsSecret(itemName); secretItem {
+							unlockVault(vault)
+						}
 						if item, err := vault.Get(itemName); err != nil {
 							utils.ExitOnError(err)
 						} else {
