@@ -7,14 +7,17 @@ import (
 	"strings"
 )
 
-func (vlt *Vault) getSecretByReference(secretRef string) ([]byte, error) {
+func (vlt *Vault) getDataByReference(secretRef string) ([]byte, error) {
 	sliced := strings.Split(secretRef, vlt.Id()+".")
 	if len(sliced) != 2 {
 		return nil, errInvalidReferenceFormat
 	}
 	secretName := strings.Trim(sliced[1], " }")
-	vd, err := vlt.get(secretName, true)
-	return vd.value, err
+	if vd, err := vlt.get(secretName, true); err != nil {
+		return nil, err
+	} else {
+		return vd.value, nil
+	}
 }
 
 func (vlt *Vault) getVaultSecretRefRegex() *regexp.Regexp {
@@ -24,14 +27,14 @@ func (vlt *Vault) getVaultSecretRefRegex() *regexp.Regexp {
 	return vlt.vaultSecretRefRegex
 }
 
-func (vlt *Vault) deRefSecretsFromContent(content string) ([]byte, error) {
+func (vlt *Vault) deRefFromContent(content string) ([]byte, error) {
 	vaultSecretRefRegex := vlt.getVaultSecretRefRegex()
 	secretRefs := vaultSecretRefRegex.FindAllString(content, -1)
 	if len(secretRefs) == 1 && len(content) == len(secretRefs[0]) {
-		return vlt.getSecretByReference(secretRefs[0])
+		return vlt.getDataByReference(secretRefs[0])
 	} else {
 		for _, secretRef := range secretRefs {
-			decrypted, err := vlt.getSecretByReference(secretRef)
+			decrypted, err := vlt.getDataByReference(secretRef)
 			if err != nil {
 				return nil, err
 			}
@@ -41,7 +44,7 @@ func (vlt *Vault) deRefSecretsFromContent(content string) ([]byte, error) {
 	return []byte(content), nil
 }
 
-func (vlt *Vault) DeRefSecrets(path string) error {
+func (vlt *Vault) DeRef(path string) error {
 	if vlt.IsLocked() {
 		return errVaultLocked
 	}
@@ -56,7 +59,7 @@ func (vlt *Vault) DeRefSecrets(path string) error {
 		if err != nil {
 			return err
 		}
-		dereferncedBytes, err := vlt.deRefSecretsFromContent(string(data))
+		dereferncedBytes, err := vlt.deRefFromContent(string(data))
 		if err != nil {
 			return err
 		}

@@ -44,6 +44,8 @@ docker run -it --rm -v $PWD:/workspace ghcr.io/amagioss/slv:latest version
 
 ## Usage
 
+### Basic CLI Commands
+
 #### Create a new profile
 ```sh
 $ slv profile new -n amagi
@@ -103,6 +105,24 @@ $ slv vault share -v test.slv.yaml -s bob
 Shared vault: test.slv.yaml
 ```
 Once shared, the other environments can access the vault using their respective secret keys
+
+### Using SLV as a library
+SLV can also be used as a library in your Go projects. The following is an example of how to use SLV to read secrets from a vault. Ensure that the vault is shared with the environment and the environment is configured by setting the environment variable `SLV_ENV_SECRET_KEY` or `SLV_ENV_SECRET_BINDING` before executing it.
+```go
+package main
+
+import "oss.amagi.com/slv"
+
+func main() {
+	dataMap, err := slv.GetAllVaultData("demo.slv.yaml")
+	if err != nil {
+		panic(err)
+	}
+	for k, v := range dataMap {
+		print(k, " : ", string(v.Value()), "\n")
+	}
+}
+```
 
 ## Integrations
 Some of the integrations that SLV currently supports are:

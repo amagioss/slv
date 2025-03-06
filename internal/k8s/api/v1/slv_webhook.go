@@ -23,7 +23,6 @@ import (
 	"oss.amagi.com/slv/internal/k8s/utils"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -42,15 +41,11 @@ func (r *SLV) SetupWebhookWithManager(mgr ctrl.Manager) error {
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 //+kubebuilder:webhook:path=/validate,mutating=false,failurePolicy=fail,sideEffects=None,groups=slv.oss.amagi.com,resources=slvs,verbs=create;update,versions=v1,name=vslv.oss.amagi.com,admissionReviewVersions=v1
 
-var _ webhook.Defaulter = &SLV{}
-
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (r *SLV) Default() {
 	slvlog.Info("default", "name", r.Name)
 	// Set SLV default values - not required for now
 }
-
-var _ webhook.Validator = &SLV{}
 
 func (r *SLV) validateSLV() (err error) {
 	vault := r.Spec.Vault

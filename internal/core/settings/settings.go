@@ -25,7 +25,7 @@ type manifest struct {
 	AllowVaultSharing bool `yaml:"allow_vault_sharing"`
 }
 
-func (settings Settings) MarshalYAML() (interface{}, error) {
+func (settings Settings) MarshalYAML() (any, error) {
 	return settings.manifest, nil
 }
 

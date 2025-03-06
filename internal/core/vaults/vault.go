@@ -147,7 +147,7 @@ func Get(filePath string) (vlt *Vault, err error) {
 	if !commons.FileExists(filePath) {
 		return nil, errVaultNotFound
 	}
-	obj := make(map[string]interface{})
+	obj := make(map[string]any)
 	if err := commons.ReadFromYAML(filePath, &obj); err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (vlt *Vault) commit() error {
 		data = vlt
 	}
 	return commons.WriteToYAML(vlt.path,
-		"# Use the pattern "+vlt.getSecretRef("YOUR_SECRET_NAME")+" as placeholder to reference secrets from this vault into files\n", data)
+		"# Use the pattern "+vlt.getDataRef("YOUR_SECRET_NAME")+" as placeholder to reference data from this vault into files\n", data)
 }
 
 func (vlt *Vault) reset() error {

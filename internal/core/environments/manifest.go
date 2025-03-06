@@ -18,7 +18,7 @@ type manifest struct {
 	Environments map[string]*Environment `yaml:"environments,omitempty"`
 }
 
-func (envManifest EnvManifest) MarshalYAML() (interface{}, error) {
+func (envManifest EnvManifest) MarshalYAML() (any, error) {
 	return envManifest.manifest, nil
 }
 

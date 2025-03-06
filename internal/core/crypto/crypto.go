@@ -7,7 +7,7 @@ import (
 )
 
 func (publicKey *PublicKey) encrypt(data []byte) (*ciphered, error) {
-	ciphertext, err := publicKey.pubKey.Encrypt(data, true)
+	ciphertext, err := publicKey.pubKey.Encrypt(data, true, false)
 	if err != nil {
 		return nil, errEncryptionFailed
 	}

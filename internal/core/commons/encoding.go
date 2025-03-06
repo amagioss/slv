@@ -9,7 +9,7 @@ var (
 	base32Encoding = base32.StdEncoding.WithPadding(base32.NoPadding)
 )
 
-func jsonSerialize(data interface{}) (dataBytes []byte, err error) {
+func jsonSerialize(data any) (dataBytes []byte, err error) {
 	dataBytes, err = json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -17,7 +17,7 @@ func jsonSerialize(data interface{}) (dataBytes []byte, err error) {
 	return dataBytes, nil
 }
 
-func jsonDeserialize(dataBytes []byte, data interface{}) (err error) {
+func jsonDeserialize(dataBytes []byte, data any) (err error) {
 	err = json.Unmarshal(dataBytes, &data)
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func jsonDeserialize(dataBytes []byte, data interface{}) (err error) {
 	return nil
 }
 
-func Serialize(data interface{}) (string, error) {
+func Serialize(data any) (string, error) {
 	serialized, err := jsonSerialize(data)
 	if err != nil {
 		return "", err
@@ -37,7 +37,7 @@ func Serialize(data interface{}) (string, error) {
 	return Encode(serialized), nil
 }
 
-func Deserialize(serialized string, data interface{}) (err error) {
+func Deserialize(serialized string, data any) (err error) {
 	serializedBytes, err := Decode(serialized)
 	if err != nil {
 		return err

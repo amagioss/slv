@@ -37,7 +37,7 @@ func vaultDerefCommand() *cobra.Command {
 						utils.ExitOnError(err)
 					}
 					for _, path := range paths {
-						if err = vault.DeRefSecrets(path); err != nil {
+						if err = vault.DeRef(path); err != nil {
 							utils.ExitOnError(err)
 						}
 						fmt.Println("Dereferenced", color.GreenString(path), "with the vault", color.GreenString(vaultFile))

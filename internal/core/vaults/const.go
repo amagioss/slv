@@ -13,7 +13,7 @@ const (
 	vaultFileNameEnding                 = config.AppNameLowerCase
 	VaultKey             crypto.KeyType = 'V'
 	vaultIdLength                       = 30
-	secretNamePattern                   = "[a-zA-Z]([a-zA-Z0-9_]*[a-zA-Z0-9])?"
+	secretNamePattern                   = `([\w]+)?`
 	secretRefPatternBase                = `\{\{\s*VAULTID\.` + secretNamePattern + `\s*\}\}`
 	vaultIdAbbrev                       = "VID"
 
@@ -23,8 +23,9 @@ const (
 )
 
 var (
-	secretNameRegex = regexp.MustCompile(secretNamePattern)
-	secretRefRegex  = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", config.AppNameUpperCase+"_"+vaultIdAbbrev+"_[A-Za-z0-9]+"))
+	secretNameRegex                = regexp.MustCompile(secretNamePattern)
+	unsupportedSecretNameCharRegex = regexp.MustCompile(`[^\w]`)
+	secretRefRegex                 = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", config.AppNameUpperCase+"_"+vaultIdAbbrev+"_[A-Za-z0-9]+"))
 
 	errVaultVersionNotRecognized    = errors.New("unsupported version - please upgrade to the latest version of slv or use a version that matches the vault")
 	errGeneratingVaultId            = errors.New("error in generating a new vault id")
@@ -35,7 +36,7 @@ var (
 	errVaultExists                  = errors.New("vault exists already")
 	errVaultNotFound                = errors.New("vault not found")
 	errVaultCannotBeSharedWithVault = errors.New("vault cannot be shared with another vault")
-	errInvalidVaultDataName         = errors.New("invalid name format [secret name must start with a letter and can only contain letters, numbers and underscores]")
+	errInvalidVaultDataName         = errors.New("invalid name format [name must start with a letter and can only contain letters, numbers and underscores]")
 	errVaultDataExistsAlready       = errors.New("data exists already for the given name")
 	errVaultDataNotFound            = errors.New("no data found for the given name")
 	errVaultPublicKeyNotFound       = errors.New("vault public key not found")

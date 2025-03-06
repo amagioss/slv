@@ -19,7 +19,7 @@ func bindWithPassword(skBytes []byte, inputs map[string][]byte) (ref map[string]
 	if err != nil {
 		return nil, err
 	}
-	sealedSecretKeyBytes, err := xipherKey.Encrypt(skBytes, false)
+	sealedSecretKeyBytes, err := xipherKey.Encrypt(skBytes, false, false)
 	if err != nil {
 		return nil, err
 	}
