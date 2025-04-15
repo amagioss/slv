@@ -10,13 +10,11 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"oss.amagi.com/slv/internal/core/config"
 	"oss.amagi.com/slv/internal/core/crypto"
 	"oss.amagi.com/slv/internal/core/environments/providers"
 )
 
 const (
-	resourceName            = config.AppNameLowerCase
 	secretKeyName           = "SecretKey"
 	publicKeyNameEC         = "PublicKeyEC"
 	publicKeyNamePQ         = "PublicKeyPQ"
@@ -38,14 +36,14 @@ func GetSecretKeyFor(clientset *kubernetes.Clientset, namespace string) (secretK
 			return nil, fmt.Errorf("failed to get k8s clientset: %w", err)
 		}
 	}
-	secret, err := clientset.CoreV1().Secrets(namespace).Get(context.Background(), resourceName, metav1.GetOptions{})
+	secret, err := clientset.CoreV1().Secrets(namespace).Get(context.Background(), slvK8sEnvSecret, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 	if secretKey, err = ExtractSecretKeyFromSecret(secret); secretKey != nil {
 		return secretKey, err
 	}
-	if configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), resourceName, metav1.GetOptions{}); err == nil {
+	if configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), slvK8sEnvSecret, metav1.GetOptions{}); err == nil {
 		if secretKey, err = ExtractSecretKeyFromConfigMapBinding(configMap); secretKey != nil {
 			return secretKey, err
 		}
@@ -78,12 +76,12 @@ func ExtractSecretKeyFromConfigMapBinding(configMap *corev1.ConfigMap) (*crypto.
 
 func putPublicKeyToConfigMap(clientset *kubernetes.Clientset, publicKeyStrEC, publicKeyStrPQ string) error {
 	namespace := GetCurrentNamespace()
-	configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), resourceName, metav1.GetOptions{})
+	configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), slvK8sEnvSecret, metav1.GetOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
 			configMap = &corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      resourceName,
+					Name:      slvK8sEnvSecret,
 					Namespace: GetCurrentNamespace(),
 				},
 				Data: map[string]string{

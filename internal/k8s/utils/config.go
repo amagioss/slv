@@ -7,14 +7,19 @@ import (
 
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"oss.amagi.com/slv/internal/core/config"
 )
 
 var (
 	currentNamespace *string
 	kubeConfig       *clientcmd.ClientConfig
-
-	envGenEnabled  = strings.ToLower(os.Getenv("SLV_K8S_SKIP_ENVAUTOGEN")) != "true"
-	nameSpacedMode = strings.ToLower(os.Getenv("SLV_K8S_NAMESPACED_MODE")) == "true"
+	nameSpacedMode   = strings.ToLower(os.Getenv("SLV_K8S_NAMESPACED_MODE")) == "true"
+	slvK8sEnvSecret  = func() string {
+		if val := os.Getenv("SLV_K8S_ENV_SECRET"); val != "" {
+			return val
+		}
+		return config.AppNameLowerCase
+	}()
 )
 
 func IsNamespacedMode() bool {

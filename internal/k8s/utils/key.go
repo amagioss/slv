@@ -6,7 +6,6 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"oss.amagi.com/slv/internal/core/crypto"
-	"oss.amagi.com/slv/internal/core/environments"
 	"oss.amagi.com/slv/internal/core/secretkey"
 )
 
@@ -21,9 +20,7 @@ func SecretKey() (secretKey *crypto.SecretKey, err error) {
 		sk, _ := secretkey.Get()
 		if clientset, _ := getKubeClientSet(); clientset != nil {
 			if sk == nil {
-				if sk, err = GetSecretKeyFor(clientset, GetCurrentNamespace()); err != nil && envGenEnabled {
-					sk, err = crypto.NewSecretKey(environments.EnvironmentKey)
-				}
+				sk, err = GetSecretKeyFor(clientset, GetCurrentNamespace())
 			}
 			if err == nil && sk != nil {
 				sKey = sk
@@ -52,7 +49,7 @@ func GetPublicKeyFromK8s(namespace string, pq bool) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get k8s clientset: %w", err)
 	}
-	configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), resourceName, metav1.GetOptions{})
+	configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), slvK8sEnvSecret, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
@@ -62,7 +59,7 @@ func GetPublicKeyFromK8s(namespace string, pq bool) (string, error) {
 	}
 	publicKeyStr, ok := configMap.Data[configMapKey]
 	if !ok {
-		return "", fmt.Errorf("public key not found in configmap: %s", resourceName)
+		return "", fmt.Errorf("public key not found in configmap: %s", slvK8sEnvSecret)
 	}
 	return publicKeyStr, nil
 }
