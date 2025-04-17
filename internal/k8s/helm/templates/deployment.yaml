@@ -13,11 +13,11 @@ spec:
   replicas: {{ .Values.config.replicas }}
   selector:
     matchLabels:
-      app: slv-k8s-operator
+      app: slv-operator
   template:
     metadata:
       labels:
-        app: slv-k8s-operator
+        app: slv-operator
         {{- with .Values.runnerConfig.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

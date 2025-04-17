@@ -2,10 +2,10 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: slv-k8s-cronjob
+  name: slv-cronjob
   namespace: {{ .Release.Namespace }}
   labels:
-    app: slv-k8s-cronjob
+    app: slv-cronjob
     {{- with .Values.runnerConfig.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -16,10 +16,10 @@ spec:
       ttlSecondsAfterFinished: {{ .Values.config.ttlSecondsAfterFinished | default 0 }}
       template:
         metadata:
-          name: slv-k8s-cronjob
+          name: slv-cronjob
           namespace: {{ .Release.Namespace }}
           labels:
-            app: slv-k8s-cronjob
+            app: slv-cronjob
             {{- with .Values.runnerConfig.podLabels }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

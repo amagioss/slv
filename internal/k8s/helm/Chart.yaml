@@ -1,5 +1,5 @@
 apiVersion: v2
-name: slv-helm
+name: slv
 description: A Helm chart for installing SLV
 
 # A chart can be either an 'application' or a 'library' chart.

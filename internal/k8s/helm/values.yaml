@@ -74,4 +74,4 @@ runnerConfig:
   podLabels: {}
 
   # The name with which the serviceAccount has to be created and attached to the SLV pods.
-  serviceAccountName: slv-cronjob-sa
+  serviceAccountName: ""

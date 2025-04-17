@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: slv-k8s-operator-clusterrole
+  name: slv-operator-clusterrole
 rules:
   - apiGroups: ["slv.oss.amagi.com"]
     resources: ["slvs"]
@@ -32,7 +32,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: slv-k8s-job-role
+  name: slv-job-role
 rules:
   - apiGroups: ["slv.oss.amagi.com"]
     resources: ["slvs"]
@@ -60,7 +60,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: slv-k8s-cronjob-role
+  name: slv-cronjob-role
 rules:
   - apiGroups: ["slv.oss.amagi.com"]
     resources: ["slvs"]

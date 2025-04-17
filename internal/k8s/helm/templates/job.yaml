@@ -2,10 +2,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name:  slv-k8s-job
+  name:  slv-job
   namespace: {{ .Release.Namespace }}
   labels:
-    app: slv-k8s-job
+    app: slv-job
     {{- with .Values.runnerConfig.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -13,10 +13,10 @@ spec:
   ttlSecondsAfterFinished: {{ .Values.config.ttlSecondsAfterFinished | default 3600 }}
   template:
     metadata:
-      name: slv-k8s-job
+      name: slv-job
       namespace: {{ .Release.Namespace }}
       labels:
-        app: slv-k8s-job
+        app: slv-job
         {{- with .Values.runnerConfig.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
