@@ -1,0 +1,44 @@
+{{- if eq .Values.config.mode "operator" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: slv-k8s-operator-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.runnerConfig.serviceAccountName | default "slv-sa" }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: slv-k8s-operator-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+{{- end}}
+---
+{{ if eq .Values.config.mode "job" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: slv-k8s-job-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.runnerConfig.serviceAccountName | default "slv-sa" }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: slv-k8s-job-role
+  apiGroup: rbac.authorization.k8s.io
+{{- end}}
+---
+{{ if eq .Values.config.mode "cronjob" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: slv-k8s-cronjob-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.runnerConfig.serviceAccountName | default "slv-sa" }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: slv-k8s-cronjob-role
+  apiGroup: rbac.authorization.k8s.io
+{{- end}}
