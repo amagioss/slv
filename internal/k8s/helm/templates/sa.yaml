@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.runnerConfig.serviceAccountName }}
+  namespace: {{ .Release.Namespace }}
+automountServiceAccountToken: true
+

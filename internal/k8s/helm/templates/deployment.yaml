@@ -1,0 +1,28 @@
+{{- if eq .Values.config.mode "operator" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slv-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: slv-k8s-operator
+    {{- with .Values.runnerConfig.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.config.replicas }}
+  selector:
+    matchLabels:
+      app: slv-operator
+  template:
+    metadata:
+      labels:
+        app: slv-operator
+        {{- with .Values.runnerConfig.podLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.runnerConfig.serviceAccountName | default "slv-sa" }}
+      containers:
+      {{- include "slv.container" . | nindent 8 }}
+{{- end }}

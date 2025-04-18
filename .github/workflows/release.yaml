@@ -50,6 +50,21 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ github.ref_name }}
             ghcr.io/${{ github.repository }}:latest
 
+      - name: Install helm
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: azure/setup-helm@v3
+      - name: Helm Package & Push
+        run: |
+          echo "${{secrets.GITHUB_TOKEN}}"| helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+          mkdir -p ./internal/k8s/helm/templates/CRDs
+          cp ./internal/k8s/config/crd/bases/slv.oss.amagi.com_slvs.yaml ./internal/k8s/helm/templates/CRDs/slv.oss.amagi.com_slvs.yaml
+          helm package ./internal/k8s/helm \
+          --version ${{ github.ref_name }} \
+          --destination . 
+          helm push ./slv-${{ github.ref_name }}.tgz oci://ghcr.io/${{ github.repository }}/helm
+          rm ./slv-${{ github.ref_name }}.tgz
+
   pages:
     name: Deploy Static Assets to GitHub Pages
     needs: release
