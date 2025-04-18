@@ -20,7 +20,7 @@ This section is responsible for configuring the SLV environment, which is requir
   - The `secretBinding` should be stored under the key name `SecretBinding`.  
   **Note**: Ensure this secret exists in the same namespace as the release namespace.
   
-**Note**: Ensure that at least one of `secretBinding` or `k8sSecret` is specified. SLV may not work as        expected without a secret key or binding.
+**Note**: Ensure that at least one of `secretBinding` or `k8sSecret` is specified. SLV may not work as expected without a secret key or binding.
 
 ---
 

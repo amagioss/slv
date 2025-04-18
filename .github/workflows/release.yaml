@@ -49,6 +49,18 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ env.SLV_VERSION }}
             ghcr.io/${{ github.repository }}:${{ github.ref_name }}
             ghcr.io/${{ github.repository }}:latest
+      - name: Install helm
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: azure/setup-helm@v3
+      - name: Helm Package & Push
+        run: |
+          cp ./internal/k8s/config/crd/bases/slv.oss.amagi.com_slvs.yaml ./internal/k8s/helm/crds/slv.oss.amagi.com_slvs.yaml
+          helm package ./internal/k8s/helm \
+          --version ${{ github.ref_name }} \
+          --destination . \
+          helm push ./slv-${ github.ref_name }.tgz oci://ghcr.io/${{ github.repository }}/helm \
+          rm ./slv-${ github.ref_name }.tgz
 
   pages:
     name: Deploy Static Assets to GitHub Pages
