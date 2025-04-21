@@ -2,7 +2,7 @@ package cmdprofile
 
 import (
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/cli/commands/utils"
 )
 
 var (

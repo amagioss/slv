@@ -6,18 +6,18 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/environments"
-	"oss.amagi.com/slv/internal/core/profiles"
-	"oss.amagi.com/slv/internal/core/secretkey"
-	"oss.amagi.com/slv/internal/core/vaults"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/environments"
+	"slv.sh/slv/internal/core/profiles"
+	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func getVault(filePath string) (*vaults.Vault, error) {
 	return vaults.Get(filePath)
 }
 
-func showVaultData(vault *vaults.Vault) {
+func showVault(vault *vaults.Vault) {
 	accessors, err := vault.ListAccessors()
 	if err != nil {
 		utils.ExitOnError(err)
@@ -75,7 +75,7 @@ func showVaultData(vault *vaults.Vault) {
 		}
 		accessorTable.Append(row)
 	}
-	fmt.Println("Vault ID: ", vault.Config.PublicKey)
+	fmt.Println("Vault ID: ", vault.Spec.Config.PublicKey)
 	fmt.Println("Vault Data:")
 	dataTable := tablewriter.NewWriter(os.Stdout)
 	tableHeaderColors := []tablewriter.Colors{{tablewriter.Bold, tablewriter.FgHiWhiteColor},
@@ -147,7 +147,7 @@ func VaultCommand() *cobra.Command {
 				if envSecretKey != nil {
 					vault.Unlock(envSecretKey)
 				}
-				showVaultData(vault)
+				showVault(vault)
 			},
 		}
 		vaultCmd.PersistentFlags().StringP(vaultFileFlag.Name, vaultFileFlag.Shorthand, "", vaultFileFlag.Usage)

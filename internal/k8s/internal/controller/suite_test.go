@@ -32,7 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	slvv1 "oss.amagi.com/slv/internal/k8s/api/v1"
+	slvv1 "slv.sh/slv/internal/k8s/api/v1"
 	//+kubebuilder:scaffold:imports
 )
 

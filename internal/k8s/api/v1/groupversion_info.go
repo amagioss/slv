@@ -16,13 +16,13 @@ limitations under the License.
 
 // Package v1 contains API Schema definitions for the slv v1 API group
 // +kubebuilder:object:generate=true
-// +groupName=slv.oss.amagi.com
+// +groupName=slv.sh
 package v1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"oss.amagi.com/slv/internal/core/config"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
+	"slv.sh/slv/internal/core/config"
 )
 
 const (

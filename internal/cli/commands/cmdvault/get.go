@@ -9,9 +9,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/secretkey"
-	"oss.amagi.com/slv/internal/core/vaults"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func unlockVault(vault *vaults.Vault) {
@@ -25,7 +25,7 @@ func unlockVault(vault *vaults.Vault) {
 	}
 }
 
-func getVaultDataMap(vault *vaults.Vault, itemName string, encodeToBase64, withMetadata bool) map[string]any {
+func getVaultItemMap(vault *vaults.Vault, itemName string, encodeToBase64, withMetadata bool) map[string]any {
 	type vaultItem struct {
 		Value     string `json:"value,omitempty" yaml:"value,omitempty"`
 		Secret    bool   `json:"secret,omitempty" yaml:"secret,omitempty"`
@@ -33,15 +33,15 @@ func getVaultDataMap(vault *vaults.Vault, itemName string, encodeToBase64, withM
 		Hash      string `json:"hash,omitempty" yaml:"hash,omitempty"`
 	}
 	dataMap := make(map[string]any)
-	var vaultDataMap map[string]*vaults.VaultData
+	var vaultItemMap map[string]*vaults.VaultItem
 	var err error
 	if itemName == "" {
 		unlockVault(vault)
-		if vaultDataMap, err = vault.List(true); err != nil {
+		if vaultItemMap, err = vault.List(true); err != nil {
 			utils.ExitOnError(err)
 		}
 	} else {
-		var item *vaults.VaultData
+		var item *vaults.VaultItem
 		if !vault.Exists(itemName) {
 			utils.ExitOnError(fmt.Errorf("item %s not found", itemName))
 		}
@@ -51,9 +51,9 @@ func getVaultDataMap(vault *vaults.Vault, itemName string, encodeToBase64, withM
 		if item, err = vault.Get(itemName); err != nil {
 			utils.ExitOnError(err)
 		}
-		vaultDataMap = map[string]*vaults.VaultData{itemName: item}
+		vaultItemMap = map[string]*vaults.VaultItem{itemName: item}
 	}
-	for name, value := range vaultDataMap {
+	for name, value := range vaultItemMap {
 		var val string
 		if encodeToBase64 {
 			val = base64.StdEncoding.EncodeToString(value.Value())
@@ -97,21 +97,21 @@ func vaultGetCommand() *cobra.Command {
 				exportFormat := cmd.Flag(vaultExportFormatFlag.Name).Value.String()
 				switch exportFormat {
 				case "json":
-					dataMap := getVaultDataMap(vault, itemName, encodeToBase64, withMetadata)
-					jsonData, err := json.MarshalIndent(dataMap, "", "  ")
+					viMap := getVaultItemMap(vault, itemName, encodeToBase64, withMetadata)
+					jsonData, err := json.MarshalIndent(viMap, "", "  ")
 					if err != nil {
 						utils.ExitOnError(err)
 					}
 					fmt.Println(string(jsonData))
 				case "yaml", "yml":
-					dataMap := getVaultDataMap(vault, itemName, encodeToBase64, withMetadata)
+					dataMap := getVaultItemMap(vault, itemName, encodeToBase64, withMetadata)
 					yamlData, err := yaml.Marshal(dataMap)
 					if err != nil {
 						utils.ExitOnError(err)
 					}
 					fmt.Println(string(yamlData))
 				case "envars", "envar", "env", ".env":
-					dataMap := getVaultDataMap(vault, itemName, encodeToBase64, false)
+					dataMap := getVaultItemMap(vault, itemName, encodeToBase64, false)
 					for key, value := range dataMap {
 						strValue := value.(string)
 						strValue = strings.ReplaceAll(strValue, "\\", "\\\\")
@@ -121,7 +121,7 @@ func vaultGetCommand() *cobra.Command {
 				default:
 					if itemName == "" {
 						unlockVault(vault)
-						showVaultData(vault)
+						showVault(vault)
 					} else {
 						if !vault.Exists(itemName) {
 							utils.ExitOnError(fmt.Errorf("item %s not found", itemName))

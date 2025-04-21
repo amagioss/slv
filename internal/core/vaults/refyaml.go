@@ -52,7 +52,7 @@ func (vlt *Vault) yamlJsonRef(data []byte, prefix string, forceUpdate, encrypt, 
 		path = append(path, prefix)
 	}
 	err = vlt.yamlTraverseAndUpdateRefSecrets(&yamlMap, path, forceUpdate, encrypt)
-	conflicting = (err == errVaultDataExistsAlready)
+	conflicting = (err == errVaultItemExistsAlready)
 	if err == nil {
 		var updatedYaml []byte
 		if toJson {

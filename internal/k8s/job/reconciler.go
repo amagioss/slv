@@ -14,10 +14,10 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/crypto"
-	slvv1 "oss.amagi.com/slv/internal/k8s/api/v1"
-	"oss.amagi.com/slv/internal/k8s/utils"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/crypto"
+	slvv1 "slv.sh/slv/internal/k8s/api/v1"
+	"slv.sh/slv/internal/k8s/utils"
 )
 
 const (
@@ -62,7 +62,7 @@ func listSLVs(cfg *rest.Config) ([]slvv1.SLV, error) {
 }
 
 func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvObj slvv1.SLV) (err error) {
-	vault := slvObj.Spec.Vault
+	vault := slvObj.Vault
 	if utils.IsNamespacedMode() && slvObj.Namespace != utils.GetCurrentNamespace() {
 		if namespacedSecretKey, _ := utils.GetSecretKeyFor(clientset, slvObj.Namespace); namespacedSecretKey != nil {
 			vault.Unlock(namespacedSecretKey)

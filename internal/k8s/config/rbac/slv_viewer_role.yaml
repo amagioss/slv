@@ -12,7 +12,7 @@ metadata:
   name: slv-viewer-role
 rules:
 - apiGroups:
-  - slv.oss.amagi.com
+  - slv.sh
   resources:
   - slvs
   verbs:
@@ -20,7 +20,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - slv.oss.amagi.com
+  - slv.sh
   resources:
   - slvs/status
   verbs:

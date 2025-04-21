@@ -7,26 +7,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-type k8slv struct {
-	Kind       string            `json:"kind,omitempty" yaml:"kind,omitempty"`
-	APIVersion string            `json:"apiVersion,omitempty" yaml:"apiVersion,omitempty"`
-	Metadata   map[string]any    `json:"metadata,omitempty" yaml:"metadata,omitempty"`
-	Type       corev1.SecretType `json:"type,omitempty" yaml:"type,omitempty"`
-	Spec       *Vault            `json:"spec" yaml:"spec"`
-}
-
 func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err error) {
 	if name == "" && k8SecretContent == nil {
 		return errK8sNameRequired
 	}
-	if vlt.k8s == nil {
-		vlt.k8s = &k8slv{
-			APIVersion: k8sApiVersion,
-			Kind:       k8sKind,
-			Metadata:   make(map[string]any),
-			Spec:       vlt,
-		}
-	}
+	vlt.validate()
 	if k8SecretContent != nil {
 		var secretResource any
 		if err = yaml.Unmarshal(k8SecretContent, &secretResource); err != nil {
@@ -44,13 +29,8 @@ func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err err
 		if err != nil {
 			return err
 		}
-		if err = json.Unmarshal(metaJson, &vlt.k8s.Metadata); err != nil {
+		if err = json.Unmarshal(metaJson, &vlt.ObjectMeta); err != nil {
 			return err
-		}
-		for key, value := range vlt.k8s.Metadata {
-			if value == nil {
-				delete(vlt.k8s.Metadata, key)
-			}
 		}
 		secretDataMap := make(map[string][]byte)
 		if k8secret.Data != nil {
@@ -69,17 +49,17 @@ func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err err
 					return err
 				}
 			}
-			vlt.k8s.Type = k8secret.Type
+			vlt.Type = string(k8secret.Type)
 		}
 	}
 	if name != "" {
-		vlt.k8s.Metadata["name"] = name
+		vlt.Name = name
 	}
-	if vlt.k8s.Metadata["name"] == "" {
+	if vlt.Name == "" {
 		return errK8sNameRequired
 	}
 	if namespace != "" {
-		vlt.k8s.Metadata["namespace"] = namespace
+		vlt.Namespace = namespace
 	}
 	return vlt.commit()
 }
@@ -96,17 +76,17 @@ func (v *Vault) DeepCopy() *Vault {
 func (v *Vault) DeepCopyInto(out *Vault) {
 	*out = *v
 	v.init()
-	out.Data = make(map[string]string, len(v.Data))
-	for key, val := range v.Data {
-		out.Data[key] = val
-	}
-	out.Config = vaultConfig{
-		Version:     v.Config.Version,
-		Id:          v.Config.Id,
-		PublicKey:   v.Config.PublicKey,
-		Hash:        v.Config.Hash,
-		WrappedKeys: make([]string, len(v.Config.WrappedKeys)),
-	}
-	copy(out.Config.WrappedKeys, v.Config.WrappedKeys)
-	out.vaultSecretRefRegex = v.vaultSecretRefRegex
+	// out.Data = make(map[string]string, len(v.Data))
+	// for key, val := range v.Data {
+	// 	out.Data[key] = val
+	// }
+	// out.Config = vaultConfig{
+	// 	Version:     v.Config.Version,
+	// 	Id:          v.Config.Id,
+	// 	PublicKey:   v.Config.PublicKey,
+	// 	Hash:        v.Config.Hash,
+	// 	WrappedKeys: make([]string, len(v.Config.WrappedKeys)),
+	// }
+	// copy(out.Config.WrappedKeys, v.Config.WrappedKeys)
+	// out.vaultSecretRefRegex = v.vaultSecretRefRegex
 }

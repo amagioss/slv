@@ -5,19 +5,19 @@ import (
 	"time"
 
 	"gopkg.in/yaml.v3"
-	"oss.amagi.com/slv/internal/core/crypto"
+	"slv.sh/slv/internal/core/crypto"
 )
 
 func (vlt *Vault) putWithoutCommit(name string, value []byte, encrypt bool) (err error) {
 	if !secretNameRegex.MatchString(name) {
-		return errInvalidVaultDataName
+		return errInvalidVaultItemName
 	}
 	var finalValue string
 	if encrypt {
 		var vaultPublicKey *crypto.PublicKey
 		if vaultPublicKey, err = vlt.getPublicKey(); err == nil {
 			var sealedSecret *crypto.SealedSecret
-			if sealedSecret, err = vaultPublicKey.EncryptSecret(value, vlt.Config.Hash); err == nil {
+			if sealedSecret, err = vaultPublicKey.EncryptSecret(value, vlt.Spec.Config.Hash); err == nil {
 				finalValue = sealedSecret.String()
 			}
 		}
@@ -26,10 +26,10 @@ func (vlt *Vault) putWithoutCommit(name string, value []byte, encrypt bool) (err
 	}
 	if err == nil {
 		vlt.init()
-		if vlt.Data == nil {
-			vlt.Data = make(map[string]string)
+		if vlt.Spec.Data == nil {
+			vlt.Spec.Data = make(map[string]string)
 		}
-		vlt.Data[name] = finalValue
+		vlt.Spec.Data[name] = finalValue
 	}
 	return
 }
@@ -63,29 +63,29 @@ func (vlt *Vault) Import(importData []byte, force, encrypt bool) (err error) {
 
 func (vlt *Vault) Exists(name string) (exists bool) {
 	vlt.init()
-	if vlt.Data != nil {
-		_, exists = vlt.Data[name]
+	if vlt.Spec.Data != nil {
+		_, exists = vlt.Spec.Data[name]
 	}
 	return exists
 }
 
-func (vlt *Vault) List(decrypt bool) (map[string]*VaultData, error) {
+func (vlt *Vault) List(decrypt bool) (map[string]*VaultItem, error) {
 	vlt.init()
-	dataMap := make(map[string]*VaultData)
-	for name := range vlt.Data {
+	itemMap := make(map[string]*VaultItem)
+	for name := range vlt.Spec.Data {
 		if data, err := vlt.get(name, decrypt); err == nil {
-			dataMap[name] = data
+			itemMap[name] = data
 		} else {
 			return nil, fmt.Errorf("error retrieving '%s': %w", name, err)
 		}
 	}
-	return dataMap, nil
+	return itemMap, nil
 }
 
 func (vlt *Vault) GetAllValues() (map[string][]byte, error) {
-	if vaultDataMap, err := vlt.List(true); err == nil {
+	if vaultItemMap, err := vlt.List(true); err == nil {
 		valuesMap := make(map[string][]byte)
-		for name, data := range vaultDataMap {
+		for name, data := range vaultItemMap {
 			valuesMap[name] = data.value
 		}
 		return valuesMap, nil
@@ -94,43 +94,43 @@ func (vlt *Vault) GetAllValues() (map[string][]byte, error) {
 	}
 }
 
-func (vlt *Vault) get(name string, decrypt bool) (*VaultData, error) {
+func (vlt *Vault) get(name string, decrypt bool) (*VaultItem, error) {
 	vlt.init()
-	rawValue := vlt.Data[name]
+	rawValue := vlt.Spec.Data[name]
 	if rawValue == "" {
-		return nil, errVaultDataNotFound
+		return nil, errVaultItemNotFound
 	}
-	data := vlt.getFromCache(name)
-	if data == nil {
-		data = &VaultData{}
+	item := vlt.getFromCache(name)
+	if item == nil {
+		item = &VaultItem{}
 		sealedSecret := &crypto.SealedSecret{}
 		if err := sealedSecret.FromString(rawValue); err == nil {
-			data.isSecret = true
+			item.isSecret = true
 			if decrypt {
 				if vlt.IsLocked() {
 					return nil, errVaultLocked
 				}
-				if data.value, err = vlt.secretKey.DecryptSecret(*sealedSecret); err != nil {
+				if item.value, err = vlt.Spec.secretKey.DecryptSecret(*sealedSecret); err != nil {
 					return nil, err
 				}
 			}
-			data.updatedAt = new(time.Time)
-			*data.updatedAt = sealedSecret.EncryptedAt()
+			item.updatedAt = new(time.Time)
+			*item.updatedAt = sealedSecret.EncryptedAt()
 			if sealedSecret.Hash() != "" {
-				data.hash = sealedSecret.Hash()
+				item.hash = sealedSecret.Hash()
 			}
 		}
-		if !data.isSecret {
-			data.value = []byte(rawValue)
+		if !item.isSecret {
+			item.value = []byte(rawValue)
 		}
-		if decrypt || !data.isSecret {
-			vlt.putToCache(name, data)
+		if decrypt || !item.isSecret {
+			vlt.putToCache(name, item)
 		}
 	}
-	return data, nil
+	return item, nil
 }
 
-func (vlt *Vault) Get(name string) (data *VaultData, err error) {
+func (vlt *Vault) Get(name string) (item *VaultItem, err error) {
 	return vlt.get(name, true)
 }
 
@@ -148,7 +148,7 @@ func (vlt *Vault) DeleteItem(name string) error {
 func (vlt *Vault) DeleteItems(names []string) error {
 	vlt.init()
 	for _, name := range names {
-		delete(vlt.Data, name)
+		delete(vlt.Spec.Data, name)
 		vlt.deleteFromCache(name)
 	}
 	return vlt.commit()

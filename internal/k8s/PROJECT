@@ -2,20 +2,20 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: oss.amagi.com
+domain: slv.sh
 layout:
 - go.kubebuilder.io/v4
 projectName: operator
-repo: oss.amagi.com/slv
+repo: slv.sh/slv
 resources:
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: oss.amagi.com
+  domain: slv.sh
   group: slv
   kind: SLV
-  path: oss.amagi.com/slv/internal/k8s/api/v1
+  path: slv.sh/slv/internal/k8s/api/v1
   version: v1
   webhooks:
     validation: true

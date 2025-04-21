@@ -12,10 +12,10 @@ webhooks:
       namespace: system
       path: /validate
   failurePolicy: Fail
-  name: vslv.oss.amagi.com
+  name: validate-slv
   rules:
   - apiGroups:
-    - slv.oss.amagi.com
+    - slv.sh
     apiVersions:
     - v1
     operations:

@@ -21,10 +21,10 @@ func (vlt *Vault) getDataByReference(secretRef string) ([]byte, error) {
 }
 
 func (vlt *Vault) getVaultSecretRefRegex() *regexp.Regexp {
-	if vlt.vaultSecretRefRegex == nil {
-		vlt.vaultSecretRefRegex = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", vlt.Id()))
+	if vlt.Spec.vaultSecretRefRegex == nil {
+		vlt.Spec.vaultSecretRefRegex = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", vlt.Id()))
 	}
-	return vlt.vaultSecretRefRegex
+	return vlt.Spec.vaultSecretRefRegex
 }
 
 func (vlt *Vault) deRefFromContent(content string) ([]byte, error) {

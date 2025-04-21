@@ -3,8 +3,8 @@ package environments
 import (
 	"errors"
 
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/crypto"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/crypto"
 )
 
 const (

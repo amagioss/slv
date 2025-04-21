@@ -4,7 +4,7 @@ kind: ClusterRole
 metadata:
   name: slv-operator-clusterrole
 rules:
-  - apiGroups: ["slv.oss.amagi.com"]
+  - apiGroups: ["slv.sh"]
     resources: ["slvs"]
     verbs:
       - "get"
@@ -34,7 +34,7 @@ kind: ClusterRole
 metadata:
   name: slv-job-role
 rules:
-  - apiGroups: ["slv.oss.amagi.com"]
+  - apiGroups: ["slv.sh"]
     resources: ["slvs"]
     verbs:
       - "get"
@@ -62,7 +62,7 @@ kind: ClusterRole
 metadata:
   name: slv-cronjob-role
 rules:
-  - apiGroups: ["slv.oss.amagi.com"]
+  - apiGroups: ["slv.sh"]
     resources: ["slvs"]
     verbs:
       - "get"

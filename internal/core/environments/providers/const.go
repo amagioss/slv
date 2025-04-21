@@ -3,7 +3,7 @@ package providers
 import (
 	"errors"
 
-	"oss.amagi.com/slv/internal/core/config"
+	"slv.sh/slv/internal/core/config"
 )
 
 const (

@@ -5,8 +5,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/secretkey"
 )
 
 func vaultDerefCommand() *cobra.Command {

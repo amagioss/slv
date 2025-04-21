@@ -1,8 +1,8 @@
 package slv
 
 import (
-	"oss.amagi.com/slv/internal/core/secretkey"
-	"oss.amagi.com/slv/internal/core/vaults"
+	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func unlockVault(vaultFile string) (*vaults.Vault, error) {
@@ -20,8 +20,8 @@ func unlockVault(vaultFile string) (*vaults.Vault, error) {
 	return vault, nil
 }
 
-// GetAllVaultData returns all secrets from the vault
-func GetAllVaultData(vaultFile string) (map[string]*vaults.VaultData, error) {
+// GetAllVaultItems returns all secrets from the vault
+func GetAllVaultItems(vaultFile string) (map[string]*vaults.VaultItem, error) {
 	vault, err := unlockVault(vaultFile)
 	if err != nil {
 		return nil, err
@@ -29,8 +29,8 @@ func GetAllVaultData(vaultFile string) (map[string]*vaults.VaultData, error) {
 	return vault.List(true)
 }
 
-// GetVaultData returns a named secret from the vault
-func GetVaultData(vaultFile, name string) (vaultData *vaults.VaultData, err error) {
+// GetVaultItem returns a named secret from the vault
+func GetVaultItem(vaultFile, name string) (vaultItem *vaults.VaultItem, err error) {
 	if vault, err := unlockVault(vaultFile); err != nil {
 		return nil, err
 	} else {
@@ -38,8 +38,8 @@ func GetVaultData(vaultFile, name string) (vaultData *vaults.VaultData, err erro
 	}
 }
 
-// PutVaultData writes a secret to the vault
-func PutVaultData(vaultFile, secretName string, secretValue []byte, encrypt bool) error {
+// PutVaultItem writes a secret to the vault
+func PutVaultItem(vaultFile, secretName string, secretValue []byte, encrypt bool) error {
 	vault, err := vaults.Get(vaultFile)
 	if err != nil {
 		return err
