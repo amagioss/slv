@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/zalando/go-keyring"
-	"oss.amagi.com/slv/internal/core/commons"
-	"oss.amagi.com/slv/internal/core/input"
+	"slv.sh/slv/internal/core/commons"
+	"slv.sh/slv/internal/core/input"
 	"xipher.org/xipher"
 )
 

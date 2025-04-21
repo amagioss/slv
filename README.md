@@ -19,21 +19,21 @@ brew install amagioss/slv/slv
 #### Install Latest Version
 **With Shell (MacOs/Linux):**
 ```sh
-curl -fsSL https://oss.amagi.com/slv/install.sh | sh
+curl -fsSL https://slv.sh/scripts/install.sh | sh
 ```
 **With PowerShell (Windows):**
 ```powershell
-irm https://oss.amagi.com/slv/install.ps1 | iex
+irm https://slv.sh/scripts/install.ps1 | iex
 ```
 
 #### Install Specific Version
 **With Shell (MacOs/Linux):**
 ```sh
-curl -fsSL https://oss.amagi.com/slv/install.sh | sh -s v0.1.7
+curl -fsSL https://slv.sh/scripts/install.sh | sh -s v0.1.7
 ```
 **With PowerShell (Windows):**
 ```powershell
-$v="0.1.7"; irm https://oss.amagi.com/slv/install.ps1 | iex
+$v="0.1.7"; irm https://slv.sh/scripts/install.ps1 | iex
 ```
 
 ### Docker
@@ -48,9 +48,9 @@ docker run -it --rm -v $PWD:/workspace ghcr.io/amagioss/slv:latest version
 
 #### Create a new profile
 ```sh
-$ slv profile new -n amagi
+$ slv profile new -n my_org
 
-Created profile:  amagi
+Created profile: my_org
 ```
 
 #### Create a new environment
@@ -111,14 +111,14 @@ SLV can also be used as a library in your Go projects. The following is an examp
 ```go
 package main
 
-import "oss.amagi.com/slv"
+import "slv.sh/slv"
 
 func main() {
-	dataMap, err := slv.GetAllVaultData("demo.slv.yaml")
+	viMap, err := slv.GetAllVaultItems("demo.slv.yaml")
 	if err != nil {
 		panic(err)
 	}
-	for k, v := range dataMap {
+	for k, v := range viMap {
 		print(k, " : ", string(v.Value()), "\n")
 	}
 }

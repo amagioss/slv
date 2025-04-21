@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/core/config"
+	"slv.sh/slv/internal/core/config"
 )
 
 func versionCommand() *cobra.Command {

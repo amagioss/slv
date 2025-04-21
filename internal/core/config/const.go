@@ -13,7 +13,7 @@ const (
 	AppNameLowerCase = "slv"
 	AppNameUpperCase = "SLV"
 	description      = AppNameUpperCase + " (Secure Local Vault) : " + "Securely store, share, and access secrets alongside the codebase."
-	website          = "https://oss.amagi.com/slv"
+	website          = "https://slv.sh"
 	art              = `
 	 ____  _ __     __
 	/ ___|| |\ \   / /
@@ -22,10 +22,11 @@ const (
 	|____/|_____\_/   
 	`
 
-	K8SLVGroup      = "slv.oss.amagi.com"
-	K8SLVVersion    = "v1"
-	K8SLVKind       = AppNameUpperCase
-	K8SLVVaultField = "spec"
+	K8SLVGroup                = "slv.sh"
+	K8SLVVersion              = "v1"
+	K8SLVKind                 = AppNameUpperCase
+	K8SLVAnnotationVersionKey = K8SLVGroup + "/version"
+	K8SLVVaultField           = "spec"
 )
 
 var (

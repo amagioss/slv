@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"oss.amagi.com/slv/internal/core/commons"
+	"slv.sh/slv/internal/core/commons"
 )
 
 type ciphered struct {

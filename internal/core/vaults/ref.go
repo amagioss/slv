@@ -23,10 +23,10 @@ func (vlt *Vault) getUnusedName(name string) string {
 
 func (vlt *Vault) refBlob(data []byte, secretName string, forceUpdate, encrypt bool) (result string, conflicting bool, err error) {
 	if !secretNameRegex.MatchString(secretName) {
-		return "", false, errInvalidVaultDataName
+		return "", false, errInvalidVaultItemName
 	}
 	if !forceUpdate && vlt.Exists(secretName) {
-		return "", true, errVaultDataExistsAlready
+		return "", true, errVaultItemExistsAlready
 	}
 	return vlt.getDataRef(secretName), false, vlt.putWithoutCommit(secretName, data, encrypt)
 }

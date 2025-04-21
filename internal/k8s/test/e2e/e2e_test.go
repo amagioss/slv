@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"oss.amagi.com/slv/internal/k8s/test/utils"
+	"slv.sh/slv/internal/k8s/test/utils"
 )
 
 const namespace = "operator-system"

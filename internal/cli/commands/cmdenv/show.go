@@ -7,11 +7,11 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/environments"
-	"oss.amagi.com/slv/internal/core/profiles"
-	k8sutils "oss.amagi.com/slv/internal/k8s/utils"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/environments"
+	"slv.sh/slv/internal/core/profiles"
+	k8sutils "slv.sh/slv/internal/k8s/utils"
 )
 
 func ShowEnv(env environments.Environment, includeEDS, excludeBindingFromEds bool) {

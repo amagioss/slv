@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"oss.amagi.com/slv/internal/core/commons"
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/crypto"
+	"slv.sh/slv/internal/core/commons"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/crypto"
 )
 
 type EnvType string

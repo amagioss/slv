@@ -18,18 +18,13 @@ package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"oss.amagi.com/slv/internal/core/vaults"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// SLVSpec defines the desired state of SLV
-type SLVSpec struct {
-	vaults.Vault `json:",inline"`
-}
-
-// SLVStatus defines the observed state of SLV
+// SLVStatus defines the state of SLV vault
 type SLVStatus struct {
 	Error string `json:"error,omitempty"`
 }
@@ -37,19 +32,19 @@ type SLVStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// SLV is the Schema for the slvs API
+// SLV is the Schema for the SLV Vault
 type SLV struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Type   string    `json:"type,omitempty"`
-	Spec   SLVSpec   `json:"spec"`
-	Status SLVStatus `json:"status,omitempty"`
+	vaults.Vault `json:",inline"`
+	Type         string    `json:"type,omitempty"`
+	Status       SLVStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// SLVList contains a list of SLV
+// SLVList contains a list of SLV Vaults
 type SLVList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

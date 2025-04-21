@@ -10,8 +10,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"oss.amagi.com/slv/internal/core/crypto"
-	"oss.amagi.com/slv/internal/core/environments/providers"
+	"slv.sh/slv/internal/core/crypto"
+	"slv.sh/slv/internal/core/environments/providers"
 )
 
 const (

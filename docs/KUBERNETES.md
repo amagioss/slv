@@ -2,7 +2,7 @@
 
 SLV Kubernetes Integration helps in reconciling SLV vaults as kubernetes secrets into namespaces.
 - SLV can create SLV's kuberenetes compatible vaults with a `--k8s` flag.
-- Doing so creates vaults that are custom resources based on SLV's [CRD](https://oss.amagi.com/slv/k8s/crd.yaml).
+- Doing so creates vaults that are custom resources based on SLV's [CRD](https://slv.sh/k8s/crd.yaml).
 
 ```sh
 slv vault new -v [vault-file.yaml] -k [public_key] --search [env_key_word] --k8s [k8s-secret-file-path | - | k8s-slv-resource-name]
@@ -24,9 +24,9 @@ kubectl create secret docker-registry secret-tiger-docker \
 ```
 
 ## Getting Started
-To get started apply the SLV [CRD](https://oss.amagi.com/slv/k8s/crd.yaml) using the following command.
+To get started apply the SLV [CRD](https://slv.sh/k8s/crd.yaml) using the following command.
 ```sh
-kubectl apply -f https://oss.amagi.com/slv/k8s/crd.yaml
+kubectl apply -f https://slv.sh/k8s/crd.yaml
 ```
 
 SLV supports two ways to reconcile SLV vaults as kuberenetes secrets:
@@ -55,11 +55,11 @@ kubectl create secret generic slv -n slv --from-literal=SecretKey=SLV_ESK_AEAEKA
 ```
 - Install the SLV Kubernetes Operator into your cluster (modify the values in the yaml file based on your requirement)
 ```sh
-kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/operator.yaml
+kubectl apply -f https://slv.sh/k8s/samples/deploy/operator.yaml
 ```
 - Download this vault and keep it locally
 ```sh
-curl -s https://oss.amagi.com/slv/k8s/samples/pets.slv.yaml > pets.slv.yaml
+curl -fsSL https://slv.sh/k8s/samples/pets.slv.yaml > pets.slv.yaml
 ```
 - Apply the downloaded vault
 ```sh
@@ -102,7 +102,7 @@ kubectl create secret generic slv -n samplespace --from-literal=SecretKey=SLV_ES
 ```
 - Download this vault and keep it locally
 ```sh
-curl -s https://oss.amagi.com/slv/k8s/samples/pets.slv.yaml > pets.slv.yaml
+curl -fsSL https://slv.sh/k8s/samples/pets.slv.yaml > pets.slv.yaml
 ```
 - Apply the downloaded vault to the namespace
 ```sh
@@ -110,7 +110,7 @@ kubectl apply -f pets.slv.yaml -n samplespace
 ```
 - Run the job in your namespace (modify the values in the yaml file based on your requirement)
 ```sh
-kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/job.yaml -n samplespace
+kubectl apply -f https://slv.sh/k8s/samples/deploy/job.yaml -n samplespace
 ```
 - Try reading the processed secret
 ```sh
@@ -123,7 +123,7 @@ kubectl apply -f pets.slv.yaml -n samplespace
 ```
 - Run the job again
 ```sh
-kubectl apply -f https://oss.amagi.com/slv/k8s/samples/deploy/job.yaml -n samplespace
+kubectl apply -f https://slv.sh/k8s/samples/deploy/job.yaml -n samplespace
 ```
 - Try again by reading the updated secret
 ```sh

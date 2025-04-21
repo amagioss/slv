@@ -1,43 +1,78 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
   workflow_call:
 
 jobs:
 
   pages:
-    name: Deploy Static Assets to GitHub Pages
+
+    name: GitHub Pages Release
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     permissions:
       contents: read
+      packages: read
       pages: write
       id-token: write
+
     concurrency:
       group: "pages"
       cancel-in-progress: true
+
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Prepare pages directory
+
+      - name: Install oras
+        uses: oras-project/setup-oras@v1
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Pull Helm charts
         run: |
-          cp scripts/install/* pages/
+          CHARTS_REPO="ghcr.io/${{ github.repository }}/charts"
+          HELM_PAGES_DIR="pages/charts"
+          mkdir -p "${HELM_PAGES_DIR}"
+          VERSIONS=$(oras repo tags "${CHARTS_REPO}" | sort -Vu)
+          for v in $VERSIONS; do
+            helm pull "oci://${CHARTS_REPO}" --version "$v" -d "${HELM_PAGES_DIR}"
+          done
+          helm repo index "${HELM_PAGES_DIR}" --url "${{ steps.pages.outputs.base_url }}/charts"
+        shell: bash
+
+      - name: Add static assets
+        run: |
+          cp scripts pages/
           mkdir -p pages/k8s/samples/deploy
-          cp internal/k8s/config/crd/bases/slv.oss.amagi.com_slvs.yaml pages/k8s/crd.yaml
+          cp internal/k8s/config/crd/bases/slv.sh_slvs.yaml pages/k8s/crd.yaml
           cp internal/k8s/deploy/operator.yaml pages/k8s/samples/deploy/operator.yaml
           cp internal/k8s/deploy/job.yaml pages/k8s/samples/deploy/job.yaml
           cp internal/k8s/config/samples/slv_v1_slv.yaml pages/k8s/samples/pets.slv.yaml
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: pages
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

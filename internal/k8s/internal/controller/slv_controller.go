@@ -32,14 +32,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/go-logr/logr"
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/crypto"
-	slvv1 "oss.amagi.com/slv/internal/k8s/api/v1"
-	"oss.amagi.com/slv/internal/k8s/utils"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/crypto"
+	slvv1 "slv.sh/slv/internal/k8s/api/v1"
+	"slv.sh/slv/internal/k8s/utils"
 )
 
 const (
-	slvVersionAnnotationKey = slvv1.Group + "/version"
+	slvVersionAnnotationKey = config.K8SLVAnnotationVersionKey
 	slvResourceName         = config.AppNameLowerCase
 )
 
@@ -105,9 +105,9 @@ func (r *SLVReconciler) getSecretKeyForNamespace(ctx context.Context, namespace 
 	return nil
 }
 
-//+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=slv.oss.amagi.com,resources=slvs/finalizers,verbs=update
+//+kubebuilder:rbac:groups=slv.sh,resources=slvs,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=slv.sh,resources=slvs/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=slv.sh,resources=slvs/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -131,7 +131,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	vault := slvObj.Spec.Vault
+	vault := slvObj.Vault
 	if utils.IsNamespacedMode() && slvObj.Namespace != utils.GetCurrentNamespace() {
 		if namespaceSecretKey := r.getSecretKeyForNamespace(ctx, req.Namespace); namespaceSecretKey != nil {
 			vault.Unlock(namespaceSecretKey)

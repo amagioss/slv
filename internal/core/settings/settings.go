@@ -2,14 +2,8 @@ package settings
 
 import (
 	"gopkg.in/yaml.v3"
-	"oss.amagi.com/slv/internal/core/commons"
+	"slv.sh/slv/internal/core/commons"
 )
-
-// import (
-// 	"os"
-
-// 	"oss.amagi.com/slv/internal/core/commons"
-// )
 
 type Settings struct {
 	path *string
@@ -55,10 +49,3 @@ func GetManifest(path string) (settings *Settings, err error) {
 	settings.path = &path
 	return
 }
-
-// func (settings *Settings) commit() error {
-// 	if commons.WriteToYAML(*settings.path, "", settings) != nil {
-// 		return errWritingManifest
-// 	}
-// 	return nil
-// }

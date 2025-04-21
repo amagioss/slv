@@ -3,20 +3,21 @@ package vaults
 import (
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
 
-	"golang.org/x/mod/semver"
-	"oss.amagi.com/slv/internal/core/commons"
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/crypto"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"slv.sh/slv/internal/core/commons"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/crypto"
 )
 
 type vaultConfig struct {
-	Version     string   `json:"version,omitempty" yaml:"version,omitempty"`
 	Id          string   `json:"id" yaml:"id"`
 	PublicKey   string   `json:"publicKey" yaml:"publicKey"`
 	Hash        bool     `json:"hash,omitempty" yaml:"hash,omitempty"`
@@ -24,55 +25,62 @@ type vaultConfig struct {
 }
 
 type Vault struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Type string     `json:"type,omitempty" yaml:"type,omitempty"`
+	Spec *VaultSpec `json:"spec" yaml:"spec"`
+}
+
+type VaultSpec struct {
 	Secrets             map[string]string     `json:"slvSecrets,omitempty" yaml:"slvSecrets,omitempty"`
 	Data                map[string]string     `json:"slvData,omitempty" yaml:"slvData,omitempty"`
 	Config              vaultConfig           `json:"slvConfig" yaml:"slvConfig"`
 	path                string                `json:"-"`
 	publicKey           *crypto.PublicKey     `json:"-"`
 	secretKey           *crypto.SecretKey     `json:"-"`
-	cache               map[string]*VaultData `json:"-"`
+	cache               map[string]*VaultItem `json:"-"`
 	vaultSecretRefRegex *regexp.Regexp        `json:"-"`
-	k8s                 *k8slv                `json:"-"`
 }
 
-type VaultData struct {
+type VaultItem struct {
 	value     []byte     `json:"-"`
 	isSecret  bool       `json:"-"`
 	updatedAt *time.Time `json:"-"`
 	hash      string     `json:"-"`
 }
 
-func (vd *VaultData) Value() []byte {
-	return vd.value
+func (vi *VaultItem) Value() []byte {
+	return vi.value
 }
 
-func (vd *VaultData) IsSecret() bool {
-	return vd.isSecret
+func (vi *VaultItem) IsSecret() bool {
+	return vi.isSecret
 }
 
-func (vd *VaultData) UpdatedAt() *time.Time {
-	return vd.updatedAt
+func (vi *VaultItem) UpdatedAt() *time.Time {
+	return vi.updatedAt
 }
 
-func (vd *VaultData) Hash() string {
-	return vd.hash
+func (vi *VaultItem) Hash() string {
+	return vi.hash
 }
 
 func (vlt *Vault) Id() string {
-	return vlt.Config.Id
+	return vlt.Spec.Config.Id
 }
 
 func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
-	if vlt.publicKey == nil {
-		if vlt.Config.PublicKey == "" {
+	if vlt.Spec.publicKey == nil {
+		if vlt.Spec.Config.PublicKey == "" {
 			return nil, errVaultPublicKeyNotFound
 		}
-		publicKey, err = crypto.PublicKeyFromString(vlt.Config.PublicKey)
+		publicKey, err = crypto.PublicKeyFromString(vlt.Spec.Config.PublicKey)
 		if err == nil {
-			vlt.publicKey = publicKey
+			vlt.Spec.publicKey = publicKey
 		}
 	}
-	return vlt.publicKey, err
+	return vlt.Spec.publicKey, err
 }
 
 func isValidVaultFileName(fileName string) bool {
@@ -90,7 +98,7 @@ func newVaultId() (string, error) {
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yml or .slv.yaml.
-func New(filePath, k8sName, k8sNamespace string, k8SecretContent []byte, hash, quantumSafe bool, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+func New(filePath, vaultName, k8sNamespace string, k8SecretContent []byte, hash, quantumSafe bool, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
@@ -116,27 +124,34 @@ func New(filePath, k8sName, k8sNamespace string, k8SecretContent []byte, hash, q
 	if err != nil {
 		return nil, err
 	}
+	if vaultName == "" {
+		vaultName = getNameFromFilePath(filePath)
+	}
 	vlt = &Vault{
-		publicKey: vaultPublicKey,
-		Config: vaultConfig{
-			Version:   semver.Major(config.Version),
-			Id:        vauldId,
-			PublicKey: vaultPubKeyStr,
-			Hash:      hash,
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: k8sApiVersion,
+			Kind:       k8sKind,
 		},
-		path:      filePath,
-		secretKey: vaultSecretKey,
+		ObjectMeta: metav1.ObjectMeta{
+			Name: vaultName,
+		},
+		Spec: &VaultSpec{
+			publicKey: vaultPublicKey,
+			Config: vaultConfig{
+				Id:        vauldId,
+				PublicKey: vaultPubKeyStr,
+				Hash:      hash,
+			},
+			path:      filePath,
+			secretKey: vaultSecretKey,
+		},
 	}
 	for _, pubKey := range publicKeys {
 		if _, err := vlt.share(pubKey, false); err != nil {
 			return nil, err
 		}
 	}
-	if k8sName == "" && k8SecretContent == nil {
-		return vlt, vlt.commit()
-	} else {
-		return vlt, vlt.ToK8s(k8sName, k8sNamespace, k8SecretContent)
-	}
+	return vlt, vlt.commit()
 }
 
 // Returns the vault instance from a given yaml. The vault file name must end with .slv.yml or .slv.yaml.
@@ -155,83 +170,102 @@ func Get(filePath string) (vlt *Vault, err error) {
 	if err != nil {
 		return nil, err
 	}
-	return get(jsonData, filePath, obj[k8sVaultField] != nil)
+	return get(jsonData, filePath, obj[k8sVaultSpecField] != nil)
 }
 
-func get(jsonData []byte, filePath string, k8s bool) (vlt *Vault, err error) {
-	if k8s {
-		k8sVault := &k8slv{}
-		if err = json.Unmarshal(jsonData, k8sVault); err != nil {
-			return nil, err
-		}
-		vlt = k8sVault.Spec
-		vlt.k8s = k8sVault
-	} else {
+func get(jsonData []byte, filePath string, fullVault bool) (vlt *Vault, err error) {
+	if fullVault {
 		vlt = &Vault{}
 		if err = json.Unmarshal(jsonData, vlt); err != nil {
 			return nil, err
 		}
+	} else {
+		vs := &VaultSpec{}
+		if err = json.Unmarshal(jsonData, vs); err != nil {
+			return nil, err
+		}
+		vlt = &Vault{
+			Spec: vs,
+		}
 	}
-	vlt.path = filePath
-	if vlt.Config.Version != "" && config.Version != "" &&
-		(!semver.IsValid(vlt.Config.Version) || !semver.IsValid(config.Version) ||
-			semver.Compare(semver.Major(config.Version), semver.Major(vlt.Config.Version)) < 0) {
-		return nil, errVaultVersionNotRecognized
-	}
+	vlt.validate()
+	vlt.Spec.path = filePath
 	vlt.init()
 	return vlt, nil
 }
 
 func (vlt *Vault) init() {
-	if vlt.Secrets != nil {
-		if vlt.Data != nil {
-			for key, value := range vlt.Data {
-				vlt.Secrets[key] = value
+	if vlt.Spec.Secrets != nil {
+		if vlt.Spec.Data != nil {
+			for key, value := range vlt.Spec.Data {
+				vlt.Spec.Secrets[key] = value
 			}
 		}
-		vlt.Data = vlt.Secrets
-		vlt.Secrets = nil
+		vlt.Spec.Data = vlt.Spec.Secrets
+		vlt.Spec.Secrets = nil
 	}
 }
 
 func (vlt *Vault) IsLocked() bool {
-	return vlt.secretKey == nil
+	return vlt.Spec.secretKey == nil
 }
 
 func (vlt *Vault) Lock() {
 	vlt.clearSecretCache()
-	vlt.secretKey = nil
+	vlt.Spec.secretKey = nil
 }
 
 func (vlt *Vault) Delete() error {
 	vlt.clearSecretCache()
-	return os.Remove(vlt.path)
+	return os.Remove(vlt.Spec.path)
 }
 
 func (vlt *Vault) commit() error {
 	if err := vlt.validate(); err != nil {
 		return err
 	}
-	var data any
-	if vlt.k8s != nil {
-		data = vlt.k8s
-	} else {
-		data = vlt
+	jsonData, err := json.Marshal(vlt)
+	if err != nil {
+		return err
 	}
-	return commons.WriteToYAML(vlt.path,
-		"# Use the pattern "+vlt.getDataRef("YOUR_SECRET_NAME")+" as placeholder to reference data from this vault into files\n", data)
+	var data any
+	if err = json.Unmarshal(jsonData, &data); err != nil {
+		return fmt.Errorf("error unmarshaling JSON: %w", err)
+	}
+	return commons.WriteToYAML(vlt.Spec.path,
+		"# Use the pattern "+vlt.getDataRef("YOUR_SECRET_NAME")+
+			" as placeholder to reference data from this vault into files\n", data)
 }
 
 func (vlt *Vault) reset() error {
 	vlt.clearSecretCache()
-	return commons.ReadFromYAML(vlt.path, &vlt)
+	return commons.ReadFromYAML(vlt.Spec.path, &vlt)
+}
+
+func getNameFromFilePath(path string) string {
+	name := filepath.Base(path)
+	return strings.TrimSuffix(name, "."+vaultFileNameEnding+filepath.Ext(name))
 }
 
 func (vlt *Vault) validate() error {
-	if vlt.Config.PublicKey == "" {
+	vlt.APIVersion = k8sApiVersion
+	vlt.Kind = k8sKind
+	if vlt.ObjectMeta.Name == "" {
+		vlt.ObjectMeta.Name = getNameFromFilePath(vlt.Spec.path)
+	}
+	if vlt.Annotations == nil {
+		vlt.Annotations = make(map[string]string)
+	}
+	if vlt.Annotations[k8sVersionAnnotationKey] == "" {
+		vlt.Annotations[k8sVersionAnnotationKey] = config.Version
+	}
+	if vlt.ObjectMeta.CreationTimestamp.IsZero() {
+		vlt.ObjectMeta.CreationTimestamp = metav1.Now()
+	}
+	if vlt.Spec.Config.PublicKey == "" {
 		return errVaultPublicKeyNotFound
 	}
-	if len(vlt.Config.WrappedKeys) == 0 {
+	if len(vlt.Spec.Config.WrappedKeys) == 0 {
 		return errVaultWrappedKeysNotFound
 	}
 	return nil

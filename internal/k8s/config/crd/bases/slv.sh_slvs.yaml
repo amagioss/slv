@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: slvs.slv.oss.amagi.com
+  name: slvs.slv.sh
 spec:
-  group: slv.oss.amagi.com
+  group: slv.sh
   names:
     kind: SLV
     listKind: SLVList
@@ -17,7 +17,7 @@ spec:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: SLV is the Schema for the slvs API
+        description: SLV is the Schema for the SLV Vault
         properties:
           apiVersion:
             description: |-
@@ -37,7 +37,6 @@ spec:
           metadata:
             type: object
           spec:
-            description: SLVSpec defines the desired state of SLV
             properties:
               slvConfig:
                 properties:
@@ -46,8 +45,6 @@ spec:
                   id:
                     type: string
                   publicKey:
-                    type: string
-                  version:
                     type: string
                   wrappedKeys:
                     items:
@@ -70,7 +67,7 @@ spec:
             - slvConfig
             type: object
           status:
-            description: SLVStatus defines the observed state of SLV
+            description: SLVStatus defines the state of SLV vault
             properties:
               error:
                 type: string

@@ -3,7 +3,7 @@ package crypto
 import (
 	"strings"
 
-	"oss.amagi.com/slv/internal/core/commons"
+	"slv.sh/slv/internal/core/commons"
 	"xipher.org/xipher"
 )
 

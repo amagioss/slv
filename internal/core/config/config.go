@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"oss.amagi.com/slv/internal/core/input"
+	"slv.sh/slv/internal/core/input"
 )
 
 func IsAdminModeEnabled() bool {

@@ -3,10 +3,10 @@ package secretkey
 import (
 	"errors"
 
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/crypto"
-	"oss.amagi.com/slv/internal/core/environments"
-	"oss.amagi.com/slv/internal/core/environments/providers"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/crypto"
+	"slv.sh/slv/internal/core/environments"
+	"slv.sh/slv/internal/core/environments/providers"
 )
 
 var (

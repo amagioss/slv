@@ -4,10 +4,10 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/environments"
-	"oss.amagi.com/slv/internal/core/environments/providers"
-	"oss.amagi.com/slv/internal/core/profiles"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/environments"
+	"slv.sh/slv/internal/core/environments/providers"
+	"slv.sh/slv/internal/core/profiles"
 )
 
 func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) *cobra.Command {
