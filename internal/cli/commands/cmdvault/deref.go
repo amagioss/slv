@@ -23,7 +23,7 @@ func vaultDerefCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				paths, err := cmd.Flags().GetStringSlice(vaultDerefPathFlag.Name)
+				paths, err := cmd.Flags().GetStringSlice(vaultRefFileFlag.Name)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -47,8 +47,8 @@ func vaultDerefCommand() *cobra.Command {
 			},
 		}
 		vaultDerefCmd.Flags().StringSliceP(vaultFileFlag.Name, vaultFileFlag.Shorthand, []string{}, vaultFileFlag.Usage)
-		vaultDerefCmd.Flags().StringSliceP(vaultDerefPathFlag.Name, vaultDerefPathFlag.Shorthand, []string{}, vaultDerefPathFlag.Usage)
-		vaultDerefCmd.MarkFlagRequired(vaultDerefPathFlag.Name)
+		vaultDerefCmd.Flags().StringSliceP(vaultRefFileFlag.Name, vaultRefFileFlag.Shorthand, []string{}, vaultRefFileFlag.Usage)
+		vaultDerefCmd.MarkFlagRequired(vaultRefFileFlag.Name)
 	}
 	return vaultDerefCmd
 }
