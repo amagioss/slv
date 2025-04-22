@@ -13,7 +13,7 @@ const (
 	vaultFileNameEnding                 = config.AppNameLowerCase
 	VaultKey             crypto.KeyType = 'V'
 	vaultIdLength                       = 30
-	secretNamePattern                   = `([\w]+)?`
+	secretNamePattern                   = `([\w]+)`
 	secretRefPatternBase                = `\{\{\s*VAULTID\.` + secretNamePattern + `\s*\}\}`
 	vaultIdAbbrev                       = "VID"
 

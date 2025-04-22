@@ -237,7 +237,7 @@ func (vlt *Vault) commit() error {
 			" as placeholder to reference data from this vault into files\n", data)
 }
 
-func (vlt *Vault) reset() error {
+func (vlt *Vault) reload() error {
 	vlt.clearSecretCache()
 	return commons.ReadFromYAML(vlt.Spec.path, &vlt)
 }

@@ -108,17 +108,7 @@ var (
 
 	vaultRefFileFlag = utils.FlagDef{
 		Name:  "file",
-		Usage: "Path to the YAML/JSON file to be referenced",
-	}
-
-	vaultRefTypeFlag = utils.FlagDef{
-		Name:  "format",
-		Usage: "Data serialization format of the referenced file",
-	}
-
-	vaultDerefPathFlag = utils.FlagDef{
-		Name:  "path",
-		Usage: "Path to a file/directory to dereference secrets",
+		Usage: "Path to the YAML/JSON/blob file to be referenced",
 	}
 
 	secretRefPreviewOnlyFlag = utils.FlagDef{
