@@ -16,7 +16,7 @@ func profilePullCommand() *cobra.Command {
 			Aliases: []string{"sync"},
 			Short:   "Pulls the latest changes for the current profile from remote repository",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -36,7 +36,7 @@ func profilePushCommand() *cobra.Command {
 			Use:   "push",
 			Short: "Pushes the changes in the current profile to the pre-configured remote repository",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

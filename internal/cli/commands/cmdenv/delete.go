@@ -16,7 +16,7 @@ func envDeleteCommand() *cobra.Command {
 			Aliases: []string{"delete", "rm", "remove"},
 			Short:   "Deletes an environment from current profile",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

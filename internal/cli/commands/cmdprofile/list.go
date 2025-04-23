@@ -19,9 +19,9 @@ func profileListCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				} else {
-					defaultProfileName, _ := profiles.GetDefaultProfileName()
+					currentProfileName, _ := profiles.GetCurrentProfileName()
 					for _, profileName := range profileNames {
-						if profileName == defaultProfileName {
+						if profileName == currentProfileName {
 							fmt.Println("*", color.GreenString(profileName))
 						} else {
 							fmt.Println(" ", profileName)

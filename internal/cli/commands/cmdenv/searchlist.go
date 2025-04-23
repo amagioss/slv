@@ -16,7 +16,7 @@ func envListSearchCommand() *cobra.Command {
 			Aliases: []string{"list", "ls", "search", "find"},
 			Short:   "List/Search environments from profile",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

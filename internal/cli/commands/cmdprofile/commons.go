@@ -6,13 +6,13 @@ import (
 )
 
 var (
-	profileCmd     *cobra.Command
-	profileNewCmd  *cobra.Command
-	profileListCmd *cobra.Command
-	profileSetCmd  *cobra.Command
-	profileDelCmd  *cobra.Command
-	profilePullCmd *cobra.Command
-	profilePushCmd *cobra.Command
+	profileCmd           *cobra.Command
+	profileNewCmd        *cobra.Command
+	profileListCmd       *cobra.Command
+	profileSetCurrentCmd *cobra.Command
+	profileDelCmd        *cobra.Command
+	profilePullCmd       *cobra.Command
+	profilePushCmd       *cobra.Command
 )
 
 var (

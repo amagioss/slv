@@ -11,7 +11,7 @@ import (
 const (
 	// Profile Manager constants
 	profilesDirName        = "profiles"
-	defaultProfileFileName = ".default"
+	currentProfileFileName = ".current"
 
 	// Profile constants
 	profileDataDirName          = "data"
@@ -34,9 +34,9 @@ var (
 	errProfileNotFound                  = errors.New("profile not found")
 	errProfileExistsAlready             = errors.New("profile exists already")
 	errInvalidProfileName               = errors.New("invalid profile name")
-	errNoDefaultProfileFound            = errors.New("no default profile found")
-	errSettingDefaultProfile            = errors.New("error setting default profile")
-	errDeletingDefaultProfile           = errors.New("error deleting default profile")
+	errNoCurrentProfileSet              = errors.New("current profile not set")
+	errSettingCurrentProfile            = errors.New("error setting current profile")
+	errDeletingCurrentProfile           = errors.New("error deleting current profile")
 	errProfileNotGitRepository          = errors.New("profile is not a git repository")
 	errProfileGitPullMarking            = errors.New("error marking profile as pulled")
 	errChangesNotAllowedInGitProfile    = errors.New("changes not allowed since the current profile is git based")

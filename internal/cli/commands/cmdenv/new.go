@@ -57,7 +57,7 @@ func envNewServiceCommand() *cobra.Command {
 				}
 				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 				if addToProfileFlag {
-					profile, err := profiles.GetDefaultProfile()
+					profile, err := profiles.GetCurrentProfile()
 					if err != nil {
 						utils.ExitOnError(err)
 					}
@@ -127,7 +127,7 @@ func envNewUserCommand() *cobra.Command {
 				ShowEnv(*env, true, true)
 				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 				if addToProfileFlag {
-					profile, err := profiles.GetDefaultProfile()
+					profile, err := profiles.GetCurrentProfile()
 					if err != nil {
 						utils.ExitOnError(err)
 					}

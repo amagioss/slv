@@ -44,7 +44,7 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 			ShowEnv(*env, true, false)
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 			if addToProfileFlag {
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

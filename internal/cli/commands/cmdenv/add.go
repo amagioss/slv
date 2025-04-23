@@ -21,7 +21,7 @@ func envAddCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

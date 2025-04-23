@@ -22,7 +22,7 @@ func showVault(vault *vaults.Vault) {
 	if err != nil {
 		utils.ExitOnError(err)
 	}
-	profile, _ := profiles.GetDefaultProfile()
+	profile, _ := profiles.GetCurrentProfile()
 	self := environments.GetSelf()
 	accessorTable := tablewriter.NewWriter(os.Stdout)
 	accessorTable.SetHeader([]string{"Public Key", "Type", "Name"})

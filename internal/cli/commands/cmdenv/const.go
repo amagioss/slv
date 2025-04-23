@@ -41,7 +41,7 @@ var (
 
 	envAddFlag = utils.FlagDef{
 		Name:  "add",
-		Usage: "Adds environment to default profile",
+		Usage: "Adds environment to current profile",
 	}
 
 	envSetRootFlag = utils.FlagDef{
