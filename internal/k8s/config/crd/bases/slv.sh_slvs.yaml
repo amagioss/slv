@@ -59,10 +59,6 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
-              slvSecrets:
-                additionalProperties:
-                  type: string
-                type: object
             required:
             - slvConfig
             type: object

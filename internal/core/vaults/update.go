@@ -3,15 +3,16 @@ package vaults
 import (
 	"encoding/json"
 
+	"maps"
+
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 )
 
-func (vlt *Vault) ToK8s(name, namespace string, k8SecretContent []byte) (err error) {
-	if name == "" && k8SecretContent == nil {
-		return errK8sNameRequired
+func (vlt *Vault) Update(name, namespace string, k8SecretContent []byte) (err error) {
+	if err = vlt.validate(); err != nil {
+		return err
 	}
-	vlt.validate()
 	if k8SecretContent != nil {
 		var secretResource any
 		if err = yaml.Unmarshal(k8SecretContent, &secretResource); err != nil {
@@ -74,19 +75,32 @@ func (v *Vault) DeepCopy() *Vault {
 }
 
 func (v *Vault) DeepCopyInto(out *Vault) {
-	*out = *v
-	v.init()
-	// out.Data = make(map[string]string, len(v.Data))
-	// for key, val := range v.Data {
-	// 	out.Data[key] = val
-	// }
-	// out.Config = vaultConfig{
-	// 	Version:     v.Config.Version,
-	// 	Id:          v.Config.Id,
-	// 	PublicKey:   v.Config.PublicKey,
-	// 	Hash:        v.Config.Hash,
-	// 	WrappedKeys: make([]string, len(v.Config.WrappedKeys)),
-	// }
-	// copy(out.Config.WrappedKeys, v.Config.WrappedKeys)
-	// out.vaultSecretRefRegex = v.vaultSecretRefRegex
+	if v == nil || out == nil {
+		return
+	}
+	out.ObjectMeta = v.ObjectMeta
+	out.TypeMeta = v.TypeMeta
+	out.Type = v.Type
+	out.Spec = &VaultSpec{}
+	v.Spec.DeepCopyInto(out.Spec)
+}
+
+func (v *VaultSpec) DeepCopyInto(out *VaultSpec) {
+	if v == nil || out == nil {
+		return
+	}
+	out.path = v.path
+	out.Data = make(map[string]string)
+	maps.Copy(out.Data, v.Data)
+	if v.secretKey != nil {
+		out.secretKey = v.secretKey
+	}
+	out.publicKey = v.publicKey
+	out.vaultSecretRefRegex = v.vaultSecretRefRegex
+	out.Config = vaultConfig{
+		Id:          v.Config.Id,
+		PublicKey:   v.Config.PublicKey,
+		Hash:        v.Config.Hash,
+		WrappedKeys: v.Config.WrappedKeys,
+	}
 }

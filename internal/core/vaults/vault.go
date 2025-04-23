@@ -33,7 +33,6 @@ type Vault struct {
 }
 
 type VaultSpec struct {
-	Secrets             map[string]string     `json:"slvSecrets,omitempty" yaml:"slvSecrets,omitempty"`
 	Data                map[string]string     `json:"slvData,omitempty" yaml:"slvData,omitempty"`
 	Config              vaultConfig           `json:"slvConfig" yaml:"slvConfig"`
 	path                string                `json:"-"`
@@ -98,7 +97,7 @@ func newVaultId() (string, error) {
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yml or .slv.yaml.
-func New(filePath, vaultName, k8sNamespace string, k8SecretContent []byte, hash, quantumSafe bool, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+func New(filePath, name, k8sNamespace string, k8SecretContent []byte, hash, quantumSafe bool, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
 	}
@@ -124,8 +123,8 @@ func New(filePath, vaultName, k8sNamespace string, k8SecretContent []byte, hash,
 	if err != nil {
 		return nil, err
 	}
-	if vaultName == "" {
-		vaultName = getNameFromFilePath(filePath)
+	if name == "" {
+		name = getNameFromFilePath(filePath)
 	}
 	vlt = &Vault{
 		TypeMeta: metav1.TypeMeta{
@@ -133,7 +132,7 @@ func New(filePath, vaultName, k8sNamespace string, k8SecretContent []byte, hash,
 			Kind:       k8sKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: vaultName,
+			Name: name,
 		},
 		Spec: &VaultSpec{
 			publicKey: vaultPublicKey,
@@ -151,7 +150,12 @@ func New(filePath, vaultName, k8sNamespace string, k8SecretContent []byte, hash,
 			return nil, err
 		}
 	}
-	return vlt, vlt.commit()
+	if k8SecretContent != nil {
+		err = vlt.Update(name, k8sNamespace, k8SecretContent)
+	} else {
+		err = vlt.commit()
+	}
+	return
 }
 
 // Returns the vault instance from a given yaml. The vault file name must end with .slv.yml or .slv.yaml.
@@ -188,22 +192,9 @@ func get(jsonData []byte, filePath string, fullVault bool) (vlt *Vault, err erro
 			Spec: vs,
 		}
 	}
-	vlt.validate()
 	vlt.Spec.path = filePath
-	vlt.init()
-	return vlt, nil
-}
-
-func (vlt *Vault) init() {
-	if vlt.Spec.Secrets != nil {
-		if vlt.Spec.Data != nil {
-			for key, value := range vlt.Spec.Data {
-				vlt.Spec.Secrets[key] = value
-			}
-		}
-		vlt.Spec.Data = vlt.Spec.Secrets
-		vlt.Spec.Secrets = nil
-	}
+	err = vlt.validate()
+	return
 }
 
 func (vlt *Vault) IsLocked() bool {

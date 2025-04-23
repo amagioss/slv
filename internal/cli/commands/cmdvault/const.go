@@ -9,7 +9,7 @@ var (
 	// Commands
 	vaultCmd             *cobra.Command
 	vaultNewCmd          *cobra.Command
-	vaultToK8sCmd        *cobra.Command
+	vaultUpdateCmd       *cobra.Command
 	vaultAccessCmd       *cobra.Command
 	vaultAccessAddCmd    *cobra.Command
 	vaultAccessRemoveCmd *cobra.Command
@@ -34,9 +34,9 @@ var (
 		Usage: "Enables hashing by preserving a partial hash of the actual secret for the purpose of validating secret rotation [Not recommended, though it might be difficult to brute-force]",
 	}
 
-	vaultK8sNameFlag = utils.FlagDef{
-		Name:  "k8s-name",
-		Usage: "Name for the K8s SLV resource",
+	vaultNameFlag = utils.FlagDef{
+		Name:  "name",
+		Usage: "Name for the SLV vault",
 	}
 
 	vaultK8sNamespaceFlag = utils.FlagDef{
