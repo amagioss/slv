@@ -5,7 +5,7 @@ metadata:
   name: slv-rolebinding
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.config.serviceAccountName | default "slv-sa" }}
+  name: {{ .Values.config.serviceAccountName | default "slv-serviceaccount" }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole

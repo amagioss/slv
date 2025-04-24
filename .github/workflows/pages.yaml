@@ -49,12 +49,16 @@ jobs:
 
       - name: Pull Helm charts
         run: |
-          CHARTS_REPO="ghcr.io/${{ github.repository }}/charts"
+          CHARTS_REPO_BASE="ghcr.io/${{ github.repository }}/charts"
           HELM_PAGES_DIR="pages/charts"
           mkdir -p "${HELM_PAGES_DIR}"
-          VERSIONS=$(oras repo tags "${CHARTS_REPO}" | sort -Vu)
-          for v in $VERSIONS; do
-            helm pull "oci://${CHARTS_REPO}" --version "$v" -d "${HELM_PAGES_DIR}"
+          OPERATOR_VERSIONS=$(oras repo tags "${CHARTS_REPO_BASE}/slv-operator" | sort -Vu)
+          for v in $OPERATOR_VERSIONS; do
+            helm pull "oci://${CHARTS_REPO_BASE}/slv-operator" --version "$v" -d "${HELM_PAGES_DIR}"
+          done
+          JOB_VERSIONS=$(oras repo tags "${CHARTS_REPO_BASE}/slv-job" | sort -Vu)
+          for v in $JOB_VERSIONS; do
+            helm pull "oci://${CHARTS_REPO_BASE}/slv-job" --version "$v" -d "${HELM_PAGES_DIR}"
           done
           helm repo index "${HELM_PAGES_DIR}" --url "${{ steps.pages.outputs.base_url }}/charts"
         shell: bash

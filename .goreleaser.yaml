@@ -164,13 +164,13 @@ builds:
 archives:
   - id: slv
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    format: zip
-    builds:
+    formats: [ 'zip' ]
+    ids:
       - slv
   - id: slv-shared-lib
     name_template: "{{ .ProjectName }}-shared-lib_{{ .Os }}_{{ .Arch }}"
-    format: zip
-    builds:
+    formats: [ 'zip' ]
+    ids:
       - slv-shared-lib-darwin-amd64
       - slv-shared-lib-darwin-arm64
       - slv-shared-lib-windows-amd64
@@ -193,7 +193,7 @@ changelog:
       - '^test:'
 
 nfpms:
-  - builds:
+  - ids:
       - slv
     file_name_template: '{{ .PackageName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     vendor: SLV

@@ -67,10 +67,21 @@ jobs:
 
       - name: Helm Release Charts
         run: |
-          mkdir -p ./internal/k8s/charts/templates/CRDs
-          cp ./internal/k8s/config/crd/bases/slv.sh_slvs.yaml ./internal/k8s/charts/templates/CRDs/slv.sh_slvs.yaml
-          helm package ./internal/k8s/charts --version ${{ env.SLV_VERSION }} --destination . 
-          helm push ./slv-${{ env.SLV_VERSION }}.tgz oci://ghcr.io/${{ github.repository }}/charts
+          echo '{{- define "slvlib.crd" -}}' > internal/k8s/charts/slv-lib/templates/_crd.tpl
+          cat internal/k8s/config/crd/bases/slv.sh_slvs.yaml >> internal/k8s/charts/slv-lib/templates/_crd.tpl
+          echo '{{- end -}}' >> internal/k8s/charts/slv-lib/templates/_crd.tpl
+
+          sed -i "s/0\.0\.0/${SLV_VERSION}/g" internal/k8s/charts/slv-lib/Chart.yaml
+          sed -i "s/0\.0\.0/${SLV_VERSION}/g" internal/k8s/charts/slv-operator/Chart.yaml
+          sed -i "s/0\.0\.0/${SLV_VERSION}/g" internal/k8s/charts/slv-job/Chart.yaml
+
+          helm dep update ./internal/k8s/charts/slv-operator
+          helm dep update ./internal/k8s/charts/slv-job
+
+          helm package ./internal/k8s/charts/slv-operator --version ${{ env.SLV_VERSION }} --destination .
+          helm package ./internal/k8s/charts/slv-job --version ${{ env.SLV_VERSION }} --destination .
+          helm push ./slv-operator-${{ env.SLV_VERSION }}.tgz oci://ghcr.io/${{ github.repository }}/charts
+          helm push ./slv-job-${{ env.SLV_VERSION }}.tgz oci://ghcr.io/${{ github.repository }}/charts
 
   pages:
     name: GitHub Pages Release
