@@ -23,17 +23,16 @@ config:
   # The image with tag to be used for SLV
   # You must ensure that the tag that you use is the same as Chart.Version
   # Otherwise, helm will throw an error.
-  image: ghcr.io/amagioss/slv:0.0.0
+  image: ""
   # The image pull policy.
   imagePullPolicy: IfNotPresent
-
 
   # Setting resource constraints for the operator.
   resource:
     # Resource limits 
     limits:
-      cpu: "300m" 
-      memory: "300Mi" 
+      cpu: "250m" 
+      memory: "250Mi" 
     # Resource requests 
     requests:
       cpu: "250m" 
@@ -56,9 +55,3 @@ config:
   # The number of replicas to be used by the deployment for SLV pods. 
   # This is only applicable when the mode is set to "operator".
   replicas: 1
-
-
-
-
-
-

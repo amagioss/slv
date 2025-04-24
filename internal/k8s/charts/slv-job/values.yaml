@@ -14,8 +14,6 @@ slvEnvironment:
   # Ensure that this exists in the same namespace as the release namespace.
   k8sSecret: "slv"
 
-
-
 # The configuration for the SLV pod that will be run. 
 # This will be shared across all modes and hence is common.
 config:
@@ -23,17 +21,16 @@ config:
   # The image with tag to be used for SLV
   # You must ensure that the tag that you use is the same as Chart.Version
   # Otherwise, helm will throw an error.
-  image: ghcr.io/amagioss/slv:0.0.0
+  image: ""
   # The image pull policy.
   imagePullPolicy: IfNotPresent
-
 
   # Setting resource constraints for the operator.
   resource:
     # Resource limits 
     limits:
-      cpu: "300m" 
-      memory: "300Mi" 
+      cpu: "250m" 
+      memory: "250Mi" 
     # Resource requests 
     requests:
       cpu: "250m" 
@@ -58,10 +55,3 @@ config:
 
   # When set, the job will be run as a "Cronjob". The field specifies how frequently the cronjob has to run.
   # schedule: "0 * * * *" # Runs at the top of every hour
-
-
-  
-
-
-
-
