@@ -1,7 +1,7 @@
 package vaults
 
 import (
-	"oss.amagi.com/slv/internal/core/crypto"
+	"slv.sh/slv/internal/core/crypto"
 )
 
 func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
@@ -15,7 +15,7 @@ func (vlt *Vault) share(publicKey *crypto.PublicKey, commit bool) (bool, error) 
 	if publicKey.Type() == VaultKey {
 		return false, errVaultCannotBeSharedWithVault
 	}
-	for _, wrappedKeyStr := range vlt.Config.WrappedKeys {
+	for _, wrappedKeyStr := range vlt.Spec.Config.WrappedKeys {
 		wrappedKey := &crypto.WrappedKey{}
 		if err := wrappedKey.FromString(wrappedKeyStr); err != nil {
 			return false, err
@@ -24,9 +24,9 @@ func (vlt *Vault) share(publicKey *crypto.PublicKey, commit bool) (bool, error) 
 			return false, nil
 		}
 	}
-	wrappedKey, err := publicKey.EncryptKey(*vlt.secretKey)
+	wrappedKey, err := publicKey.EncryptKey(*vlt.Spec.secretKey)
 	if err == nil {
-		vlt.Config.WrappedKeys = append(vlt.Config.WrappedKeys, wrappedKey.String())
+		vlt.Spec.Config.WrappedKeys = append(vlt.Spec.Config.WrappedKeys, wrappedKey.String())
 		if commit {
 			err = vlt.commit()
 		}
@@ -35,7 +35,7 @@ func (vlt *Vault) share(publicKey *crypto.PublicKey, commit bool) (bool, error) 
 }
 
 func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error {
-	vaultDataMap, err := vlt.List(true)
+	vaultItemMap, err := vlt.List(true)
 	if err != nil {
 		return err
 	}
@@ -75,24 +75,24 @@ func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error
 	if err != nil {
 		return err
 	}
-	vlt.publicKey = vaultPublicKey
+	vlt.Spec.publicKey = vaultPublicKey
 	vaultPublicKeyStr, err := vaultPublicKey.String()
 	if err != nil {
 		return err
 	}
-	vlt.Config.PublicKey = vaultPublicKeyStr
-	vlt.secretKey = vaultSecretKey
-	vlt.Config.WrappedKeys = []string{}
+	vlt.Spec.Config.PublicKey = vaultPublicKeyStr
+	vlt.Spec.secretKey = vaultSecretKey
+	vlt.Spec.Config.WrappedKeys = []string{}
 	for _, accessor := range newAccessors {
-		wrappedKey, err := accessor.EncryptKey(*vlt.secretKey)
+		wrappedKey, err := accessor.EncryptKey(*vlt.Spec.secretKey)
 		if err == nil {
-			vlt.Config.WrappedKeys = append(vlt.Config.WrappedKeys, wrappedKey.String())
+			vlt.Spec.Config.WrappedKeys = append(vlt.Spec.Config.WrappedKeys, wrappedKey.String())
 		} else {
 			return err
 		}
 	}
-	for name, vaultData := range vaultDataMap {
-		if err = vlt.putWithoutCommit(name, vaultData.value, vaultData.isSecret); err != nil {
+	for name, vaultItem := range vaultItemMap {
+		if err = vlt.putWithoutCommit(name, vaultItem.value, vaultItem.isSecret); err != nil {
 			return err
 		}
 	}
@@ -101,7 +101,7 @@ func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error
 
 func (vlt *Vault) ListAccessors() ([]crypto.PublicKey, error) {
 	var accessors []crypto.PublicKey
-	for _, wrappedKeyStr := range vlt.Config.WrappedKeys {
+	for _, wrappedKeyStr := range vlt.Spec.Config.WrappedKeys {
 		wrappedKey := &crypto.WrappedKey{}
 		err := wrappedKey.FromString(wrappedKeyStr)
 		if err != nil {
@@ -120,14 +120,14 @@ func (vlt *Vault) Unlock(secretKey *crypto.SecretKey) error {
 	if !vlt.IsLocked() {
 		return nil
 	}
-	for _, wrappedKeyStr := range vlt.Config.WrappedKeys {
+	for _, wrappedKeyStr := range vlt.Spec.Config.WrappedKeys {
 		wrappedKey := &crypto.WrappedKey{}
 		if err := wrappedKey.FromString(wrappedKeyStr); err != nil {
 			return err
 		}
 		decryptedKey, err := secretKey.DecryptKey(*wrappedKey)
 		if err == nil {
-			vlt.secretKey = decryptedKey
+			vlt.Spec.secretKey = decryptedKey
 			return nil
 		}
 	}

@@ -7,7 +7,7 @@ import (
 
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"oss.amagi.com/slv/internal/core/config"
+	"slv.sh/slv/internal/core/config"
 )
 
 var (

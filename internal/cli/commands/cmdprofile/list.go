@@ -5,8 +5,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/profiles"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/profiles"
 )
 
 func profileListCommand() *cobra.Command {
@@ -19,9 +19,9 @@ func profileListCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				} else {
-					defaultProfileName, _ := profiles.GetDefaultProfileName()
+					currentProfileName, _ := profiles.GetCurrentProfileName()
 					for _, profileName := range profileNames {
-						if profileName == defaultProfileName {
+						if profileName == currentProfileName {
 							fmt.Println("*", color.GreenString(profileName))
 						} else {
 							fmt.Println(" ", profileName)

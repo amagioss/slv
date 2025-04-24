@@ -5,9 +5,9 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/environments"
-	"oss.amagi.com/slv/internal/core/profiles"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/environments"
+	"slv.sh/slv/internal/core/profiles"
 )
 
 func envAddCommand() *cobra.Command {
@@ -21,7 +21,7 @@ func envAddCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

@@ -27,7 +27,8 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	slvv1 "oss.amagi.com/slv/internal/k8s/api/v1"
+	"slv.sh/slv/internal/core/vaults"
+	slvv1 "slv.sh/slv/internal/k8s/api/v1"
 )
 
 var _ = Describe("SLV Controller", func() {
@@ -47,9 +48,11 @@ var _ = Describe("SLV Controller", func() {
 			err := k8sClient.Get(ctx, typeNamespacedName, slv)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &slvv1.SLV{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName,
-						Namespace: "default",
+					Vault: vaults.Vault{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      resourceName,
+							Namespace: "default",
+						},
 					},
 					// TODO(user): Specify other spec details if needed.
 				}

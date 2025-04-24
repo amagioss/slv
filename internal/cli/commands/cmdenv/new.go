@@ -5,12 +5,12 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/crypto"
-	"oss.amagi.com/slv/internal/core/environments"
-	"oss.amagi.com/slv/internal/core/environments/providers"
-	"oss.amagi.com/slv/internal/core/input"
-	"oss.amagi.com/slv/internal/core/profiles"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/crypto"
+	"slv.sh/slv/internal/core/environments"
+	"slv.sh/slv/internal/core/environments/providers"
+	"slv.sh/slv/internal/core/input"
+	"slv.sh/slv/internal/core/profiles"
 )
 
 func envNewCommand() *cobra.Command {
@@ -57,7 +57,7 @@ func envNewServiceCommand() *cobra.Command {
 				}
 				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 				if addToProfileFlag {
-					profile, err := profiles.GetDefaultProfile()
+					profile, err := profiles.GetCurrentProfile()
 					if err != nil {
 						utils.ExitOnError(err)
 					}
@@ -127,7 +127,7 @@ func envNewUserCommand() *cobra.Command {
 				ShowEnv(*env, true, true)
 				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 				if addToProfileFlag {
-					profile, err := profiles.GetDefaultProfile()
+					profile, err := profiles.GetCurrentProfile()
 					if err != nil {
 						utils.ExitOnError(err)
 					}

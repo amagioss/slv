@@ -6,8 +6,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/input"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/input"
 )
 
 func vaultPutCommand() *cobra.Command {

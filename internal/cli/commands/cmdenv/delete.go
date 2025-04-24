@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/input"
-	"oss.amagi.com/slv/internal/core/profiles"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/input"
+	"slv.sh/slv/internal/core/profiles"
 )
 
 func envDeleteCommand() *cobra.Command {
@@ -16,7 +16,7 @@ func envDeleteCommand() *cobra.Command {
 			Aliases: []string{"delete", "rm", "remove"},
 			Short:   "Deletes an environment from current profile",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

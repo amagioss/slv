@@ -2,14 +2,14 @@ package cmdvault
 
 import (
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/cli/commands/utils"
 )
 
 var (
 	// Commands
 	vaultCmd             *cobra.Command
 	vaultNewCmd          *cobra.Command
-	vaultToK8sCmd        *cobra.Command
+	vaultUpdateCmd       *cobra.Command
 	vaultAccessCmd       *cobra.Command
 	vaultAccessAddCmd    *cobra.Command
 	vaultAccessRemoveCmd *cobra.Command
@@ -34,9 +34,9 @@ var (
 		Usage: "Enables hashing by preserving a partial hash of the actual secret for the purpose of validating secret rotation [Not recommended, though it might be difficult to brute-force]",
 	}
 
-	vaultK8sNameFlag = utils.FlagDef{
-		Name:  "k8s-name",
-		Usage: "Name for the K8s SLV resource",
+	vaultNameFlag = utils.FlagDef{
+		Name:  "name",
+		Usage: "Name for the SLV vault",
 	}
 
 	vaultK8sNamespaceFlag = utils.FlagDef{
@@ -108,17 +108,7 @@ var (
 
 	vaultRefFileFlag = utils.FlagDef{
 		Name:  "file",
-		Usage: "Path to the YAML/JSON file to be referenced",
-	}
-
-	vaultRefTypeFlag = utils.FlagDef{
-		Name:  "format",
-		Usage: "Data serialization format of the referenced file",
-	}
-
-	vaultDerefPathFlag = utils.FlagDef{
-		Name:  "path",
-		Usage: "Path to a file/directory to dereference secrets",
+		Usage: "Path to the YAML/JSON/blob file to be referenced",
 	}
 
 	secretRefPreviewOnlyFlag = utils.FlagDef{

@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/crypto"
-	"oss.amagi.com/slv/internal/core/environments"
-	"oss.amagi.com/slv/internal/core/profiles"
-	k8sutils "oss.amagi.com/slv/internal/k8s/utils"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/crypto"
+	"slv.sh/slv/internal/core/environments"
+	"slv.sh/slv/internal/core/profiles"
+	k8sutils "slv.sh/slv/internal/k8s/utils"
 )
 
 func GetPublicKeys(cmd *cobra.Command, root, pq bool) (publicKeys []*crypto.PublicKey, err error) {
@@ -34,7 +34,7 @@ func GetPublicKeys(cmd *cobra.Command, root, pq bool) (publicKeys []*crypto.Publ
 		}
 		publicKeys = append(publicKeys, publicKey)
 	}
-	profile, err := profiles.GetDefaultProfile()
+	profile, err := profiles.GetCurrentProfile()
 	if err != nil && len(queries) > 0 {
 		return nil, err
 	}

@@ -2,17 +2,17 @@ package cmdprofile
 
 import (
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/cli/commands/utils"
 )
 
 var (
-	profileCmd     *cobra.Command
-	profileNewCmd  *cobra.Command
-	profileListCmd *cobra.Command
-	profileSetCmd  *cobra.Command
-	profileDelCmd  *cobra.Command
-	profilePullCmd *cobra.Command
-	profilePushCmd *cobra.Command
+	profileCmd           *cobra.Command
+	profileNewCmd        *cobra.Command
+	profileListCmd       *cobra.Command
+	profileSetCurrentCmd *cobra.Command
+	profileDelCmd        *cobra.Command
+	profilePullCmd       *cobra.Command
+	profilePushCmd       *cobra.Command
 )
 
 var (

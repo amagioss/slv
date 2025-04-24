@@ -5,12 +5,12 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/cmdenv"
-	"oss.amagi.com/slv/internal/cli/commands/cmdprofile"
-	"oss.amagi.com/slv/internal/cli/commands/cmdsystem"
-	"oss.amagi.com/slv/internal/cli/commands/cmdvault"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/config"
+	"slv.sh/slv/internal/cli/commands/cmdenv"
+	"slv.sh/slv/internal/cli/commands/cmdprofile"
+	"slv.sh/slv/internal/cli/commands/cmdsystem"
+	"slv.sh/slv/internal/cli/commands/cmdvault"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/config"
 )
 
 var (

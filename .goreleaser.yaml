@@ -24,10 +24,10 @@ builds:
       - CGO_ENABLED=0
     flags: "-mod=readonly"
     ldflags:
-      - -X oss.amagi.com/slv/internal/core/config.version={{.Version}}
-      - -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}
+      - -X slv.sh/slv/internal/core/config.version={{.Version}}
+      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
+      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
+      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
 
 # Builds for Shared Library
   - id: slv-shared-lib-darwin-amd64
@@ -43,10 +43,10 @@ builds:
       - CXX=o64-clang++
     flags: "-mod=readonly"
     ldflags:
-      - -X oss.amagi.com/slv/internal/core/config.version={{.Version}}
-      - -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}
+      - -X slv.sh/slv/internal/core/config.version={{.Version}}
+      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
+      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
+      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
 
   - id: slv-shared-lib-darwin-arm64
     binary: slv
@@ -61,10 +61,10 @@ builds:
       - CXX=oa64-clang++
     flags: "-mod=readonly"
     ldflags:
-      - -X oss.amagi.com/slv/internal/core/config.version={{.Version}}
-      - -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}
+      - -X slv.sh/slv/internal/core/config.version={{.Version}}
+      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
+      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
+      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
 
   - id: slv-shared-lib-windows-amd64
     binary: slv
@@ -79,10 +79,10 @@ builds:
       - CXX=x86_64-w64-mingw32-g++
     flags: "-mod=readonly"
     ldflags:
-      - -X oss.amagi.com/slv/internal/core/config.version={{.Version}}
-      - -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}
+      - -X slv.sh/slv/internal/core/config.version={{.Version}}
+      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
+      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
+      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
 
   - id: slv-shared-lib-windows-arm64
     binary: slv
@@ -97,10 +97,10 @@ builds:
       - CXX=/llvm-mingw/bin/aarch64-w64-mingw32-g++
     flags: "-mod=readonly"
     ldflags:
-      - -X oss.amagi.com/slv/internal/core/config.version={{.Version}}
-      - -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}
+      - -X slv.sh/slv/internal/core/config.version={{.Version}}
+      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
+      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
+      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
 
   - id: slv-shared-lib-linux-amd64
     binary: slv
@@ -115,10 +115,10 @@ builds:
       - CXX=x86_64-linux-gnu-g++
     flags: "-mod=readonly"
     ldflags:
-      - -X oss.amagi.com/slv/internal/core/config.version={{.Version}}
-      - -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}
+      - -X slv.sh/slv/internal/core/config.version={{.Version}}
+      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
+      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
+      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
       - -extldflags "-lc -lrt -lpthread"
 
   - id: slv-shared-lib-linux-arm64
@@ -134,10 +134,10 @@ builds:
       - CXX=aarch64-linux-gnu-g++
     flags: "-mod=readonly"
     ldflags:
-      - -X oss.amagi.com/slv/internal/core/config.version={{.Version}}
-      - -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}
+      - -X slv.sh/slv/internal/core/config.version={{.Version}}
+      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
+      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
+      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
       - -extldflags "-lc -lrt -lpthread"
 
   - id: slv-shared-lib-linux-armv7
@@ -155,22 +155,22 @@ builds:
       - CXX=arm-linux-gnueabihf-g++
     flags: "-mod=readonly"
     ldflags:
-      - -X oss.amagi.com/slv/internal/core/config.version={{.Version}}
-      - -X oss.amagi.com/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X oss.amagi.com/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X oss.amagi.com/slv/internal/core/config.releaseURL={{.ReleaseURL}}
+      - -X slv.sh/slv/internal/core/config.version={{.Version}}
+      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
+      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
+      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
       - -extldflags "-lc -lrt -lpthread"
 
 archives:
   - id: slv
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    format: zip
-    builds:
+    formats: [ 'zip' ]
+    ids:
       - slv
   - id: slv-shared-lib
     name_template: "{{ .ProjectName }}-shared-lib_{{ .Os }}_{{ .Arch }}"
-    format: zip
-    builds:
+    formats: [ 'zip' ]
+    ids:
       - slv-shared-lib-darwin-amd64
       - slv-shared-lib-darwin-arm64
       - slv-shared-lib-windows-amd64
@@ -193,33 +193,22 @@ changelog:
       - '^test:'
 
 nfpms:
-  - builds:
+  - ids:
       - slv
     file_name_template: '{{ .PackageName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
-    vendor: Amagi Media Labs
-    homepage: https://oss.amagi.com/slv
+    vendor: SLV
+    homepage: https://slv.sh
     maintainer: Shibly Meeran <shibme@shib.me>
     formats:
       - apk
       - deb
       - rpm
 
-release:
-  extra_files:
-    - glob: ./internal/k8s/config/crd/bases/slv.oss.amagi.com_slvs.yaml
-      name_template: slv_k8s_crd.yaml
-    - glob: ./internal/k8s/deploy/operator.yaml
-      name_template: slv_k8s_operator.yaml
-    - glob: ./internal/k8s/deploy/job.yaml
-      name_template: slv_k8s_job.yaml
-    - glob: ./internal/k8s/config/samples/slv_v1_slv.yaml
-      name_template: slv_k8s_sample.yaml
-
 brews:
   - ids:
       - slv
     name: slv
-    homepage: "https://oss.amagi.com/slv"
+    homepage: https://slv.sh
     commit_author:
       name: Shibly Meeran
       email: shibme@shib.me

@@ -5,11 +5,11 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/cmdenv"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/environments"
-	"oss.amagi.com/slv/internal/core/input"
+	"slv.sh/slv/internal/cli/commands/cmdenv"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/environments"
+	"slv.sh/slv/internal/core/input"
 )
 
 func systemResetCommand() *cobra.Command {

@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/environments"
-	"oss.amagi.com/slv/internal/core/profiles"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/environments"
+	"slv.sh/slv/internal/core/profiles"
 )
 
 func envListSearchCommand() *cobra.Command {
@@ -16,7 +16,7 @@ func envListSearchCommand() *cobra.Command {
 			Aliases: []string{"list", "ls", "search", "find"},
 			Short:   "List/Search environments from profile",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

@@ -2,7 +2,7 @@ package cmdenv
 
 import (
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/cli/commands/utils"
 )
 
 var (
@@ -41,7 +41,7 @@ var (
 
 	envAddFlag = utils.FlagDef{
 		Name:  "add",
-		Usage: "Adds environment to default profile",
+		Usage: "Adds environment to current profile",
 	}
 
 	envSetRootFlag = utils.FlagDef{

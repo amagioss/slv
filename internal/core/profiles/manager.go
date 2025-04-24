@@ -4,15 +4,15 @@ import (
 	"os"
 	"path/filepath"
 
-	"oss.amagi.com/slv/internal/core/commons"
-	"oss.amagi.com/slv/internal/core/config"
+	"slv.sh/slv/internal/core/commons"
+	"slv.sh/slv/internal/core/config"
 )
 
 type profileManager struct {
 	dir                string
 	profileList        map[string]struct{}
-	defaultProfileName *string
-	defaultProfile     *Profile
+	currentProfileName *string
+	currentProfile     *Profile
 }
 
 var profileMgr *profileManager = nil
@@ -49,7 +49,7 @@ func initProfileManager() error {
 		}
 	}
 	profileMgr = &manager
-	GetDefaultProfileName()
+	GetCurrentProfileName()
 	return nil
 }
 
@@ -96,13 +96,13 @@ func New(profileName, gitURI, gitBranch string) error {
 		return err
 	}
 	profileMgr.profileList[profileName] = struct{}{}
-	if profileMgr.defaultProfileName == nil {
-		return SetDefault(profileName)
+	if profileMgr.currentProfileName == nil {
+		return SetCurrentProfile(profileName)
 	}
 	return nil
 }
 
-func SetDefault(profileName string) error {
+func SetCurrentProfile(profileName string) error {
 	if profileName == "" {
 		return errInvalidProfileName
 	}
@@ -112,44 +112,44 @@ func SetDefault(profileName string) error {
 	if _, exists := profileMgr.profileList[profileName]; !exists {
 		return errProfileNotFound
 	}
-	if commons.WriteToFile(filepath.Join(profileMgr.dir, defaultProfileFileName), []byte(profileName)) != nil {
-		return errSettingDefaultProfile
+	if commons.WriteToFile(filepath.Join(profileMgr.dir, currentProfileFileName), []byte(profileName)) != nil {
+		return errSettingCurrentProfile
 	}
-	profileMgr.defaultProfileName = &profileName
-	profileMgr.defaultProfile = nil
+	profileMgr.currentProfileName = &profileName
+	profileMgr.currentProfile = nil
 	return nil
 }
 
-func GetDefaultProfileName() (string, error) {
+func GetCurrentProfileName() (string, error) {
 	if err := initProfileManager(); err != nil {
 		return "", err
 	}
-	if profileMgr.defaultProfileName != nil {
-		return *profileMgr.defaultProfileName, nil
+	if profileMgr.currentProfileName != nil {
+		return *profileMgr.currentProfileName, nil
 	}
-	fileContent, err := os.ReadFile(filepath.Join(profileMgr.dir, defaultProfileFileName))
-	defaultProfileName := string(fileContent)
+	fileContent, err := os.ReadFile(filepath.Join(profileMgr.dir, currentProfileFileName))
+	currentProfileName := string(fileContent)
 	if err != nil {
-		return "", errNoDefaultProfileFound
+		return "", errNoCurrentProfileSet
 	}
-	profileMgr.defaultProfileName = &defaultProfileName
-	return *profileMgr.defaultProfileName, nil
+	profileMgr.currentProfileName = &currentProfileName
+	return *profileMgr.currentProfileName, nil
 }
 
-func GetDefaultProfile() (profile *Profile, err error) {
+func GetCurrentProfile() (profile *Profile, err error) {
 	if err = initProfileManager(); err != nil {
 		return nil, err
 	}
-	if profileMgr.defaultProfile == nil {
-		defaultProfileName, err := GetDefaultProfileName()
+	if profileMgr.currentProfile == nil {
+		currentProfileName, err := GetCurrentProfileName()
 		if err != nil {
 			return nil, err
 		}
-		if profileMgr.defaultProfile, err = Get(defaultProfileName); err != nil {
+		if profileMgr.currentProfile, err = Get(currentProfileName); err != nil {
 			return nil, err
 		}
 	}
-	return profileMgr.defaultProfile, nil
+	return profileMgr.currentProfile, nil
 }
 
 func Delete(profileName string) error {
@@ -162,8 +162,8 @@ func Delete(profileName string) error {
 	if _, exists := profileMgr.profileList[profileName]; !exists {
 		return errProfileNotFound
 	}
-	if profileMgr.defaultProfileName != nil && *profileMgr.defaultProfileName == profileName {
-		return errDeletingDefaultProfile
+	if profileMgr.currentProfileName != nil && *profileMgr.currentProfileName == profileName {
+		return errDeletingCurrentProfile
 	}
 	delete(profileMgr.profileList, profileName)
 	delete(profileMap, profileName)

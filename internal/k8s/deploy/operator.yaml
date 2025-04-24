@@ -12,7 +12,7 @@ kind: ClusterRole
 metadata:
   name: slv-k8s-operator-clusterrole
 rules:
-  - apiGroups: ["slv.oss.amagi.com"]
+  - apiGroups: ["slv.sh"]
     resources: ["slvs"]
     verbs:
       - "get"

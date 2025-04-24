@@ -16,7 +16,7 @@ func ProfileCommand() *cobra.Command {
 			},
 		}
 		profileCmd.AddCommand(profileNewCommand())
-		profileCmd.AddCommand(profileDefaultCommand())
+		profileCmd.AddCommand(profileSetCurrentCommand())
 		profileCmd.AddCommand(profileListCommand())
 		profileCmd.AddCommand(profileDeleteCommand())
 		profileCmd.AddCommand(profilePullCommand())

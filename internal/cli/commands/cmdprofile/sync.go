@@ -5,8 +5,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"oss.amagi.com/slv/internal/cli/commands/utils"
-	"oss.amagi.com/slv/internal/core/profiles"
+	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/profiles"
 )
 
 func profilePullCommand() *cobra.Command {
@@ -16,7 +16,7 @@ func profilePullCommand() *cobra.Command {
 			Aliases: []string{"sync"},
 			Short:   "Pulls the latest changes for the current profile from remote repository",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -36,7 +36,7 @@ func profilePushCommand() *cobra.Command {
 			Use:   "push",
 			Short: "Pushes the changes in the current profile to the pre-configured remote repository",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetDefaultProfile()
+				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

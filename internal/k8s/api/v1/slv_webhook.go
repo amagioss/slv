@@ -18,12 +18,12 @@ package v1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime"
-	"oss.amagi.com/slv/internal/core/config"
-	"oss.amagi.com/slv/internal/core/crypto"
-	"oss.amagi.com/slv/internal/k8s/utils"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/crypto"
+	"slv.sh/slv/internal/k8s/utils"
 )
 
 // log is for logging in this package.
@@ -39,7 +39,7 @@ func (r *SLV) SetupWebhookWithManager(mgr ctrl.Manager) error {
 // TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-//+kubebuilder:webhook:path=/validate,mutating=false,failurePolicy=fail,sideEffects=None,groups=slv.oss.amagi.com,resources=slvs,verbs=create;update,versions=v1,name=vslv.oss.amagi.com,admissionReviewVersions=v1
+//+kubebuilder:webhook:path=/validate,mutating=false,failurePolicy=fail,sideEffects=None,groups=slv.sh,resources=slvs,verbs=create;update,versions=v1,name=validate-slv,admissionReviewVersions=v1
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (r *SLV) Default() {
@@ -48,7 +48,7 @@ func (r *SLV) Default() {
 }
 
 func (r *SLV) validateSLV() (err error) {
-	vault := r.Spec.Vault
+	vault := r
 	if utils.IsNamespacedMode() && r.Namespace != utils.GetCurrentNamespace() {
 		if namespacedSecretKey, _ := utils.GetSecretKeyFor(nil, r.Namespace); namespacedSecretKey != nil {
 			vault.Unlock(namespacedSecretKey)

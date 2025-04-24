@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"oss.amagi.com/slv/internal/core/crypto"
-	"oss.amagi.com/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/crypto"
+	"slv.sh/slv/internal/core/secretkey"
 )
 
 var (

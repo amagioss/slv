@@ -4,9 +4,9 @@ import (
 	"os"
 	"strings"
 
-	"oss.amagi.com/slv/internal/cli"
-	"oss.amagi.com/slv/internal/k8s/job"
-	"oss.amagi.com/slv/internal/k8s/operator"
+	"slv.sh/slv/internal/cli"
+	"slv.sh/slv/internal/k8s/job"
+	"slv.sh/slv/internal/k8s/operator"
 )
 
 func main() {
