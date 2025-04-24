@@ -65,7 +65,6 @@ jobs:
 
       - name: Add static assets
         run: |
-          cp scripts pages/
           mkdir -p pages/k8s/samples/deploy
           cp internal/k8s/config/crd/bases/slv.sh_slvs.yaml pages/k8s/crd.yaml
           cp internal/k8s/deploy/operator.yaml pages/k8s/samples/deploy/operator.yaml
