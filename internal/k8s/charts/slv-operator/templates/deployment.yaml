@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slv-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: slv-k8s-operator
+    {{- with .Values.config.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.config.replicas }}
+  selector:
+    matchLabels:
+      app: slv-operator
+  template:
+    metadata:
+      labels:
+        app: slv-operator
+        {{- with .Values.config.podLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.config.serviceAccountName | default "slv-serviceaccount" }}
+      containers:
+      {{- include "slvlib.container" . | nindent 8 }}
+            - name: SLV_MODE
+              value: "k8s_operator"
+        {{- if and (false) (eq .Values.config.enableWebhook true) }}
+            - name: SLV_K8S_ENABLE_WEBHOOKS
+              value: "true"
+        {{- end }}

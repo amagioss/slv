@@ -1,0 +1,1 @@
+{{- include "slvlib.clusterrolebinding" . | nindent 0 }}

@@ -1,4 +1,4 @@
-{{- if eq .Values.config.mode "cronjob" }}
+{{- if .Values.config.schedule -}}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -6,11 +6,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: slv-cronjob
-    {{- with .Values.runnerConfig.labels }}
+    {{- with .Values.config.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  schedule: {{ .Values.config.schedule | default "0 * * * *" }}
+  schedule: {{ .Values.config.schedule }}
   jobTemplate:
     spec:
       ttlSecondsAfterFinished: {{ .Values.config.ttlSecondsAfterFinished | default 0 }}
@@ -20,13 +20,15 @@ spec:
           namespace: {{ .Release.Namespace }}
           labels:
             app: slv-cronjob
-            {{- with .Values.runnerConfig.podLabels }}
+            {{- with .Values.config.podLabels }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
         spec:
           containers:
-          {{- include "slv.container" . | nindent 12 }}
+          {{- include "slvlib.container" . | nindent 12 }}
+                - name: SLV_MODE
+                  value: "k8s_job"
           restartPolicy: Never
-          serviceAccountName: {{ .Values.runnerConfig.serviceAccountName | default "slv-sa" }}
+          serviceAccountName: {{ .Values.config.serviceAccountName | default "slv-serviceaccount" }}
       backoffLimit: {{ .Values.config.backoffLimit | default 4 }}
 {{- end}}
