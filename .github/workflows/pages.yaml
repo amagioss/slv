@@ -30,6 +30,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install npm dependencies
+        run: |
+          npm -C website ci
+
+      - name: Build Docusaurus
+        run: |
+          npm -C website run build
+      
+      - name: Copy Build Assets to Pages
+        run: |
+          cp -r website/build/* pages/
+
       - name: Install oras
         uses: oras-project/setup-oras@v1
 

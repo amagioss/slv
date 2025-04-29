@@ -1,0 +1,57 @@
+.features {
+  padding: 4rem 0;
+  background-color: var(--ifm-background-surface-color);
+}
+
+.feature {
+  text-align: center;
+  padding: 2rem;
+}
+
+.featureSvg {
+  height: 80px;
+  width: 80px;
+  margin-bottom: 1rem;
+  fill: var(--ifm-color-primary);
+  stroke: var(--ifm-color-primary);
+}
+
+h3 {
+  margin-top: 1rem;
+  font-size: 1.5rem;
+}
+
+.feature p{
+  color: var(--ifm-color-primary-light);
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feature {
+  text-align: center;
+  padding: 2rem;
+  opacity: 0; /* Initially invisible */
+  animation: fadeInUp 2s ease forwards;
+}
+
+/* Optional: Stagger animation slightly for each feature */
+.features .col:nth-child(1) .feature {
+  animation-delay: 1s;
+}
+.features .col:nth-child(2) .feature {
+  animation-delay: 1s;
+}
+.features .col:nth-child(3) .feature {
+  animation-delay: 1s;
+}
