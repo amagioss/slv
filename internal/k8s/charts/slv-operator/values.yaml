@@ -1,57 +1,51 @@
-# Configuration for the SLV Environment. This environment is responsible for being able to decrypt the SLV secrets.
-slvEnvironment:
-    
-  # Please ensure that atleast one of ["secretBinding","k8sSecret"] are filled. 
-  # SLV may not work as expected without a secret key or binding specified.
+# Please ensure that atleast one of ["secretBinding","k8sSecret"] are filled. 
+# SLV may not work as expected without a secret key or binding specified.
 
-  # The secretBinding String
-  secretBinding: ""
+# The secretBinding String
+secretBinding: ""
 
-  # The name of the secret in the Kubernetes cluster that contains the secretKey or the secretBinding. 
-  # The secretKey is to be put inside the key name "SecretKey".
-  # (or)
-  # The secretBinding is to be put inside the key name "SecretBinding". 
-  # Ensure that this exists in the same namespace as the release namespace.
-  k8sSecret: "slv"
+# The name of the secret in the Kubernetes cluster that contains the secretKey or the secretBinding. 
+# The secretKey is to be put inside the key name "SecretKey".
+# (or)
+# The secretBinding is to be put inside the key name "SecretBinding". 
+# Ensure that this exists in the same namespace as the release namespace.
+k8sSecret: ""
 
+# The image with tag to be used for SLV
+# You must ensure that the tag that you use is the same as Chart.Version
+# Otherwise, helm will throw an error.
+image: ""
+# The image pull policy.
+imagePullPolicy: IfNotPresent
 
+# Setting resource constraints for the operator.
+resource:
+  # Resource limits 
+  limits:
+    cpu: "250m" 
+    memory: "250Mi" 
+  # Resource requests 
+  requests:
+    cpu: "250m" 
+    memory: "250Mi" 
 
-# The configuration for the SLV pod that will be run. 
-# This will be shared across all modes and hence is common.
-config:
-  
-  # The image with tag to be used for SLV
-  # You must ensure that the tag that you use is the same as Chart.Version
-  # Otherwise, helm will throw an error.
-  image: ""
-  # The image pull policy.
-  imagePullPolicy: IfNotPresent
+# The labels to be set for the Deployment/CronJob/Job
+labels: {}
 
-  # Setting resource constraints for the operator.
-  resource:
-    # Resource limits 
-    limits:
-      cpu: "250m" 
-      memory: "250Mi" 
-    # Resource requests 
-    requests:
-      cpu: "250m" 
-      memory: "250Mi" 
-  
-  # The labels to be set for the Deployment/CronJob/Job
-  labels: {}
+# The pod Labels to be set for SLV pods.
+podLabels: {}
 
-  # The pod Labels to be set for SLV pods.
-  podLabels: {}
+# The name with which the serviceAccount to be attached to the SLV pods. 
+# If you set this value, the helm chart will not set up cluster roles or cluster role bindings. 
+# You will have to make sure that the service account attached has necessary permissions for SLV to run smoothly. 
+# Understand the consequenses of filling this value carefully.
+serviceAccountName: ""
 
-  # The name with which the serviceAccount has to be created and attached to the SLV pods.
-  serviceAccountName: ""
+# Whether to enable the SLV webhook or not. 
+# This is only applicable for the operator mode. 
+# This feature is still work in progress and will be enabled in the future.
+enableWebhook: false
 
-  # Whether to enable the SLV webhook or not. 
-  # This is only applicable for the operator mode. 
-  # This feature is still work in progress and will be enabled in the future.
-  enableWebhook: false
-
-  # The number of replicas to be used by the deployment for SLV pods. 
-  # This is only applicable when the mode is set to "operator".
-  replicas: 1
+# The number of replicas to be used by the deployment for SLV pods. 
+# This is only applicable when the mode is set to "operator".
+replicas: 1

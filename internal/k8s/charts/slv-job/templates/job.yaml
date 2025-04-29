@@ -1,23 +1,23 @@
-{{- if not .Values.config.schedule -}}
+{{- if not .Values.schedule -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name:  slv-job
+  name:  {{.Values.jobName | default "slv-job"}}
   namespace: {{ .Release.Namespace }}
   labels:
     app: slv-job
-    {{- with .Values.config.labels }}
+    {{- with .Values.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ttlSecondsAfterFinished: {{ .Values.config.ttlSecondsAfterFinished | default 3600 }}
+  ttlSecondsAfterFinished: {{ .Values.ttlSecondsAfterFinished | default 3600 }}
   template:
     metadata:
       name: slv-job
       namespace: {{ .Release.Namespace }}
       labels:
         app: slv-job
-        {{- with .Values.config.podLabels }}
+        {{- with .Values.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -26,6 +26,6 @@ spec:
             - name: SLV_MODE
               value: "k8s_job"
       restartPolicy: Never
-      serviceAccountName: {{ .Values.config.serviceAccountName | default "slv-serviceaccount" }}
-  backoffLimit: {{ .Values.config.backoffLimit | default 4 }}
+      serviceAccountName: {{ .Values.serviceAccountName | default "slv-serviceaccount" }}
+  backoffLimit: {{ .Values.backoffLimit | default 4 }}
   {{- end -}}

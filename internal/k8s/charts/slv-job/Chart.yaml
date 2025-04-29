@@ -1,6 +1,6 @@
 apiVersion: v2
 name: slv-job
-description: To run a Job/CronJob that reconciles SLV CRs to Kubernetes Secret
+description: Job/CronJob to reconcile SLV CRs to Secrets
 
 # A chart can be either an 'application' or a 'library' chart.
 #

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: slv-operator
-description: Runs a controller that reconciles SLV CRs to Kubernetes Secret
+description: Controller that reconciles SLV CRs to Secrets
 
 # A chart can be either an 'application' or a 'library' chart.
 #
