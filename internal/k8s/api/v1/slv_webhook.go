@@ -49,20 +49,13 @@ func (r *SLV) Default() {
 
 func (r *SLV) validateSLV() (err error) {
 	vault := r
-	if utils.IsNamespacedMode() && r.Namespace != utils.GetCurrentNamespace() {
-		if namespacedSecretKey, _ := utils.GetSecretKeyFor(nil, r.Namespace); namespacedSecretKey != nil {
-			vault.Unlock(namespacedSecretKey)
-		}
+	var secretKey *crypto.SecretKey
+	if secretKey, err = utils.SecretKey(); err != nil {
+		slvlog.Error(err, "failed to get secret key", "name", r.Name)
 	}
-	if vault.IsLocked() {
-		var secretKey *crypto.SecretKey
-		if secretKey, err = utils.SecretKey(); err != nil {
-			slvlog.Error(err, "failed to get secret key", "name", r.Name)
-		}
-		if err = vault.Unlock(secretKey); err != nil {
-			slvlog.Error(err, "failed to unlock vault", "name", r.Name)
-			return err
-		}
+	if err = vault.Unlock(secretKey); err != nil {
+		slvlog.Error(err, "failed to unlock vault", "name", r.Name)
+		return err
 	}
 	if _, err = vault.List(true); err != nil {
 		slvlog.Error(err, "failed to get all secrets", "name", r.Name)

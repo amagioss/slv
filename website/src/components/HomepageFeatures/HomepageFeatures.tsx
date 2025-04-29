@@ -10,11 +10,11 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Kubernetes Native',
-    Svg: require('@site/static/img/kubernetes.svg').default,
+    title: 'Complete SDLC Integration',
+    Svg: require('@site/static/img/code.svg').default,
     description: (
       <>
-        SLV integrates seamlessly into Kubernetes as a native custom resource (CRD), eliminating the need for external vault servers or complex sidecars.
+        From local development to CI builds and deployment (cloud or on-prem), SLV secures your secrets across the entire software development lifecycle.
       </>
     ),
   },
@@ -23,16 +23,16 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/git-branch.svg').default,
     description: (
       <>
-        Safely commit encrypted secrets into your Git repositories without risk. SLV enables true GitOps workflows, treating secrets as part of your infrastructure code.
+        Securely commit SLV-encrypted secrets into Git repositories with confidence. SLV enables true GitOps by managing secrets as code, similar to configs.
       </>
     ),
   },
   {
-    title: 'Complete SDLC Integration',
-    Svg: require('@site/static/img/code.svg').default,
+    title: 'Kubernetes Native',
+    Svg: require('@site/static/img/kubernetes.svg').default,
     description: (
       <>
-        From local CLI development to GitHub Actions to Kubernetes clusters, SLV secures your secrets throughout the entire software development lifecycle.
+        SLV seamlessly integrates with Kubernetes via a custom resource automatically converted to native secrets, eliminating external vault servers or complex sidecars.
       </>
     ),
   },

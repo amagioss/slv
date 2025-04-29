@@ -17,7 +17,6 @@ import (
 	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/crypto"
 	slvv1 "slv.sh/slv/internal/k8s/api/v1"
-	"slv.sh/slv/internal/k8s/utils"
 )
 
 const (
@@ -46,7 +45,7 @@ func listSLVs(cfg *rest.Config) ([]slvv1.SLV, error) {
 			Group:    config.K8SLVGroup,
 			Version:  config.K8SLVVersion,
 			Resource: "slvs",
-		}).Namespace(utils.GetCurrentNamespace()).List(context.Background(), metav1.ListOptions{})
+		}).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -63,15 +62,8 @@ func listSLVs(cfg *rest.Config) ([]slvv1.SLV, error) {
 
 func toSecret(clientset *kubernetes.Clientset, secretKey *crypto.SecretKey, slvObj slvv1.SLV) (err error) {
 	vault := slvObj.Vault
-	if utils.IsNamespacedMode() && slvObj.Namespace != utils.GetCurrentNamespace() {
-		if namespacedSecretKey, _ := utils.GetSecretKeyFor(clientset, slvObj.Namespace); namespacedSecretKey != nil {
-			vault.Unlock(namespacedSecretKey)
-		}
-	}
-	if vault.IsLocked() {
-		if err = vault.Unlock(secretKey); err != nil {
-			return err
-		}
+	if err = vault.Unlock(secretKey); err != nil {
+		return err
 	}
 	slvSecretMap, err := vault.GetAllValues()
 	if err != nil {

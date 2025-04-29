@@ -54,7 +54,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
-	google.golang.org/api v0.230.0 // indirect
+	google.golang.org/api v0.231.0 // indirect
 	google.golang.org/genproto v0.0.0-20250428153025-10db94c68c34 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250428153025-10db94c68c34 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250428153025-10db94c68c34 // indirect

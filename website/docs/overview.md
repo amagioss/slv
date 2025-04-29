@@ -6,25 +6,19 @@ sidebar_position: 1
 
 # What is SLV?
 
-**SLV (Secure Local Vault)** is an open-source tool by Amagi OSS that enables secure storage, sharing, and access to secrets directly alongside your codebase. It keeps secrets encrypted and only accessible to authorized environments.
+**SLV (Secure Local Vault)** is a free and open-source tool designed for securely storing, sharing, and accessing secrets directly within your codebase. It ensures secrets remain encrypted at rest and in transit, allowing access only within explicitly authorized environments, thus simplifying secure collaboration and enhancing overall security.
 
 ---
 
-## What Problem Does SLV Solve?
+## What problem does SLV solve?
 
-Secrets like API keys, credentials, and tokens are often spread across Git repos, CI/CD systems, and cloud configs — increasing the risk of leaks and complexity. SLV solves this by offering a simple, secure, and decentralized way to manage secrets without relying on a central vault.
-
----
-
-## Core Idea
-
-- **Anyone can add or update secrets**, but only authorized environments can decrypt them.
-- **Each environment has a unique identity**, which controls access to secrets stored within a shared encrypted vault.
-
-This makes SLV secure, auditable, and friendly to GitOps workflows.
+Secrets such as API keys and tokens are often scattered across Git repositories, CI/CD systems, and cloud configurations, increasing the risk of leaks. SLV addresses this challenge by providing a simple, secure, and decentralized solution for managing secrets without relying on a centralized vault. This approach enables seamless cross-collaboration across hybrid cloud environments and even supports air-gapped systems.
 
 ---
 
-## Get Started
+## Core Principles of SLV
 
-Jump right into using SLV with setup instructions and usage examples - [Quick Start](/docs/quick-start)
+- **Secrets can be added or updated by anyone**, but only authorized environments are permitted to decrypt them.
+- **Each environment is treated as a distinct entity**, with the ability to access secrets distributed across multiple vaults.
+
+This approach ensures that SLV remains secure, auditable, and easy to use.

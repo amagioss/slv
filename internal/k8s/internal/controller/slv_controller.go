@@ -33,7 +33,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"slv.sh/slv/internal/core/config"
-	"slv.sh/slv/internal/core/crypto"
 	slvv1 "slv.sh/slv/internal/k8s/api/v1"
 	"slv.sh/slv/internal/k8s/utils"
 )
@@ -89,22 +88,6 @@ func isAnnotationUpdateRequred(slvAnnotations, secretAnnotations map[string]stri
 	return secretAnnotations[slvVersionAnnotationKey] != config.Version
 }
 
-func (r *SLVReconciler) getSecretKeyForNamespace(ctx context.Context, namespace string) (secretKey *crypto.SecretKey) {
-	slvSecret := &corev1.Secret{}
-	if err := r.Get(ctx, types.NamespacedName{Name: slvResourceName, Namespace: namespace}, slvSecret); err == nil {
-		if secretKey, _ = utils.ExtractSecretKeyFromSecret(slvSecret); secretKey != nil {
-			return secretKey
-		}
-	}
-	slvConfigMap := &corev1.ConfigMap{}
-	if err := r.Get(ctx, types.NamespacedName{Name: slvResourceName, Namespace: namespace}, slvConfigMap); err == nil {
-		if secretKey, _ = utils.ExtractSecretKeyFromConfigMapBinding(slvConfigMap); secretKey != nil {
-			return secretKey
-		}
-	}
-	return nil
-}
-
 //+kubebuilder:rbac:groups=slv.sh,resources=slvs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=slv.sh,resources=slvs/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=slv.sh,resources=slvs/finalizers,verbs=update
@@ -132,18 +115,11 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	}
 
 	vault := slvObj.Vault
-	if utils.IsNamespacedMode() && slvObj.Namespace != utils.GetCurrentNamespace() {
-		if namespaceSecretKey := r.getSecretKeyForNamespace(ctx, req.Namespace); namespaceSecretKey != nil {
-			vault.Unlock(namespaceSecretKey)
-		}
-	}
-	if vault.IsLocked() {
-		if secretKey, err := utils.SecretKey(); err != nil {
-			return r.returnError(ctx, &slvObj, &logger, err, "Failed to get secret key")
-		} else {
-			if err = vault.Unlock(secretKey); err != nil {
-				return r.returnError(ctx, &slvObj, &logger, err, "Failed to unlock vault")
-			}
+	if secretKey, err := utils.SecretKey(); err != nil {
+		return r.returnError(ctx, &slvObj, &logger, err, "Failed to get secret key")
+	} else {
+		if err = vault.Unlock(secretKey); err != nil {
+			return r.returnError(ctx, &slvObj, &logger, err, "Failed to unlock vault")
 		}
 	}
 	slvSecretMap, err := vault.GetAllValues()

@@ -291,8 +291,8 @@ golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8T
 golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 gomodules.xyz/jsonpatch/v2 v2.5.0 h1:JELs8RLM12qJGXU4u/TO3V25KW8GreMKl9pdkk14RM0=
 gomodules.xyz/jsonpatch/v2 v2.5.0/go.mod h1:AH3dM2RI6uoBZxn3LVrfvJ3E0/9dG4cSrbuBJT4moAY=
-google.golang.org/api v0.230.0 h1:2u1hni3E+UXAXrONrrkfWpi/V6cyKVAbfGVeGtC3OxM=
-google.golang.org/api v0.230.0/go.mod h1:aqvtoMk7YkiXx+6U12arQFExiRV9D/ekvMCwCd/TksQ=
+google.golang.org/api v0.231.0 h1:LbUD5FUl0C4qwia2bjXhCMH65yz1MLPzA/0OYEsYY7Q=
+google.golang.org/api v0.231.0/go.mod h1:H52180fPI/QQlUc0F4xWfGZILdv09GCWKt2bcsn164A=
 google.golang.org/genproto v0.0.0-20250428153025-10db94c68c34 h1:oklGWmm0ZiCw4efmdYZo5MF9t6nRvGzM5+0klSjOmGM=
 google.golang.org/genproto v0.0.0-20250428153025-10db94c68c34/go.mod h1:hiH/EqX5GBdTyIpkqMqDGUHDiBniln8b4FCw+NzPxQY=
 google.golang.org/genproto/googleapis/api v0.0.0-20250428153025-10db94c68c34 h1:0PeQib/pH3nB/5pEmFeVQJotzGohV0dq4Vcp09H5yhE=

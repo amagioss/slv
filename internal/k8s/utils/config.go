@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -13,7 +12,6 @@ import (
 var (
 	currentNamespace *string
 	kubeConfig       *clientcmd.ClientConfig
-	nameSpacedMode   = strings.ToLower(os.Getenv("SLV_K8S_NAMESPACED_MODE")) == "true"
 	slvK8sEnvSecret  = func() string {
 		if val := os.Getenv("SLV_K8S_ENV_SECRET"); val != "" {
 			return val
@@ -21,10 +19,6 @@ var (
 		return config.AppNameLowerCase
 	}()
 )
-
-func IsNamespacedMode() bool {
-	return nameSpacedMode
-}
 
 func getKubeConfig() clientcmd.ClientConfig {
 	if kubeConfig == nil {
