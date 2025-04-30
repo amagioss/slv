@@ -42,7 +42,8 @@ podLabels: {}
 # The name with which the serviceAccount to be attached to the SLV Job. 
 # If you set this value, the helm chart will not set up cluster roles or cluster role bindings. 
 # You will have to make sure that the service account attached has necessary permissions for SLV to run smoothly. 
-# Understand the consequenses of filling this value carefully.serviceAccountName: ""
+# Understand the consequenses of filling this value carefully.
+serviceAccountName: ""
 
 # The number of times kubernetes must retry the job in case of failure.
 # This is only applicable when the mode is set to "job" or "cronjob".

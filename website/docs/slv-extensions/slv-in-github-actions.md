@@ -30,7 +30,7 @@ steps:
 - name: Setup SLV
   uses: amagioss/slv-action@v1
   with:
-    version: 0.9.0
+    version: 0.9.2
 ```
 
 ### Load SLV Secrets Into Environment Variables
@@ -51,7 +51,6 @@ steps:
 - name: Load SLV Secrets - PROD
   uses: amagioss/slv-action@v1
   with:
-    version: 0.1.5
     vault: creds.slv.yml
     env-secret-key: ${{ secrets.SLV_ENV_SECRET_KEY }}
     prefix: "PROD_"
