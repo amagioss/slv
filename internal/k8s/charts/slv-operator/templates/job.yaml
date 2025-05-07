@@ -4,8 +4,17 @@ kind: Job
 metadata:
   name: generate-slv-webhook-certs-job{{ now | date "20060102150405" }}
   namespace: slv
+  labels:
+    {{- with .Values.webhook.job.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   template:
+    metadata:
+      labels:
+        {{- with .Values.webhook.job.labels }}
+        {{- toYaml . | nindent 12 }}
+        {{- end }}
     spec:
       containers:
         - name: create-slv-webhook-certs
