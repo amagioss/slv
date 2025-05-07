@@ -4,7 +4,7 @@ metadata:
   name: slv-operator
   namespace: {{ .Release.Namespace }}
   labels:
-    app: slv-k8s-operator
+    app: slv-operator
     {{- with .Values.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -22,11 +22,48 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ .Values.serviceAccountName | default "slv-serviceaccount" }}
+      volumes:
+      {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.webhook.enabled .Values.webhook.createTLSCerts }}
+        - name: cert
+          secret:
+            secretName: slv-webhook-server-cert
+      {{- end }}
+      {{- if and .Values.webhook.enabled .Values.webhook.createTLSCerts }}
+      initContainers:
+      - name: wait-for-cert
+        image: bitnami/kubectl:latest
+        command:
+          - /bin/sh
+          - -c
+          - |
+            for i in $(seq 1 60); do
+              kubectl get secret slv-webhook-server-cert -n {{ .Release.Namespace }} && exit 0
+              echo "Waiting for secret slv-webhook-server-cert..."
+              sleep 2
+            done
+            echo "Timed out waiting for cert secret"
+            exit 1
+      {{- end }}
       containers:
       {{- include "slvlib.container" . | nindent 8 }}
             - name: SLV_MODE
               value: "k8s_operator"
-        {{- if and (false) (eq .Values.enableWebhook true) }}
+        {{- if .Values.webhook.enabled }}
             - name: SLV_K8S_ENABLE_WEBHOOKS
               value: "true"
+          volumeMounts:
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.webhook.createTLSCerts }}
+            - name: cert
+              mountPath: /tmp/k8s-webhook-server/serving-certs
+              readOnly: true
+          {{- end -}}              
         {{- end }}
+
+
+

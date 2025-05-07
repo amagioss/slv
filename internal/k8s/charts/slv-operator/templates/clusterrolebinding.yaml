@@ -1,1 +1,16 @@
 {{- include "slvlib.clusterrolebinding" . | nindent 0 }}
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: slv-webhook-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: slv-webhook-sa
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: slv-webhook-clusterrole
+  apiGroup: rbac.authorization.k8s.io
