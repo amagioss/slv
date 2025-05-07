@@ -1,0 +1,22 @@
+{{- if and .Values.webhook.enabled .Values.webhook.createTLSCerts }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: generate-slv-webhook-certs-job{{ now | date "20060102150405" }}
+  namespace: slv
+spec:
+  template:
+    spec:
+      containers:
+        - name: create-slv-webhook-certs
+          image: {{ .Values.webhook.jobImage | default "alpine:3.19" }}
+          imagePullPolicy: {{ .Values.webhook.jobImagePullPolicy | default "IfNotPresent" }}
+          resources:
+            {{- with .Values.webhook.job.resource }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}         
+          command:
+            {{- include "installCertScript" . | nindent 12 }}
+      restartPolicy: OnFailure
+      serviceAccountName: slv-webhook-sa
+{{- end -}}

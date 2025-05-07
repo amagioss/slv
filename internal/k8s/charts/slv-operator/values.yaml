@@ -41,11 +41,69 @@ podLabels: {}
 # Understand the consequenses of filling this value carefully.
 serviceAccountName: ""
 
-# Whether to enable the SLV webhook or not. 
-# This is only applicable for the operator mode. 
-# This feature is still work in progress and will be enabled in the future.
-enableWebhook: false
+# The volumes to be mounted inside the SLV pods.
+volumes: []
+# The volume mounts to be mounted inside the SLV pods.
+volumeMounts: []
 
 # The number of replicas to be used by the deployment for SLV pods. 
-# This is only applicable when the mode is set to "operator".
 replicas: 1
+
+
+webhook:
+  # Whether to enable the SLV webhook or not. 
+  enabled: true
+  
+  # If set to true, helm will automatically create TLS certificates for the webhook and set up the configuration. 
+  # If set to false, you will have to create the TLS certificates and set up the configuration manually. You can
+  # - Use .Values.operator.volumes and .Values.operator.volumeMounts to mount the TLS certificates inside the SLV pods.
+  # - Use .Values.webhook.validatingWebhookConfiguration.annotations to set up ca injection (If using cert-manager)
+  # - Use .Values.webhook.validatingWebhookConfiguration.caBundle to directly specify the caBundle for the webhook.
+  createTLSCerts: true
+
+  # The validity duration of the TLS certificates in days.
+  # This is only applicable when the createTLSCerts is set to true.
+  # The default value is 30 years.
+  # Provide only the number of days. Eg. If you want to set the duration to 30 years, set this value to 10950.
+  duration: 10950
+  # The number of days before the TLS certificates expire when the job to create the TLS certificates will be run.
+  # This is only applicable when the createTLSCerts is set to true.
+  # If not specified, the certificate will not be renewed.
+  renewBefore: 15
+  # A CronJob will run to check for certificate expiry and renew the certificate if it is about to expire. Specify the schedule for the CronJob.
+  # This is only applicable when the createTLSCerts is set to true.
+  # If not specified, the CronJob will not be created.
+  cronJobSchedule: "0 0 * * *" # Run every day at midnight.
+
+  # Configurations for the job to create the TLS certificates.
+  # This is only applicable when the createTLSCerts is set to true.
+  # The job will be created in the same namespace as the release namespace.
+  job:
+    # The image to be used for the job to create the TLS certificates.
+    image: ""
+    # The image pull policy to be used for the job to create the TLS certificates.
+    imagePullPolicy: ""
+    # Labels to be set for the job to create the TLS certificates.
+    labels: {}
+    # resource constraints for the job to create the TLS certificates.
+    resource:
+      limits:
+        cpu: "100m" 
+        memory: "100Mi" 
+      requests:
+        cpu: "100m" 
+        memory: "100Mi"
+
+  # Configurations for the webhook.
+  # This is only applicable when the createTLSCerts is set to false.
+  validatingWebhookConfiguration:
+    
+    # The annotations to be set for the validating webhook configuration.
+    # This is only applicable when the createTLSCerts is set to false.
+    # This is useful when you are using cert-manager to create the TLS certificates.
+    # The annotations are set in the format of "cert-manager.io/<annotation-name>: <annotation-value>"
+    annotations: {}
+
+    # The caBundle to be used for the webhook. 
+    # This is only applicable when the createTLSCerts is set to false.
+    caBundle: ""

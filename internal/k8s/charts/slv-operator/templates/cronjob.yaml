@@ -1,0 +1,25 @@
+{{- if and .Values.webhook.cronJobSchedule .Values.webhook.enabled .Values.webhook.createTLSCerts }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: renew-slv-webhook-certs-cronjob
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: {{ .Values.webhook.cronJobSchedule | default "0 0 * * *" }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: renew-slv-webhook-certs
+              image: {{ .Values.webhook.jobImage | default "alpine:3.19" }}
+              imagePullPolicy: {{ .Values.webhook.jobImagePullPolicy | default "IfNotPresent" }}
+              resources:
+                {{- with .Values.webhook.job.resource }}
+                {{- toYaml . | nindent 16 }}
+                {{- end }}         
+              command:
+                {{- include "installCertScript" . | nindent 16 }}
+          restartPolicy: OnFailure
+          serviceAccountName: slv-webhook-sa
+{{- end }}          

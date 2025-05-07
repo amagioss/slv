@@ -1,0 +1,32 @@
+{{- if and .Values.webhook.enabled .Values.webhook.createTLSCerts }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: slv-operator-validating-webhook
+  annotations:
+    {{- with .Values.webhook.validatingWebhookConfiguration.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: slv-operator-webhook
+      namespace: {{ .Release.Namespace }}
+      path: /validate-slv-sh-v1-slv
+    caBundle: {{ .Values.webhook.validatingWebhookConfiguration.caBundle }}
+  failurePolicy: Fail
+  name: slv-operator-webhook.{{ .Release.Namespace }}.svc
+  rules:
+  - apiGroups:
+    - slv.sh
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - slvs
+  sideEffects: None
+{{- end -}}
