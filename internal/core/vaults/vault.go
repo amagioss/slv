@@ -83,9 +83,9 @@ func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
 }
 
 func isValidVaultFileName(fileName string) bool {
-	return strings.HasSuffix(fileName, "."+vaultFileNameEnding) ||
-		strings.HasSuffix(fileName, vaultFileNameEnding+".yaml") ||
-		strings.HasSuffix(fileName, vaultFileNameEnding+".yml")
+	return strings.HasSuffix(fileName, "."+vaultFileNameExt) ||
+		strings.HasSuffix(fileName, vaultFileNameExt+".yaml") ||
+		strings.HasSuffix(fileName, vaultFileNameExt+".yml")
 }
 
 func newVaultId() (string, error) {
@@ -235,7 +235,7 @@ func (vlt *Vault) reload() error {
 
 func getNameFromFilePath(path string) string {
 	name := filepath.Base(path)
-	return strings.TrimSuffix(name, "."+vaultFileNameEnding+filepath.Ext(name))
+	return strings.TrimSuffix(name, "."+vaultFileNameExt+filepath.Ext(name))
 }
 
 func (vlt *Vault) validate() error {

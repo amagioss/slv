@@ -77,6 +77,9 @@ func vaultPutCommand() *cobra.Command {
 			},
 		}
 		vaultPutCmd.Flags().StringP(itemNameFlag.Name, itemNameFlag.Shorthand, "", itemNameFlag.Usage)
+		if err := vaultPutCmd.RegisterFlagCompletionFunc(itemNameFlag.Name, vaultItemNameCompletion); err != nil {
+			utils.ExitOnError(err)
+		}
 		vaultPutCmd.Flags().StringP(itemValueFlag.Name, itemValueFlag.Shorthand, "", itemValueFlag.Usage)
 		vaultPutCmd.Flags().StringP(itemValueFlagDeprecated.Name, itemValueFlagDeprecated.Shorthand, "", itemValueFlagDeprecated.Usage)
 		vaultPutCmd.Flags().StringP(vaultImportFileFlag.Name, vaultImportFileFlag.Shorthand, "", vaultImportFileFlag.Usage)

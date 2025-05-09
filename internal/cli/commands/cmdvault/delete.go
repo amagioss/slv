@@ -38,6 +38,9 @@ func vaultDeleteCommand() *cobra.Command {
 			},
 		}
 		vaultDeleteCmd.Flags().StringSliceP(itemNameFlag.Name, itemNameFlag.Shorthand, []string{}, itemNameFlag.Usage)
+		if err := vaultDeleteCmd.RegisterFlagCompletionFunc(itemNameFlag.Name, vaultItemNameCompletion); err != nil {
+			utils.ExitOnError(err)
+		}
 	}
 	return vaultDeleteCmd
 }

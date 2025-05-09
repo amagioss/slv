@@ -3,6 +3,11 @@ package cmdvault
 import (
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/config"
+)
+
+const (
+	vaultFileNameExt = config.AppNameLowerCase
 )
 
 var (

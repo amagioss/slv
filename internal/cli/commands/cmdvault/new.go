@@ -52,6 +52,9 @@ func vaultNewCommand() *cobra.Command {
 		}
 		vaultNewCmd.Flags().StringSliceP(cmdenv.EnvPublicKeysFlag.Name, cmdenv.EnvPublicKeysFlag.Shorthand, []string{}, cmdenv.EnvPublicKeysFlag.Usage)
 		vaultNewCmd.Flags().StringSliceP(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchFlag.Shorthand, []string{}, cmdenv.EnvSearchFlag.Usage)
+		if err := vaultNewCmd.RegisterFlagCompletionFunc(cmdenv.EnvSearchFlag.Name, cmdenv.EnvSearchCompletion); err != nil {
+			utils.ExitOnError(err)
+		}
 		vaultNewCmd.Flags().BoolP(cmdenv.EnvSelfFlag.Name, cmdenv.EnvSelfFlag.Shorthand, false, cmdenv.EnvSelfFlag.Usage)
 		vaultNewCmd.Flags().BoolP(cmdenv.EnvK8sFlag.Name, cmdenv.EnvK8sFlag.Shorthand, false, cmdenv.EnvK8sFlag.Usage)
 		vaultNewCmd.Flags().StringP(vaultNameFlag.Name, vaultNameFlag.Shorthand, "", vaultNameFlag.Usage)

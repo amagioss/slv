@@ -67,6 +67,15 @@ func (vlt *Vault) Exists(name string) (exists bool) {
 	return exists
 }
 
+func (vlt *Vault) GetItemNames() (itemNames []string) {
+	if vlt.Spec.Data != nil {
+		for name := range vlt.Spec.Data {
+			itemNames = append(itemNames, name)
+		}
+	}
+	return
+}
+
 func (vlt *Vault) List(decrypt bool) (map[string]*VaultItem, error) {
 	itemMap := make(map[string]*VaultItem)
 	for name := range vlt.Spec.Data {

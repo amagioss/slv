@@ -50,6 +50,9 @@ func envDeleteCommand() *cobra.Command {
 			},
 		}
 		envDeleteCmd.Flags().StringSliceP(EnvSearchFlag.Name, EnvSearchFlag.Shorthand, []string{}, EnvSearchFlag.Usage)
+		if err := envDeleteCmd.RegisterFlagCompletionFunc(EnvSearchFlag.Name, EnvSearchCompletion); err != nil {
+			utils.ExitOnError(err)
+		}
 		envDeleteCmd.Flags().StringSliceP(EnvPublicKeysFlag.Name, EnvPublicKeysFlag.Shorthand, []string{}, EnvPublicKeysFlag.Usage)
 		envDeleteCmd.Flags().BoolP(EnvSelfFlag.Name, EnvSelfFlag.Shorthand, false, EnvSelfFlag.Usage)
 		envDeleteCmd.Flags().BoolP(EnvK8sFlag.Name, EnvK8sFlag.Shorthand, false, EnvK8sFlag.Usage)

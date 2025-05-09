@@ -2,7 +2,10 @@ package cmdvault
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -152,6 +155,9 @@ func VaultCommand() *cobra.Command {
 		}
 		vaultCmd.PersistentFlags().StringP(vaultFileFlag.Name, vaultFileFlag.Shorthand, "", vaultFileFlag.Usage)
 		vaultCmd.MarkPersistentFlagRequired(vaultFileFlag.Name)
+		if err := vaultCmd.RegisterFlagCompletionFunc(vaultFileFlag.Name, vaultFilePathCompletion); err != nil {
+			utils.ExitOnError(err)
+		}
 		vaultCmd.AddCommand(vaultNewCommand())
 		vaultCmd.AddCommand(vaultUpdateCommand())
 		vaultCmd.AddCommand(vaultPutCommand())
@@ -163,4 +169,38 @@ func VaultCommand() *cobra.Command {
 		vaultCmd.AddCommand(vaultAccessCommand())
 	}
 	return vaultCmd
+}
+
+func vaultFilePathCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	var vaultFiles []string
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveError
+	}
+	err = filepath.WalkDir(wd, func(path string, d fs.DirEntry, err error) error {
+		if d.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(d.Name(), "."+vaultFileNameExt) ||
+			strings.HasSuffix(d.Name(), vaultFileNameExt+".yaml") ||
+			strings.HasSuffix(d.Name(), vaultFileNameExt+".yml") {
+			if relPath, err := filepath.Rel(wd, path); err == nil {
+				vaultFiles = append(vaultFiles, relPath)
+			} else {
+				vaultFiles = append(vaultFiles, path)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveError
+	}
+	return vaultFiles, cobra.ShellCompDirectiveDefault
+}
+
+func vaultItemNameCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	if vault, err := getVault(cmd.Flag(vaultFileFlag.Name).Value.String()); err == nil {
+		return vault.GetItemNames(), cobra.ShellCompDirectiveNoFileComp
+	}
+	return nil, cobra.ShellCompDirectiveError
 }
