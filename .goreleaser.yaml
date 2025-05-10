@@ -208,6 +208,9 @@ brews:
   - ids:
       - slv
     name: slv
+    install: |
+      bin.install "{{ .Binary }}"
+      generate_completions_from_executable(bin/"{{ .Binary }}","completion")
     homepage: https://slv.sh
     commit_author:
       name: Shibly Meeran
