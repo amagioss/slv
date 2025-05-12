@@ -15,29 +15,30 @@ import (
 )
 
 func unlockVault(vault *vaults.Vault) {
-	envSecretKey, err := secretkey.Get()
-	if err != nil {
-		utils.ExitOnError(err)
-	}
-	err = vault.Unlock(envSecretKey)
-	if err != nil {
-		utils.ExitOnError(err)
+	if vault.IsLocked() {
+		envSecretKey, err := secretkey.Get()
+		if err != nil {
+			utils.ExitOnError(err)
+		}
+		if err = vault.Unlock(envSecretKey); err != nil {
+			utils.ExitOnError(err)
+		}
 	}
 }
 
 func getVaultItemMap(vault *vaults.Vault, itemName string, encodeToBase64, withMetadata bool) map[string]any {
-	type vaultItem struct {
-		Value     string `json:"value,omitempty" yaml:"value,omitempty"`
-		Secret    bool   `json:"secret,omitempty" yaml:"secret,omitempty"`
-		UpdatedAt string `json:"updatedAt,omitempty" yaml:"updatedAt,omitempty"`
-		Hash      string `json:"hash,omitempty" yaml:"hash,omitempty"`
+	type itemInfo struct {
+		Value       string `json:"value,omitempty" yaml:"value,omitempty"`
+		IsSecret    bool   `json:"isSecret,omitempty" yaml:"isSecret,omitempty"`
+		EncryptedAt string `json:"encryptedAt,omitempty" yaml:"encryptedAt,omitempty"`
+		Hash        string `json:"hash,omitempty" yaml:"hash,omitempty"`
 	}
 	dataMap := make(map[string]any)
 	var vaultItemMap map[string]*vaults.VaultItem
 	var err error
 	if itemName == "" {
 		unlockVault(vault)
-		if vaultItemMap, err = vault.List(true); err != nil {
+		if vaultItemMap, err = vault.GetAllItems(); err != nil {
 			utils.ExitOnError(err)
 		}
 	} else {
@@ -45,7 +46,7 @@ func getVaultItemMap(vault *vaults.Vault, itemName string, encodeToBase64, withM
 		if !vault.Exists(itemName) {
 			utils.ExitOnError(fmt.Errorf("item %s not found", itemName))
 		}
-		if secretItem, _ := vault.IsSecret(itemName); secretItem {
+		if item.IsSecret() {
 			unlockVault(vault)
 		}
 		if item, err = vault.Get(itemName); err != nil {
@@ -53,27 +54,31 @@ func getVaultItemMap(vault *vaults.Vault, itemName string, encodeToBase64, withM
 		}
 		vaultItemMap = map[string]*vaults.VaultItem{itemName: item}
 	}
-	for name, value := range vaultItemMap {
-		var val string
+	for name, item := range vaultItemMap {
+		itemValue, err := item.Value()
+		if err != nil {
+			utils.ExitOnError(err)
+		}
+		var valueStr string
 		if encodeToBase64 {
-			val = base64.StdEncoding.EncodeToString(value.Value())
+			valueStr = base64.StdEncoding.EncodeToString(itemValue)
 		} else {
-			val = string(value.Value())
+			valueStr = string(itemValue)
 		}
 		if withMetadata {
-			vi := vaultItem{
-				Value:  val,
-				Secret: value.IsSecret(),
+			fi := itemInfo{
+				Value:    valueStr,
+				IsSecret: item.IsSecret(),
 			}
-			if value.UpdatedAt() != nil {
-				vi.UpdatedAt = value.UpdatedAt().Format(time.RFC3339)
+			if item.EncryptedAt() != nil {
+				fi.EncryptedAt = item.EncryptedAt().Format(time.RFC3339)
 			}
-			if value.Hash() != "" {
-				vi.Hash = value.Hash()
+			if item.Hash() != "" {
+				fi.Hash = item.Hash()
 			}
-			dataMap[name] = vi
+			dataMap[name] = fi
 		} else {
-			dataMap[name] = val
+			dataMap[name] = valueStr
 		}
 	}
 	return dataMap
@@ -126,13 +131,17 @@ func vaultGetCommand() *cobra.Command {
 						if !vault.Exists(itemName) {
 							utils.ExitOnError(fmt.Errorf("item %s not found", itemName))
 						}
-						if secretItem, _ := vault.IsSecret(itemName); secretItem {
+						item, err := vault.Get(itemName)
+						if err != nil {
+							utils.ExitOnError(err)
+						}
+						if item.IsSecret() {
 							unlockVault(vault)
 						}
-						if item, err := vault.Get(itemName); err != nil {
+						if itemValueStr, err := item.ValueString(); err != nil {
 							utils.ExitOnError(err)
 						} else {
-							fmt.Println(string(item.Value()))
+							fmt.Println(itemValueStr)
 						}
 					}
 				}

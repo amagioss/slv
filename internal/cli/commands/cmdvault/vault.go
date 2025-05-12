@@ -18,12 +18,12 @@ import (
 )
 
 func showVault(vault *vaults.Vault) {
-	dataMap, err := vault.List(!vault.IsLocked())
+	vaultItemMap, err := vault.GetAllItems()
 	if err != nil {
 		utils.ExitOnError(err)
 	}
 	hashFound := false
-	for _, data := range dataMap {
+	for _, data := range vaultItemMap {
 		if hashFound = data.Hash() != ""; hashFound {
 			break
 		}
@@ -40,26 +40,30 @@ func showVault(vault *vaults.Vault) {
 		dataTableHeader = append(dataTableHeader, text.Colors{text.Bold}.Sprint("Hash"))
 	}
 	dataTable.AppendHeader(dataTableHeader)
-	dataTableRows := make([]table.Row, 0, len(dataMap))
-	for name, data := range dataMap {
+	dataTableRows := make([]table.Row, 0, len(vaultItemMap))
+	for name, item := range vaultItemMap {
 		row := table.Row{name}
-		if data.Value() == nil {
+		if vault.IsLocked() {
 			row = append(row, "(Locked)")
 		} else {
-			row = append(row, string(data.Value()))
+			itemValueStr, err := item.ValueString()
+			if err != nil {
+				utils.ExitOnError(err)
+			}
+			row = append(row, itemValueStr)
 		}
-		if data.IsSecret() {
+		if item.IsSecret() {
 			row = append(row, "Secret")
 		} else {
 			row = append(row, "Plain Text")
 		}
-		if data.UpdatedAt() != nil {
-			row = append(row, data.UpdatedAt().Format("02-Jan-2006 15:04:05"))
+		if item.EncryptedAt() != nil {
+			row = append(row, item.EncryptedAt().Format("02-Jan-2006 15:04:05"))
 		} else {
 			row = append(row, "N/A")
 		}
 		if hashFound {
-			row = append(row, data.Hash())
+			row = append(row, item.Hash())
 		}
 		dataTableRows = append(dataTableRows, row)
 	}

@@ -34,25 +34,30 @@ func (vlt *Vault) share(publicKey *crypto.PublicKey, commit bool) (bool, error) 
 	return err == nil, err
 }
 
-func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error {
-	vaultItemMap, err := vlt.List(true)
-	if err != nil {
+func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) (err error) {
+	var vaultItemsMap map[string]*VaultItem
+	if vaultItemsMap, err = vlt.GetAllItems(); err != nil {
 		return err
 	}
-	accessors, err := vlt.ListAccessors()
-	if err != nil {
+	for _, vaultItem := range vaultItemsMap {
+		if _, err = vaultItem.Value(); err != nil {
+			return err
+		}
+	}
+	var accessors []crypto.PublicKey
+	if accessors, err = vlt.ListAccessors(); err != nil {
 		return err
 	}
 	var newAccessors []crypto.PublicKey
 	for _, accessor := range accessors {
 		found := false
 		for _, publicKey := range publicKeys {
-			publicKeyStr, err := publicKey.String()
-			if err != nil {
+			var publicKeyStr string
+			if publicKeyStr, err = publicKey.String(); err != nil {
 				return err
 			}
-			accessorStr, err := accessor.String()
-			if err != nil {
+			var accessorStr string
+			if accessorStr, err = accessor.String(); err != nil {
 				return err
 			}
 			if publicKeyStr == accessorStr {
@@ -91,12 +96,14 @@ func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) error
 			return err
 		}
 	}
-	for name, vaultItem := range vaultItemMap {
+	for name, vaultItem := range vaultItemsMap {
 		if err = vlt.putWithoutCommit(name, vaultItem.value, vaultItem.isSecret); err != nil {
 			return err
 		}
 	}
-	return vlt.commit()
+	err = vlt.commit()
+	vlt.clearCache()
+	return
 }
 
 func (vlt *Vault) ListAccessors() ([]crypto.PublicKey, error) {

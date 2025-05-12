@@ -20,6 +20,6 @@ func (vlt *Vault) deleteFromCache(name string) {
 	}
 }
 
-func (vlt *Vault) clearSecretCache() {
+func (vlt *Vault) clearCache() {
 	vlt.Spec.cache = nil
 }

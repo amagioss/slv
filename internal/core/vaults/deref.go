@@ -13,10 +13,12 @@ func (vlt *Vault) getDataByReference(secretRef string) ([]byte, error) {
 		return nil, errInvalidReferenceFormat
 	}
 	secretName := strings.Trim(sliced[1], " }")
-	if vd, err := vlt.get(secretName, true); err != nil {
+	if item, err := vlt.Get(secretName); err != nil {
+		return nil, err
+	} else if itemValue, err := item.Value(); err != nil {
 		return nil, err
 	} else {
-		return vd.value, nil
+		return itemValue, nil
 	}
 }
 

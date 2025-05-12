@@ -64,7 +64,7 @@ func (vlt *Vault) Exists(name string) (exists bool) {
 	if vlt.Spec.Data != nil {
 		_, exists = vlt.Spec.Data[name]
 	}
-	return exists
+	return
 }
 
 func (vlt *Vault) GetItemNames() (itemNames []string) {
@@ -76,10 +76,10 @@ func (vlt *Vault) GetItemNames() (itemNames []string) {
 	return
 }
 
-func (vlt *Vault) List(decrypt bool) (map[string]*VaultItem, error) {
+func (vlt *Vault) GetAllItems() (map[string]*VaultItem, error) {
 	itemMap := make(map[string]*VaultItem)
 	for name := range vlt.Spec.Data {
-		if data, err := vlt.get(name, decrypt); err == nil {
+		if data, err := vlt.Get(name); err == nil {
 			itemMap[name] = data
 		} else {
 			return nil, fmt.Errorf("error retrieving '%s': %w", name, err)
@@ -89,61 +89,52 @@ func (vlt *Vault) List(decrypt bool) (map[string]*VaultItem, error) {
 }
 
 func (vlt *Vault) GetAllValues() (map[string][]byte, error) {
-	if vaultItemMap, err := vlt.List(true); err == nil {
-		valuesMap := make(map[string][]byte)
-		for name, data := range vaultItemMap {
-			valuesMap[name] = data.value
+	itemValueMap := make(map[string][]byte)
+	for name := range vlt.Spec.Data {
+		if item, err := vlt.Get(name); err == nil {
+			if itemValue, err := item.Value(); err == nil {
+				itemValueMap[name] = itemValue
+			} else {
+				return nil, fmt.Errorf("error retrieving '%s': %w", name, err)
+			}
+		} else {
+			return nil, fmt.Errorf("error retrieving '%s': %w", name, err)
 		}
-		return valuesMap, nil
-	} else {
-		return nil, err
 	}
+	return itemValueMap, nil
 }
 
-func (vlt *Vault) get(name string, decrypt bool) (*VaultItem, error) {
+func (vlt *Vault) Get(name string) (*VaultItem, error) {
 	rawValue := vlt.Spec.Data[name]
 	if rawValue == "" {
 		return nil, errVaultItemNotFound
 	}
 	item := vlt.getFromCache(name)
 	if item == nil {
-		item = &VaultItem{}
+		item = &VaultItem{
+			vlt:      vlt,
+			rawValue: rawValue,
+		}
 		sealedSecret := &crypto.SealedSecret{}
 		if err := sealedSecret.FromString(rawValue); err == nil {
 			item.isSecret = true
-			if decrypt {
-				if vlt.IsLocked() {
-					return nil, errVaultLocked
-				}
-				if item.value, err = vlt.Spec.secretKey.DecryptSecret(*sealedSecret); err != nil {
-					return nil, err
-				}
-			}
-			item.updatedAt = new(time.Time)
-			*item.updatedAt = sealedSecret.EncryptedAt()
+			item.encryptedAt = new(time.Time)
+			*item.encryptedAt = sealedSecret.EncryptedAt()
 			if sealedSecret.Hash() != "" {
 				item.hash = sealedSecret.Hash()
 			}
 		}
-		if !item.isSecret {
-			item.value = []byte(rawValue)
-		}
-		if decrypt || !item.isSecret {
-			vlt.putToCache(name, item)
-		}
+		vlt.putToCache(name, item)
 	}
 	return item, nil
 }
 
-func (vlt *Vault) Get(name string) (item *VaultItem, err error) {
-	return vlt.get(name, true)
-}
-
-func (vlt *Vault) IsSecret(name string) (isSecret bool, err error) {
-	if data, err := vlt.get(name, false); err == nil {
-		isSecret = data.isSecret
+func (vlt *Vault) GetValue(name string) ([]byte, error) {
+	item, err := vlt.Get(name)
+	if err != nil {
+		return nil, err
 	}
-	return
+	return item.Value()
 }
 
 func (vlt *Vault) DeleteItem(name string) error {

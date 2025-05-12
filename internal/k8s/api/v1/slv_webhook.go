@@ -64,7 +64,7 @@ func (r *SLV) validateSLV() (err error) {
 		slvlog.Error(err, "failed to unlock vault", "name", r.Name)
 		return err
 	}
-	if _, err = vault.List(true); err != nil {
+	if _, err = vault.GetAllValues(); err != nil {
 		slvlog.Error(err, "failed to get all secrets", "name", r.Name)
 		return err
 	}

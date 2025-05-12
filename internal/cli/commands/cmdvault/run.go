@@ -50,7 +50,7 @@ func runVaultCommand(shell bool, vaultFile, prefix, command string, args ...stri
 	if err != nil {
 		utils.ExitOnError(err)
 	}
-	secrets, err := vault.List(true)
+	secrets, err := vault.GetAllValues()
 	if err != nil {
 		utils.ExitOnError(err)
 	}
@@ -60,11 +60,11 @@ func runVaultCommand(shell bool, vaultFile, prefix, command string, args ...stri
 			slvShell.Env = append(slvShell.Env, envar)
 		}
 	}
-	for name, data := range secrets {
+	for name, value := range secrets {
 		if prefix != "" {
 			name = prefix + name
 		}
-		slvShell.Env = append(slvShell.Env, name+"="+string(data.Value()))
+		slvShell.Env = append(slvShell.Env, name+"="+string(value))
 	}
 	slvShell.Stdin = os.Stdin
 	slvShell.Stdout = os.Stdout

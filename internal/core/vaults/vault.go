@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"slv.sh/slv/internal/core/commons"
@@ -40,29 +39,6 @@ type VaultSpec struct {
 	secretKey           *crypto.SecretKey     `json:"-"`
 	cache               map[string]*VaultItem `json:"-"`
 	vaultSecretRefRegex *regexp.Regexp        `json:"-"`
-}
-
-type VaultItem struct {
-	value     []byte     `json:"-"`
-	isSecret  bool       `json:"-"`
-	updatedAt *time.Time `json:"-"`
-	hash      string     `json:"-"`
-}
-
-func (vi *VaultItem) Value() []byte {
-	return vi.value
-}
-
-func (vi *VaultItem) IsSecret() bool {
-	return vi.isSecret
-}
-
-func (vi *VaultItem) UpdatedAt() *time.Time {
-	return vi.updatedAt
-}
-
-func (vi *VaultItem) Hash() string {
-	return vi.hash
 }
 
 func (vlt *Vault) Id() string {
@@ -193,7 +169,7 @@ func get(jsonData []byte, filePath string, fullVault bool) (vlt *Vault, err erro
 		}
 	}
 	vlt.Spec.path = filePath
-	err = vlt.validate()
+	err = vlt.validateAndUpdate()
 	return
 }
 
@@ -202,17 +178,17 @@ func (vlt *Vault) IsLocked() bool {
 }
 
 func (vlt *Vault) Lock() {
-	vlt.clearSecretCache()
+	vlt.clearCache()
 	vlt.Spec.secretKey = nil
 }
 
 func (vlt *Vault) Delete() error {
-	vlt.clearSecretCache()
+	vlt.clearCache()
 	return os.Remove(vlt.Spec.path)
 }
 
 func (vlt *Vault) commit() error {
-	if err := vlt.validate(); err != nil {
+	if err := vlt.validateAndUpdate(); err != nil {
 		return err
 	}
 	jsonData, err := json.Marshal(vlt)
@@ -229,7 +205,7 @@ func (vlt *Vault) commit() error {
 }
 
 func (vlt *Vault) reload() error {
-	vlt.clearSecretCache()
+	vlt.clearCache()
 	return commons.ReadFromYAML(vlt.Spec.path, &vlt)
 }
 
@@ -238,7 +214,7 @@ func getNameFromFilePath(path string) string {
 	return strings.TrimSuffix(name, "."+vaultFileNameExt+filepath.Ext(name))
 }
 
-func (vlt *Vault) validate() error {
+func (vlt *Vault) validateAndUpdate() error {
 	vlt.APIVersion = k8sApiVersion
 	vlt.Kind = k8sKind
 	if vlt.ObjectMeta.Name == "" {

@@ -10,7 +10,7 @@ import (
 )
 
 func (vlt *Vault) Update(name, namespace string, k8SecretContent []byte) (err error) {
-	if err = vlt.validate(); err != nil {
+	if err = vlt.validateAndUpdate(); err != nil {
 		return err
 	}
 	if k8SecretContent != nil {
