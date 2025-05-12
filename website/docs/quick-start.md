@@ -36,7 +36,7 @@ Have the secret key stored somewhere safe, as you may have to use it later.
 ### Create a new vault
 A vault is a collection of secrets (as the name suggests). You can share vaults with other environments within the profile. Let's create a secret and share it with alice.
 ```bash
-$ slv vault new -v test.slv.yaml -s alice
+slv vault new -v test.slv.yaml -s alice
 ```
 #### Output
 ```
@@ -69,7 +69,7 @@ super_secret_pwd
 ### Share a vault with another environment
 If you already have a vault with you and would like to share it with someone else, you can do so by running
 ```bash
-$ slv vault share -v test.slv.yaml -s bob
+slv vault share -v test.slv.yaml -s bob
 ```
 #### Output
 ```
