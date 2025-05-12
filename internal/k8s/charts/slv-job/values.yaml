@@ -54,4 +54,4 @@ backoffLimit: 4
 ttlSecondsAfterFinished: 3600
 
 # When set, the job will be run as a "Cronjob". The field specifies how frequently the cronjob has to run.
-# schedule: "0 * * * *" # Runs at the top of every hour
+schedule: # E.g, "0 * * * *" - Runs at the top of every hour

@@ -17,24 +17,30 @@ limitations under the License.
 package operator
 
 import (
+	"context"
 	"crypto/tls"
 	"flag"
+	"fmt"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	"github.com/open-policy-agent/cert-controller/pkg/rotator"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
 	"slv.sh/slv/internal/core/config"
 	slvv1 "slv.sh/slv/internal/k8s/api/v1"
 	"slv.sh/slv/internal/k8s/internal/controller"
@@ -48,9 +54,60 @@ var (
 )
 
 var (
-	webhookEnabled = strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) == "true" ||
-		strings.ToLower(os.Getenv("SLV_K8S_ENABLE_WEBHOOKS")) == "true"
+	// Webhook settings
+	disableWebhook      = getEnvBool("SLV_DISABLE_WEBHOOKS", false)
+	disableCertRotation = getEnvBool("SLV_DISABLE_CERT_ROTATION", false)
+	certServiceName     = getEnvOrDefault("SLV_WEBHOOK_SERVICE_NAME", "slv-webhook-service")
+	VwhName             = getEnvOrDefault("SLV_WEBHOOK_VWH_NAME", "slv-operator-validating-webhook")
+
+	// Certificate and secret configuration
+	secretName     = getEnvOrDefault("SLV_WEBHOOK_SECRET_NAME", "slv-webhook-server-cert")
+	caName         = getEnvOrDefault("SLV_WEBHOOK_CA_NAME", "slv-webhook-ca")
+	caOrganization = getEnvOrDefault("SLV_WEBHOOK_CA_ORG", "slv")
+	certName       = getEnvOrDefault("SLV_WEBHOOK_CERT_NAME", "tls.crt")
+	keyName        = getEnvOrDefault("SLV_WEBHOOK_KEY_NAME", "tls.key")
+	certDir        = getEnvOrDefault("SLV_WEBHOOK_CERT_DIR", "/tmp/k8s-webhook-server/serving-certs")
+
+	// Certificate rotation durations
+	caCertDuration         = getEnvDuration("SLV_CA_CERT_DURATION", 3*365*24*time.Hour)   // 3 years
+	serverCertDuration     = getEnvDuration("SLV_SERVER_CERT_DURATION", 365*24*time.Hour) // 1 year
+	rotationCheckFrequency = getEnvDuration("SLV_ROTATION_CHECK_FREQUENCY", 24*time.Hour) // every 24 hours
+	lookaheadInterval      = getEnvDuration("SLV_LOOKAHEAD_INTERVAL", 7*24*time.Hour)     // one week before expiration
 )
+
+// TODO: Move to utils
+func getEnvOrDefault(envKey, defaultValue string) string {
+	if value, exists := os.LookupEnv(envKey); exists && value != "" {
+		return strings.ToLower(value)
+	}
+	return defaultValue
+}
+
+// TODO: Move to utils
+func getEnvBool(envKey string, defaultVal bool) bool {
+	val := getEnvOrDefault(envKey, "")
+	if val == "" {
+		return defaultVal
+	}
+	parsed, err := strconv.ParseBool(val)
+	if err != nil {
+		return defaultVal
+	}
+	return parsed
+}
+
+// TODO: Move to utils
+func getEnvDuration(envKey string, defaultVal time.Duration) time.Duration {
+	val := getEnvOrDefault(envKey, "")
+	if val == "" {
+		return defaultVal
+	}
+	parsed, err := time.ParseDuration(val)
+	if err != nil {
+		return defaultVal
+	}
+	return parsed
+}
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
@@ -65,6 +122,14 @@ func Run() {
 	var probeAddr string
 	var secureMetrics bool
 	var enableHTTP2 bool
+
+	// Define webhook
+	var webhooks []rotator.WebhookInfo
+	webhooks = append(webhooks, rotator.WebhookInfo{
+		Name: VwhName,
+		Type: rotator.Validating,
+	})
+
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
@@ -138,6 +203,35 @@ func Run() {
 		os.Exit(1)
 	}
 
+	setupFinished := make(chan struct{})
+	if !disableCertRotation {
+		setupLog.Info("setting up cert rotation")
+
+		if err := rotator.AddRotator(mgr, &rotator.CertRotator{
+			SecretKey: types.NamespacedName{
+				Namespace: utils.GetCurrentNamespace(),
+				Name:      secretName,
+			},
+			CertDir:                certDir,
+			CAName:                 caName,
+			CAOrganization:         caOrganization,
+			DNSName:                fmt.Sprintf("%s.%s.svc", certServiceName, utils.GetCurrentNamespace()),
+			IsReady:                setupFinished,
+			Webhooks:               webhooks,
+			RequireLeaderElection:  enableLeaderElection,
+			CaCertDuration:         caCertDuration,
+			ServerCertDuration:     serverCertDuration,
+			RotationCheckFrequency: rotationCheckFrequency,
+			LookaheadInterval:      lookaheadInterval,
+			// ExtKeyUsages:   &keyUsages,
+		}); err != nil {
+			setupLog.Error(err, "unable to set up cert rotation")
+			os.Exit(1)
+		}
+	} else {
+		close(setupFinished)
+	}
+
 	if err = (&controller.SLVReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -145,22 +239,36 @@ func Run() {
 		setupLog.Error(err, "unable to create controller", "controller", slvv1.Kind)
 		os.Exit(1)
 	}
-	if webhookEnabled {
-		setupLog.Info("setting up webhooks")
-		if err = (&slvv1.SLV{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", slvv1.Kind)
-			os.Exit(1)
-		}
-	}
+
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
 		os.Exit(1)
 	}
+
 	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up ready check")
 		os.Exit(1)
+	}
+
+	if !disableWebhook {
+		if err := mgr.Add(manager.RunnableFunc((func(ctx context.Context) error {
+			if !disableCertRotation {
+				setupLog.Info("waiting for certs to be ready before registering webhook")
+				<-setupFinished
+				setupLog.Info("certs ready, setting up webhook")
+			} else {
+				setupLog.Info("skipping cert rotation, setting up webhook")
+			}
+			if err := (&slvv1.SLV{}).SetupWebhookWithManager(mgr); err != nil {
+				return fmt.Errorf("failed to set up SLV webhook: %w", err)
+			}
+			return nil
+		}))); err != nil {
+			setupLog.Error(err, "unable to register webhook setup hook")
+			os.Exit(1)
+		}
 	}
 
 	setupLog.Info("starting manager")
@@ -168,4 +276,5 @@ func Run() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+
 }

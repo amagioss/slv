@@ -37,18 +37,26 @@ helm upgrade --install slv slv/slv-operator --namespace slv --create-namespace
 
 ## Helm Chart Values
 
+### SLV Helm Chart Configuration
+
 | Parameter | Description | Default |
-| --- | --- | --- |
-| `secretBinding` | Secret binding string for the environment. | None |
-| `k8sSecret` | Name of the Kubernetes Secret containing the `SecretKey` or `SecretBinding`. Must be in the release namespace. | `slv` |
-| `image` | Full image URL including tag. Helm enforces the tag to match the chart version. | `ghcr.io/amagioss/slv:<CHART_VERSION>` |
-| `imagePullPolicy` | Image pull policy. | `IfNotPresent` |
-| `resource` | CPU and memory resource limits for operator pods. | `250m` CPU and `250Mi` Memory |
-| `labels` | Additional labels for the deployment. | None |
-| `podLabels` | Additional labels for operator pods. | None |
-| `serviceAccountName` | Service account name. If provided, assumes custom permissions are pre-configured. | None |
-| `enableWebhook` | Enable or disable SLV webhook. | `false` |
-| `replicas` | Number of operator replicas. | `1` |
+|---|---|---|
+| `secretBinding` | Secret binding string used for the environment. Either this or `k8sSecret` must be specified. | `""` |
+| `k8sSecret` | Name of the Kubernetes Secret that contains either the `SecretKey` or `SecretBinding` under keys `SecretKey` or `SecretBinding` respectively. Must be in the release namespace. | `""` |
+| `image` | Full image URL including tag. Must match the Helm chart version. | `"ghcr.io/amagioss/slv:<CHART_VERSION>"` |
+| `imagePullPolicy` | Image pull policy. | `"IfNotPresent"` |
+| `resource` | CPU and memory resource limits/requests for the operator pods. Use standard `limits` and `requests` structure. | Refer Helm |
+| `labels` | Additional labels to add to the Deployment | `{}` |
+| `podLabels` | Additional labels to add to individual SLV pods. | `{}` |
+| `serviceAccountName` | If provided, SLV will not install cluster roles or bindings. Ensure this SA has correct permissions. | `""` |
+| `volumes` | Additional volumes to mount in the SLV pods. | `[]` |
+| `volumeMounts` | Volume mounts for the volumes specified above. | `[]` |
+| `replicas` | Number of SLV operator replicas. | `1` |
+| `webhook.disableAutomaticCertManagement` | If `false`, SLV manages TLS certs for the webhook using the built-in mechanism. If `true`, you must manually manage TLS and caBundle injection. | `false` |
+| `webhook.serviceName` | Name of the Kubernetes service pointing to the webhook server. | `"slv-webhook-service"` |
+| `webhook.validatingWebhookConfigName` | Name of the `ValidatingWebhookConfiguration` resource. | `"slv-operator-validating-webhook"` |
+| `webhook.certSecretName` | Name of the Kubernetes Secret where SLV stores TLS certs for the webhook. | `"slv-webhook-server-cert"` |
+| `webhook.vwhAnnotations` | Additional annotations to add to the `ValidatingWebhookConfiguration` (e.g., for CA injection). | `{}` |
 
 ---
 
@@ -88,7 +96,7 @@ secret/slv created
 
 ### Install the SLV Operator
 ```bash
-helm upgrade --install slv slv-dev/slv-operator --namespace slv --create-namespace
+helm upgrade --install slv slv/slv-operator --namespace slv --create-namespace
 ```
 #### Output:
 ```bash

@@ -25,9 +25,25 @@ spec:
             {{- end }}
         spec:
           containers:
-          {{- include "slvlib.container" . | nindent 12 }}
-                - name: SLV_MODE
-                  value: "k8s_job"
+          - name: slv
+            {{- if and (.Values.image) (not (hasSuffix .Chart.Version .Values.image)) -}}
+            {{- fail (printf "The image tag must be set to the Chart.Version '%s'" .Chart.Version) -}}
+            {{- end }}
+            image: {{ .Values.image | default (printf "ghcr.io/amagioss/slv:%s" .Chart.AppVersion) }}
+            imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+            resources:
+              {{- toYaml .Values.resource | nindent 14 }}
+            env:
+                {{- if ne .Values.k8sSecret ""}}
+              - name: SLV_K8S_ENV_SECRET
+                value: {{ .Values.k8sSecret }}
+                {{- end }}
+                {{- if ne .Values.secretBinding "" }}
+              - name: SLV_ENV_SECRET_BINDING
+                value: {{ .Values.secretBinding }}
+                {{- end }}                
+              - name: SLV_MODE
+                value: "k8s_job"
           restartPolicy: Never
           serviceAccountName: {{ .Values.serviceAccountName | default "slv-serviceaccount" }}
       backoffLimit: {{ .Values.backoffLimit | default 4 }}
