@@ -82,10 +82,15 @@ jobs:
 
       - name: Add static assets
         run: |
+          CHARTS_REPO_BASE="ghcr.io/${{ github.repository }}/charts"
           mkdir -p pages/k8s/samples/deploy
+          LATEST_OPERATOR_CHART_VERSION=$(oras repo tags "${CHARTS_REPO_BASE}/slv-operator" | sort -Vu | tail -n 1)
+          helm pull "oci://${CHARTS_REPO_BASE}/slv-operator" --version $LATEST_OPERATOR_CHART_VERSION --untar -d ./.charts
+          helm template slv ./.charts/slv-operator --namespace slv > pages/k8s/samples/deploy/operator.yaml
+          LATEST_JOB_CHART_VERSION=$(oras repo tags "${CHARTS_REPO_BASE}/slv-job" | sort -Vu | tail -n 1)
+          helm pull "oci://${CHARTS_REPO_BASE}/slv-job" --version $LATEST_JOB_CHART_VERSION --untar -d ./.charts
+          helm template slv ./.charts/slv-job --namespace slv > pages/k8s/samples/deploy/job.yaml
           cp internal/k8s/config/crd/bases/slv.sh_slvs.yaml pages/k8s/crd.yaml
-          cp internal/k8s/deploy/operator.yaml pages/k8s/samples/deploy/operator.yaml
-          cp internal/k8s/deploy/job.yaml pages/k8s/samples/deploy/job.yaml
           cp internal/k8s/config/samples/slv_v1_slv.yaml pages/k8s/samples/pets.slv.yaml
 
       - name: Upload artifact

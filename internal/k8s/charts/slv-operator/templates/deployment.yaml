@@ -39,22 +39,21 @@ spec:
           image: {{ .Values.image | default (printf "ghcr.io/amagioss/slv:%s" .Chart.AppVersion) }}
           imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
           resources:
-            resources:
-              {{- if .Values.webhook.disableAutomaticCertManagement | default false }}
-              limits:
-                cpu: {{ .Values.resource.limits.cpu | default "200m"}}
-                memory: {{ .Values.resource.limits.memory | default "192Mi"}}
-              requests:
-                cpu: {{ .Values.resource.requests.cpu | default "200m"}}
-                memory: {{ .Values.resource.limits.memory | default "192Mi"}}
-              {{- else }}
-              limits:
-                cpu: {{ .Values.resource.limits.cpu | default "250m"}}
-                memory: {{ .Values.resource.limits.memory | default "256Mi"}}
-              requests:
-                cpu: {{ .Values.resource.requests.cpu | default "250m"}}
-                memory: {{ .Values.resource.limits.memory | default "256Mi"}}
-              {{- end }}
+            {{- if .Values.webhook.disableAutomaticCertManagement | default false }}
+            limits:
+              cpu: {{ .Values.resource.limits.cpu | default "200m"}}
+              memory: {{ .Values.resource.limits.memory | default "192Mi"}}
+            requests:
+              cpu: {{ .Values.resource.requests.cpu | default "200m"}}
+              memory: {{ .Values.resource.limits.memory | default "192Mi"}}
+            {{- else }}
+            limits:
+              cpu: {{ .Values.resource.limits.cpu | default "250m"}}
+              memory: {{ .Values.resource.limits.memory | default "256Mi"}}
+            requests:
+              cpu: {{ .Values.resource.requests.cpu | default "250m"}}
+              memory: {{ .Values.resource.limits.memory | default "256Mi"}}
+            {{- end }}
           env:
               {{- if ne .Values.k8sSecret ""}}
             - name: SLV_K8S_ENV_SECRET

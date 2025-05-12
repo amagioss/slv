@@ -21,7 +21,26 @@ This ensures a seamless, real-time synchronization between vault data and Kubern
 
 ---
 
-## Installation
+## Quick Install (For Testing)
+
+We recommend using the official [Helm chart method](#installation) for deploying the SLV Operator in Production. The following method is for quick testing purposes only.
+
+Create a namespace for the SLV Operator
+```
+kubectl create namespace slv
+```
+
+Preload the environment secret with the `SecretKey` or `SecretBinding` as shown below:
+```bash
+kubectl create secret generic slv -n slv --from-literal=SecretKey=<your_slv_env_secret_key>
+```
+
+Quickly install the SLV Operator using the provided YAML:
+```bash
+kubectl apply -f https://slv.sh/k8s/samples/deploy/operator.yaml
+```
+
+## Installation 
 
 The SLV Operator can be easily deployed using the official Helm chart:
 

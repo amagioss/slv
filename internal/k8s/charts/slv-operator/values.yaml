@@ -20,14 +20,12 @@ imagePullPolicy: ""
 
 # Setting resource constraints for the operator.
 resource:
-  # # Resource limits 
-  # limits:
-  #   cpu: "250m" 
-  #   memory: "250Mi" 
-  # # Resource requests 
-  # requests:
-  #   cpu: "250m" 
-  #   memory: "250Mi" 
+  limits:
+    cpu: ""
+    memory: ""
+  requests:
+    cpu: ""
+    memory: ""
 
 # The labels to be set for the Deployment/CronJob/Job
 labels: {}
