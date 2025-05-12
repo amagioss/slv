@@ -7,7 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/olekukonko/tablewriter"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/environments"
@@ -16,83 +17,32 @@ import (
 	"slv.sh/slv/internal/core/vaults"
 )
 
-func getVault(filePath string) (*vaults.Vault, error) {
-	return vaults.Get(filePath)
-}
-
 func showVault(vault *vaults.Vault) {
-	accessors, err := vault.ListAccessors()
-	if err != nil {
-		utils.ExitOnError(err)
-	}
-	profile, _ := profiles.GetCurrentProfile()
-	self := environments.GetSelf()
-	accessorTable := tablewriter.NewWriter(os.Stdout)
-	accessorTable.SetHeader([]string{"Public Key", "Type", "Name"})
-	accessorTable.SetHeaderColor(tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor},
-		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor},
-		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor})
-	for _, accessor := range accessors {
-		var env *environments.Environment
-		accessorPK, err := accessor.String()
-		if err != nil {
-			utils.ExitOnError(err)
-		}
-		row := []string{accessorPK}
-		selfEnv := false
-		rootEnv := false
-		if self != nil && self.PublicKey == accessorPK {
-			env = self
-			selfEnv = true
-		} else if profile != nil {
-			env, err = profile.GetEnv(accessorPK)
-			if err != nil {
-				utils.ExitOnError(err)
-			}
-			if env == nil {
-				root, err := profile.GetRoot()
-				if err != nil {
-					utils.ExitOnError(err)
-				}
-				if root != nil && root.PublicKey == accessorPK {
-					rootEnv = true
-					env = root
-				}
-			}
-		}
-		if env != nil {
-			if selfEnv {
-				row = append(row, "Self")
-			} else if rootEnv {
-				row = append(row, "Root")
-			} else {
-				if env.EnvType == environments.USER {
-					row = append(row, "User")
-				} else {
-					row = append(row, "Service")
-				}
-			}
-			row = append(row, env.Name)
-		} else {
-			row = append(row, "Unknown", "")
-		}
-		accessorTable.Append(row)
-	}
-	fmt.Println("Vault ID: ", vault.Spec.Config.PublicKey)
-	fmt.Println("Vault Data:")
-	dataTable := tablewriter.NewWriter(os.Stdout)
-	tableHeaderColors := []tablewriter.Colors{{tablewriter.Bold, tablewriter.FgHiWhiteColor},
-		{tablewriter.Bold, tablewriter.FgHiWhiteColor},
-		{tablewriter.Bold, tablewriter.FgHiWhiteColor},
-		{tablewriter.Bold, tablewriter.FgHiWhiteColor}}
-	hashAdded := false
-	rows := [][]string{}
 	dataMap, err := vault.List(!vault.IsLocked())
 	if err != nil {
 		utils.ExitOnError(err)
 	}
+	hashFound := false
+	for _, data := range dataMap {
+		if hashFound = data.Hash() != ""; hashFound {
+			break
+		}
+	}
+	dataTable := table.NewWriter()
+	dataTable.SetOutputMirror(os.Stdout)
+	dataTableHeader := table.Row{
+		text.Colors{text.Bold}.Sprint("Name"),
+		text.Colors{text.Bold}.Sprint("Value"),
+		text.Colors{text.Bold}.Sprint("Type"),
+		text.Colors{text.Bold}.Sprint("Encrypted At"),
+	}
+	if hashFound {
+		dataTableHeader = append(dataTableHeader, text.Colors{text.Bold}.Sprint("Hash"))
+	}
+	dataTable.AppendHeader(dataTableHeader)
+	dataTableRows := make([]table.Row, 0, len(dataMap))
 	for name, data := range dataMap {
-		row := []string{name}
+		row := table.Row{name}
 		if data.Value() == nil {
 			row = append(row, "(Locked)")
 		} else {
@@ -108,29 +58,64 @@ func showVault(vault *vaults.Vault) {
 		} else {
 			row = append(row, "N/A")
 		}
-		if data.Hash() != "" {
+		if hashFound {
 			row = append(row, data.Hash())
-			hashAdded = true
 		}
-		rows = append(rows, row)
+		dataTableRows = append(dataTableRows, row)
 	}
-	header := []string{"Name", "Value", "Type", "Updated At"}
-	if hashAdded {
-		header = append(header, "Hash")
-		for i := range rows {
-			if len(rows[i]) < 4 {
-				rows[i] = append(rows[i], "")
+	dataTable.AppendRows(dataTableRows)
+
+	accessors, err := vault.ListAccessors()
+	if err != nil {
+		utils.ExitOnError(err)
+	}
+	profile, _ := profiles.GetCurrentProfile()
+	var root *environments.Environment
+	if profile != nil {
+		root, _ = profile.GetRoot()
+	}
+	self := environments.GetSelf()
+	accessTable := table.NewWriter()
+	accessTable.SetOutputMirror(os.Stdout)
+	accessTable.AppendHeader(table.Row{
+		text.Colors{text.Bold}.Sprint("Public Key"),
+		text.Colors{text.Bold}.Sprint("Type"),
+		text.Colors{text.Bold}.Sprint("Name"),
+	})
+	accessTableRows := make([]table.Row, 0, len(accessors))
+	for _, accessor := range accessors {
+		accessorPubKey, err := accessor.String()
+		if err != nil {
+			utils.ExitOnError(err)
+		}
+		row := table.Row{accessorPubKey}
+		if self != nil && self.PublicKey == accessorPubKey {
+			row = append(row, "Self", self.Name)
+		} else if root != nil && root.PublicKey == accessorPubKey {
+			row = append(row, "Root", root.Name)
+		} else if profile != nil {
+			if env, _ := profile.GetEnv(accessorPubKey); env != nil {
+				if env.EnvType == environments.USER {
+					row = append(row, "User", env.Name)
+				} else {
+					row = append(row, "Service", env.Name)
+				}
 			}
 		}
-		tableHeaderColors = append(tableHeaderColors, tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor})
+		if len(row) < 3 {
+			row = append(row, "Unknown", "")
+		}
+		accessTableRows = append(accessTableRows, row)
 	}
-	dataTable.SetHeader(header)
-	dataTable.SetHeaderColor(tableHeaderColors...)
-	dataTable.AppendBulk(rows)
+	accessTable.AppendRows(accessTableRows)
+
+	fmt.Println("Vault ID: ", vault.Spec.Config.PublicKey)
+	fmt.Println("Vault Data:")
+	dataTable.SetStyle(table.StyleLight)
 	dataTable.Render()
 	fmt.Println("Accessible by:")
-	accessorTable.Render()
-	utils.SafeExit()
+	accessTable.SetStyle(table.StyleLight)
+	accessTable.Render()
 }
 
 func VaultCommand() *cobra.Command {
@@ -142,7 +127,7 @@ func VaultCommand() *cobra.Command {
 			Long:    `Manage vaults/secrets using SLV. SLV Vaults are files that store secrets in a key-value format.`,
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
-				vault, err := getVault(vaultFile)
+				vault, err := vaults.Get(vaultFile)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -199,7 +184,7 @@ func vaultFilePathCompletion(cmd *cobra.Command, args []string, toComplete strin
 }
 
 func vaultItemNameCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	if vault, err := getVault(cmd.Flag(vaultFileFlag.Name).Value.String()); err == nil {
+	if vault, err := vaults.Get(cmd.Flag(vaultFileFlag.Name).Value.String()); err == nil {
 		return vault.GetItemNames(), cobra.ShellCompDirectiveNoFileComp
 	}
 	return nil, cobra.ShellCompDirectiveError

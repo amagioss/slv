@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func vaultUpdateCommand() *cobra.Command {
@@ -17,7 +18,7 @@ func vaultUpdateCommand() *cobra.Command {
 				vaultFilePath := cmd.Flag(vaultFileFlag.Name).Value.String()
 				name := cmd.Flag(vaultNameFlag.Name).Value.String()
 				namespace := cmd.Flag(vaultK8sNamespaceFlag.Name).Value.String()
-				vault, err := getVault(vaultFilePath)
+				vault, err := vaults.Get(vaultFilePath)
 				if err != nil {
 					utils.ExitOnError(err)
 				}

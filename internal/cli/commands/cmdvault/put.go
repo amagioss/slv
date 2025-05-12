@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/input"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func vaultPutCommand() *cobra.Command {
@@ -25,7 +26,7 @@ func vaultPutCommand() *cobra.Command {
 				}
 				importFile := cmd.Flag(vaultImportFileFlag.Name).Value.String()
 				plaintextValue, _ := cmd.Flags().GetBool(plaintextValueFlag.Name)
-				vault, err := getVault(vaultFile)
+				vault, err := vaults.Get(vaultFile)
 				if err != nil {
 					utils.ExitOnError(err)
 				}

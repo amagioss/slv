@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func vaultDeleteCommand() *cobra.Command {
@@ -16,7 +17,7 @@ func vaultDeleteCommand() *cobra.Command {
 			Short:   "Removes secret from the vault",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
-				vault, err := getVault(vaultFile)
+				vault, err := vaults.Get(vaultFile)
 				if err != nil {
 					utils.ExitOnError(err)
 				}

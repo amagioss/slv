@@ -88,7 +88,7 @@ func vaultGetCommand() *cobra.Command {
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 				itemName := cmd.Flag(itemNameFlag.Name).Value.String()
-				vault, err := getVault(vaultFile)
+				vault, err := vaults.Get(vaultFile)
 				if err != nil {
 					utils.ExitOnError(err)
 				}

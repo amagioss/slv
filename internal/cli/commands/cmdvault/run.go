@@ -13,6 +13,7 @@ import (
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func execVaultCommand(vaultFile, prefix, command string) {
@@ -37,7 +38,7 @@ func execVaultCommand(vaultFile, prefix, command string) {
 }
 
 func runVaultCommand(shell bool, vaultFile, prefix, command string, args ...string) {
-	vault, err := getVault(vaultFile)
+	vault, err := vaults.Get(vaultFile)
 	if err != nil {
 		utils.ExitOnError(err)
 	}

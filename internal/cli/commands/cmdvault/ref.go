@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"slv.sh/slv/internal/cli/commands/utils"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func refineType(data any, foundType string) string {
@@ -44,7 +45,7 @@ func vaultRefCommand() *cobra.Command {
 			Short:   "References and updates secrets to a vault from a given yaml, json or the whole file content",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
-				vault, err := getVault(vaultFile)
+				vault, err := vaults.Get(vaultFile)
 				if err != nil {
 					utils.ExitOnError(err)
 				}

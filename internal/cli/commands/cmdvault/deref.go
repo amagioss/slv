@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func vaultDerefCommand() *cobra.Command {
@@ -28,7 +29,7 @@ func vaultDerefCommand() *cobra.Command {
 					utils.ExitOnError(err)
 				}
 				for _, vaultFile := range vaultFiles {
-					vault, err := getVault(vaultFile)
+					vault, err := vaults.Get(vaultFile)
 					if err != nil {
 						utils.ExitOnError(err)
 					}

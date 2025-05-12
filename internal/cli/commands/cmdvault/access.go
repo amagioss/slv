@@ -9,6 +9,7 @@ import (
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/crypto"
 	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 func vaultAccessCommand() *cobra.Command {
@@ -52,7 +53,7 @@ func vaultAccessAddCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				vault, err := getVault(vaultFile)
+				vault, err := vaults.Get(vaultFile)
 				if err == nil {
 					err = vault.Unlock(envSecretKey)
 					if err == nil {
@@ -87,7 +88,7 @@ func vaultAccessRemoveCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				vault, err := getVault(vaultFile)
+				vault, err := vaults.Get(vaultFile)
 				if err == nil {
 					var envSecretKey *crypto.SecretKey
 					if envSecretKey, err = secretkey.Get(); err == nil {
