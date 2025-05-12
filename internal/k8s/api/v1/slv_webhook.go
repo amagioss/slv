@@ -58,14 +58,15 @@ func (r *SLV) validateSLV() (err error) {
 	vault := r
 	var secretKey *crypto.SecretKey
 	if secretKey, err = utils.SecretKey(); err != nil {
-		slvlog.Error(err, "failed to get secret key", "name", r.Name)
+		slvlog.Error(err, "failed to retrieve secret key", "name", r.Name, "error", err.Error())
+		return err
 	}
 	if err = vault.Unlock(secretKey); err != nil {
-		slvlog.Error(err, "failed to unlock vault", "name", r.Name)
+		slvlog.Error(err, "failed to unlock vault", "name", r.Name, "error", err.Error())
 		return err
 	}
 	if _, err = vault.GetAllValues(); err != nil {
-		slvlog.Error(err, "failed to get all secrets", "name", r.Name)
+		slvlog.Error(err, "failed to read all secrets", "name", r.Name, "error", err.Error())
 		return err
 	}
 	return nil
@@ -77,7 +78,6 @@ func (r *SLV) ValidateCreate(ctx context.Context, obj runtime.Object) (admission
 	if !ok {
 		return nil, fmt.Errorf("expected *SLV but got %T", obj)
 	}
-
 	slvlog.Info("Validating create", "name", slv.GetName())
 	return nil, slv.validateSLV()
 }
@@ -94,11 +94,5 @@ func (r *SLV) ValidateUpdate(ctx context.Context, old runtime.Object, obj runtim
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
 func (r *SLV) ValidateDelete(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	slv, ok := obj.(*SLV)
-	if !ok {
-		return nil, fmt.Errorf("expected *SLV but got %T", obj)
-	}
-
-	slvlog.Info("Validating delete", "name", slv.GetName())
 	return nil, nil
 }
