@@ -3,7 +3,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ .Values.webhook.validatingWebhookConfigName | default "slv-operator-validating-webhook" }}
   annotations: 
-    {{- toYaml .Values.webhook.vwhAnnotations | nindent 4 }}
+    {{- toYaml .Values.webhook.validatingWebhookConfigAnnotations | nindent 4 }}
 webhooks:
 - admissionReviewVersions:
   - v1

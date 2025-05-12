@@ -41,39 +41,49 @@ podLabels: {}
 # Understand the consequenses of filling this value carefully.
 serviceAccountName: ""
 
-# The volumes to be mounted inside the SLV pods.
+# The volumes to be used inside the SLV pods. 
+# You may need this when you are using cert-manager to inject CA certs into the SLV pods.
+# E.g. - name: cert
+#        secret:
+#        secretName: slv-webhook-server-cert
 volumes: []
 
+
 # The volume mounts to be mounted inside the SLV pods.
+# You may need this when you are using cert-manager to inject CA certs into the SLV pods.
+# E.g. - name: cert
+#        mountPath: /tmp/k8s-webhook-server/serving-certs
+#        readOnly: true
 volumeMounts: []
 
 # The number of replicas to be used by the deployment for SLV pods. 
-replicas: 
+replicas: 1
 
 
 webhook:
   
   # If set to false (left as it is), slv will automatically create TLS certificates for the webhook and set up the configuration. 
-  # If set to false, you will have to create the TLS certificates and set up the configuration manually. You can
+  # If set to true, you will have to create the TLS certificates and set up the configuration manually. You can
   # - Use .Values.operator.volumes and .Values.operator.volumeMounts to mount the TLS certificates inside the SLV pods.
   # - Use .Values.webhook.vwhAnnotations to set up ca injection (If using cert-manager)
   # Default: false
-  disableAutomaticCertManagement:  
+  disableAutomaticCertManagement: false
 
   # The name of the service that routes to the webhook server
   # Default: slv-webhook-service
-  serviceName: 
-
-  # Name of the ValidatingWebhookConfiguration for SLV webhook
-  # Default: slv-operator-validating-webhook
-  validatingWebhookConfigName: 
-
+  serviceName: ""
+  
   # Name of the Secret where TLS certs will be stored for SLV webhook
   # Default: slv-webhook-server-cert
-  certSecretName: 
+  certSecretName: ""
+  
+  # Name of the ValidatingWebhookConfiguration for SLV webhook
+  # Default: slv-operator-validating-webhook
+  validatingWebhookConfigName: ""
 
   # Annotations to add to the validatingWebhookConfiguration
-  vwhAnnotations: 
+  # E.g. cert-manager.io/inject-ca-from-secret: "slv-webhook-server-cert"
+  validatingWebhookConfigAnnotations: {}
 
 
 
