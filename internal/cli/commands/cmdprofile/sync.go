@@ -12,9 +12,9 @@ import (
 func profilePullCommand() *cobra.Command {
 	if profilePullCmd == nil {
 		profilePullCmd = &cobra.Command{
-			Use:     "pull",
-			Aliases: []string{"sync"},
-			Short:   "Pulls the latest changes for the current profile from remote repository",
+			Use:     "sync",
+			Aliases: []string{"pull"},
+			Short:   "Update the current profile from remote",
 			Run: func(cmd *cobra.Command, args []string) {
 				profile, err := profiles.GetCurrentProfile()
 				if err != nil {
@@ -23,29 +23,9 @@ func profilePullCommand() *cobra.Command {
 				if err = profile.Pull(); err != nil {
 					utils.ExitOnError(err)
 				}
-				fmt.Printf("Successfully pulled changes into profile: %s\n", color.GreenString(profile.Name()))
+				fmt.Printf("Profile %s is updated from remote successfully\n", color.GreenString(profile.Name()))
 			},
 		}
 	}
 	return profilePullCmd
-}
-
-func profilePushCommand() *cobra.Command {
-	if profilePushCmd == nil {
-		profilePushCmd = &cobra.Command{
-			Use:   "push",
-			Short: "Pushes the changes in the current profile to the pre-configured remote repository",
-			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetCurrentProfile()
-				if err != nil {
-					utils.ExitOnError(err)
-				}
-				if err = profile.Push(); err != nil {
-					utils.ExitOnError(err)
-				}
-				fmt.Printf("Successfully pushed changes from profile: %s\n", color.GreenString(profile.Name()))
-			},
-		}
-	}
-	return profilePushCmd
 }

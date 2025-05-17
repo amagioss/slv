@@ -76,7 +76,11 @@ func GetPublicKeys(cmd *cobra.Command, root, pq bool) (publicKeys []*crypto.Publ
 		return nil, fmt.Errorf("no matching environments found")
 	}
 	if profile != nil && root {
-		if rootPublicKey, err := profile.RootPublicKey(); err != nil {
+		rootEnv, err := profile.GetRoot()
+		if err != nil {
+			return nil, err
+		}
+		if rootPublicKey, err := rootEnv.GetPublicKey(); err != nil {
 			return nil, err
 		} else if rootPublicKey != nil {
 			publicKeys = append(publicKeys, rootPublicKey)

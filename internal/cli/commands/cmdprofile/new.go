@@ -2,6 +2,7 @@ package cmdprofile
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -12,25 +13,51 @@ import (
 func profileNewCommand() *cobra.Command {
 	if profileNewCmd == nil {
 		profileNewCmd = &cobra.Command{
-			Use:   "new",
-			Short: "Creates a new profile",
+			Use:     "new",
+			Aliases: []string{"setup"},
+			Short:   "Sets up a new profile based on a remote",
 			Run: func(cmd *cobra.Command, args []string) {
-				name, _ := cmd.Flags().GetString(profileNameFlag.Name)
-				gitURI, _ := cmd.Flags().GetString(profileGitURI.Name)
-				gitBranch, _ := cmd.Flags().GetString(profileGitBranch.Name)
-				err := profiles.New(name, gitURI, gitBranch)
-				if err == nil {
-					fmt.Println("Created profile: ", color.GreenString(name))
-					utils.SafeExit()
-				} else {
-					utils.ExitOnError(err)
-				}
+				cmd.Help()
 			},
 		}
-		profileNewCmd.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
-		profileNewCmd.Flags().StringP(profileGitURI.Name, profileGitURI.Shorthand, "", profileGitURI.Usage)
-		profileNewCmd.Flags().StringP(profileGitBranch.Name, profileGitBranch.Shorthand, "", profileGitBranch.Usage)
-		profileNewCmd.MarkFlagRequired(profileNameFlag.Name)
+	}
+	for _, remoteType := range profiles.ListRemoteTypes() {
+		profileNewCmd.AddCommand(getRemoteProfileCommand(remoteType))
 	}
 	return profileNewCmd
+}
+
+func getRemoteProfileCommand(remoteType string) *cobra.Command {
+	remoteArgs := profiles.GetRemoteTypeArgs(remoteType)
+	remoteProfileCommand := &cobra.Command{
+		Use:   remoteType,
+		Short: "Sets up a profile based on a remote profile (" + remoteType + ")",
+		Run: func(cmd *cobra.Command, args []string) {
+			name, _ := cmd.Flags().GetString(profileNameFlag.Name)
+			updateInterval, err := cmd.Flags().GetDuration(profileUpdateInterval.Name)
+			if err != nil {
+				utils.ExitOnError(err)
+			}
+			remoteConfig := make(map[string]string)
+			for _, arg := range remoteArgs {
+				if value, _ := cmd.Flags().GetString(arg.Name()); value != "" {
+					remoteConfig[arg.Name()] = value
+				}
+			}
+			if err = profiles.New(name, remoteType, updateInterval, remoteConfig); err != nil {
+				utils.ExitOnError(err)
+			}
+			fmt.Printf("Created profile %s with remote type %s\n", color.GreenString(name), color.GreenString(remoteType))
+		},
+	}
+	remoteProfileCommand.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
+	remoteProfileCommand.MarkFlagRequired(profileNameFlag.Name)
+	remoteProfileCommand.Flags().DurationP(profileUpdateInterval.Name, "", time.Hour, profileUpdateInterval.Usage)
+	for _, arg := range remoteArgs {
+		remoteProfileCommand.Flags().StringP(arg.Name(), "", "", arg.Description())
+		if arg.Required() {
+			remoteProfileCommand.MarkFlagRequired(arg.Name())
+		}
+	}
+	return remoteProfileCommand
 }

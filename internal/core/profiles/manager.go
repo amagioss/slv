@@ -3,6 +3,7 @@ package profiles
 import (
 	"os"
 	"path/filepath"
+	"time"
 
 	"slv.sh/slv/internal/core/commons"
 	"slv.sh/slv/internal/core/config"
@@ -19,37 +20,36 @@ var profileMgr *profileManager = nil
 var profileMap map[string]*Profile = make(map[string]*Profile)
 
 func initProfileManager() error {
-	if profileMgr != nil {
-		return nil
-	}
-	var manager profileManager
-	manager.dir = filepath.Join(config.GetAppDataDir(), profilesDirName)
-	profileManagerDirInfo, err := os.Stat(manager.dir)
-	if err != nil {
-		err = os.MkdirAll(manager.dir, 0755)
+	if profileMgr == nil {
+		RegisterDefaultRemotes()
+		var manager profileManager
+		manager.dir = filepath.Join(config.GetAppDataDir(), profilesDirName)
+		profileManagerDirInfo, err := os.Stat(manager.dir)
 		if err != nil {
-			return errCreatingProfileCollectionDir
+			err = os.MkdirAll(manager.dir, 0755)
+			if err != nil {
+				return errCreatingProfilesHomeDir
+			}
+		} else if !profileManagerDirInfo.IsDir() {
+			return errInitializingProfileManagementDir
 		}
-	} else if !profileManagerDirInfo.IsDir() {
-		return errInitializingProfileManagementDir
-	}
-	profileManagerDir, err := os.Open(manager.dir)
-	if err != nil {
-		return errOpeningProfileManagementDir
-	}
-	defer profileManagerDir.Close()
-	fileInfoList, err := profileManagerDir.Readdir(-1)
-	if err != nil {
-		return errOpeningProfileManagementDir
-	}
-	manager.profileList = make(map[string]struct{})
-	for _, fileInfo := range fileInfoList {
-		if fileInfo.IsDir() {
-			manager.profileList[fileInfo.Name()] = struct{}{}
+		profileManagerDir, err := os.Open(manager.dir)
+		if err != nil {
+			return errOpeningProfileManagementDir
 		}
+		defer profileManagerDir.Close()
+		fileInfoList, err := profileManagerDir.Readdir(-1)
+		if err != nil {
+			return errOpeningProfileManagementDir
+		}
+		manager.profileList = make(map[string]struct{})
+		for _, fileInfo := range fileInfoList {
+			if fileInfo.IsDir() {
+				manager.profileList[fileInfo.Name()] = struct{}{}
+			}
+		}
+		profileMgr = &manager
 	}
-	profileMgr = &manager
-	GetCurrentProfileName()
 	return nil
 }
 
@@ -74,15 +74,15 @@ func Get(profileName string) (profile *Profile, err error) {
 	if _, exists := profileMgr.profileList[profileName]; !exists {
 		return nil, errProfileNotFound
 	}
-	if profile, err = getProfileForPath(filepath.Join(profileMgr.dir, profileName)); err != nil {
+	if profile, err = getProfile(profileName, filepath.Join(profileMgr.dir, profileName)); err != nil {
 		return nil, err
 	}
-	profile.name = commons.StringPtr(profileName)
+	profile.name = profileName
 	profileMap[profileName] = profile
 	return
 }
 
-func New(profileName, gitURI, gitBranch string) error {
+func New(profileName, remoteType string, updateInterval time.Duration, remoteConfig map[string]string) error {
 	if profileName == "" {
 		return errInvalidProfileName
 	}
@@ -92,7 +92,7 @@ func New(profileName, gitURI, gitBranch string) error {
 	if _, exists := profileMgr.profileList[profileName]; exists {
 		return errProfileExistsAlready
 	}
-	if _, err := newProfile(filepath.Join(profileMgr.dir, profileName), gitURI, gitBranch); err != nil {
+	if _, err := createProfile(profileName, filepath.Join(profileMgr.dir, profileName), remoteType, updateInterval, remoteConfig); err != nil {
 		return err
 	}
 	profileMgr.profileList[profileName] = struct{}{}

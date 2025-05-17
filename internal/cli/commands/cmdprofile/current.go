@@ -33,6 +33,9 @@ func profileSetCurrentCommand() *cobra.Command {
 		}
 		profileSetCurrentCmd.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
 		profileSetCurrentCmd.MarkFlagRequired(profileNameFlag.Name)
+		if err := profileSetCurrentCmd.RegisterFlagCompletionFunc(profileNameFlag.Name, profileNameCompletion); err != nil {
+			utils.ExitOnError(err)
+		}
 	}
 	return profileSetCurrentCmd
 }

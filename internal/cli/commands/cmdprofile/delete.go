@@ -27,6 +27,9 @@ func profileDeleteCommand() *cobra.Command {
 		}
 		profileDelCmd.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
 		profileDelCmd.MarkFlagRequired(profileNameFlag.Name)
+		if err := profileDelCmd.RegisterFlagCompletionFunc(profileNameFlag.Name, profileNameCompletion); err != nil {
+			utils.ExitOnError(err)
+		}
 	}
 	return profileDelCmd
 }

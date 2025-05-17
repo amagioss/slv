@@ -2,6 +2,7 @@ package cmdprofile
 
 import (
 	"github.com/spf13/cobra"
+	"slv.sh/slv/internal/core/profiles"
 )
 
 func ProfileCommand() *cobra.Command {
@@ -20,7 +21,14 @@ func ProfileCommand() *cobra.Command {
 		profileCmd.AddCommand(profileListCommand())
 		profileCmd.AddCommand(profileDeleteCommand())
 		profileCmd.AddCommand(profilePullCommand())
-		profileCmd.AddCommand(profilePushCommand())
 	}
 	return profileCmd
+}
+
+func profileNameCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	profileNames, err := profiles.List()
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveError
+	}
+	return profileNames, cobra.ShellCompDirectiveNoFileComp
 }

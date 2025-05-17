@@ -14,7 +14,7 @@ func envAddCommand() *cobra.Command {
 	if envAddCmd == nil {
 		envAddCmd = &cobra.Command{
 			Use:     "add",
-			Aliases: []string{"set", "put", "store", "a"},
+			Aliases: []string{"set", "put"},
 			Short:   "Adds an environment to the current profile",
 			Run: func(cmd *cobra.Command, args []string) {
 				envdefs, err := cmd.Flags().GetStringSlice(envDefFlag.Name)
@@ -45,7 +45,7 @@ func envAddCommand() *cobra.Command {
 					}
 				}
 				if successMessage == "" {
-					successMessage = fmt.Sprintf("Successfully added %d environments to profile %s", len(envdefs), color.GreenString(profile.Name()))
+					successMessage = fmt.Sprintf("Successfully added %d environment(s) to profile (%s)", len(envdefs), color.GreenString(profile.Name()))
 				}
 				fmt.Println(successMessage)
 				utils.SafeExit()

@@ -3,8 +3,6 @@ package profiles
 import (
 	"errors"
 	"time"
-
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
 // Errors and constants used by profiles
@@ -14,21 +12,22 @@ const (
 	currentProfileFileName = ".current"
 
 	// Profile constants
-	profileDataDirName          = "data"
-	profileSettingsFileName     = "settings.yml"
-	profileEnvironmentsFileName = "environments.yml"
-	profileGroupsFileName       = "groups.yml"
-	profileGitSyncInterval      = time.Hour
+	profileConfigFileName = ".profile.yaml"
+	profileDataDirName    = "data"
+	defaultSyncInterval   = time.Hour
+
+	defaultEnvManifestFileName = "environments.yaml"
+	defaultSettingsFileName    = "settings.yaml"
 )
 
 var (
-	gitHttpAuth          *http.BasicAuth
-	gitHttpAuthProcessed = false
+	defaultRemoteRegistered = false
+	envManifestFileNames    = []string{defaultEnvManifestFileName, "environments.yml"}
+	settingsFileNames       = []string{defaultSettingsFileName, "settings.yml"}
 
 	errProfilePathExistsAlready         = errors.New("profile path exists already")
-	errCreatingProfileDir               = errors.New("error creating profile dir")
 	errProfilePathDoesNotExist          = errors.New("profile path does not exist")
-	errCreatingProfileCollectionDir     = errors.New("error creating profile collection dir in app data dir")
+	errCreatingProfilesHomeDir          = errors.New("error creating profiles home dir inside app data dir")
 	errInitializingProfileManagementDir = errors.New("error initializing profile management dir")
 	errOpeningProfileManagementDir      = errors.New("error opening profile management dir")
 	errProfileNotFound                  = errors.New("profile not found")
@@ -37,7 +36,8 @@ var (
 	errNoCurrentProfileSet              = errors.New("current profile not set")
 	errSettingCurrentProfile            = errors.New("error setting current profile")
 	errDeletingCurrentProfile           = errors.New("error deleting current profile")
-	errProfileNotGitRepository          = errors.New("profile is not a git repository")
-	errProfileGitPullMarking            = errors.New("error marking profile as pulled")
-	errChangesNotAllowedInGitProfile    = errors.New("changes not allowed since the current profile is git based")
+	errRemoteTypeDoesNotExist           = errors.New("remote type does not exist")
+	errRemoteSetupNotImplemented        = errors.New("remote setup not implemented")
+	errRemotePullNotImplemented         = errors.New("remote pull not implemented")
+	errRemotePushNotSupported           = errors.New("remote push not supported")
 )

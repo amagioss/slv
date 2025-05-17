@@ -32,9 +32,8 @@ func envNewCommand() *cobra.Command {
 func envNewServiceCommand() *cobra.Command {
 	if envNewServiceCmd == nil {
 		envNewServiceCmd = &cobra.Command{
-			Use:     "service",
-			Aliases: []string{"serv", "svc", "s"},
-			Short:   "Creates a new service environment",
+			Use:   "service",
+			Short: "Creates a new service environment",
 			Run: func(cmd *cobra.Command, args []string) {
 				name, _ := cmd.Flags().GetString(envNameFlag.Name)
 				email, _ := cmd.Flags().GetString(envEmailFlag.Name)
@@ -61,21 +60,23 @@ func envNewServiceCommand() *cobra.Command {
 					if err != nil {
 						utils.ExitOnError(err)
 					}
-					err = profile.PutEnv(env)
-					if err != nil {
-						utils.ExitOnError(err)
+					if err = profile.PutEnv(env); err != nil {
+						utils.ExitOnError(fmt.Errorf("failed to add the environment to profile (%s): %w", profile.Name(), err))
 					}
+					fmt.Printf("Successfully added the environment to profile (%s)\n", color.GreenString(profile.Name()))
 				}
-				utils.SafeExit()
 			},
 		}
 		envNewServiceCmd.Flags().StringP(envNameFlag.Name, envNameFlag.Shorthand, "", envNameFlag.Usage)
 		envNewServiceCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
 		envNewServiceCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
-		envNewServiceCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 		envNewServiceCmd.MarkFlagRequired(envNameFlag.Name)
 		envNewServiceCmd.AddCommand(newKMSEnvCommand("aws", "Create a service environment for AWS KMS", awsARNFlag))
 		envNewServiceCmd.AddCommand(newKMSEnvCommand("gcp", "Create a service environment for GCP KMS", gcpKmsResNameFlag))
+		profile, _ := profiles.GetCurrentProfile()
+		if profile != nil && profile.IsPushSupported() {
+			envNewServiceCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
+		}
 	}
 	return envNewServiceCmd
 }
@@ -131,10 +132,10 @@ func envNewUserCommand() *cobra.Command {
 					if err != nil {
 						utils.ExitOnError(err)
 					}
-					err = profile.PutEnv(env)
-					if err != nil {
-						utils.ExitOnError(err)
+					if err = profile.PutEnv(env); err != nil {
+						utils.ExitOnError(fmt.Errorf("failed to add the environment to profile (%s): %w", profile.Name(), err))
 					}
+					fmt.Printf("Successfully added the environment to profile (%s)\n", color.GreenString(profile.Name()))
 				}
 				fmt.Println(color.GreenString("Successfully registered as self environment"))
 				if secretBinding != "" {
@@ -147,8 +148,11 @@ func envNewUserCommand() *cobra.Command {
 		envNewUserCmd.Flags().StringP(envNameFlag.Name, envNameFlag.Shorthand, "", envNameFlag.Usage)
 		envNewUserCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
 		envNewUserCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
-		envNewUserCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 		envNewUserCmd.MarkFlagRequired(envNameFlag.Name)
+		profile, _ := profiles.GetCurrentProfile()
+		if profile != nil && profile.IsPushSupported() {
+			envNewUserCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
+		}
 	}
 	return envNewUserCmd
 }

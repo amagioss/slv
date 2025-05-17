@@ -54,7 +54,7 @@ func NewEnvironment(name string, envType EnvType, pq bool) (*Environment, *crypt
 	return nil, nil, err
 }
 
-func (env *Environment) getPublicKey() (publicKey *crypto.PublicKey, err error) {
+func (env *Environment) GetPublicKey() (publicKey *crypto.PublicKey, err error) {
 	if env.publicKey == nil {
 		if env.PublicKey == "" {
 			return nil, errEnvironmentPublicKeyNotFound

@@ -12,9 +12,9 @@ import (
 func envListSearchCommand() *cobra.Command {
 	if envListSearchCmd == nil {
 		envListSearchCmd = &cobra.Command{
-			Use:     "get",
-			Aliases: []string{"list", "ls", "search", "find"},
-			Short:   "List/Search environments from profile",
+			Use:     "list",
+			Aliases: []string{"ls", "search", "find", "get"},
+			Short:   "List/Search environments from current profile",
 			Run: func(cmd *cobra.Command, args []string) {
 				profile, err := profiles.GetCurrentProfile()
 				if err != nil {

@@ -2,6 +2,7 @@ package cmdenv
 
 import (
 	"github.com/spf13/cobra"
+	"slv.sh/slv/internal/core/profiles"
 )
 
 func EnvCommand() *cobra.Command {
@@ -16,11 +17,14 @@ func EnvCommand() *cobra.Command {
 			},
 		}
 		envCmd.AddCommand(envNewCommand())
-		envCmd.AddCommand(envAddCommand())
 		envCmd.AddCommand(envListSearchCommand())
 		envCmd.AddCommand(envDeleteCommand())
 		envCmd.AddCommand(envSetSelfCommand())
 		envCmd.AddCommand(envShowCommand())
+		profile, _ := profiles.GetCurrentProfile()
+		if profile != nil && profile.IsPushSupported() {
+			envCmd.AddCommand(envAddCommand())
+		}
 	}
 	return envCmd
 }

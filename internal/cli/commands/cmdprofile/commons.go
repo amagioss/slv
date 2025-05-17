@@ -12,7 +12,6 @@ var (
 	profileSetCurrentCmd *cobra.Command
 	profileDelCmd        *cobra.Command
 	profilePullCmd       *cobra.Command
-	profilePushCmd       *cobra.Command
 )
 
 var (
@@ -22,13 +21,8 @@ var (
 		Usage:     "Profile name",
 	}
 
-	profileGitURI = utils.FlagDef{
-		Name:  "git",
-		Usage: "Git URI to clone the profile from",
-	}
-
-	profileGitBranch = utils.FlagDef{
-		Name:  "git-branch",
-		Usage: "Git branch corresponding to the git URI",
+	profileUpdateInterval = utils.FlagDef{
+		Name:  "update-interval",
+		Usage: "Interval in seconds to check for remote updates",
 	}
 )

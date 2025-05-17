@@ -1,204 +1,215 @@
 package profiles
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
-	"github.com/go-git/go-git/v5"
 	"slv.sh/slv/internal/core/commons"
-	"slv.sh/slv/internal/core/config"
-	"slv.sh/slv/internal/core/crypto"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/settings"
 )
 
+type profileConfig struct {
+	RemoteType     string            `json:"remoteType" yaml:"remoteType"`
+	UpdatedAt      time.Time         `json:"updatedAt" yaml:"updatedAt"`
+	UpdateInterval time.Duration     `json:"updateInterval" yaml:"updateInterval"`
+	Config         map[string]string `json:"config" yaml:"config"`
+	file           string
+}
+
+func (pc *profileConfig) write() error {
+	pc.UpdatedAt = time.Now()
+	return commons.WriteToYAML(pc.file, "", pc)
+}
+
 type Profile struct {
-	name        *string
-	dir         *string
-	settings    *settings.Settings
-	envManifest *environments.EnvManifest
-	repo        *git.Repository
+	name          string
+	dir           string
+	dataDir       string
+	profileConfig *profileConfig
+	settings      *settings.Settings
+	envManifest   *environments.EnvManifest
+	remote        *remote
 }
 
 func (profile *Profile) Name() string {
-	return *profile.name
+	return profile.name
 }
 
-func (profile *Profile) commit(msg string) error {
-	if msg != "" {
-		return profile.gitCommit(msg)
+func (profile *Profile) getConfig() (*profileConfig, error) {
+	if profile.profileConfig == nil {
+		profileConfig := &profileConfig{}
+		profileConfigFile := filepath.Join(profile.dir, profileConfigFileName)
+		if err := commons.ReadFromYAML(profileConfigFile, profileConfig); err != nil {
+			return nil, err
+		}
+		profileConfig.file = profileConfigFile
+		profile.profileConfig = profileConfig
+		profile.profileConfig.file = filepath.Join(profile.dir, profileConfigFileName)
 	}
-	return nil
+	return profile.profileConfig, nil
 }
 
-func newProfile(dir, gitURI, gitBranch string) (profile *Profile, err error) {
-	if commons.DirExists(dir) {
-		return nil, errProfilePathExistsAlready
-	}
-	var repo *git.Repository
-	if gitURI != "" {
-		repo, err = gitClone(dir, gitURI, gitBranch)
+func (profile *Profile) getRemote() (*remote, error) {
+	if profile.remote == nil {
+		profileConfig, err := profile.getConfig()
 		if err != nil {
 			return nil, err
 		}
-	} else if err = os.MkdirAll(dir, 0755); err != nil {
-		return nil, errCreatingProfileDir
+		profile.remote = remotes[profileConfig.RemoteType]
+		if profile.remote == nil {
+			return nil, errRemoteTypeDoesNotExist
+		}
 	}
-	profile = &Profile{
-		dir:  &dir,
-		repo: repo,
+	return profile.remote, nil
+}
+
+func (profile *Profile) pull(setup bool) error {
+	remote, err := profile.getRemote()
+	if err != nil {
+		return err
 	}
-	if err = profile.commit(""); err != nil {
+	if setup {
+		err = (remote.setup)(profile.dataDir, profile.profileConfig.Config)
+	} else {
+		err = (remote.pull)(profile.dataDir, profile.profileConfig.Config)
+	}
+	if err == nil {
+		profile.envManifest = nil
+		profile.settings = nil
+		profile.profileConfig.UpdatedAt = time.Now()
+		err = profile.profileConfig.write()
+	}
+	return err
+}
+
+func (profile *Profile) Pull() error {
+	return profile.pull(false)
+}
+
+func (profile *Profile) pullOnDue() error {
+	if time.Since(profile.profileConfig.UpdatedAt) < profile.profileConfig.UpdateInterval {
+		return nil
+	}
+	return profile.Pull()
+}
+
+func (profile *Profile) IsPushSupported() bool {
+	remote, err := profile.getRemote()
+	if err != nil {
+		return false
+	}
+	return remote.push != nil
+}
+
+func (profile *Profile) Push(note string) (err error) {
+	if !profile.IsPushSupported() {
+		return errRemotePushNotSupported
+	}
+	if err = (profile.remote.push)(profile.dataDir, profile.profileConfig.Config, note); err == nil {
+		profile.profileConfig.UpdatedAt = time.Now()
+		err = profile.profileConfig.write()
+	}
+	return
+}
+
+func createProfile(name, dir, remoteType string, updateInterval time.Duration, remoteConfig map[string]string) (profile *Profile, err error) {
+	if commons.DirExists(dir) {
+		return nil, errProfilePathExistsAlready
+	}
+	remote := remotes[remoteType]
+	if remote == nil {
+		return nil, errRemoteTypeDoesNotExist
+	}
+	if remote.setup == nil {
+		return nil, errRemoteSetupNotImplemented
+	}
+	if remote.pull == nil {
+		return nil, errRemotePullNotImplemented
+	}
+	if err = os.MkdirAll(dir, 0755); err != nil {
+		return nil, fmt.Errorf("error creating profile dir: %w", err)
+	}
+	profileDataDir := filepath.Join(dir, profileDataDirName)
+	if err = (remote.setup)(profileDataDir, remoteConfig); err == nil {
+		if updateInterval < 0 {
+			updateInterval = defaultSyncInterval
+		}
+		profile = &Profile{
+			name:    name,
+			dir:     dir,
+			dataDir: profileDataDir,
+			profileConfig: &profileConfig{
+				RemoteType:     remoteType,
+				UpdateInterval: updateInterval,
+				Config:         remoteConfig,
+				file:           filepath.Join(dir, profileConfigFileName),
+			},
+		}
+		err = profile.profileConfig.write()
+	}
+	if err != nil {
+		os.RemoveAll(dir)
 		return nil, err
 	}
 	return profile, nil
 }
 
-func getProfileForPath(dir string) (*Profile, error) {
+func getProfile(name, dir string) (profile *Profile, err error) {
 	if !commons.DirExists(dir) {
 		return nil, errProfilePathDoesNotExist
 	}
-	profile := &Profile{
-		dir: &dir,
+	profile = &Profile{
+		name:    name,
+		dir:     dir,
+		dataDir: filepath.Join(dir, profileDataDirName),
 	}
-	profile.gitLoadRepo()
-	return profile, nil
+	if _, err = profile.getConfig(); err != nil {
+		return nil, err
+	}
+	if err = profile.pullOnDue(); err != nil {
+		return nil, err
+	}
+	return
 }
 
-func (profile *Profile) isWriteDenied() bool {
-	return profile.repo != nil && !config.IsAdminModeEnabled()
+func getAvailableFilePath(basePath string, fileNames []string) string {
+	for _, fileName := range fileNames {
+		if commons.FileExists(filepath.Join(basePath, fileName)) {
+			return filepath.Join(basePath, fileName)
+		}
+	}
+	return ""
 }
 
 func (profile *Profile) GetSettings() (*settings.Settings, error) {
+	var err error
 	if profile.settings == nil {
-		settingsManifest, err := settings.GetManifest(filepath.Join(*profile.dir, profileSettingsFileName))
-		if err != nil {
-			settingsManifest, err = settings.NewManifest(filepath.Join(*profile.dir, profileSettingsFileName))
-			if err != nil {
-				return nil, err
-			}
+		if settingsFile := getAvailableFilePath(profile.dataDir, settingsFileNames); settingsFile != "" {
+			profile.settings, err = settings.GetManifest(settingsFile)
+		} else {
+			profile.settings, err = settings.NewManifest(filepath.Join(profile.dataDir, defaultSettingsFileName))
 		}
-		profile.settings = settingsManifest
+		if err != nil {
+			return nil, err
+		}
 	}
 	return profile.settings, nil
 }
 
 func (profile *Profile) getEnvManifest() (*environments.EnvManifest, error) {
+	var err error
 	if profile.envManifest == nil {
-		envManifest, err := environments.GetManifest(filepath.Join(*profile.dir, profileEnvironmentsFileName))
-		if err != nil {
-			envManifest, err = environments.NewManifest(filepath.Join(*profile.dir, profileEnvironmentsFileName))
-			if err != nil {
-				return nil, err
-			}
+		if envManifestFile := getAvailableFilePath(profile.dataDir, envManifestFileNames); envManifestFile != "" {
+			profile.envManifest, err = environments.GetManifest(envManifestFile)
+		} else {
+			profile.envManifest, err = environments.NewManifest(filepath.Join(profile.dataDir, defaultEnvManifestFileName))
 		}
-		profile.envManifest = envManifest
+		if err != nil {
+			return nil, err
+		}
 	}
 	return profile.envManifest, nil
-}
-
-func (profile *Profile) PutEnv(env *environments.Environment) error {
-	if profile.isWriteDenied() {
-		return errChangesNotAllowedInGitProfile
-	}
-	if profile.repo != nil {
-		if err := profile.Pull(); err != nil {
-			return err
-		}
-	}
-	envManifest, err := profile.getEnvManifest()
-	if err != nil {
-		return err
-	}
-	if err = envManifest.PutEnv(env); err != nil {
-		return err
-	}
-	return profile.commit("Adding environment: " + env.PublicKey + " [" + env.Name + "]")
-}
-
-func (profile *Profile) RootPublicKey() (*crypto.PublicKey, error) {
-	envManifest, err := profile.getEnvManifest()
-	if err != nil {
-		return nil, err
-	}
-	return envManifest.RootPublicKey()
-}
-
-func (profile *Profile) SetRoot(env *environments.Environment) error {
-	if profile.isWriteDenied() {
-		return errChangesNotAllowedInGitProfile
-	}
-	if profile.repo != nil {
-		if err := profile.Pull(); err != nil {
-			return err
-		}
-	}
-	envManifest, err := profile.getEnvManifest()
-	if err != nil {
-		return err
-	}
-	if err = envManifest.SetRoot(env); err != nil {
-		return err
-	}
-	return profile.commit("Setting root environment: " + env.PublicKey + " [" + env.Name + "]")
-}
-
-func (profile *Profile) GetRoot() (*environments.Environment, error) {
-	envManifest, err := profile.getEnvManifest()
-	if err != nil {
-		return nil, err
-	}
-	return envManifest.Root, nil
-}
-
-func (profile *Profile) SearchEnvs(queries []string) ([]*environments.Environment, error) {
-	envManifest, err := profile.getEnvManifest()
-	if err != nil {
-		return nil, err
-	}
-	return envManifest.SearchEnvs(queries), nil
-}
-
-func (profile *Profile) DeleteEnv(id string) error {
-	if profile.isWriteDenied() {
-		return errChangesNotAllowedInGitProfile
-	}
-	if profile.repo != nil {
-		if err := profile.Pull(); err != nil {
-			return err
-		}
-	}
-	envManifest, err := profile.getEnvManifest()
-	if err != nil {
-		return err
-	}
-	env, err := envManifest.DeleteEnv(id)
-	if err != nil {
-		return err
-	}
-	return profile.commit("Deleting environment: " + env.PublicKey + " [" + env.Name + "]")
-}
-
-func (profile *Profile) ListEnvs() ([]*environments.Environment, error) {
-	envManifest, err := profile.getEnvManifest()
-	if err != nil {
-		return nil, err
-	}
-	return envManifest.ListEnvs(), nil
-}
-
-func (profile *Profile) GetEnv(id string) (*environments.Environment, error) {
-	envManifest, err := profile.getEnvManifest()
-	if err != nil {
-		return nil, err
-	}
-	return envManifest.GetEnv(id), nil
-}
-
-func (profile *Profile) Pull() error {
-	return profile.gitPull()
-}
-
-func (profile *Profile) Push() error {
-	return profile.gitPush()
 }

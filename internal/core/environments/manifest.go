@@ -5,7 +5,6 @@ import (
 
 	"gopkg.in/yaml.v3"
 	"slv.sh/slv/internal/core/commons"
-	"slv.sh/slv/internal/core/crypto"
 )
 
 type EnvManifest struct {
@@ -49,16 +48,16 @@ func GetManifest(path string) (envManifest *EnvManifest, err error) {
 	return
 }
 
-func (envManifest *EnvManifest) commit() error {
+func (envManifest *EnvManifest) write() error {
 	if commons.WriteToYAML(*envManifest.path, "", envManifest) != nil {
 		return errWritingManifest
 	}
 	return nil
 }
 
-func (envManifest *EnvManifest) RootPublicKey() (*crypto.PublicKey, error) {
+func (envManifest *EnvManifest) GetRoot() (*Environment, error) {
 	if envManifest.Root != nil {
-		return envManifest.Root.getPublicKey()
+		return envManifest.Root, nil
 	}
 	return nil, nil
 }
@@ -68,7 +67,7 @@ func (envManifest *EnvManifest) SetRoot(env *Environment) error {
 		return errRootExistsAlready
 	}
 	envManifest.Root = env
-	return envManifest.commit()
+	return envManifest.write()
 }
 
 func (envManifest *EnvManifest) ListEnvs() (environments []*Environment) {
@@ -115,7 +114,7 @@ func (envManifest *EnvManifest) DeleteEnv(id string) (env *Environment, err erro
 	}
 	env = envManifest.Environments[id]
 	delete(envManifest.Environments, id)
-	return env, envManifest.commit()
+	return env, envManifest.write()
 }
 
 func (envManifest *EnvManifest) PutEnv(env *Environment) (err error) {
@@ -123,5 +122,5 @@ func (envManifest *EnvManifest) PutEnv(env *Environment) (err error) {
 		envManifest.Environments = make(map[string]*Environment)
 	}
 	envManifest.Environments[env.PublicKey] = env
-	return envManifest.commit()
+	return envManifest.write()
 }

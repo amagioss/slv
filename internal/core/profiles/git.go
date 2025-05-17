@@ -16,8 +16,37 @@ import (
 	gitssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/kevinburke/ssh_config"
 	"golang.org/x/crypto/ssh"
-	"slv.sh/slv/internal/core/config"
 )
+
+const (
+	configGitRepoKey      = "repo"
+	configGitBranchKey    = "branch"
+	configGitHTTPUserKey  = "auth-user"
+	configGitHTTPTokenKey = "auth-token"
+)
+
+var gitArgs = []arg{
+	{
+		name:        configGitRepoKey,
+		required:    true,
+		description: "The Git repository URL of the remote profile",
+	},
+	{
+		name:        configGitBranchKey,
+		required:    false,
+		description: "The Git branch to be used for the remote profile",
+	},
+	{
+		name:        configGitHTTPUserKey,
+		required:    false,
+		description: "The username to authenticate with the git repository over HTTP",
+	},
+	{
+		name:        configGitHTTPTokenKey,
+		required:    false,
+		description: "The token to authenticate with the git repository over HTTP",
+	},
+}
 
 func expandTilde(path string) string {
 	if len(path) > 0 && path[0] == '~' {
@@ -51,24 +80,16 @@ func getSSHKeyFiles(uri string) []string {
 	return nil
 }
 
-func getGitAuth(gitURI string) transport.AuthMethod {
-	if strings.HasPrefix(gitURI, "https://") {
-		if !gitHttpAuthProcessed {
-			gitHttpUsername := config.GetGitHTTPUsername()
-			if gitHttpUsername != "" {
-				gitHttpToken := config.GetGitHTTPToken()
-				if gitHttpToken != "" {
-					gitHttpAuth = &http.BasicAuth{
-						Username: gitHttpUsername,
-						Password: gitHttpToken,
-					}
-				}
+func getGitAuth(gitUrl, username, token string) transport.AuthMethod {
+	if strings.HasPrefix(gitUrl, "https://") {
+		if username != "" && token != "" {
+			return &http.BasicAuth{
+				Username: username,
+				Password: token,
 			}
-			gitHttpAuthProcessed = true
 		}
-		return gitHttpAuth
 	}
-	if sshKeyFiles := getSSHKeyFiles(gitURI); len(sshKeyFiles) > 0 {
+	if sshKeyFiles := getSSHKeyFiles(gitUrl); len(sshKeyFiles) > 0 {
 		keyPath := sshKeyFiles[0]
 		keyBytes, err := os.ReadFile(keyPath)
 		if err == nil {
@@ -84,43 +105,8 @@ func getGitAuth(gitURI string) transport.AuthMethod {
 	return nil
 }
 
-func (profile *Profile) getGitAuth() (transport.AuthMethod, error) {
-	remotes, err := profile.repo.Remotes()
-	if err != nil {
-		return nil, err
-	}
-	if len(remotes) == 0 {
-		return nil, errProfileNotGitRepository
-	} else {
-		return getGitAuth(remotes[0].Config().URLs[0]), nil
-	}
-}
-
-func (profile *Profile) gitLoadRepo() {
-	profile.repo, _ = git.PlainOpen(*profile.dir)
-	lastUpdated := profile.gitLastPulledAt()
-	if time.Since(lastUpdated) > profileGitSyncInterval {
-		profile.gitPull()
-	}
-}
-
-func (profile *Profile) gitLastPulledAt() time.Time {
-	if profile.repo == nil {
-		return time.Now()
-	}
-	slvPullMarkFile := filepath.Join(*profile.dir, ".git", ".slv-pull")
-	slvPullMarkStat, err := os.Stat(slvPullMarkFile)
-	if err != nil {
-		return time.Time{}
-	}
-	return slvPullMarkStat.ModTime()
-}
-
-func (profile *Profile) gitCommit(msg string) error {
-	if profile.repo == nil {
-		return nil
-	}
-	worktree, err := profile.repo.Worktree()
+func gitCommit(repo *git.Repository, msg string) error {
+	worktree, err := repo.Worktree()
 	if err != nil {
 		return err
 	}
@@ -145,46 +131,33 @@ func (profile *Profile) gitCommit(msg string) error {
 	return err
 }
 
-func gitClone(dir, uri, branch string) (*git.Repository, error) {
+func gitSetup(dir string, config map[string]string) (err error) {
+	gitUrl := config[configGitRepoKey]
 	cloneOptions := &git.CloneOptions{
-		URL: uri,
+		URL: gitUrl,
 	}
-	if auth := getGitAuth(uri); auth != nil {
-		cloneOptions.Auth = auth
-	}
+	cloneOptions.Auth = getGitAuth(gitUrl, config[configGitHTTPUserKey], config[configGitHTTPTokenKey])
+	branch := config[configGitBranchKey]
 	if branch != "" {
 		cloneOptions.ReferenceName = plumbing.NewBranchReferenceName(branch)
 		cloneOptions.SingleBranch = true
 	}
-	return git.PlainClone(dir, false, cloneOptions)
+	_, err = git.PlainClone(dir, false, cloneOptions)
+	return
 }
 
-func (profile *Profile) gitMarkPull() error {
-	slvPullMarkFile := filepath.Join(*profile.dir, ".git", ".slv-pull")
-	if _, err := os.Create(slvPullMarkFile); err != nil {
-		return errProfileGitPullMarking
-	}
-	return nil
-}
-
-func (profile *Profile) gitPull() error {
-	if profile.repo == nil {
-		return errProfileNotGitRepository
-	}
-	if err := profile.gitMarkPull(); err != nil {
-		return err
-	}
-	worktree, err := profile.repo.Worktree()
+func gitPull(dir string, config map[string]string) (err error) {
+	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return err
 	}
-	auth, err := profile.getGitAuth()
+	worktree, err := repo.Worktree()
 	if err != nil {
 		return err
 	}
 	err = worktree.Pull(&git.PullOptions{
 		Progress: os.Stderr,
-		Auth:     auth,
+		Auth:     getGitAuth(config[configGitRepoKey], config[configGitHTTPUserKey], config[configGitHTTPTokenKey]),
 	})
 	if err == git.NoErrAlreadyUpToDate {
 		return nil
@@ -192,16 +165,16 @@ func (profile *Profile) gitPull() error {
 	return err
 }
 
-func (profile *Profile) gitPush() error {
-	if profile.repo == nil {
-		return errProfileNotGitRepository
-	}
-	auth, err := profile.getGitAuth()
+func gitPush(dir string, config map[string]string, note string) (err error) {
+	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return err
 	}
-	return profile.repo.Push(&git.PushOptions{
+	if err = gitCommit(repo, note); err != nil {
+		return err
+	}
+	return repo.Push(&git.PushOptions{
 		Progress: os.Stderr,
-		Auth:     auth,
+		Auth:     getGitAuth(config[configGitRepoKey], config[configGitHTTPUserKey], config[configGitHTTPTokenKey]),
 	})
 }

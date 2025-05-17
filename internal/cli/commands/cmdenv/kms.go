@@ -1,8 +1,10 @@
 package cmdenv
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/environments"
@@ -48,10 +50,10 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				err = profile.PutEnv(env)
-				if err != nil {
-					utils.ExitOnError(err)
+				if err = profile.PutEnv(env); err != nil {
+					utils.ExitOnError(fmt.Errorf("failed to add environment to profile (%s): %w", profile.Name(), err))
 				}
+				fmt.Printf("Successfully added the environment to profile (%s)\n", color.GreenString(profile.Name()))
 			}
 			utils.SafeExit()
 		},
@@ -61,8 +63,11 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 	newKMSEnvCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
 	newKMSEnvCmd.Flags().StringP(keyIdFlag.Name, keyIdFlag.Shorthand, "", keyIdFlag.Usage)
 	newKMSEnvCmd.Flags().StringP(kmsRSAPublicKey.Name, kmsRSAPublicKey.Shorthand, "", kmsRSAPublicKey.Usage)
-	newKMSEnvCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 	newKMSEnvCmd.MarkFlagRequired(envNameFlag.Name)
 	newKMSEnvCmd.MarkFlagRequired(keyIdFlag.Name)
+	profile, _ := profiles.GetCurrentProfile()
+	if profile != nil && profile.IsPushSupported() {
+		newKMSEnvCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
+	}
 	return newKMSEnvCmd
 }
