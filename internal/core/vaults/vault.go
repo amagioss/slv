@@ -72,7 +72,7 @@ func newVaultId() (string, error) {
 	return config.AppNameUpperCase + "_" + vaultIdAbbrev + "_" + commons.Encode(idBytes), nil
 }
 
-// Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yml or .slv.yaml.
+// Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yaml or .slv.yml.
 func New(filePath, name, k8sNamespace string, k8SecretContent []byte, hash, quantumSafe bool, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName
@@ -134,7 +134,7 @@ func New(filePath, name, k8sNamespace string, k8SecretContent []byte, hash, quan
 	return
 }
 
-// Returns the vault instance from a given yaml. The vault file name must end with .slv.yml or .slv.yaml.
+// Returns the vault instance from a given yaml. The vault file name must end with .slv.yaml or .slv.yml.
 func Get(filePath string) (vlt *Vault, err error) {
 	if !isValidVaultFileName(filePath) {
 		return nil, errInvalidVaultFileName

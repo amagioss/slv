@@ -40,7 +40,7 @@ steps:
 - name: Load SLV Secrets
   uses: amagioss/slv-action@v1
   with:
-    vault: creds.slv.yml
+    vault: creds.slv.yaml
     env-secret-key: ${{ secrets.SLV_ENV_SECRET_KEY }}
 ```
 
@@ -51,7 +51,7 @@ steps:
 - name: Load SLV Secrets - PROD
   uses: amagioss/slv-action@v1
   with:
-    vault: creds.slv.yml
+    vault: creds.slv.yaml
     env-secret-key: ${{ secrets.SLV_ENV_SECRET_KEY }}
     prefix: "PROD_"
 ```

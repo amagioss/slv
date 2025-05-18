@@ -12,19 +12,19 @@ import (
 )
 
 const (
-	configUrlKey    = "url"
-	configHeaderKey = "auth-header"
+	configHTTPUrlKey    = "url"
+	configHTTPHeaderKey = "auth-header"
 )
 
 var httpArgs = []arg{
 	{
-		name:        configUrlKey,
+		name:        configHTTPUrlKey,
 		required:    true,
 		description: "The HTTP base URL of the remote profile",
 	},
 	{
-		name:        configHeaderKey,
-		required:    false,
+		name:        configHTTPHeaderKey,
+		sensitive:   true,
 		description: "The header to be used for HTTP URLs protected by auth. E.g. 'Authorization: Bearer <token>'",
 	},
 }
@@ -62,11 +62,11 @@ func getUrlContent(url, header string) ([]byte, error) {
 }
 
 func httpPull(dir string, config map[string]string) (err error) {
-	url := strings.TrimSuffix(config[configUrlKey], "/")
+	url := strings.TrimSuffix(config[configHTTPUrlKey], "/")
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		return fmt.Errorf("invalid HTTP URL: %s", url)
 	}
-	header := config[configHeaderKey]
+	header := config[configHTTPHeaderKey]
 	var envManifestFileName, settingsFileName string
 	var environmentBytes, settingsBytes []byte
 	for _, envManifestFileName = range envManifestFileNames {

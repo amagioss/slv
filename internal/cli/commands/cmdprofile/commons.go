@@ -6,12 +6,12 @@ import (
 )
 
 var (
-	profileCmd           *cobra.Command
-	profileNewCmd        *cobra.Command
-	profileListCmd       *cobra.Command
-	profileSetCurrentCmd *cobra.Command
-	profileDelCmd        *cobra.Command
-	profilePullCmd       *cobra.Command
+	profileCmd          *cobra.Command
+	profileNewCmd       *cobra.Command
+	profileListCmd      *cobra.Command
+	profileSetActiveCmd *cobra.Command
+	profileDelCmd       *cobra.Command
+	profileSyncCmd      *cobra.Command
 )
 
 var (
@@ -21,8 +21,8 @@ var (
 		Usage:     "Profile name",
 	}
 
-	profileUpdateInterval = utils.FlagDef{
-		Name:  "update-interval",
-		Usage: "Interval in seconds to check for remote updates",
+	profileSyncInterval = utils.FlagDef{
+		Name:  "sync-interval",
+		Usage: "Profile sync interval",
 	}
 )

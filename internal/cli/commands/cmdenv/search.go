@@ -14,9 +14,9 @@ func envListSearchCommand() *cobra.Command {
 		envListSearchCmd = &cobra.Command{
 			Use:     "list",
 			Aliases: []string{"ls", "search", "find", "get"},
-			Short:   "List/Search environments from current profile",
+			Short:   "List/Search environments from the active profile",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetCurrentProfile()
+				profile, err := profiles.GetActiveProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -49,7 +49,7 @@ func envListSearchCommand() *cobra.Command {
 }
 
 func EnvSearchCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	profile, err := profiles.GetCurrentProfile()
+	profile, err := profiles.GetActiveProfile()
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveError
 	}

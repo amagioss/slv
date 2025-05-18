@@ -15,13 +15,13 @@ func envAddCommand() *cobra.Command {
 		envAddCmd = &cobra.Command{
 			Use:     "add",
 			Aliases: []string{"set", "put"},
-			Short:   "Adds an environment to the current profile",
+			Short:   "Adds an environment to the active profile",
 			Run: func(cmd *cobra.Command, args []string) {
 				envdefs, err := cmd.Flags().GetStringSlice(envDefFlag.Name)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				profile, err := profiles.GetCurrentProfile()
+				profile, err := profiles.GetActiveProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

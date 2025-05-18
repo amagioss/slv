@@ -33,17 +33,16 @@ var gitArgs = []arg{
 	},
 	{
 		name:        configGitBranchKey,
-		required:    false,
 		description: "The Git branch to be used for the remote profile",
 	},
 	{
 		name:        configGitHTTPUserKey,
-		required:    false,
+		sensitive:   true,
 		description: "The username to authenticate with the git repository over HTTP",
 	},
 	{
 		name:        configGitHTTPTokenKey,
-		required:    false,
+		sensitive:   true,
 		description: "The token to authenticate with the git repository over HTTP",
 	},
 }

@@ -1,6 +1,7 @@
 package profiles
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,18 +10,83 @@ import (
 	"slv.sh/slv/internal/core/commons"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/settings"
+	"xipher.org/xipher"
 )
 
 type profileConfig struct {
-	RemoteType     string            `json:"remoteType" yaml:"remoteType"`
-	UpdatedAt      time.Time         `json:"updatedAt" yaml:"updatedAt"`
-	UpdateInterval time.Duration     `json:"updateInterval" yaml:"updateInterval"`
-	Config         map[string]string `json:"config" yaml:"config"`
-	file           string
+	RemoteType   string            `json:"type" yaml:"type"`
+	SyncedAt     time.Time         `json:"syncedAt" yaml:"syncedAt"`
+	SyncInterval time.Duration     `json:"syncInterval" yaml:"syncInterval"`
+	SecretKeyStr string            `json:"sk" yaml:"sk"`
+	Config       map[string]string `json:"config" yaml:"config"`
+	file         string
+	sk           *xipher.SecretKey
+}
+
+func (pc *profileConfig) getSecretKey() (sk *xipher.SecretKey, err error) {
+	if pc.sk == nil {
+		if pc.SecretKeyStr == "" {
+			if sk, err = xipher.NewSecretKey(); err != nil {
+				return nil, err
+			}
+			if skBytes, err := sk.Bytes(); err != nil {
+				return nil, err
+			} else {
+				pc.SecretKeyStr = base64.StdEncoding.EncodeToString(skBytes)
+			}
+		} else {
+			if skBytes, err := base64.StdEncoding.DecodeString(pc.SecretKeyStr); err != nil {
+				return nil, err
+			} else if sk, err = xipher.ParseSecretKey(skBytes); err != nil {
+				return nil, err
+			}
+		}
+		pc.sk = sk
+	}
+	return pc.sk, nil
+}
+
+func (pc *profileConfig) encrypt() error {
+	sk, err := pc.getSecretKey()
+	if err != nil {
+		return err
+	}
+	for _, arg := range GetRemoteTypeArgs(pc.RemoteType) {
+		if value, ok := pc.Config[arg.Name()]; ok && arg.sensitive && value != "" {
+			var ct []byte
+			if ct, err = sk.Encrypt([]byte(value), true, false); err != nil {
+				return err
+			}
+			pc.Config[arg.Name()] = base64.StdEncoding.EncodeToString(ct)
+		}
+	}
+	return nil
+}
+
+func (pc *profileConfig) decrypt() error {
+	sk, err := pc.getSecretKey()
+	if err != nil {
+		return err
+	}
+	for _, arg := range GetRemoteTypeArgs(pc.RemoteType) {
+		if value, ok := pc.Config[arg.Name()]; ok && arg.sensitive && value != "" {
+			var pt []byte
+			if ctBytes, err := base64.StdEncoding.DecodeString(value); err != nil {
+				return err
+			} else if pt, err = sk.Decrypt(ctBytes); err != nil {
+				return err
+			}
+			pc.Config[arg.Name()] = string(pt)
+		}
+	}
+	return nil
 }
 
 func (pc *profileConfig) write() error {
-	pc.UpdatedAt = time.Now()
+	pc.SyncedAt = time.Now()
+	if err := pc.encrypt(); err != nil {
+		return err
+	}
 	return commons.WriteToYAML(pc.file, "", pc)
 }
 
@@ -40,14 +106,16 @@ func (profile *Profile) Name() string {
 
 func (profile *Profile) getConfig() (*profileConfig, error) {
 	if profile.profileConfig == nil {
-		profileConfig := &profileConfig{}
-		profileConfigFile := filepath.Join(profile.dir, profileConfigFileName)
-		if err := commons.ReadFromYAML(profileConfigFile, profileConfig); err != nil {
+		profileConfig := &profileConfig{
+			file: filepath.Join(profile.dir, profileConfigFileName),
+		}
+		if err := commons.ReadFromYAML(profileConfig.file, profileConfig); err != nil {
 			return nil, err
 		}
-		profileConfig.file = profileConfigFile
+		if err := profileConfig.decrypt(); err != nil {
+			return nil, err
+		}
 		profile.profileConfig = profileConfig
-		profile.profileConfig.file = filepath.Join(profile.dir, profileConfigFileName)
 	}
 	return profile.profileConfig, nil
 }
@@ -79,7 +147,7 @@ func (profile *Profile) pull(setup bool) error {
 	if err == nil {
 		profile.envManifest = nil
 		profile.settings = nil
-		profile.profileConfig.UpdatedAt = time.Now()
+		profile.profileConfig.SyncedAt = time.Now()
 		err = profile.profileConfig.write()
 	}
 	return err
@@ -90,7 +158,7 @@ func (profile *Profile) Pull() error {
 }
 
 func (profile *Profile) pullOnDue() error {
-	if time.Since(profile.profileConfig.UpdatedAt) < profile.profileConfig.UpdateInterval {
+	if time.Since(profile.profileConfig.SyncedAt) < profile.profileConfig.SyncInterval {
 		return nil
 	}
 	return profile.Pull()
@@ -109,7 +177,7 @@ func (profile *Profile) Push(note string) (err error) {
 		return errRemotePushNotSupported
 	}
 	if err = (profile.remote.push)(profile.dataDir, profile.profileConfig.Config, note); err == nil {
-		profile.profileConfig.UpdatedAt = time.Now()
+		profile.profileConfig.SyncedAt = time.Now()
 		err = profile.profileConfig.write()
 	}
 	return
@@ -142,10 +210,10 @@ func createProfile(name, dir, remoteType string, updateInterval time.Duration, r
 			dir:     dir,
 			dataDir: profileDataDir,
 			profileConfig: &profileConfig{
-				RemoteType:     remoteType,
-				UpdateInterval: updateInterval,
-				Config:         remoteConfig,
-				file:           filepath.Join(dir, profileConfigFileName),
+				RemoteType:   remoteType,
+				SyncInterval: updateInterval,
+				Config:       remoteConfig,
+				file:         filepath.Join(dir, profileConfigFileName),
 			},
 		}
 		err = profile.profileConfig.write()
@@ -155,6 +223,13 @@ func createProfile(name, dir, remoteType string, updateInterval time.Duration, r
 		return nil, err
 	}
 	return profile, nil
+}
+
+func isValidProfile(dir string) bool {
+	if !commons.DirExists(dir) {
+		return false
+	}
+	return commons.FileExists(filepath.Join(dir, profileConfigFileName))
 }
 
 func getProfile(name, dir string) (profile *Profile, err error) {

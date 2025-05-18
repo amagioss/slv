@@ -12,9 +12,9 @@ import (
 func profileDeleteCommand() *cobra.Command {
 	if profileDelCmd == nil {
 		profileDelCmd = &cobra.Command{
-			Use:     "delete",
-			Aliases: []string{"del", "rm", "remove"},
-			Short:   "Deletes a profile",
+			Use:     "rm",
+			Aliases: []string{"remove", "del", "delete"},
+			Short:   "Removes a profile",
 			Run: func(cmd *cobra.Command, args []string) {
 				name, _ := cmd.Flags().GetString(profileNameFlag.Name)
 				if err := profiles.Delete(name); err != nil {

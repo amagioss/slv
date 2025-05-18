@@ -15,7 +15,7 @@ func profileNewCommand() *cobra.Command {
 		profileNewCmd = &cobra.Command{
 			Use:     "new",
 			Aliases: []string{"setup"},
-			Short:   "Sets up a new profile based on a remote",
+			Short:   "Sets up a new profile from a given remote",
 			Run: func(cmd *cobra.Command, args []string) {
 				cmd.Help()
 			},
@@ -34,7 +34,7 @@ func getRemoteProfileCommand(remoteType string) *cobra.Command {
 		Short: "Sets up a profile based on a remote profile (" + remoteType + ")",
 		Run: func(cmd *cobra.Command, args []string) {
 			name, _ := cmd.Flags().GetString(profileNameFlag.Name)
-			updateInterval, err := cmd.Flags().GetDuration(profileUpdateInterval.Name)
+			updateInterval, err := cmd.Flags().GetDuration(profileSyncInterval.Name)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
@@ -47,12 +47,12 @@ func getRemoteProfileCommand(remoteType string) *cobra.Command {
 			if err = profiles.New(name, remoteType, updateInterval, remoteConfig); err != nil {
 				utils.ExitOnError(err)
 			}
-			fmt.Printf("Created profile %s with remote type %s\n", color.GreenString(name), color.GreenString(remoteType))
+			fmt.Printf("Created profile %s from remote (%s)\n", color.GreenString(name), color.GreenString(remoteType))
 		},
 	}
 	remoteProfileCommand.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
 	remoteProfileCommand.MarkFlagRequired(profileNameFlag.Name)
-	remoteProfileCommand.Flags().DurationP(profileUpdateInterval.Name, "", time.Hour, profileUpdateInterval.Usage)
+	remoteProfileCommand.Flags().DurationP(profileSyncInterval.Name, "", time.Hour, profileSyncInterval.Usage)
 	for _, arg := range remoteArgs {
 		remoteProfileCommand.Flags().StringP(arg.Name(), "", "", arg.Description())
 		if arg.Required() {

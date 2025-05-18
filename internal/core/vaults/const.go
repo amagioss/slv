@@ -29,7 +29,7 @@ var (
 	secretRefRegex                 = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", config.AppNameUpperCase+"_"+vaultIdAbbrev+"_[A-Za-z0-9]+"))
 
 	errGeneratingVaultId            = errors.New("error in generating a new vault id")
-	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameExt + ".yml or " + vaultFileNameExt + ".yaml]")
+	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameExt + ".yaml or " + vaultFileNameExt + ".yml]")
 	errVaultDirPathCreation         = errors.New("error in creating a new vault directory path")
 	errVaultNotAccessible           = errors.New("vault is not accessible using the given environment key")
 	errVaultLocked                  = errors.New("the vault is currently locked")

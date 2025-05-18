@@ -9,14 +9,14 @@ import (
 	"slv.sh/slv/internal/core/profiles"
 )
 
-func profilePullCommand() *cobra.Command {
-	if profilePullCmd == nil {
-		profilePullCmd = &cobra.Command{
+func profileSyncCommand() *cobra.Command {
+	if profileSyncCmd == nil {
+		profileSyncCmd = &cobra.Command{
 			Use:     "sync",
 			Aliases: []string{"pull"},
-			Short:   "Update the current profile from remote",
+			Short:   "Update the active profile from remote",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetCurrentProfile()
+				profile, err := profiles.GetActiveProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -27,5 +27,5 @@ func profilePullCommand() *cobra.Command {
 			},
 		}
 	}
-	return profilePullCmd
+	return profileSyncCmd
 }

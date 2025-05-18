@@ -58,9 +58,9 @@ func envShowRootCommand() *cobra.Command {
 	if envShowRootCmd == nil {
 		envShowRootCmd = &cobra.Command{
 			Use:   "root",
-			Short: "Shows the current root environment from the profile if registered",
+			Short: "Shows the root environment from the active profile",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetCurrentProfile()
+				profile, err := profiles.GetActiveProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -83,7 +83,7 @@ func envShowSelfCommand() *cobra.Command {
 	if envShowSelfCmd == nil {
 		envShowSelfCmd = &cobra.Command{
 			Use:     "self",
-			Aliases: []string{"user", "me", "my", "current"},
+			Aliases: []string{"me"},
 			Short:   "Shows the current user environment if registered in the host",
 			Run: func(cmd *cobra.Command, args []string) {
 				env := environments.GetSelf()
@@ -115,7 +115,7 @@ func envShowK8sCommand() *cobra.Command {
 					utils.ExitOnError(err)
 				}
 				var env *environments.Environment
-				profile, err := profiles.GetCurrentProfile()
+				profile, err := profiles.GetActiveProfile()
 				if err == nil {
 					env, _ = profile.GetEnv(pk)
 				}

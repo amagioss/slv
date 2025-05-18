@@ -17,10 +17,10 @@ func ProfileCommand() *cobra.Command {
 			},
 		}
 		profileCmd.AddCommand(profileNewCommand())
-		profileCmd.AddCommand(profileSetCurrentCommand())
+		profileCmd.AddCommand(profileSetActiveCommand())
 		profileCmd.AddCommand(profileListCommand())
 		profileCmd.AddCommand(profileDeleteCommand())
-		profileCmd.AddCommand(profilePullCommand())
+		profileCmd.AddCommand(profileSyncCommand())
 	}
 	return profileCmd
 }

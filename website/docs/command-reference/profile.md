@@ -80,15 +80,15 @@ slv profile list
 #### Example:
 ```bash
 $ slv profile list
-  my_org_slv_profile
-* my_local_slv_profile
+my_org_slv_profile
+my_local_slv_profile
 ```
-The `*` in the output represents the current profile.
+The active profile is shown in a different color.
 
 ---
 
-## Set Default Profile
-Set an already added SLV profile as the current profile.
+## Set Active Profile
+Set an already added SLV profile as the active profile.
 #### General usage:
 ```bash
 slv profile set [flags]
@@ -106,13 +106,13 @@ slv profile set --name <SLV_PROFILE_NAME>
 #### Example:
 ```bash
 $ slv profile set --name my_other_profile
-Successfully set my_other_profile as current profile
+Successfully set my_other_profile as active profile
 ```
 
 ---
 
 ## Pull remote changes into local profile
-Pulls the latest changes for the current profile from remote repository. (Only works for profiles with remote repository set using `--git` flag.)
+Pulls the latest changes for the active profile from remote repository. (Only works for profiles with remote repository set using `--git` flag.)
 #### General Usage:
 ```bash
 slv profile pull [flags]
@@ -137,7 +137,7 @@ Successfully pulled changes into profile: my_org
 ---
 
 ## Push local changes to remote profile
-Pushes the changes in the current profile to the pre-configured remote repository. (Only works for profiles with remote repository set using `--git` flag.)
+Pushes the changes in the active profile to the pre-configured remote repository. (Only works for profiles with remote repository set using `--git` flag.)
 #### General Usage:
 ```bash
 slv profile push [flags]
@@ -161,7 +161,7 @@ Successfully pushed changes from profile: my_org
 ---
 
 ## Delete a profile
-Deletes an existing profile. Note that you **cannot delete the current profile**.
+Deletes an existing profile. Note that you **cannot delete the active profile**.
 #### General Usage:
 ```bash
 slv profile delete [flags]

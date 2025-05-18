@@ -41,7 +41,7 @@ var (
 
 	envAddFlag = utils.FlagDef{
 		Name:  "add",
-		Usage: "Adds environment to current profile",
+		Usage: "Adds environment to active profile",
 	}
 
 	envSetRootFlag = utils.FlagDef{
@@ -57,7 +57,7 @@ var (
 
 	EnvSelfFlag = utils.FlagDef{
 		Name:  "env-self",
-		Usage: "References to the self environment (the current local environment where the command is executed)",
+		Usage: "References to the self environment (the local environment where the command is executed)",
 	}
 
 	envDefFlag = utils.FlagDef{

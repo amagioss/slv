@@ -18,7 +18,7 @@ slv help <PATH_TO_COMMAND>
 #### Example:
 ```bash
 $ slv help env add
-Adds an environment to the current profile
+Adds an environment to the active profile
 
 Usage:
   slv env add [flags]

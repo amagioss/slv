@@ -10,7 +10,7 @@ Aliases: `env`, `envs`, `environment`, `environments`
 Commands:
 - [`new`](#create-a-new-environment)
 - [`add`](#add-an-existing-environment)
-- [`get`](#get-environments-in-current-profile)
+- [`get`](#get-environments-in-active-profile)
 - [`set-self`](#set-self-environment) 
 - [`show`](#show-requested-environment)
 - [`del`](#delete-an-environment)
@@ -46,7 +46,7 @@ slv env new self [flags]
 | --email | String | True | None | Email Address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
-| --add | None | False | NA | Add the created environment to the current profile |
+| --add | None | False | NA | Add the created environment to the active profile |
 | --help | None | NA | NA| Help text for `slv env new self` |
 
 #### Usage:
@@ -88,7 +88,7 @@ slv env new service [flags]
 | --email | String | True | None | Email Address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
-| --add | None | False | NA | Add the created environment to the current profile |
+| --add | None | False | NA | Add the created environment to the active profile |
 | --help | None | NA | NA| Help text for `slv env new service` |
 
 #### Commands available:
@@ -133,7 +133,7 @@ slv env new service gcp [flags]
 | --email | String | True | None | Email Address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
-| --add | None | False | NA | Add the created environment to the current profile |
+| --add | None | False | NA | Add the created environment to the active profile |
 | --help | None | NA | NA| Help text for `slv env new service gcp` |
 
 ##### Usage:
@@ -160,7 +160,7 @@ slv env new service aws [flags]
 | --email | String | True | None | Email Address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
-| --add | None | False | NA | Add the created environment to the current profile |
+| --add | None | False | NA | Add the created environment to the active profile |
 | --help | None | NA | NA| Help text for `slv env new service aws` |
 
 ##### Usage:
@@ -187,7 +187,7 @@ slv env add [flags]
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- |
 | --env-def | String(s) | True | NA | EDS for the environment to be added |
-| --root | None | NA | NA| Set the environment as root environment for the current profile |
+| --root | None | NA | NA| Set the environment as root environment for the active profile |
 | --help | None | NA | NA| Help text for `slv env add` |
 
 #### Usage:
@@ -202,8 +202,8 @@ Successfully added 1 environments to profile my_org
 ```
 ---
 
-## Get Environments in Current Profile
-Used to list all the profiles that are present in the current profile. The command can also be used to filter down results or search based on name, tag and email.
+## Get Environments in Active Profile
+Used to list all the profiles that are present in the active profile. The command can also be used to filter down results or search based on name, tag and email.
 
 #### General usage:
 ```bash
@@ -296,7 +296,7 @@ slv env show [command]
 
 #### Commands:
 - [`self`](#show-self-environment) - Shows the self environment.
-- [`root`](#show-root-environment) - Shows the root environment in the current profile.
+- [`root`](#show-root-environment) - Shows the root environment in the active profile.
 - [`k8s`](#show-k8s-environment) - Takes the current kubernetes context and shows the environment present in the context.
 
 ### Show Self Environment
@@ -326,7 +326,7 @@ Env Definition:  SLV_EDS_AF4JYNGKIFF4GMAYQ7Y674R7A4HTH5MQSOUUJMWFNHLDJW2EUTCPQMQ
 ```
 
 ### Show Root Environment
-Print details about the root environment. This is applicable only when there is a current profile set.
+Print details about the root environment. This is applicable only when there is an active profile.
 #### General Usage:
 ```bash
 slv env show root [flags]

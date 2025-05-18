@@ -351,5 +351,5 @@ sigs.k8s.io/structured-merge-diff/v4 v4.7.0 h1:qPeWmscJcXP0snki5IYF79Z8xrl8ETFxg
 sigs.k8s.io/structured-merge-diff/v4 v4.7.0/go.mod h1:dDy58f92j70zLsuZVuUX5Wp9vtxXpaZnkPGWeqDfCps=
 sigs.k8s.io/yaml v1.4.0 h1:Mk1wCc2gy/F0THH0TAp1QYyJNzRm2KCLy3o5ASXVI5E=
 sigs.k8s.io/yaml v1.4.0/go.mod h1:Ejl7/uTz7PSA4eKMyQCUTnhZYNmLIl+5c2lQPGR2BPY=
-xipher.org/xipher v1.16.1 h1:LSL6MR/jLmiyeQTS7todicapJwp7s3uYbXKD30j6q64=
-xipher.org/xipher v1.16.1/go.mod h1:dtuGZVoVW1/PD8hO33nGrwa4SFwgHXx1wUnk+60z6XE=
+xipher.org/xipher v1.17.0 h1:db3XVfhTMhXRtE/195ESr3rZr0uK3CkFBDxFHhlK9Yo=
+xipher.org/xipher v1.17.0/go.mod h1:dtuGZVoVW1/PD8hO33nGrwa4SFwgHXx1wUnk+60z6XE=

@@ -12,16 +12,15 @@ func RegisterRemote(name string, setup setup, pull pull, push push, args []arg) 
 	}
 }
 
-func RegisterDefaultRemotes() {
-	if !defaultRemoteRegistered {
-		defaultRemoteRegistered = true
+func registerDefaultRemotes() {
+	if len(remotes) == 0 {
 		RegisterRemote("git", gitSetup, gitPull, gitPush, gitArgs)
 		RegisterRemote("http", httpSetup, httpPull, nil, httpArgs)
 	}
 }
 
 func ListRemoteTypes() []string {
-	RegisterDefaultRemotes()
+	registerDefaultRemotes()
 	remoteNames := make([]string, 0, len(remotes))
 	for name := range remotes {
 		remoteNames = append(remoteNames, name)
@@ -51,6 +50,7 @@ type remote struct {
 type arg struct {
 	name        string
 	required    bool
+	sensitive   bool
 	description string
 }
 
@@ -60,6 +60,10 @@ func (a *arg) Name() string {
 
 func (a *arg) Required() bool {
 	return a.required
+}
+
+func (a *arg) Sensitive() bool {
+	return a.sensitive
 }
 
 func (a *arg) Description() string {

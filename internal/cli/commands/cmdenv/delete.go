@@ -12,11 +12,11 @@ import (
 func envDeleteCommand() *cobra.Command {
 	if envDeleteCmd == nil {
 		envDeleteCmd = &cobra.Command{
-			Use:     "del",
-			Aliases: []string{"delete", "rm", "remove"},
-			Short:   "Deletes an environment from current profile",
+			Use:     "rm",
+			Aliases: []string{"remove", "delete", "del"},
+			Short:   "Removes an environment from active profile",
 			Run: func(cmd *cobra.Command, args []string) {
-				profile, err := profiles.GetCurrentProfile()
+				profile, err := profiles.GetActiveProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

@@ -73,7 +73,7 @@ func showVault(vault *vaults.Vault) {
 	if err != nil {
 		utils.ExitOnError(err)
 	}
-	profile, _ := profiles.GetCurrentProfile()
+	profile, _ := profiles.GetActiveProfile()
 	var root *environments.Environment
 	if profile != nil {
 		root, _ = profile.GetRoot()

@@ -1,6 +1,7 @@
 package profiles
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -9,19 +10,58 @@ import (
 	"slv.sh/slv/internal/core/config"
 )
 
-type profileManager struct {
-	dir                string
-	profileList        map[string]struct{}
-	currentProfileName *string
-	currentProfile     *Profile
+type profileManagerConfig struct {
+	file              string
+	activeProfile     *Profile
+	ActiveProfileName string `json:"active" yaml:"active"`
 }
 
-var profileMgr *profileManager = nil
-var profileMap map[string]*Profile = make(map[string]*Profile)
+func (pmc *profileManagerConfig) write() error {
+	return commons.WriteToYAML(pmc.file, "", pmc)
+}
+
+func (pmc *profileManagerConfig) getActiveProfile() (*Profile, error) {
+	if pmc.activeProfile == nil {
+		if pmc.ActiveProfileName == "" {
+			return nil, errNoActiveProfileSet
+		}
+		profile, err := Get(pmc.ActiveProfileName)
+		if err != nil {
+			return nil, err
+		}
+		pmc.activeProfile = profile
+	}
+	return pmc.activeProfile, nil
+}
+
+type profileManager struct {
+	dir         string
+	profileList map[string]struct{}
+	config      *profileManagerConfig
+}
+
+func (pm *profileManager) getConfig() (*profileManagerConfig, error) {
+	if pm.config == nil {
+		pmc := &profileManagerConfig{}
+		pmcFile := filepath.Join(pm.dir, profileMgrConfigFileName)
+		if commons.FileExists(pmcFile) {
+			if err := commons.ReadFromYAML(pmcFile, pmc); err != nil {
+				return nil, fmt.Errorf("error reading profile manager config file: %w", err)
+			}
+		} else {
+			if err := commons.WriteToYAML(pmcFile, "", pmc); err != nil {
+				return nil, fmt.Errorf("error creating profile manager config file: %w", err)
+			}
+		}
+		pmc.file = pmcFile
+		pm.config = pmc
+	}
+	return pm.config, nil
+}
 
 func initProfileManager() error {
 	if profileMgr == nil {
-		RegisterDefaultRemotes()
+		registerDefaultRemotes()
 		var manager profileManager
 		manager.dir = filepath.Join(config.GetAppDataDir(), profilesDirName)
 		profileManagerDirInfo, err := os.Stat(manager.dir)
@@ -45,8 +85,17 @@ func initProfileManager() error {
 		manager.profileList = make(map[string]struct{})
 		for _, fileInfo := range fileInfoList {
 			if fileInfo.IsDir() {
-				manager.profileList[fileInfo.Name()] = struct{}{}
+				if isValidProfile(filepath.Join(manager.dir, fileInfo.Name())) {
+					manager.profileList[fileInfo.Name()] = struct{}{}
+				} else {
+					if err := os.RemoveAll(filepath.Join(manager.dir, fileInfo.Name())); err != nil {
+						return fmt.Errorf("error removing invalid profile directory: %w", err)
+					}
+				}
 			}
+		}
+		if _, err = manager.getConfig(); err != nil {
+			return err
 		}
 		profileMgr = &manager
 	}
@@ -96,13 +145,17 @@ func New(profileName, remoteType string, updateInterval time.Duration, remoteCon
 		return err
 	}
 	profileMgr.profileList[profileName] = struct{}{}
-	if profileMgr.currentProfileName == nil {
-		return SetCurrentProfile(profileName)
+	pmc, err := profileMgr.getConfig()
+	if err != nil {
+		return err
+	}
+	if pmc.ActiveProfileName == "" {
+		return SetActiveProfile(profileName)
 	}
 	return nil
 }
 
-func SetCurrentProfile(profileName string) error {
+func SetActiveProfile(profileName string) error {
 	if profileName == "" {
 		return errInvalidProfileName
 	}
@@ -112,44 +165,41 @@ func SetCurrentProfile(profileName string) error {
 	if _, exists := profileMgr.profileList[profileName]; !exists {
 		return errProfileNotFound
 	}
-	if commons.WriteToFile(filepath.Join(profileMgr.dir, currentProfileFileName), []byte(profileName)) != nil {
-		return errSettingCurrentProfile
+	pmc, err := profileMgr.getConfig()
+	if err != nil {
+		return err
 	}
-	profileMgr.currentProfileName = &profileName
-	profileMgr.currentProfile = nil
+	pmc.ActiveProfileName = profileName
+	pmc.activeProfile = nil
+	if pmc.write() != nil {
+		return errSettingActiveProfile
+	}
 	return nil
 }
 
-func GetCurrentProfileName() (string, error) {
+func GetActiveProfileName() (string, error) {
 	if err := initProfileManager(); err != nil {
 		return "", err
 	}
-	if profileMgr.currentProfileName != nil {
-		return *profileMgr.currentProfileName, nil
-	}
-	fileContent, err := os.ReadFile(filepath.Join(profileMgr.dir, currentProfileFileName))
-	currentProfileName := string(fileContent)
+	pmc, err := profileMgr.getConfig()
 	if err != nil {
-		return "", errNoCurrentProfileSet
+		return "", err
 	}
-	profileMgr.currentProfileName = &currentProfileName
-	return *profileMgr.currentProfileName, nil
+	if pmc.ActiveProfileName != "" {
+		return pmc.ActiveProfileName, nil
+	}
+	return "", errNoActiveProfileSet
 }
 
-func GetCurrentProfile() (profile *Profile, err error) {
+func GetActiveProfile() (profile *Profile, err error) {
 	if err = initProfileManager(); err != nil {
 		return nil, err
 	}
-	if profileMgr.currentProfile == nil {
-		currentProfileName, err := GetCurrentProfileName()
-		if err != nil {
-			return nil, err
-		}
-		if profileMgr.currentProfile, err = Get(currentProfileName); err != nil {
-			return nil, err
-		}
+	pmc, err := profileMgr.getConfig()
+	if err != nil {
+		return nil, err
 	}
-	return profileMgr.currentProfile, nil
+	return pmc.getActiveProfile()
 }
 
 func Delete(profileName string) error {
@@ -162,8 +212,12 @@ func Delete(profileName string) error {
 	if _, exists := profileMgr.profileList[profileName]; !exists {
 		return errProfileNotFound
 	}
-	if profileMgr.currentProfileName != nil && *profileMgr.currentProfileName == profileName {
-		return errDeletingCurrentProfile
+	pmc, err := profileMgr.getConfig()
+	if err != nil {
+		return err
+	}
+	if pmc.ActiveProfileName == profileName {
+		return errDeletingActiveProfile
 	}
 	delete(profileMgr.profileList, profileName)
 	delete(profileMap, profileName)

@@ -21,7 +21,7 @@ func EnvCommand() *cobra.Command {
 		envCmd.AddCommand(envDeleteCommand())
 		envCmd.AddCommand(envSetSelfCommand())
 		envCmd.AddCommand(envShowCommand())
-		profile, _ := profiles.GetCurrentProfile()
+		profile, _ := profiles.GetActiveProfile()
 		if profile != nil && profile.IsPushSupported() {
 			envCmd.AddCommand(envAddCommand())
 		}

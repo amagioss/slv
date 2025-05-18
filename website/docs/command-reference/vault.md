@@ -24,7 +24,7 @@ Aliases: `vault`, `v`, `vaults`, `secret`, `secrets`
 | --vault | String | True | NA | Path to the SLV Vault file |
 | --help | None | NA | NA | Help text for `slv vault` |
 
-The `vault` command always works within the context of a vault file. Therefore, the `--vault` flag will have to be set for all commands. The vault file must end with either `.slv.yml` or `slv.yaml`.
+The `vault` command always works within the context of a vault file. Therefore, the `--vault` flag will have to be set for all commands. The vault file must end with either `.slv.yaml` or `slv.yml`.
 
 ---
 
@@ -85,9 +85,9 @@ slv vault --vault <PATH_TO_VAULT> new --env-self  --k8s-secret <PATH_TO_K8S_SECR
 ```
 ##### Example:
 ```bash
-$ kubectl get secrets/pets --namespace slv -o yaml | slv vault --vault /tmp/vault.slv.yml new --env-self --k8s-secret -
+$ kubectl get secrets/pets --namespace slv -o yaml | slv vault --vault /tmp/vault.slv.yaml new --env-self --k8s-secret -
 Input the k8s secret object as yaml/json: 
-Created vault: /tmp/vault.slv.yml
+Created vault: /tmp/vault.slv.yaml
 ```
 In the above example, SLV was directed to read the secret object from `stdin`.
 

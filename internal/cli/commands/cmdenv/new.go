@@ -56,7 +56,7 @@ func envNewServiceCommand() *cobra.Command {
 				}
 				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 				if addToProfileFlag {
-					profile, err := profiles.GetCurrentProfile()
+					profile, err := profiles.GetActiveProfile()
 					if err != nil {
 						utils.ExitOnError(err)
 					}
@@ -73,7 +73,7 @@ func envNewServiceCommand() *cobra.Command {
 		envNewServiceCmd.MarkFlagRequired(envNameFlag.Name)
 		envNewServiceCmd.AddCommand(newKMSEnvCommand("aws", "Create a service environment for AWS KMS", awsARNFlag))
 		envNewServiceCmd.AddCommand(newKMSEnvCommand("gcp", "Create a service environment for GCP KMS", gcpKmsResNameFlag))
-		profile, _ := profiles.GetCurrentProfile()
+		profile, _ := profiles.GetActiveProfile()
 		if profile != nil && profile.IsPushSupported() {
 			envNewServiceCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 		}
@@ -128,7 +128,7 @@ func envNewUserCommand() *cobra.Command {
 				ShowEnv(*env, true, true)
 				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 				if addToProfileFlag {
-					profile, err := profiles.GetCurrentProfile()
+					profile, err := profiles.GetActiveProfile()
 					if err != nil {
 						utils.ExitOnError(err)
 					}
@@ -149,7 +149,7 @@ func envNewUserCommand() *cobra.Command {
 		envNewUserCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
 		envNewUserCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
 		envNewUserCmd.MarkFlagRequired(envNameFlag.Name)
-		profile, _ := profiles.GetCurrentProfile()
+		profile, _ := profiles.GetActiveProfile()
 		if profile != nil && profile.IsPushSupported() {
 			envNewUserCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 		}

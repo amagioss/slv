@@ -34,7 +34,7 @@ func GetPublicKeys(cmd *cobra.Command, root, pq bool) (publicKeys []*crypto.Publ
 		}
 		publicKeys = append(publicKeys, publicKey)
 	}
-	profile, err := profiles.GetCurrentProfile()
+	profile, err := profiles.GetActiveProfile()
 	if err != nil && len(queries) > 0 {
 		return nil, err
 	}

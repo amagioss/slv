@@ -56,7 +56,7 @@ func registerProvider(name string, bind Bind, unbind UnBind, refRequired bool) {
 }
 
 func RegisterEnvSecretProvider(name string, bind Bind, unbind UnBind, refRequired bool) error {
-	loadDefaultProviders()
+	registerDefaultProviders()
 	if _, ok := providerMap[name]; ok {
 		return errProviderRegisteredAlready
 	}
@@ -66,7 +66,7 @@ func RegisterEnvSecretProvider(name string, bind Bind, unbind UnBind, refRequire
 
 func NewEnvForProvider(providerName, envName string, envType environments.EnvType,
 	inputs map[string][]byte, quantumSafe bool) (*environments.Environment, error) {
-	loadDefaultProviders()
+	registerDefaultProviders()
 	provider, ok := providerMap[providerName]
 	if !ok {
 		return nil, errProviderUnknown
@@ -104,7 +104,7 @@ func getSecretKeyFromBytesForBinding(skBytes []byte) (secretKey *crypto.SecretKe
 }
 
 func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypto.SecretKey, err error) {
-	loadDefaultProviders()
+	registerDefaultProviders()
 	var secretKeyBytes []byte
 	var esb *envSecretBinding
 	if envSecretBindingStr == "" {
@@ -128,4 +128,13 @@ func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypt
 		}
 	}
 	return nil, err
+}
+
+func registerDefaultProviders() {
+	if !defaultProvidersRegistered {
+		registerProvider(passwordProviderName, bindWithPassword, unBindWithPassword, true)
+		registerProvider(awsProviderName, bindWithAWSKMS, unBindFromAWSKMS, true)
+		registerProvider(gcpProviderName, bindWithGCP, unBindWithGCP, true)
+		defaultProvidersRegistered = true
+	}
 }

@@ -46,7 +46,7 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 			ShowEnv(*env, true, false)
 			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 			if addToProfileFlag {
-				profile, err := profiles.GetCurrentProfile()
+				profile, err := profiles.GetActiveProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -65,7 +65,7 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 	newKMSEnvCmd.Flags().StringP(kmsRSAPublicKey.Name, kmsRSAPublicKey.Shorthand, "", kmsRSAPublicKey.Usage)
 	newKMSEnvCmd.MarkFlagRequired(envNameFlag.Name)
 	newKMSEnvCmd.MarkFlagRequired(keyIdFlag.Name)
-	profile, _ := profiles.GetCurrentProfile()
+	profile, _ := profiles.GetActiveProfile()
 	if profile != nil && profile.IsPushSupported() {
 		newKMSEnvCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 	}

@@ -8,8 +8,8 @@ import (
 // Errors and constants used by profiles
 const (
 	// Profile Manager constants
-	profilesDirName        = "profiles"
-	currentProfileFileName = ".current"
+	profilesDirName          = "profiles"
+	profileMgrConfigFileName = ".profiles.yaml"
 
 	// Profile constants
 	profileConfigFileName = ".profile.yaml"
@@ -21,9 +21,11 @@ const (
 )
 
 var (
-	defaultRemoteRegistered = false
-	envManifestFileNames    = []string{defaultEnvManifestFileName, "environments.yml"}
-	settingsFileNames       = []string{defaultSettingsFileName, "settings.yml"}
+	profileMgr *profileManager     = nil
+	profileMap map[string]*Profile = make(map[string]*Profile)
+
+	envManifestFileNames = []string{defaultEnvManifestFileName, "environments.yml"}
+	settingsFileNames    = []string{defaultSettingsFileName, "settings.yml"}
 
 	errProfilePathExistsAlready         = errors.New("profile path exists already")
 	errProfilePathDoesNotExist          = errors.New("profile path does not exist")
@@ -33,9 +35,9 @@ var (
 	errProfileNotFound                  = errors.New("profile not found")
 	errProfileExistsAlready             = errors.New("profile exists already")
 	errInvalidProfileName               = errors.New("invalid profile name")
-	errNoCurrentProfileSet              = errors.New("current profile not set")
-	errSettingCurrentProfile            = errors.New("error setting current profile")
-	errDeletingCurrentProfile           = errors.New("error deleting current profile")
+	errNoActiveProfileSet               = errors.New("active profile not set")
+	errSettingActiveProfile             = errors.New("error setting active profile")
+	errDeletingActiveProfile            = errors.New("error deleting active profile")
 	errRemoteTypeDoesNotExist           = errors.New("remote type does not exist")
 	errRemoteSetupNotImplemented        = errors.New("remote setup not implemented")
 	errRemotePullNotImplemented         = errors.New("remote pull not implemented")
