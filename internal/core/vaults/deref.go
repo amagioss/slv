@@ -8,7 +8,7 @@ import (
 )
 
 func (vlt *Vault) getDataByReference(secretRef string) ([]byte, error) {
-	sliced := strings.Split(secretRef, vlt.Id()+".")
+	sliced := strings.Split(secretRef, "."+vlt.Name+".")
 	if len(sliced) != 2 {
 		return nil, errInvalidReferenceFormat
 	}
@@ -24,7 +24,7 @@ func (vlt *Vault) getDataByReference(secretRef string) ([]byte, error) {
 
 func (vlt *Vault) getVaultSecretRefRegex() *regexp.Regexp {
 	if vlt.Spec.vaultSecretRefRegex == nil {
-		vlt.Spec.vaultSecretRefRegex = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", vlt.Id()))
+		vlt.Spec.vaultSecretRefRegex = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, vaultNamePatternPlaceholder, vlt.Name))
 	}
 	return vlt.Spec.vaultSecretRefRegex
 }

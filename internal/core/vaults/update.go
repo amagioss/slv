@@ -98,7 +98,6 @@ func (v *VaultSpec) DeepCopyInto(out *VaultSpec) {
 	out.publicKey = v.publicKey
 	out.vaultSecretRefRegex = v.vaultSecretRefRegex
 	out.Config = vaultConfig{
-		Id:          v.Config.Id,
 		PublicKey:   v.Config.PublicKey,
 		Hash:        v.Config.Hash,
 		WrappedKeys: v.Config.WrappedKeys,

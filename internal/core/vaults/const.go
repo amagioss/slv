@@ -10,12 +10,14 @@ import (
 )
 
 const (
-	vaultFileNameExt                    = config.AppNameLowerCase
-	VaultKey             crypto.KeyType = 'V'
-	vaultIdLength                       = 30
-	secretNamePattern                   = `([\w]+)`
-	secretRefPatternBase                = `\{\{\s*VAULTID\.` + secretNamePattern + `\s*\}\}`
-	vaultIdAbbrev                       = "VID"
+	vaultFileNameRawExt                        = config.AppNameLowerCase
+	vaultFileNameDesiredExt                    = vaultFileNameRawExt + ".yaml"
+	VaultKey                    crypto.KeyType = 'V'
+	vaultIdLength                              = 30
+	secretNamePattern                          = `([\w]+)`
+	vaultNamePattern                           = `([a-zA-Z0-9_-]+)`
+	vaultNamePatternPlaceholder                = "VAULTNAME"
+	secretRefPatternBase                       = `\{\{\s*(SLV|slv)\.` + vaultNamePatternPlaceholder + `\.` + secretNamePattern + `\s*\}\}`
 
 	k8sApiVersion           = config.K8SLVGroup + "/" + config.K8SLVVersion
 	k8sKind                 = config.K8SLVKind
@@ -26,10 +28,9 @@ const (
 var (
 	secretNameRegex                = regexp.MustCompile(secretNamePattern)
 	unsupportedSecretNameCharRegex = regexp.MustCompile(`[^\w]`)
-	secretRefRegex                 = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, "VAULTID", config.AppNameUpperCase+"_"+vaultIdAbbrev+"_[A-Za-z0-9]+"))
+	secretRefRegex                 = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, vaultNamePatternPlaceholder, vaultNamePattern))
 
-	errGeneratingVaultId            = errors.New("error in generating a new vault id")
-	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameExt + ".yaml or " + vaultFileNameExt + ".yml]")
+	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameRawExt + ".yaml or " + vaultFileNameRawExt + ".yml]")
 	errVaultDirPathCreation         = errors.New("error in creating a new vault directory path")
 	errVaultNotAccessible           = errors.New("vault is not accessible using the given environment key")
 	errVaultLocked                  = errors.New("the vault is currently locked")
@@ -40,7 +41,7 @@ var (
 	errVaultItemExistsAlready       = errors.New("item exists already for the given name")
 	errVaultItemNotFound            = errors.New("no item found for the given name")
 	errVaultPublicKeyNotFound       = errors.New("vault public key not found")
-	errInvalidReferenceFormat       = errors.New("invalid reference format. references must follow the pattern {{" + config.AppNameUpperCase + "_" + vaultIdAbbrev + "_ABCXYZ.secretName}} to allow dereferencing")
+	errInvalidReferenceFormat       = errors.New("invalid reference format. references must follow the pattern {{" + config.AppNameUpperCase + ".<vault_name>.<secret_name>}} to allow dereferencing")
 	errInvalidImportDataFormat      = errors.New("invalid import data format - expected a map of string to string [secretName: secretValue] in YAML/JSON format")
 	errK8sNameRequired              = errors.New("k8s resource name is required for a k8s compatible SLV vault")
 	errVaultWrappedKeysNotFound     = errors.New("vault wrapped keys not found - vault will be inaccessible by any environment")

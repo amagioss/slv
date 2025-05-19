@@ -8,10 +8,11 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
+	"slv.sh/slv/internal/core/config"
 )
 
 func (vlt *Vault) getDataRef(secretName string) string {
-	return fmt.Sprintf("{{%s.%s}}", vlt.Id(), secretName)
+	return fmt.Sprintf("{{%s.%s.%s}}", config.AppNameUpperCase, vlt.Name, secretName)
 }
 
 func cleanUnsupportedNameChars(name string) string {

@@ -1,7 +1,6 @@
 package vaults
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -17,7 +16,6 @@ import (
 )
 
 type vaultConfig struct {
-	Id          string   `json:"id" yaml:"id"`
 	PublicKey   string   `json:"publicKey" yaml:"publicKey"`
 	Hash        bool     `json:"hash,omitempty" yaml:"hash,omitempty"`
 	WrappedKeys []string `json:"wrappedKeys" yaml:"wrappedKeys"`
@@ -25,7 +23,7 @@ type vaultConfig struct {
 
 type Vault struct {
 	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.ObjectMeta `json:"metadata"`
 
 	Type string     `json:"type,omitempty" yaml:"type,omitempty"`
 	Spec *VaultSpec `json:"spec" yaml:"spec"`
@@ -39,10 +37,6 @@ type VaultSpec struct {
 	secretKey           *crypto.SecretKey     `json:"-"`
 	cache               map[string]*VaultItem `json:"-"`
 	vaultSecretRefRegex *regexp.Regexp        `json:"-"`
-}
-
-func (vlt *Vault) Id() string {
-	return vlt.Spec.Config.Id
 }
 
 func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
@@ -59,28 +53,20 @@ func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
 }
 
 func isValidVaultFileName(fileName string) bool {
-	return strings.HasSuffix(fileName, "."+vaultFileNameExt) ||
-		strings.HasSuffix(fileName, vaultFileNameExt+".yaml") ||
-		strings.HasSuffix(fileName, vaultFileNameExt+".yml")
-}
-
-func newVaultId() (string, error) {
-	idBytes := make([]byte, vaultIdLength)
-	if _, err := rand.Read(idBytes); err != nil {
-		return "", errGeneratingVaultId
-	}
-	return config.AppNameUpperCase + "_" + vaultIdAbbrev + "_" + commons.Encode(idBytes), nil
+	return strings.HasSuffix(fileName, "."+vaultFileNameRawExt) ||
+		strings.HasSuffix(fileName, vaultFileNameRawExt+".yaml") ||
+		strings.HasSuffix(fileName, vaultFileNameRawExt+".yml")
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yaml or .slv.yml.
-func New(filePath, name, k8sNamespace string, k8SecretContent []byte, hash, quantumSafe bool, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
-	if !isValidVaultFileName(filePath) {
-		return nil, errInvalidVaultFileName
+func New(vaultFile, name, k8sNamespace string, k8SecretContent []byte, hash, quantumSafe bool, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+	if !isValidVaultFileName(vaultFile) {
+		vaultFile = vaultFile + vaultFileNameDesiredExt
 	}
-	if commons.FileExists(filePath) {
+	if commons.FileExists(vaultFile) {
 		return nil, errVaultExists
 	}
-	if os.MkdirAll(path.Dir(filePath), os.FileMode(0755)) != nil {
+	if os.MkdirAll(path.Dir(vaultFile), os.FileMode(0755)) != nil {
 		return nil, errVaultDirPathCreation
 	}
 	vaultSecretKey, err := crypto.NewSecretKey(VaultKey)
@@ -91,16 +77,12 @@ func New(filePath, name, k8sNamespace string, k8SecretContent []byte, hash, quan
 	if err != nil {
 		return nil, err
 	}
-	vauldId, err := newVaultId()
-	if err != nil {
-		return nil, err
-	}
 	vaultPubKeyStr, err := vaultPublicKey.String()
 	if err != nil {
 		return nil, err
 	}
 	if name == "" {
-		name = getNameFromFilePath(filePath)
+		name = getNameFromFilePath(vaultFile)
 	}
 	vlt = &Vault{
 		TypeMeta: metav1.TypeMeta{
@@ -113,11 +95,10 @@ func New(filePath, name, k8sNamespace string, k8SecretContent []byte, hash, quan
 		Spec: &VaultSpec{
 			publicKey: vaultPublicKey,
 			Config: vaultConfig{
-				Id:        vauldId,
 				PublicKey: vaultPubKeyStr,
 				Hash:      hash,
 			},
-			path:      filePath,
+			path:      vaultFile,
 			secretKey: vaultSecretKey,
 		},
 	}
@@ -135,22 +116,22 @@ func New(filePath, name, k8sNamespace string, k8SecretContent []byte, hash, quan
 }
 
 // Returns the vault instance from a given yaml. The vault file name must end with .slv.yaml or .slv.yml.
-func Get(filePath string) (vlt *Vault, err error) {
-	if !isValidVaultFileName(filePath) {
+func Get(vaultFile string) (vlt *Vault, err error) {
+	if !isValidVaultFileName(vaultFile) {
 		return nil, errInvalidVaultFileName
 	}
-	if !commons.FileExists(filePath) {
+	if !commons.FileExists(vaultFile) {
 		return nil, errVaultNotFound
 	}
 	obj := make(map[string]any)
-	if err := commons.ReadFromYAML(filePath, &obj); err != nil {
+	if err := commons.ReadFromYAML(vaultFile, &obj); err != nil {
 		return nil, err
 	}
 	jsonData, err := json.Marshal(obj)
 	if err != nil {
 		return nil, err
 	}
-	return get(jsonData, filePath, obj[k8sVaultSpecField] != nil)
+	return get(jsonData, vaultFile, obj[k8sVaultSpecField] != nil)
 }
 
 func get(jsonData []byte, filePath string, fullVault bool) (vlt *Vault, err error) {
@@ -201,7 +182,7 @@ func (vlt *Vault) commit() error {
 	}
 	return commons.WriteToYAML(vlt.Spec.path,
 		"# Use the pattern "+vlt.getDataRef("YOUR_SECRET_NAME")+
-			" as placeholder to reference data from this vault into files\n", data)
+			" as placeholder to reference data from this vault into files.\n", data)
 }
 
 func (vlt *Vault) reload() error {
@@ -211,7 +192,8 @@ func (vlt *Vault) reload() error {
 
 func getNameFromFilePath(path string) string {
 	name := filepath.Base(path)
-	return strings.TrimSuffix(name, "."+vaultFileNameExt+filepath.Ext(name))
+	name = strings.TrimSuffix(name, "."+vaultFileNameRawExt+filepath.Ext(name))
+	return regexp.MustCompile(`[^a-zA-Z0-9_-]`).ReplaceAllString(name, "_")
 }
 
 func (vlt *Vault) validateAndUpdate() error {

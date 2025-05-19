@@ -42,8 +42,6 @@ spec:
                 properties:
                   hash:
                     type: boolean
-                  id:
-                    type: string
                   publicKey:
                     type: string
                   wrappedKeys:
@@ -51,7 +49,6 @@ spec:
                       type: string
                     type: array
                 required:
-                - id
                 - publicKey
                 - wrappedKeys
                 type: object
@@ -71,6 +68,7 @@ spec:
           type:
             type: string
         required:
+        - metadata
         - spec
         type: object
     served: true
