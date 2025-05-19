@@ -1,0 +1,94 @@
+name: Test
+
+on:
+  push:
+    paths:
+    - 'action/*'
+    - 'action.yaml'
+    - '.github/workflows/test.yaml'
+    branches:
+    - main
+  pull_request:
+    paths:
+    - 'action/*'
+    - 'action.yaml'
+    - '.github/workflows/test.yaml'
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  test-action:
+    name: Test Action
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        version: ['0.11.0', 'latest']
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup SLV
+      uses: ./
+      with:
+        version: ${{ matrix.version }}
+    - name: Get latest SLV Version
+      id: slv-latest
+      run: |
+        latest_release_tag=$(curl -Ls \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
+        echo "version=$latest_release_tag" >> $GITHUB_OUTPUT
+    - name: Show SLV Version
+      run: |
+        echo "$(slv --version | grep "SLV Version")"
+    - name: Capture SLV Version Installed
+      run: |
+        echo "SLV_VERSION_INSTALLED=$(slv --version | grep "SLV Version" | awk '{print $4}')" >> $GITHUB_ENV
+    - name: Verify SLV Version
+      shell: python
+      env:
+        SLV_VERSION_EXPECTED: ${{ matrix.version }}
+        SLV_LATEST_VERSION: ${{ steps.slv-latest.outputs.version }}
+      run: |
+        import sys, os
+        if os.environ["SLV_VERSION_EXPECTED"] == "latest":
+          sys.exit(0 if os.environ["SLV_VERSION_INSTALLED"] == os.environ["SLV_LATEST_VERSION"] else 1)
+        else:
+          sys.exit(0 if os.environ["SLV_VERSION_EXPECTED"] in os.environ["SLV_VERSION_INSTALLED"] else 1)
+    - name: Create a new SLV Environment
+      id: new-slv-env
+      run: |
+        slv_new_env_output=$(slv env new service --name slv-action)
+        public_key=$(echo "$slv_new_env_output" | sed -n 's/^Public Key:[[:space:]]*//p')
+        secret_key=$(echo "$slv_new_env_output" | sed -n 's/^Secret Key:[[:space:]]*//p')
+        echo "public_key=$public_key" >> $GITHUB_OUTPUT
+        echo "secret_key=$secret_key" >> $GITHUB_OUTPUT
+    - name: Create a new SLV Vault
+      run: |
+        slv vault new -v pets.slv.yml --env-pubkey ${{ steps.new-slv-env.outputs.public_key }}
+        cat pets.slv.yml
+    - name: Add a known secret to the vault
+      run: |
+        slv vault put -v pets.slv.yml --name AWESOME_CAT --value "Kuwan"
+        cat pets.slv.yml
+    - name: Load SLV Vault to Environment
+      uses: ./
+      with:
+        version: ${{ matrix.version }}
+        vault: pets.slv.yml
+        env-secret-key: ${{ steps.new-slv-env.outputs.secret_key }}
+        prefix: "MY_"
+    - name: Verify SLV Secrets
+      shell: python
+      run: |
+        import sys, os
+        sys.exit(
+            int(not os.environ["MY_AWESOME_CAT"] in "Kuwan")
+        )

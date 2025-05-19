@@ -1,0 +1,36 @@
+{
+  "name": "slv-action",
+  "description": "This action downloads and sets up the SLV CLI and helps in setting vault secrets as masked environment variables for workflows to consume",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "prepare": "ncc build index.js -o dist --source-map --license licenses.txt",
+    "test": "jest",
+    "all": "npm run lint && npm run prepare && npm run test"
+  },
+  "keywords": [
+    "actions",
+    "slv",
+    "cli",
+    "secret-manager",
+    "setup"
+  ],
+  "homepage": "https://github.com/amagioss/slv",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amagioss/slv.git"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/tool-cache": "^2.0.2",
+    "@octokit/auth-token": "^5.1.2",
+    "@octokit/rest": "^21.1.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3",
+    "eslint": "^9.27.0",
+    "jest": "^29.7.0"
+  }
+}

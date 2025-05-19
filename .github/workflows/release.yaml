@@ -85,7 +85,7 @@ jobs:
   test:
     name: Test Action
     needs: release
-    uses: amagioss/slv-action/.github/workflows/test.yaml@main
+    uses: ./.github/workflows/test.yaml
     permissions:
       contents: read
     secrets: inherit

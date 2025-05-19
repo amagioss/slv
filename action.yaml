@@ -1,0 +1,29 @@
+name: SLV Action
+description: Sets up the SLV CLI and injects vault secrets as masked environment variables for workflows.
+inputs:
+  version:
+    description: SLV version to use (e.g., 'latest' or a specific version)
+    required: false
+    default: latest
+  github-token:
+    description: GitHub token (e.g., secrets.GITHUB_TOKEN) for downloading SLV to avoid rate limits
+    required: false
+    default: ${{ github.token }}
+  vault:
+    description: Path to the vault file containing secrets
+    required: false
+  env-secret-key:
+    description: SLV environment secret key (recommended to set via GitHub secrets)
+    required: false
+  selective:
+    description: Comma-separated list of secret names from the vault file to inject as environment variables
+    required: false
+  prefix:
+    description: Prefix to prepend to environment variable names derived from SLV secrets
+    required: false
+branding:
+  icon: unlock
+  color: white
+runs:
+  using: node20
+  main: action/dist/index.js
