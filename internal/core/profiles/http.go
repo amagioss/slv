@@ -1,13 +1,16 @@
 package profiles
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
+	"slv.sh/slv/internal/core/commons"
 	"slv.sh/slv/internal/core/config"
 )
 
@@ -61,6 +64,22 @@ func getUrlContent(url, header string) ([]byte, error) {
 	return bodyBytes, nil
 }
 
+func compareAndWriteFile(filePath string, data []byte) (err error) {
+	if commons.FileExists(filePath) {
+		var fileContent []byte
+		if fileContent, err = os.ReadFile(filePath); err != nil {
+			return fmt.Errorf("failed to read file: %w", err)
+		}
+		if bytes.Equal(fileContent, data) {
+			return nil
+		}
+	}
+	if err = os.WriteFile(filePath, data, 0644); err != nil {
+		return fmt.Errorf("failed to write environments manifest: %w", err)
+	}
+	return
+}
+
 func httpPull(dir string, config map[string]string) (err error) {
 	url := strings.TrimSuffix(config[configHTTPUrlKey], "/")
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
@@ -87,12 +106,12 @@ func httpPull(dir string, config map[string]string) (err error) {
 		return fmt.Errorf("failed to create profile directory: %w", err)
 	}
 	if len(environmentBytes) > 0 {
-		if err = os.WriteFile(dir+"/"+envManifestFileName, environmentBytes, 0644); err != nil {
+		if err = compareAndWriteFile(filepath.Join(dir, envManifestFileName), environmentBytes); err != nil {
 			return fmt.Errorf("failed to write environments manifest: %w", err)
 		}
 	}
 	if len(settingsBytes) > 0 {
-		if err = os.WriteFile(dir+"/"+settingsFileName, settingsBytes, 0644); err != nil {
+		if err = compareAndWriteFile(filepath.Join(dir, settingsFileName), settingsBytes); err != nil {
 			return fmt.Errorf("failed to write settings manifest: %w", err)
 		}
 	}
