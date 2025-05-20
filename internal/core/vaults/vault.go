@@ -205,9 +205,7 @@ func (vlt *Vault) validateAndUpdate() error {
 	if vlt.Annotations == nil {
 		vlt.Annotations = make(map[string]string)
 	}
-	if vlt.Annotations[k8sVersionAnnotationKey] == "" {
-		vlt.Annotations[k8sVersionAnnotationKey] = config.Version
-	}
+	vlt.Annotations[k8sVersionAnnotationKey] = config.Version
 	if vlt.ObjectMeta.CreationTimestamp.IsZero() {
 		vlt.ObjectMeta.CreationTimestamp = metav1.Now()
 	}
