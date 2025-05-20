@@ -11,7 +11,7 @@ const tc = __nccwpck_require__(3472);
 const { Octokit } = __nccwpck_require__(9380);
 let octokit;
 const token = core.getInput('github-token');
-const userAgent = 'slv-action';
+const userAgent = 'setup-slv';
 if (token) {
   const { createTokenAuth } = "@octokit/auth-token";
   octokit = new Octokit({

@@ -21,16 +21,16 @@ You can use the action to set up SLV CLI on the runner.
 ```yaml
 steps:
 - name: Setup SLV
-  uses: amagioss/slv-action@v1
+  uses: amagioss/slv@main
 ```
 
 #### Install a Specific Version
 ```yaml
 steps:
 - name: Setup SLV
-  uses: amagioss/slv-action@v1
+  uses: amagioss/slv@main
   with:
-    version: 0.9.2
+    version: 0.11.0
 ```
 
 ### Load SLV Secrets Into Environment Variables
@@ -38,7 +38,7 @@ You can use the action to load secrets from a vault into environment variables t
 ```yaml
 steps:
 - name: Load SLV Secrets
-  uses: amagioss/slv-action@v1
+  uses: amagioss/slv@main
   with:
     vault: creds.slv.yaml
     env-secret-key: ${{ secrets.SLV_ENV_SECRET_KEY }}
@@ -49,7 +49,7 @@ If you'd like to set a prefix across all the environment variables created by SL
 ```yaml
 steps:
 - name: Load SLV Secrets - PROD
-  uses: amagioss/slv-action@v1
+  uses: amagioss/slv@main
   with:
     vault: creds.slv.yaml
     env-secret-key: ${{ secrets.SLV_ENV_SECRET_KEY }}

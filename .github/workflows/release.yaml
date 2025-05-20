@@ -70,6 +70,14 @@ jobs:
           helm package ./internal/k8s/charts/slv-job --version ${{ env.SLV_VERSION }} --destination .
           helm push ./slv-operator-${{ env.SLV_VERSION }}.tgz oci://ghcr.io/${{ github.repository }}/charts
           helm push ./slv-job-${{ env.SLV_VERSION }}.tgz oci://ghcr.io/${{ github.repository }}/charts
+      - name: Force Tagging Major Version
+        run: |
+          FULL_VER_TAG=${{ github.ref_name }}
+          MAJOR_VER_TAG=$(echo "$FULL_VER_TAG" | grep -oE '^v[0-9]+')
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git tag -f "$MAJOR_VER_TAG"
+          git push origin "$MAJOR_VER_TAG" --force
 
   pages:
     name: Publish Pages

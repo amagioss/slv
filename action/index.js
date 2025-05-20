@@ -5,7 +5,7 @@ const tc = require('@actions/tool-cache');
 const { Octokit } = require("@octokit/rest");
 let octokit;
 const token = core.getInput('github-token');
-const userAgent = 'slv-action';
+const userAgent = 'setup-slv';
 if (token) {
   const { createTokenAuth } = "@octokit/auth-token";
   octokit = new Octokit({

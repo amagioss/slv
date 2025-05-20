@@ -1,5 +1,5 @@
 {
-  "name": "slv-action",
+  "name": "setup-slv",
   "description": "This action downloads and sets up the SLV CLI and helps in setting vault secrets as masked environment variables for workflows to consume",
   "main": "index.js",
   "scripts": {
