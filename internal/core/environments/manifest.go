@@ -3,26 +3,13 @@ package environments
 import (
 	"strings"
 
-	"gopkg.in/yaml.v3"
 	"slv.sh/slv/internal/core/commons"
 )
 
 type EnvManifest struct {
-	path *string
-	*manifest
-}
-
-type manifest struct {
+	path         *string
 	Root         *Environment            `yaml:"root,omitempty"`
 	Environments map[string]*Environment `yaml:"environments,omitempty"`
-}
-
-func (envManifest EnvManifest) MarshalYAML() (any, error) {
-	return envManifest.manifest, nil
-}
-
-func (envManifest *EnvManifest) UnmarshalYAML(value *yaml.Node) (err error) {
-	return value.Decode(&envManifest.manifest)
 }
 
 func NewManifest(path string) (envManifest *EnvManifest, err error) {
@@ -30,8 +17,7 @@ func NewManifest(path string) (envManifest *EnvManifest, err error) {
 		return nil, errManifestPathExistsAlready
 	}
 	envManifest = &EnvManifest{
-		path:     &path,
-		manifest: new(manifest),
+		path: &path,
 	}
 	return
 }
