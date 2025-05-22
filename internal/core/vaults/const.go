@@ -11,7 +11,7 @@ import (
 
 const (
 	vaultFileNameRawExt                        = config.AppNameLowerCase
-	vaultFileNameDesiredExt                    = vaultFileNameRawExt + ".yaml"
+	vaultFileNameDesiredExt                    = "." + vaultFileNameRawExt + ".yaml"
 	VaultKey                    crypto.KeyType = 'V'
 	vaultIdLength                              = 30
 	secretNamePattern                          = `([\w]+)`
@@ -30,7 +30,7 @@ var (
 	unsupportedSecretNameCharRegex = regexp.MustCompile(`[^\w]`)
 	secretRefRegex                 = regexp.MustCompile(strings.ReplaceAll(secretRefPatternBase, vaultNamePatternPlaceholder, vaultNamePattern))
 
-	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with " + vaultFileNameRawExt + ".yaml or " + vaultFileNameRawExt + ".yml]")
+	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with ." + vaultFileNameRawExt + ".yaml or ." + vaultFileNameRawExt + ".yml]")
 	errVaultDirPathCreation         = errors.New("error in creating a new vault directory path")
 	errVaultNotAccessible           = errors.New("vault is not accessible using the given environment key")
 	errVaultLocked                  = errors.New("the vault is currently locked")

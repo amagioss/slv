@@ -54,8 +54,8 @@ func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {
 
 func isValidVaultFileName(fileName string) bool {
 	return strings.HasSuffix(fileName, "."+vaultFileNameRawExt) ||
-		strings.HasSuffix(fileName, vaultFileNameRawExt+".yaml") ||
-		strings.HasSuffix(fileName, vaultFileNameRawExt+".yml")
+		strings.HasSuffix(fileName, "."+vaultFileNameRawExt+".yaml") ||
+		strings.HasSuffix(fileName, "."+vaultFileNameRawExt+".yml")
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yaml or .slv.yml.
