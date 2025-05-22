@@ -221,7 +221,7 @@ async function injectSecrets() {
     for (const key in vaultData) {
       const prefixedKey = prefix + key
       if (selectiveSet.size === 0 || selectiveSet.has(key) || selectiveSet.has(prefixedKey)) {
-        if (vaultData[key].secret) {
+        if (vaultData[key].secret || vaultData[key].isSecret) {
           core.setSecret(vaultData[key].value);
         }
         core.exportVariable(prefixedKey, vaultData[key].value);
