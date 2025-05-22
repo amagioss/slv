@@ -21,8 +21,9 @@ import (
 const (
 	configGitRepoKey      = "repo"
 	configGitBranchKey    = "branch"
-	configGitHTTPUserKey  = "auth-user"
-	configGitHTTPTokenKey = "auth-token"
+	configGitHTTPUserKey  = "username"
+	configGitHTTPTokenKey = "token"
+	configGitHTTPSSHKey   = "ssh-key"
 )
 
 var gitArgs = []arg{
@@ -44,6 +45,11 @@ var gitArgs = []arg{
 		name:        configGitHTTPTokenKey,
 		sensitive:   true,
 		description: "The token to authenticate with the git repository over HTTP",
+	},
+	{
+		name:        configGitHTTPSSHKey,
+		sensitive:   true,
+		description: "The path to the SSH private key file to authenticate with the git repository over SSH",
 	},
 }
 
@@ -79,12 +85,29 @@ func getSSHKeyFiles(uri string) []string {
 	return nil
 }
 
-func getGitAuth(gitUrl, username, token string) transport.AuthMethod {
-	if strings.HasPrefix(gitUrl, "https://") {
+func getGitAuth(config map[string]string) transport.AuthMethod {
+	gitUrl := config[configGitRepoKey]
+	if strings.HasPrefix(gitUrl, "https://") || strings.HasPrefix(gitUrl, "http://") {
+		username := config[configGitHTTPUserKey]
+		token := config[configGitHTTPTokenKey]
 		if username != "" && token != "" {
 			return &http.BasicAuth{
 				Username: username,
 				Password: token,
+			}
+		}
+	}
+	if sshAgentAuth, err := gitssh.NewSSHAgentAuth("git"); err == nil {
+		return sshAgentAuth
+	}
+	if sshKeyFile := config[configGitHTTPSSHKey]; sshKeyFile != "" {
+		if keyBytes, err := os.ReadFile(sshKeyFile); err == nil {
+			_, err = ssh.ParsePrivateKey(keyBytes)
+			if err == nil {
+				auth, err := gitssh.NewPublicKeysFromFile("git", sshKeyFile, "")
+				if err == nil {
+					return auth
+				}
 			}
 		}
 	}
@@ -135,7 +158,7 @@ func gitSetup(dir string, config map[string]string) (err error) {
 	cloneOptions := &git.CloneOptions{
 		URL: gitUrl,
 	}
-	cloneOptions.Auth = getGitAuth(gitUrl, config[configGitHTTPUserKey], config[configGitHTTPTokenKey])
+	cloneOptions.Auth = getGitAuth(config)
 	branch := config[configGitBranchKey]
 	if branch != "" {
 		cloneOptions.ReferenceName = plumbing.NewBranchReferenceName(branch)
@@ -156,7 +179,7 @@ func gitPull(dir string, config map[string]string) (err error) {
 	}
 	err = worktree.Pull(&git.PullOptions{
 		Progress: os.Stderr,
-		Auth:     getGitAuth(config[configGitRepoKey], config[configGitHTTPUserKey], config[configGitHTTPTokenKey]),
+		Auth:     getGitAuth(config),
 	})
 	if err == git.NoErrAlreadyUpToDate {
 		return nil
@@ -174,6 +197,6 @@ func gitPush(dir string, config map[string]string, note string) (err error) {
 	}
 	return repo.Push(&git.PushOptions{
 		Progress: os.Stderr,
-		Auth:     getGitAuth(config[configGitRepoKey], config[configGitHTTPUserKey], config[configGitHTTPTokenKey]),
+		Auth:     getGitAuth(config),
 	})
 }

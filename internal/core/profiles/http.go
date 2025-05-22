@@ -28,7 +28,7 @@ var httpArgs = []arg{
 	{
 		name:        configHTTPHeaderKey,
 		sensitive:   true,
-		description: "The header to be used for HTTP URLs protected by auth. E.g. 'Authorization: Bearer <token>'",
+		description: "The header to be used as authentication for the HTTP URL. E.g. 'Authorization: Bearer <token>'",
 	},
 }
 

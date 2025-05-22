@@ -44,7 +44,8 @@ func getRemoteProfileCommand(remoteType string) *cobra.Command {
 					remoteConfig[arg.Name()] = value
 				}
 			}
-			if err = profiles.New(name, remoteType, updateInterval, remoteConfig); err != nil {
+			readOnly, _ := cmd.Flags().GetBool(profileReadOnlyFlag.Name)
+			if err = profiles.New(name, remoteType, readOnly, updateInterval, remoteConfig); err != nil {
 				utils.ExitOnError(err)
 			}
 			fmt.Printf("Created profile %s from remote (%s)\n", color.GreenString(name), color.GreenString(remoteType))
@@ -52,6 +53,7 @@ func getRemoteProfileCommand(remoteType string) *cobra.Command {
 	}
 	remoteProfileCommand.Flags().StringP(profileNameFlag.Name, profileNameFlag.Shorthand, "", profileNameFlag.Usage)
 	remoteProfileCommand.MarkFlagRequired(profileNameFlag.Name)
+	remoteProfileCommand.Flags().BoolP(profileReadOnlyFlag.Name, "", false, profileReadOnlyFlag.Usage)
 	remoteProfileCommand.Flags().DurationP(profileSyncInterval.Name, "", time.Hour, profileSyncInterval.Usage)
 	for _, arg := range remoteArgs {
 		remoteProfileCommand.Flags().StringP(arg.Name(), "", "", arg.Description())

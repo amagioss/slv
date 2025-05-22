@@ -131,7 +131,7 @@ func Get(profileName string) (profile *Profile, err error) {
 	return
 }
 
-func New(profileName, remoteType string, updateInterval time.Duration, remoteConfig map[string]string) error {
+func New(profileName, remoteType string, readOnly bool, updateInterval time.Duration, remoteConfig map[string]string) error {
 	if profileName == "" {
 		return errInvalidProfileName
 	}
@@ -141,7 +141,7 @@ func New(profileName, remoteType string, updateInterval time.Duration, remoteCon
 	if _, exists := profileMgr.profileList[profileName]; exists {
 		return errProfileExistsAlready
 	}
-	if _, err := createProfile(profileName, filepath.Join(profileMgr.dir, profileName), remoteType, updateInterval, remoteConfig); err != nil {
+	if _, err := createProfile(profileName, filepath.Join(profileMgr.dir, profileName), remoteType, readOnly, updateInterval, remoteConfig); err != nil {
 		return err
 	}
 	profileMgr.profileList[profileName] = struct{}{}

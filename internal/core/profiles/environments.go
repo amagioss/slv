@@ -18,10 +18,8 @@ func (profile *Profile) getEnvManifestToWrite() (*environments.EnvManifest, erro
 
 func (profile *Profile) pushAndUndoOnError(note string) error {
 	if err := profile.Push(note); err != nil {
-		if re := os.RemoveAll(profile.dataDir); re != nil {
-			return re
-		} else if re = profile.pull(true); re != nil {
-			return re
+		if e := os.RemoveAll(profile.dataDir); e != nil {
+			return e
 		}
 		return err
 	}

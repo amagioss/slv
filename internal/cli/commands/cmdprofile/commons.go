@@ -21,6 +21,11 @@ var (
 		Usage:     "Profile name",
 	}
 
+	profileReadOnlyFlag = utils.FlagDef{
+		Name:  "read-only",
+		Usage: "Set profile as read-only",
+	}
+
 	profileSyncInterval = utils.FlagDef{
 		Name:  "sync-interval",
 		Usage: "Profile sync interval",
