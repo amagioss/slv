@@ -117,12 +117,13 @@ func (vlt *Vault) Get(name string) (*VaultItem, error) {
 		}
 		sealedSecret := &crypto.SealedSecret{}
 		if err := sealedSecret.FromString(rawValue); err == nil {
-			item.isSecret = true
 			item.encryptedAt = new(time.Time)
 			*item.encryptedAt = sealedSecret.EncryptedAt()
 			if sealedSecret.Hash() != "" {
 				item.hash = sealedSecret.Hash()
 			}
+		} else {
+			item.plaintext = true
 		}
 		vlt.putToCache(name, item)
 	}

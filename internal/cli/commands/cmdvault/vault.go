@@ -52,10 +52,10 @@ func showVault(vault *vaults.Vault) {
 			}
 			row = append(row, itemValueStr)
 		}
-		if item.IsSecret() {
-			row = append(row, "Secret")
-		} else {
+		if item.IsPlaintext() {
 			row = append(row, "Plain Text")
+		} else {
+			row = append(row, "Secret")
 		}
 		if item.EncryptedAt() != nil {
 			row = append(row, item.EncryptedAt().Format("02-Jan-2006 15:04:05"))

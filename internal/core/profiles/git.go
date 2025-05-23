@@ -178,8 +178,7 @@ func gitPull(dir string, config map[string]string) (err error) {
 		return err
 	}
 	err = worktree.Pull(&git.PullOptions{
-		Progress: os.Stderr,
-		Auth:     getGitAuth(config),
+		Auth: getGitAuth(config),
 	})
 	if err == git.NoErrAlreadyUpToDate {
 		return nil
@@ -196,7 +195,6 @@ func gitPush(dir string, config map[string]string, note string) (err error) {
 		return err
 	}
 	return repo.Push(&git.PushOptions{
-		Progress: os.Stderr,
-		Auth:     getGitAuth(config),
+		Auth: getGitAuth(config),
 	})
 }

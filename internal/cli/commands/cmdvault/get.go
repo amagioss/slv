@@ -29,7 +29,7 @@ func unlockVault(vault *vaults.Vault) {
 func getVaultItemMap(vault *vaults.Vault, itemName string, encodeToBase64, withMetadata bool) map[string]any {
 	type itemInfo struct {
 		Value       string `json:"value,omitempty" yaml:"value,omitempty"`
-		IsSecret    bool   `json:"isSecret,omitempty" yaml:"isSecret,omitempty"`
+		IsPlaintext bool   `json:"isPlaintext,omitempty" yaml:"isPlaintext,omitempty"`
 		EncryptedAt string `json:"encryptedAt,omitempty" yaml:"encryptedAt,omitempty"`
 		Hash        string `json:"hash,omitempty" yaml:"hash,omitempty"`
 	}
@@ -46,7 +46,7 @@ func getVaultItemMap(vault *vaults.Vault, itemName string, encodeToBase64, withM
 		if !vault.Exists(itemName) {
 			utils.ExitOnError(fmt.Errorf("item %s not found", itemName))
 		}
-		if item.IsSecret() {
+		if !item.IsPlaintext() {
 			unlockVault(vault)
 		}
 		if item, err = vault.Get(itemName); err != nil {
@@ -67,8 +67,8 @@ func getVaultItemMap(vault *vaults.Vault, itemName string, encodeToBase64, withM
 		}
 		if withMetadata {
 			fi := itemInfo{
-				Value:    valueStr,
-				IsSecret: item.IsSecret(),
+				Value:       valueStr,
+				IsPlaintext: item.IsPlaintext(),
 			}
 			if item.EncryptedAt() != nil {
 				fi.EncryptedAt = item.EncryptedAt().Format(time.RFC3339)
@@ -135,7 +135,7 @@ func vaultGetCommand() *cobra.Command {
 						if err != nil {
 							utils.ExitOnError(err)
 						}
-						if item.IsSecret() {
+						if !item.IsPlaintext() {
 							unlockVault(vault)
 						}
 						if itemValueStr, err := item.ValueString(); err != nil {

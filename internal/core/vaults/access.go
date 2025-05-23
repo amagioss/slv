@@ -97,7 +97,7 @@ func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) (err 
 		}
 	}
 	for name, vaultItem := range vaultItemsMap {
-		if err = vlt.putWithoutCommit(name, vaultItem.value, vaultItem.isSecret); err != nil {
+		if err = vlt.putWithoutCommit(name, vaultItem.value, !vaultItem.IsPlaintext()); err != nil {
 			return err
 		}
 	}
