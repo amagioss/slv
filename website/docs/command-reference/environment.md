@@ -10,10 +10,10 @@ Aliases: `env`, `envs`, `environment`, `environments`
 Commands:
 - [`new`](#create-a-new-environment)
 - [`add`](#add-an-existing-environment)
-- [`get`](#get-environments-in-active-profile)
+- [`list`](#list-environments-in-active-profile)
 - [`set-self`](#set-self-environment) 
 - [`show`](#show-requested-environment)
-- [`del`](#delete-an-environment)
+- [`rm`](#delete-an-environment)
 
 ---
 
@@ -46,21 +46,20 @@ slv env new self [flags]
 | --email | String | True | None | Email Address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
-| --add | None | False | NA | Add the created environment to the active profile |
 | --help | None | NA | NA| Help text for `slv env new self` |
 
 #### Usage:
 ```bash
 # For quantum safe environment
-slv env new -q self --email <EMAIL_ADDRESS> --name <ENVIRONMENT_NAME> --add --tags <TAGS>
+slv env new -q self --email <EMAIL_ADDRESS> --name <ENVIRONMENT_NAME> --tags <TAGS>
 
 # For a regular environment
-slv env new self --email <EMAIL_ADDRESS> --name <ENVIRONMENT_NAME> --add --tags <TAGS>
+slv env new self --email <EMAIL_ADDRESS> --name <ENVIRONMENT_NAME> --tags <TAGS>
 ```
 
 #### Example:
 ```bash
-$ slv env new self --email alice@example.com --name alice --add --tags example_env
+$ slv env new self --email alice@example.com --name alice --tags example_env
 Enter a Password: 
 Confirm Password: 
 Public Key:      SLV_EPK_AEAUKAAAABUEMSPQ4BJIIWMSAKFUUXUV4THOP3ERH25CY4HR54W25HUJQR6XK
@@ -88,7 +87,6 @@ slv env new service [flags]
 | --email | String | True | None | Email Address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
-| --add | None | False | NA | Add the created environment to the active profile |
 | --help | None | NA | NA| Help text for `slv env new service` |
 
 #### Commands available:
@@ -107,7 +105,7 @@ slv env new service --email <EMAIL_ADDRESS> --name <ENVIRONMENT_NAME> --tags <TA
 ```
 ##### Example:
 ```bash
-$ slv env new service --email service@example.com --name example_service --tags example --add
+$ slv env new service --email service@example.com --name example_service --tags example 
 Public Key:  SLV_EPK_AEAUKAAAADM5IPIORWJ24OYHX4JSJ7R6BRMO25EHHGERKFJ33EBK4FWVU4HBY
 Name:        example_service
 Email:       service@example.com
@@ -133,12 +131,11 @@ slv env new service gcp [flags]
 | --email | String | True | None | Email Address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
-| --add | None | False | NA | Add the created environment to the active profile |
 | --help | None | NA | NA| Help text for `slv env new service gcp` |
 
 ##### Usage:
 ```bash
-slv env new service gcp --email <EMAIL_ADDRESS> --name <ENVIRONMENT_NAME> --tags <TAGS> --add --resource-name <GCP_RESOURCE_NAME> --rsa-pubkey <PATH_TO_PUBKEY_PEM>
+slv env new service gcp --email <EMAIL_ADDRESS> --name <ENVIRONMENT_NAME> --tags <TAGS>  --resource-name <GCP_RESOURCE_NAME> --rsa-pubkey <PATH_TO_PUBKEY_PEM>
 ```
 
 #### Example:
@@ -160,12 +157,11 @@ slv env new service aws [flags]
 | --email | String | True | None | Email Address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
-| --add | None | False | NA | Add the created environment to the active profile |
 | --help | None | NA | NA| Help text for `slv env new service aws` |
 
 ##### Usage:
 ```bash
-slv env new service aws --email <EMAIL_ADDRESS> --name <ENVIRONMENT_NAME> --tags <TAGS> --add --arn <AWS_RESOURCE_ARN> --rsa-pubkey <PATH_TO_PUBKEY_PEM>
+slv env new service aws --email <EMAIL_ADDRESS> --name <ENVIRONMENT_NAME> --tags <TAGS>  --arn <AWS_RESOURCE_ARN> --rsa-pubkey <PATH_TO_PUBKEY_PEM>
 ```
 
 #### Example:
@@ -176,7 +172,8 @@ TBA
 
 ## Add an existing Environment
 
-Used to add an environment that is created elsewhere to the existing machine. The Environment Definition String (`EDS`) can be used to do the same.
+Used to add an environment that is created elsewhere to the existing machine. The Environment Definition String (`EDS`) can be used to do the same. 
+> **Note:** This is not available when using **read-only** profiles.
 
 #### General usage:
 ```bash
@@ -202,12 +199,12 @@ Successfully added 1 environments to profile my_org
 ```
 ---
 
-## Get Environments in Active Profile
+## List Environments in Active Profile
 Used to list all the profiles that are present in the active profile. The command can also be used to filter down results or search based on name, tag and email.
 
 #### General usage:
 ```bash
-slv env get [flags]
+slv env list [flags]
 ```
 
 #### Flags:
@@ -218,13 +215,13 @@ slv env get [flags]
 
 #### Usage:
 ```bash
-slv env get --env-search <SEARCH_STRING>
+slv env list --env-search <SEARCH_STRING>
 ```
 
 #### Example:
 ##### Without search
 ```bash
-$ slv env get
+$ slv env list
 Public Key:      SLV_EPK_AEAUKAAAABUEMSPQ4BJIIWMSAKFUUXUV4THOP3ERH25CY4HR54W25HUJQR6XK
 Name:            alice
 Email:           alice@example.com
@@ -238,7 +235,7 @@ Tags:        [example]
 ```
 ##### With search
 ```bash
-$ slv env get --env-search alice
+$ slv env list --env-search alice
 Public Key:      SLV_EPK_AEAUKAAAABUEMSPQ4BJIIWMSAKFUUXUV4THOP3ERH25CY4HR54W25HUJQR6XK
 Name:            alice
 Email:           alice@example.com
@@ -381,7 +378,7 @@ Delete one or more environments based on search parameters such as `name`, `emai
 
 #### General Usage:
 ```bash
-slv env del [flags]
+slv env rm [flags]
 ```
 
 #### Flags:
@@ -392,11 +389,11 @@ slv env del [flags]
 
 #### Usage:
 ```bash
-slv env del --env-search <SEARCH_STRING>
+slv env rm --env-search <SEARCH_STRING>
 ```
 #### Example:
 ```bash
-$ slv env del --env-search alice
+$ slv env rm --env-search alice
 Public Key:      SLV_EPK_AEAUKAAAABUEMSPQ4BJIIWMSAKFUUXUV4THOP3ERH25CY4HR54W25HUJQR6XK
 Name:            alice
 Email:           alice@example.com

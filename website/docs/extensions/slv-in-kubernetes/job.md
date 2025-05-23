@@ -1,8 +1,8 @@
 ---
-sidebar_position: 2
+sidebar_position: 4
 ---
 
-# Job / CronJob (Beta)
+# Job / CronJob
 
 ## Overview
 
@@ -90,7 +90,7 @@ kubectl create secret generic slv -n slv --from-literal=SecretKey=SLV_ESK_AEAEKA
 #### Deploy the SLV Job
 
 ```bash
-helm upgrade --install slv slv/slv-job --set jobName=my-job-$(date +%s)
+helm upgrade --install slv slv/slv-job --namespace slv --create-namespace --set jobName=my-job-$(date +%s)
 ```
 
 #### Apply an SLV Object
@@ -102,7 +102,7 @@ kubectl apply -f https://slv.sh/k8s/samples/pets.slv.yaml
 #### Run the Job Again (if needed)
 
 ```bash
-helm upgrade --install slv slv/slv-job --set jobName=my-job-$(date +%s)
+helm upgrade --install slv slv/slv-job --namespace slv --create-namespace --set jobName=my-job-$(date +%s)
 ```
 
 #### Retrieve the Corresponding Secret

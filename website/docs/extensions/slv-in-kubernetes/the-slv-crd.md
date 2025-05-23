@@ -2,12 +2,10 @@
 sidebar_position: 1
 ---
 
-# The SLV Custom Resource (CRD)
+# Custom Resource
 
 ## What is the SLV CRD?
-When SLV is run locally, the vault is simply a file stored on the local filesystem. However, when running in Kubernetes, this model translates into a Kubernetes-native approach. Instead of being saved as a local file, the vault is stored as a **custom resource** called `SLV` within the Kubernetes API server, backed by the cluster's `etcd` database.
-
-The definition for the `SLV` custom resource can be found [here](https://github.com/amagioss/slv/blob/main/internal/k8s/config/crd/bases/slv.sh_slvs.yaml).
+An SLV vault isn’t limited to a local file .Its manifest is already structured to work as a Kubernetes object. You can run `kubectl apply -f vault.slv.yaml`, and Kubernetes will treat it like any other resource. Before you do that, though, the cluster must understand what an SLV resource is. That’s the job of the [CustomResourceDefinition (CRD)](https://github.com/amagioss/slv/blob/main/internal/k8s/config/crd/bases/slv.sh_slvs.yaml). Apply the CRD once and the API server adds a new kind called SLV. After the CRD is in place, you’re free to create, update, or delete SLV objects exactly as you would Deployments or ConfigMaps—using the same YAML tooling and RBAC rules you already rely on.
 
 ---
 
