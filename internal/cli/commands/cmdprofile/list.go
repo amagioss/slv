@@ -12,8 +12,9 @@ import (
 func profileListCommand() *cobra.Command {
 	if profileListCmd == nil {
 		profileListCmd = &cobra.Command{
-			Use:   "list",
-			Short: "Lists all profiles",
+			Use:     "list",
+			Aliases: []string{"ls"},
+			Short:   "Lists all profiles",
 			Run: func(cmd *cobra.Command, args []string) {
 				profileNames, err := profiles.List()
 				if err != nil {

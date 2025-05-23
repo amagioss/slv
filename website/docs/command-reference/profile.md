@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Profile (Beta)
+# Profile
 Documentation for the `slv profile` command.
 
 Aliases: `profile`, `profiles`
@@ -10,9 +10,8 @@ Aliases: `profile`, `profiles`
 #### Commands Available: 
 - [`new`](#new-profile)
 - [`list`](#list-profiles)
-- [`set`](#set-default-profile)
-- [`pull`](#pull-remote-changes-into-local-profile)
-- [`push`](#push-local-changes-to-remote-profile)
+- [`activate`](#set-active-profile)
+- [`sync`](#sync-profile-with-remote)
 - [`delete`](#delete-a-profile)
 
 ---
@@ -21,42 +20,56 @@ Used to create a new SLV profile or add an existing one from a git repository.
 
 #### General Usage:
 ```bash
-slv profile new [flags]
+slv profile new [command]
+```
+#### Commands Available:
+- [`git`](#creating-a-git-based-profile)
+- [`http`](#creating-a-http-url-based-profile)
+
+### Creating a Git Based Profile
+Use a remote git reposioty to maintain the profile. 
+#### Usage:
+```bash
+slv profile new git [flags] 
 ```
 #### Flags:
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- |
-| --git | String | False | None |Git URI to clone the profile from |
-| --git-branch | String | False | main | Git branch corresponding to the git URI |
+| --repo | String | False | None | Git URI to clone the profile from |
+| --branch | String | False | main | Git branch corresponding to the git URI |
+| --token | String | False | None | The token to authenticate with the git repository over HTTP |
+| --username | String | False | None | The username to authenticate with the git repository over HTTP |
 | --name | String | True | NA | Name of the profile (Scoped Locally) |
-| --help | None | NA | NA|Help text for `slv profile new` |
+| --ssh-key | String | False | None | The Path to private key to use for SSH |
+| --read-only | None | NA | NA | Set profile as read-only |
+| --sync-interval | Duration | False | `1h0m0s` | Profile sync interval |
+| --help | None | NA | NA|Help text for `slv profile new git` |
 
-### Create a new local profile
-- Typically used when you want to manage the profile locally
-- Ideal for individuals (One Man Army)
-#### Usage:
-```bash
-slv profile new --name <SLV_PROFILE_NAME>
-```
 #### Example:
 ```bash
-$ slv profile new --name my_slv_profile
-Created profile:  my_slv_profile
+$ slv profile new git --name test --repo git@github.com:username/reponame.git
+Created profile test from remote (git)
 ```
 
-### Add a profile from a git repository
-- Syncs the profile info with a git repository and environments are managed from Git
-- Ideal for groups or organisations
+### Creating a HTTP URL based Profile 
+- Syncs the profile info with a remote HTTP URL
+- Much faster than Git based profiles
 #### Usage:
 ```bash
-slv profile new --name <SLV_PROFILE_NAME> --git <GIT_URI_TO_CLONE_PROFILE_FROM> --git-branch <GIT_BRANCH_CORRESPONDING_TO_GIT_URI>
+slv profile new http [flags]
 ```
+#### Flags:
+| Flag | Arguments | Required | Default | Description |
+| -- | -- | -- | -- | -- |
+| --auth-header | String | False | None | The header to be used for HTTP URLs protected by authentication |
+| --name | String | True | NA | Name of the profile (Scoped Locally) |
+| --url | String | True | NA | The HTTP base URL of the remote profile |
+| --sync-interval | Duration | False | `1h0m0s` | Profile sync interval |
+| --help | None | NA | NA|Help text for `slv profile new http` |
 #### Example:
 ```bash
-slv profile new --name my_org --git https://github.com/my_org/slvprofile.git --git-branch main
-Enter the git username       : johndoe
-Enter the git token/password : 
-Created profile:  my_org
+$ slv profile new http -n test --url https://example.com/slvprofile/
+Created profile test from remote (http)
 ```
 
 ---
@@ -91,71 +104,44 @@ The active profile is shown in a different color.
 Set an already added SLV profile as the active profile.
 #### General usage:
 ```bash
-slv profile set [flags]
+slv profile activate [flags]
 ```
 #### Flags:
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- | 
 | --name | String | True | NA | Name of the profile to set |
-| --help | None | NA | NA|Help text for `slv profile set` |
+| --help | None | NA | NA|Help text for `slv profile activate` |
 
 #### Usage:
 ```bash
-slv profile set --name <SLV_PROFILE_NAME>
+slv profile activate --name <SLV_PROFILE_NAME>
 ```
 #### Example:
 ```bash
-$ slv profile set --name my_other_profile
+$ slv profile activate --name my_other_profile
 Successfully set my_other_profile as active profile
 ```
 
 ---
 
-## Pull remote changes into local profile
-Pulls the latest changes for the active profile from remote repository. (Only works for profiles with remote repository set using `--git` flag.)
+## Sync Profile with Remote
+Sync the local cache of your profile with the remote profile (git/http). SLV automatically syncs periodically as specified by the `--sync-interval` flag. You can use this command to manually sync profiles.
 #### General Usage:
 ```bash
-slv profile pull [flags]
+slv profile sync [flags]
 ```
 #### Flags:
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- |
-| --help | None | NA | NA | Help text for `slv profile pull` |
-
+| --help | None | NA | NA | Help text for `slv profile sync` |
 #### Usage:
 ```bash
-slv profile pull
+slv profile sync
 ```
 #### Example:
 ```bash
-$ slv profile pull
-Enter the git username       : johndoe
-Enter the git token/password : 
-Successfully pulled changes into profile: my_org
-```
-
----
-
-## Push local changes to remote profile
-Pushes the changes in the active profile to the pre-configured remote repository. (Only works for profiles with remote repository set using `--git` flag.)
-#### General Usage:
-```bash
-slv profile push [flags]
-```
-#### Flags:
-| Flag | Arguments | Required | Default | Description |
-| -- | -- | -- | -- | -- |
-| --help | None | NA | NA | Help text for `slv profile push` |
-#### Usage:
-```bash
-slv profile push
-```
-#### Example:
-```bash
-$ slv profile push
-Enter the git username       : johndoe
-Enter the git token/password : 
-Successfully pushed changes from profile: my_org
+$ slv profile sync
+Profile test is updated from remote successfully
 ```
 
 ---
@@ -164,7 +150,7 @@ Successfully pushed changes from profile: my_org
 Deletes an existing profile. Note that you **cannot delete the active profile**.
 #### General Usage:
 ```bash
-slv profile delete [flags]
+slv profile rm [flags]
 ```
 #### Flags:
 | Flag | Arguments | Required | Default | Description |
@@ -174,11 +160,11 @@ slv profile delete [flags]
 
 #### Usage:
 ```bash
-slv profile delete --name <PROFILE_NAME>
+slv profile rm --name <PROFILE_NAME>
 ```
 #### Example:
 ```bash
-$ slv profile delete --name my_org
+$ slv profile rm --name my_org
 Deleted profile:  my_org
 ```
 

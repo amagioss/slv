@@ -1,13 +1,8 @@
 ---
-sidebar_position: 2
+sidebar_position: 7
 ---
 
-# SLV in Github Actions
-
-## Supported Runners
-- `ubuntu-latest`
-- `windows-latest`
-- `macos-latest`
+# Github Actions
 
 ## Inputs
 - `version`: The version of slv to install, defaulting to `latest`
@@ -21,16 +16,16 @@ You can use the action to set up SLV CLI on the runner.
 ```yaml
 steps:
 - name: Setup SLV
-  uses: amagioss/slv@main
+  uses: amagioss/slv@v<MAJOR_VERSION>
 ```
 
 #### Install a Specific Version
 ```yaml
 steps:
 - name: Setup SLV
-  uses: amagioss/slv@main
+  uses: amagioss/slv@v<MAJOR_VERSION>
   with:
-    version: 0.11.0
+    version: 0.9.2
 ```
 
 ### Load SLV Secrets Into Environment Variables
@@ -38,7 +33,7 @@ You can use the action to load secrets from a vault into environment variables t
 ```yaml
 steps:
 - name: Load SLV Secrets
-  uses: amagioss/slv@main
+  uses: amagioss/slv@v<MAJOR_VERSION>
   with:
     vault: creds.slv.yaml
     env-secret-key: ${{ secrets.SLV_ENV_SECRET_KEY }}
@@ -49,7 +44,7 @@ If you'd like to set a prefix across all the environment variables created by SL
 ```yaml
 steps:
 - name: Load SLV Secrets - PROD
-  uses: amagioss/slv@main
+  uses: amagioss/slv@v<MAJOR_VERSION>
   with:
     vault: creds.slv.yaml
     env-secret-key: ${{ secrets.SLV_ENV_SECRET_KEY }}

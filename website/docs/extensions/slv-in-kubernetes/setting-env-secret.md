@@ -1,8 +1,8 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 ---
 
-# Setting Environment Secret Key
+# Setup K8s Environment
 
 ## Overview
 
@@ -12,7 +12,7 @@ However, when using SLV inside Kubernetes, the approach to setting the environme
 
 ---
 
-## Setting the Secret Key (Not Recommended)
+## Setting the Secret Key 
 
 You can configure the secret key directly in Kubernetes by creating a **Kubernetes Secret** in the release namespace. Then, specify the name of that secret using the Helm chart value `k8sSecret`.
 
@@ -20,15 +20,15 @@ You can configure the secret key directly in Kubernetes by creating a **Kubernet
 - **Key Requirement:** The Kubernetes Secret must contain a key named `SecretKey`. SLV will **only** look for this specific key.
 
 > ⚠️ **Warning:**
-> Directly handling secret keys is **not recommended** because it involves managing raw cryptographic material, increasing the risk of exposure. Using **secret bindings** is strongly recommended for enhanced security.
+> Directly handling secret keys is **not recommended** because it involves managing raw cryptographic material, increasing the risk of exposure. When using cloud based deployments, using **secret bindings** is strongly recommended for enhanced security.
 
 ---
 
-## Setting the Secret Binding (Recommended)
+## Setting the Secret Binding
 
 A safer approach involves using a **Secret Binding**, which encapsulates key material securely.
 
-### 1. Directly Through Helm
+### 1. Through Helm
 
 You can provide the secret binding string directly via the Helm chart value `secretBinding`:
 
