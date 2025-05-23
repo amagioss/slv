@@ -20,6 +20,9 @@ func envDeleteCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
+				if !profile.IsPushSupported() {
+					utils.ExitOnError(fmt.Errorf("profile (%s) does not support deleting environments", profile.Name()))
+				}
 				queries, err := cmd.Flags().GetStringSlice(EnvSearchFlag.Name)
 				if err != nil {
 					utils.ExitOnError(err)

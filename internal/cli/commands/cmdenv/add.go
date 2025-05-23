@@ -17,11 +17,14 @@ func envAddCommand() *cobra.Command {
 			Aliases: []string{"set", "put"},
 			Short:   "Adds an environment to the active profile",
 			Run: func(cmd *cobra.Command, args []string) {
-				envdefs, err := cmd.Flags().GetStringSlice(envDefFlag.Name)
+				profile, err := profiles.GetActiveProfile()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				profile, err := profiles.GetActiveProfile()
+				if !profile.IsPushSupported() {
+					utils.ExitOnError(fmt.Errorf("profile (%s) does not support adding environments", profile.Name()))
+				}
+				envdefs, err := cmd.Flags().GetStringSlice(envDefFlag.Name)
 				if err != nil {
 					utils.ExitOnError(err)
 				}

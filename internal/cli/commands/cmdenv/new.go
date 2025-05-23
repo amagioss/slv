@@ -41,6 +41,17 @@ func envNewServiceCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
+				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
+				var profile *profiles.Profile
+				if addToProfileFlag {
+					profile, err = profiles.GetActiveProfile()
+					if err != nil {
+						utils.ExitOnError(err)
+					}
+					if !profile.IsPushSupported() {
+						utils.ExitOnError(fmt.Errorf("profile (%s) does not support adding environments", profile.Name()))
+					}
+				}
 				var env *environments.Environment
 				var secretKey *crypto.SecretKey
 				pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
@@ -54,12 +65,7 @@ func envNewServiceCommand() *cobra.Command {
 				if secretKey != nil {
 					fmt.Println("\nSecret Key:\t", color.HiBlackString(secretKey.String()))
 				}
-				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 				if addToProfileFlag {
-					profile, err := profiles.GetActiveProfile()
-					if err != nil {
-						utils.ExitOnError(err)
-					}
 					if err = profile.PutEnv(env); err != nil {
 						utils.ExitOnError(fmt.Errorf("failed to add the environment to profile (%s): %w", profile.Name(), err))
 					}
@@ -70,13 +76,10 @@ func envNewServiceCommand() *cobra.Command {
 		envNewServiceCmd.Flags().StringP(envNameFlag.Name, envNameFlag.Shorthand, "", envNameFlag.Usage)
 		envNewServiceCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
 		envNewServiceCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
+		envNewServiceCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 		envNewServiceCmd.MarkFlagRequired(envNameFlag.Name)
 		envNewServiceCmd.AddCommand(newKMSEnvCommand("aws", "Create a service environment for AWS KMS", awsARNFlag))
 		envNewServiceCmd.AddCommand(newKMSEnvCommand("gcp", "Create a service environment for GCP KMS", gcpKmsResNameFlag))
-		profile, _ := profiles.GetActiveProfile()
-		if profile != nil && profile.IsPushSupported() {
-			envNewServiceCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
-		}
 	}
 	return envNewServiceCmd
 }
@@ -99,6 +102,18 @@ func envNewUserCommand() *cobra.Command {
 					if !confirmed {
 						fmt.Println(color.YellowString("Operation aborted"))
 						utils.SafeExit()
+					}
+				}
+				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
+				var err error
+				var profile *profiles.Profile
+				if addToProfileFlag {
+					profile, err = profiles.GetActiveProfile()
+					if err != nil {
+						utils.ExitOnError(err)
+					}
+					if !profile.IsPushSupported() {
+						utils.ExitOnError(fmt.Errorf("profile (%s) does not support adding environments", profile.Name()))
 					}
 				}
 				envName, _ := cmd.Flags().GetString(envNameFlag.Name)
@@ -126,12 +141,7 @@ func envNewUserCommand() *cobra.Command {
 				}
 				secretBinding := env.SecretBinding
 				ShowEnv(*env, true, true)
-				addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 				if addToProfileFlag {
-					profile, err := profiles.GetActiveProfile()
-					if err != nil {
-						utils.ExitOnError(err)
-					}
 					if err = profile.PutEnv(env); err != nil {
 						utils.ExitOnError(fmt.Errorf("failed to add the environment to profile (%s): %w", profile.Name(), err))
 					}
@@ -148,11 +158,8 @@ func envNewUserCommand() *cobra.Command {
 		envNewUserCmd.Flags().StringP(envNameFlag.Name, envNameFlag.Shorthand, "", envNameFlag.Usage)
 		envNewUserCmd.Flags().StringP(envEmailFlag.Name, envEmailFlag.Shorthand, "", envEmailFlag.Usage)
 		envNewUserCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
+		envNewUserCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 		envNewUserCmd.MarkFlagRequired(envNameFlag.Name)
-		profile, _ := profiles.GetActiveProfile()
-		if profile != nil && profile.IsPushSupported() {
-			envNewUserCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
-		}
 	}
 	return envNewUserCmd
 }

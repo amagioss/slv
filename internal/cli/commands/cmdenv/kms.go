@@ -25,6 +25,17 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 			if err != nil {
 				utils.ExitOnError(err)
 			}
+
+			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
+			var profile *profiles.Profile
+			if addToProfileFlag {
+				if profile, err = profiles.GetActiveProfile(); err != nil {
+					utils.ExitOnError(err)
+				}
+				if !profile.IsPushSupported() {
+					utils.ExitOnError(fmt.Errorf("profile (%s) does not support adding environments", profile.Name()))
+				}
+			}
 			inputs := make(map[string][]byte)
 			keyIdFlagValue := cmd.Flag(keyIdFlag.Name).Value.String()
 			inputs[keyIdFlag.Name] = []byte(keyIdFlagValue)
@@ -44,12 +55,7 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 			env.SetEmail(envEmail)
 			env.AddTags(envTags...)
 			ShowEnv(*env, true, false)
-			addToProfileFlag, _ := cmd.Flags().GetBool(envAddFlag.Name)
 			if addToProfileFlag {
-				profile, err := profiles.GetActiveProfile()
-				if err != nil {
-					utils.ExitOnError(err)
-				}
 				if err = profile.PutEnv(env); err != nil {
 					utils.ExitOnError(fmt.Errorf("failed to add environment to profile (%s): %w", profile.Name(), err))
 				}
@@ -63,11 +69,8 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 	newKMSEnvCmd.Flags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
 	newKMSEnvCmd.Flags().StringP(keyIdFlag.Name, keyIdFlag.Shorthand, "", keyIdFlag.Usage)
 	newKMSEnvCmd.Flags().StringP(kmsRSAPublicKey.Name, kmsRSAPublicKey.Shorthand, "", kmsRSAPublicKey.Usage)
+	newKMSEnvCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 	newKMSEnvCmd.MarkFlagRequired(envNameFlag.Name)
 	newKMSEnvCmd.MarkFlagRequired(keyIdFlag.Name)
-	profile, _ := profiles.GetActiveProfile()
-	if profile != nil && profile.IsPushSupported() {
-		newKMSEnvCmd.Flags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
-	}
 	return newKMSEnvCmd
 }
