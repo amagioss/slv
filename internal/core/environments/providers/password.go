@@ -1,12 +1,10 @@
 package providers
 
 import (
-	"crypto/sha256"
 	"fmt"
 
-	"github.com/zalando/go-keyring"
-	"slv.sh/slv/internal/core/commons"
 	"slv.sh/slv/internal/core/input"
+	"slv.sh/slv/internal/core/keystore"
 	"xipher.org/xipher"
 )
 
@@ -28,34 +26,21 @@ func bindWithPassword(skBytes []byte, inputs map[string][]byte) (ref map[string]
 	return
 }
 
-func getFromKeyring(sealedSecretKeyBytes []byte) (string, error) {
-	sha256sum := sha256.Sum256(sealedSecretKeyBytes)
-	return keyring.Get(keyringServiceName, commons.Encode(sha256sum[:]))
-}
-
-func putToKeyring(sealedSecretKeyBytes []byte, password string) error {
-	sha256sum := sha256.Sum256(sealedSecretKeyBytes)
-	return keyring.Set(keyringServiceName, commons.Encode(sha256sum[:]), password)
-}
-
 func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error) {
 	sealedSecretKeyBytes := ref["ssk"]
 	if len(sealedSecretKeyBytes) == 0 {
 		return nil, errSealedSecretKeyRef
 	}
 	var password []byte
-	setPasswordToKeyring := false
+	setPasswordToKeystore := false
 	if input.IsInteractive() == nil {
-		pwd, err := getFromKeyring(sealedSecretKeyBytes)
-		if err == nil {
-			password = []byte(pwd)
-		} else {
-			if err == keyring.ErrNotFound {
-				setPasswordToKeyring = true
-			}
+		if password, err = keystore.Get(sealedSecretKeyBytes, false); err == keystore.ErrNotFound {
+			setPasswordToKeystore = true
 			if password, err = input.GetHiddenInput("Enter Password: "); err != nil {
 				return nil, err
 			}
+		} else if err != nil {
+			return nil, fmt.Errorf("failed to get password from keystore: %w", err)
 		}
 	}
 	if password == nil {
@@ -69,11 +54,11 @@ func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error
 	if err != nil {
 		return nil, errInvalidPassword
 	}
-	if setPasswordToKeyring {
-		confirm, _ := input.GetConfirmation("Do you want to save the password in keyring? (y/n): ", "y")
+	if setPasswordToKeystore {
+		confirm, _ := input.GetConfirmation("Do you want to save the password locally? (y/n): ", "y")
 		if confirm {
-			if err := putToKeyring(sealedSecretKeyBytes, string(password)); err != nil {
-				fmt.Println("Failed to save password in keyring: ", err.Error())
+			if err := keystore.Put(sealedSecretKeyBytes, password, false); err != nil {
+				return nil, fmt.Errorf("failed to save password to keystore: %w", err)
 			}
 		}
 	}

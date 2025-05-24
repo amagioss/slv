@@ -8,6 +8,8 @@ import (
 
 	"slv.sh/slv/internal/core/commons"
 	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/keystore"
+	"xipher.org/xipher"
 )
 
 type profileManagerConfig struct {
@@ -222,4 +224,23 @@ func Delete(profileName string) error {
 	delete(profileMgr.profileList, profileName)
 	delete(profileMap, profileName)
 	return os.RemoveAll(filepath.Join(profileMgr.dir, profileName))
+}
+
+func getCryptoKey() (*xipher.SecretKey, error) {
+	if profileSK == nil {
+		if skBytes, err := keystore.Get([]byte(profileCryptoKeyName), true); err == keystore.ErrNotFound {
+			if profileSK, err = xipher.NewSecretKey(); err != nil {
+				return nil, fmt.Errorf("error creating new secret key: %w", err)
+			} else if skBytes, err = profileSK.Bytes(); err != nil {
+				return nil, fmt.Errorf("error getting secret key bytes: %w", err)
+			} else if err = keystore.Put([]byte(profileCryptoKeyName), skBytes, true); err != nil {
+				return nil, fmt.Errorf("error saving secret key to keystore: %w", err)
+			}
+		} else if err != nil {
+			return nil, fmt.Errorf("error getting secret key from keystore: %w", err)
+		} else if profileSK, err = xipher.ParseSecretKey(skBytes); err != nil {
+			return nil, fmt.Errorf("error creating secret key from bytes: %w", err)
+		}
+	}
+	return profileSK, nil
 }

@@ -10,7 +10,6 @@ import (
 	"slv.sh/slv/internal/core/commons"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/settings"
-	"xipher.org/xipher"
 )
 
 type profileConfig struct {
@@ -18,37 +17,12 @@ type profileConfig struct {
 	ReadOnly     bool              `json:"readOnly" yaml:"readOnly"`
 	SyncedAt     time.Time         `json:"syncedAt" yaml:"syncedAt"`
 	SyncInterval time.Duration     `json:"syncInterval" yaml:"syncInterval"`
-	SecretKeyStr string            `json:"sk" yaml:"sk"`
 	Config       map[string]string `json:"config" yaml:"config"`
 	file         string
-	sk           *xipher.SecretKey
-}
-
-func (pc *profileConfig) getSecretKey() (sk *xipher.SecretKey, err error) {
-	if pc.sk == nil {
-		if pc.SecretKeyStr == "" {
-			if sk, err = xipher.NewSecretKey(); err != nil {
-				return nil, err
-			}
-			if skBytes, err := sk.Bytes(); err != nil {
-				return nil, err
-			} else {
-				pc.SecretKeyStr = base64.StdEncoding.EncodeToString(skBytes)
-			}
-		} else {
-			if skBytes, err := base64.StdEncoding.DecodeString(pc.SecretKeyStr); err != nil {
-				return nil, err
-			} else if sk, err = xipher.ParseSecretKey(skBytes); err != nil {
-				return nil, err
-			}
-		}
-		pc.sk = sk
-	}
-	return pc.sk, nil
 }
 
 func (pc *profileConfig) decrypt() error {
-	sk, err := pc.getSecretKey()
+	sk, err := getCryptoKey()
 	if err != nil {
 		return err
 	}
@@ -68,7 +42,7 @@ func (pc *profileConfig) decrypt() error {
 
 func (pc *profileConfig) write() error {
 	pc.SyncedAt = time.Now()
-	sk, err := pc.getSecretKey()
+	sk, err := getCryptoKey()
 	if err != nil {
 		return err
 	}

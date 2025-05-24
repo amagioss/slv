@@ -12,7 +12,6 @@ const (
 
 	// Password Provider Constants
 	passwordProviderName = "password"
-	keyringServiceName   = config.AppNameLowerCase
 
 	// KMS Provider Constants
 	rsaPubKeyRefName = "rsa-pubkey"

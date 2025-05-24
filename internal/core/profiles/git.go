@@ -1,8 +1,8 @@
 package profiles
 
 import (
+	"fmt"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -14,8 +14,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	gitssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
-	"github.com/kevinburke/ssh_config"
 	"golang.org/x/crypto/ssh"
+	"slv.sh/slv/internal/core/commons"
 )
 
 const (
@@ -23,7 +23,9 @@ const (
 	configGitBranchKey    = "branch"
 	configGitHTTPUserKey  = "username"
 	configGitHTTPTokenKey = "token"
-	configGitHTTPSSHKey   = "ssh-key"
+	configGitSSHKey       = "ssh-key"
+
+	gitUrlRegexPattern = `(?i)^(?:(https?|git|ssh):\/\/[\w.@\-~:/]+\.git|git@[\w.\-]+:[\w./~-]+\.git)$`
 )
 
 var gitArgs = []arg{
@@ -47,84 +49,50 @@ var gitArgs = []arg{
 		description: "The token to authenticate with the git repository over HTTP",
 	},
 	{
-		name:        configGitHTTPSSHKey,
+		name:        configGitSSHKey,
 		sensitive:   true,
 		description: "The path to the SSH private key file to authenticate with the git repository over SSH",
 	},
 }
 
-func expandTilde(path string) string {
-	if len(path) > 0 && path[0] == '~' {
-		if home, err := os.UserHomeDir(); err == nil {
-			return filepath.Join(home, path[1:])
-		}
-	}
-	return path
-}
-
-func getSSHKeyFiles(uri string) []string {
-	pattern := regexp.MustCompile(`(?:[^@]+@)?([^:/]+)`)
-	matches := pattern.FindStringSubmatch(uri)
-	if len(matches) < 2 {
-		return nil
-	}
-	hostname := matches[1]
-	if hostname != "" {
-		allKeyPaths := ssh_config.GetAll(hostname, "IdentityFile")
-		var keyPaths []string
-		keyPathMap := make(map[string]struct{})
-		for _, keyPath := range allKeyPaths {
-			keyPath = expandTilde(keyPath)
-			if _, found := keyPathMap[keyPath]; !found {
-				keyPaths = append(keyPaths, keyPath)
-				keyPathMap[keyPath] = struct{}{}
-			}
-		}
-		return keyPaths
-	}
-	return nil
-}
-
-func getGitAuth(config map[string]string) transport.AuthMethod {
+func getGitAuth(config map[string]string) (auth transport.AuthMethod, err error) {
 	gitUrl := config[configGitRepoKey]
+	if !regexp.MustCompile(gitUrlRegexPattern).MatchString(gitUrl) {
+		return nil, fmt.Errorf("invalid git URL: %s", gitUrl)
+	}
 	if strings.HasPrefix(gitUrl, "https://") || strings.HasPrefix(gitUrl, "http://") {
 		username := config[configGitHTTPUserKey]
 		token := config[configGitHTTPTokenKey]
 		if username != "" && token != "" {
-			return &http.BasicAuth{
+			auth = &http.BasicAuth{
 				Username: username,
 				Password: token,
 			}
+		} else if username != "" || token != "" {
+			err = fmt.Errorf("both username and token must be provided for HTTP authentication")
 		}
-	}
-	if sshAgentAuth, err := gitssh.NewSSHAgentAuth("git"); err == nil {
-		return sshAgentAuth
-	}
-	if sshKeyFile := config[configGitHTTPSSHKey]; sshKeyFile != "" {
-		if keyBytes, err := os.ReadFile(sshKeyFile); err == nil {
-			_, err = ssh.ParsePrivateKey(keyBytes)
-			if err == nil {
-				auth, err := gitssh.NewPublicKeysFromFile("git", sshKeyFile, "")
-				if err == nil {
-					return auth
+	} else {
+		if sshKey := config[configGitSSHKey]; sshKey != "" {
+			var keyBytes []byte
+			if commons.FileExists(sshKey) {
+				if keyBytes, err = os.ReadFile(sshKey); err != nil {
+					return nil, fmt.Errorf("failed to read SSH key file %s: %w", sshKey, err)
 				}
+				config[configGitSSHKey] = string(keyBytes)
+			} else {
+				keyBytes = []byte(sshKey)
 			}
+			if _, err = ssh.ParsePrivateKey(keyBytes); err != nil {
+				return nil, fmt.Errorf("failed to parse SSH key: %w", err)
+			}
+			if auth, err = gitssh.NewPublicKeys("git", keyBytes, ""); err != nil {
+				return nil, fmt.Errorf("failed to create SSH auth from file %s: %w", sshKey, err)
+			}
+		} else if auth, err = gitssh.NewSSHAgentAuth("git"); err != nil {
+			return nil, fmt.Errorf("failed to create SSH agent auth: %w", err)
 		}
 	}
-	if sshKeyFiles := getSSHKeyFiles(gitUrl); len(sshKeyFiles) > 0 {
-		keyPath := sshKeyFiles[0]
-		keyBytes, err := os.ReadFile(keyPath)
-		if err == nil {
-			_, err = ssh.ParsePrivateKey(keyBytes)
-			if err == nil {
-				auth, err := gitssh.NewPublicKeysFromFile("git", keyPath, "")
-				if err == nil {
-					return auth
-				}
-			}
-		}
-	}
-	return nil
+	return
 }
 
 func gitCommit(repo *git.Repository, msg string) error {
@@ -158,7 +126,9 @@ func gitSetup(dir string, config map[string]string) (err error) {
 	cloneOptions := &git.CloneOptions{
 		URL: gitUrl,
 	}
-	cloneOptions.Auth = getGitAuth(config)
+	if cloneOptions.Auth, err = getGitAuth(config); err != nil {
+		return err
+	}
 	branch := config[configGitBranchKey]
 	if branch != "" {
 		cloneOptions.ReferenceName = plumbing.NewBranchReferenceName(branch)
@@ -177,8 +147,12 @@ func gitPull(dir string, config map[string]string) (err error) {
 	if err != nil {
 		return err
 	}
+	var auth transport.AuthMethod
+	if auth, err = getGitAuth(config); err != nil {
+		return err
+	}
 	err = worktree.Pull(&git.PullOptions{
-		Auth: getGitAuth(config),
+		Auth: auth,
 	})
 	if err == git.NoErrAlreadyUpToDate {
 		return nil
@@ -194,7 +168,11 @@ func gitPush(dir string, config map[string]string, note string) (err error) {
 	if err = gitCommit(repo, note); err != nil {
 		return err
 	}
+	var auth transport.AuthMethod
+	if auth, err = getGitAuth(config); err != nil {
+		return err
+	}
 	return repo.Push(&git.PushOptions{
-		Auth: getGitAuth(config),
+		Auth: auth,
 	})
 }
