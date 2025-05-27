@@ -63,43 +63,47 @@ func (pm *profileManager) getConfig() (*profileManagerConfig, error) {
 
 func initProfileManager() error {
 	if profileMgr == nil {
-		registerDefaultRemotes()
-		var manager profileManager
-		manager.dir = filepath.Join(config.GetAppDataDir(), profilesDirName)
-		profileManagerDirInfo, err := os.Stat(manager.dir)
-		if err != nil {
-			err = os.MkdirAll(manager.dir, 0755)
+		profileMgrMutex.Lock()
+		defer profileMgrMutex.Unlock()
+		if profileMgr == nil {
+			registerDefaultRemotes()
+			var manager profileManager
+			manager.dir = filepath.Join(config.GetAppDataDir(), profilesDirName)
+			profileManagerDirInfo, err := os.Stat(manager.dir)
 			if err != nil {
-				return errCreatingProfilesHomeDir
+				err = os.MkdirAll(manager.dir, 0755)
+				if err != nil {
+					return errCreatingProfilesHomeDir
+				}
+			} else if !profileManagerDirInfo.IsDir() {
+				return errInitializingProfileManagementDir
 			}
-		} else if !profileManagerDirInfo.IsDir() {
-			return errInitializingProfileManagementDir
-		}
-		profileManagerDir, err := os.Open(manager.dir)
-		if err != nil {
-			return errOpeningProfileManagementDir
-		}
-		defer profileManagerDir.Close()
-		fileInfoList, err := profileManagerDir.Readdir(-1)
-		if err != nil {
-			return errOpeningProfileManagementDir
-		}
-		manager.profileList = make(map[string]struct{})
-		for _, fileInfo := range fileInfoList {
-			if fileInfo.IsDir() {
-				if isValidProfile(filepath.Join(manager.dir, fileInfo.Name())) {
-					manager.profileList[fileInfo.Name()] = struct{}{}
-				} else {
-					if err := os.RemoveAll(filepath.Join(manager.dir, fileInfo.Name())); err != nil {
-						return fmt.Errorf("error removing invalid profile directory: %w", err)
+			profileManagerDir, err := os.Open(manager.dir)
+			if err != nil {
+				return errOpeningProfileManagementDir
+			}
+			defer profileManagerDir.Close()
+			fileInfoList, err := profileManagerDir.Readdir(-1)
+			if err != nil {
+				return errOpeningProfileManagementDir
+			}
+			manager.profileList = make(map[string]struct{})
+			for _, fileInfo := range fileInfoList {
+				if fileInfo.IsDir() {
+					if isValidProfile(filepath.Join(manager.dir, fileInfo.Name())) {
+						manager.profileList[fileInfo.Name()] = struct{}{}
+					} else {
+						if err := os.RemoveAll(filepath.Join(manager.dir, fileInfo.Name())); err != nil {
+							return fmt.Errorf("error removing invalid profile directory: %w", err)
+						}
 					}
 				}
 			}
+			if _, err = manager.getConfig(); err != nil {
+				return err
+			}
+			profileMgr = &manager
 		}
-		if _, err = manager.getConfig(); err != nil {
-			return err
-		}
-		profileMgr = &manager
 	}
 	return nil
 }

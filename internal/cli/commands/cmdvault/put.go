@@ -16,7 +16,7 @@ func vaultPutCommand() *cobra.Command {
 		vaultPutCmd = &cobra.Command{
 			Use:     "put",
 			Aliases: []string{"add", "set", "create", "load", "import"},
-			Short:   "Adds secret to the vault",
+			Short:   "Adds, updates or imports secrets to the vault",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 				itemName := cmd.Flag(itemNameFlag.Name).Value.String()

@@ -2,6 +2,7 @@ package profiles
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"xipher.org/xipher"
@@ -25,9 +26,10 @@ const (
 )
 
 var (
-	profileMgr *profileManager     = nil
-	profileMap map[string]*Profile = make(map[string]*Profile)
-	profileSK  *xipher.SecretKey
+	profileMgrMutex sync.Mutex
+	profileMgr      *profileManager     = nil
+	profileMap      map[string]*Profile = make(map[string]*Profile)
+	profileSK       *xipher.SecretKey
 
 	envManifestFileNames = []string{defaultEnvManifestFileName, "environments.yml"}
 	settingsFileNames    = []string{defaultSettingsFileName, "settings.yml"}

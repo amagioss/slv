@@ -39,9 +39,9 @@ func vaultAccessCommand() *cobra.Command {
 func vaultAccessAddCommand() *cobra.Command {
 	if vaultAccessAddCmd == nil {
 		vaultAccessAddCmd = &cobra.Command{
-			Use:     "add",
-			Aliases: []string{"allow", "grant", "share"},
-			Short:   "Adds access to a vault for the given environments/public keys",
+			Use:     "grant",
+			Aliases: []string{"allow", "add", "share"},
+			Short:   "Grants read access to a vault for the given environments/public keys",
 			Run: func(cmd *cobra.Command, args []string) {
 				envSecretKey, err := secretkey.Get()
 				if err != nil {
@@ -78,8 +78,8 @@ func vaultAccessAddCommand() *cobra.Command {
 func vaultAccessRemoveCommand() *cobra.Command {
 	if vaultAccessRemoveCmd == nil {
 		vaultAccessRemoveCmd = &cobra.Command{
-			Use:     "remove",
-			Aliases: []string{"rm", "deny", "revoke", "restrict", "delete", "del"},
+			Use:     "rm",
+			Aliases: []string{"remove", "deny", "revoke", "restrict", "delete", "del"},
 			Short:   "Remove access to a vault for the given environments/public keys",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()

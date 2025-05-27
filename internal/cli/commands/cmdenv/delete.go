@@ -59,7 +59,6 @@ func envDeleteCommand() *cobra.Command {
 		envDeleteCmd.Flags().StringSliceP(EnvPublicKeysFlag.Name, EnvPublicKeysFlag.Shorthand, []string{}, EnvPublicKeysFlag.Usage)
 		envDeleteCmd.Flags().BoolP(EnvSelfFlag.Name, EnvSelfFlag.Shorthand, false, EnvSelfFlag.Usage)
 		envDeleteCmd.Flags().BoolP(EnvK8sFlag.Name, EnvK8sFlag.Shorthand, false, EnvK8sFlag.Usage)
-		envDeleteCmd.Flags().BoolP(utils.QuantumSafeFlag.Name, utils.QuantumSafeFlag.Shorthand, false, utils.QuantumSafeFlag.Usage)
 	}
 	return envDeleteCmd
 }

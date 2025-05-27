@@ -90,7 +90,8 @@ func New(vaultFile, name, k8sNamespace string, k8SecretContent []byte, hash, qua
 			Kind:       k8sKind,
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name:      name,
+			Namespace: k8sNamespace,
 		},
 		Spec: &VaultSpec{
 			publicKey: vaultPublicKey,

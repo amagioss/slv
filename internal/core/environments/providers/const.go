@@ -29,13 +29,10 @@ const (
 )
 
 var (
-	defaultProvidersRegistered = false
-
 	// Provider Base Errors
 	errProviderUnknown               = errors.New("unknown provider")
 	errInvalidEnvSecretBindingFormat = errors.New("invalid environment secret binding format")
 	errEnvSecretBindingUnspecified   = errors.New("environment secret binding unspecified")
-	errProviderRegisteredAlready     = errors.New("env secret provider registered already")
 
 	// KMS Provider Errors
 	errInvalidRSAPublicKey = errors.New("invalid RSA public key")

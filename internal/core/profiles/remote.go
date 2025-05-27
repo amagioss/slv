@@ -1,6 +1,11 @@
 package profiles
 
-var remotes = make(map[string]*remote)
+import "sync"
+
+var (
+	remotes           = make(map[string]*remote)
+	remoteInitializer sync.Once
+)
 
 func RegisterRemote(name string, setup setup, pull pull, push push, args []arg) {
 	remotes[name] = &remote{
@@ -13,13 +18,13 @@ func RegisterRemote(name string, setup setup, pull pull, push push, args []arg) 
 }
 
 func registerDefaultRemotes() {
-	if len(remotes) == 0 {
+	remoteInitializer.Do(func() {
 		RegisterRemote("git", gitSetup, gitPull, gitPush, gitArgs)
 		RegisterRemote("http", httpSetup, httpPull, nil, httpArgs)
-	}
+	})
 }
 
-func ListRemoteTypes() []string {
+func ListRemoteNames() []string {
 	registerDefaultRemotes()
 	remoteNames := make([]string, 0, len(remotes))
 	for name := range remotes {

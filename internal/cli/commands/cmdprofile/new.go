@@ -21,7 +21,7 @@ func profileNewCommand() *cobra.Command {
 			},
 		}
 	}
-	for _, remoteType := range profiles.ListRemoteTypes() {
+	for _, remoteType := range profiles.ListRemoteNames() {
 		profileNewCmd.AddCommand(getRemoteProfileCommand(remoteType))
 	}
 	return profileNewCmd

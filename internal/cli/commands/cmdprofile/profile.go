@@ -10,8 +10,7 @@ func ProfileCommand() *cobra.Command {
 		profileCmd = &cobra.Command{
 			Use:     "profile",
 			Aliases: []string{"profiles"},
-			Short:   "Manage profiles and components within them",
-			Long:    `Profile management along with environments and preferences within profiles are handled in this command`,
+			Short:   "Manage SLV profiles",
 			Run: func(cmd *cobra.Command, args []string) {
 				cmd.Help()
 			},

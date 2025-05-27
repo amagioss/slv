@@ -41,12 +41,19 @@ func envShowCommand() *cobra.Command {
 	if envShowCmd == nil {
 		envShowCmd = &cobra.Command{
 			Use:     "show",
-			Aliases: []string{"desc", "describe", "view", "display"},
+			Aliases: []string{"describe", "view", "display"},
 			Short:   "Shows the requested environment",
 			Run: func(cmd *cobra.Command, args []string) {
-				cmd.Help()
+				envdef, _ := cmd.Flags().GetString(envDefFlag.Name)
+				if env, err := environments.FromEnvDef(envdef); err == nil {
+					ShowEnv(*env, true, false)
+				} else {
+					utils.ExitOnError(err)
+				}
 			},
 		}
+		envShowCmd.Flags().StringP(envDefFlag.Name, envDefFlag.Shorthand, "", envDefFlag.Usage)
+		envShowCmd.MarkFlagRequired(envDefFlag.Name)
 		envShowCmd.AddCommand(envShowRootCommand())
 		envShowCmd.AddCommand(envShowSelfCommand())
 		envShowCmd.AddCommand(envShowK8sCommand())

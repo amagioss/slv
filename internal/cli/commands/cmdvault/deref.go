@@ -14,7 +14,7 @@ func vaultDerefCommand() *cobra.Command {
 	if vaultDerefCmd == nil {
 		vaultDerefCmd = &cobra.Command{
 			Use:   "deref",
-			Short: "Dereferences and updates secrets from a vault to a given yaml or json file",
+			Short: "Dereferences and updates values from a vault to a given file with vault references",
 			Run: func(cmd *cobra.Command, args []string) {
 				envSecretKey, err := secretkey.Get()
 				if err != nil {

@@ -9,8 +9,7 @@ func EnvCommand() *cobra.Command {
 		envCmd = &cobra.Command{
 			Use:     "env",
 			Aliases: []string{"envs", "environment", "environments"},
-			Short:   "Environment operations",
-			Long:    `Environment operations in SLV`,
+			Short:   "Manage SLV environments",
 			Run: func(cmd *cobra.Command, args []string) {
 				cmd.Help()
 			},

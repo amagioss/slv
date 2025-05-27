@@ -63,7 +63,7 @@ var (
 	envDefFlag = utils.FlagDef{
 		Name:      "env-def",
 		Shorthand: "e",
-		Usage:     "Environment definition",
+		Usage:     "Environment definition that begins with SLV_EDS_",
 	}
 
 	EnvPublicKeysFlag = utils.FlagDef{

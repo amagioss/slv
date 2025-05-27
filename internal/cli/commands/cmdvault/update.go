@@ -13,7 +13,7 @@ func vaultUpdateCommand() *cobra.Command {
 	if vaultUpdateCmd == nil {
 		vaultUpdateCmd = &cobra.Command{
 			Use:   "update",
-			Short: "Update attributes of an existing SLV vault",
+			Short: "Update attributes of a vault",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFilePath := cmd.Flag(vaultFileFlag.Name).Value.String()
 				name := cmd.Flag(vaultNameFlag.Name).Value.String()

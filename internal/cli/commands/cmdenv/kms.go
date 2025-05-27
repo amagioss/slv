@@ -48,7 +48,7 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 				}
 			}
 			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
-			env, err = providers.NewEnvForProvider(kmsName, envName, environments.SERVICE, inputs, pq)
+			env, err = providers.NewEnv(kmsName, envName, environments.SERVICE, inputs, pq)
 			if err != nil {
 				utils.ExitOnError(err)
 			}

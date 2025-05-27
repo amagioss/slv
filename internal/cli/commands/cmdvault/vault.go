@@ -127,8 +127,7 @@ func VaultCommand() *cobra.Command {
 		vaultCmd = &cobra.Command{
 			Use:     "vault",
 			Aliases: []string{"v", "vaults", "secret", "secrets"},
-			Short:   "Manage vaults/secrets with SLV",
-			Long:    `Manage vaults/secrets using SLV. SLV Vaults are files that store secrets in a key-value format.`,
+			Short:   "Manage SLV vaults",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 				vault, err := vaults.Get(vaultFile)

@@ -3,22 +3,27 @@ package providers
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"slv.sh/slv/internal/core/commons"
 	"slv.sh/slv/internal/core/crypto"
 	"slv.sh/slv/internal/core/environments"
 )
 
-type Bind func(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error)
-type UnBind func(ref map[string][]byte) (secretKeyBytes []byte, err error)
+type bind func(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error)
+type unbind func(ref map[string][]byte) (secretKeyBytes []byte, err error)
 
-var providerMap = make(map[string]*provider)
+var (
+	providerMap         = make(map[string]*provider)
+	providerInitializer sync.Once
+)
 
 type provider struct {
-	Name        string
-	bind        *Bind
-	unbind      *UnBind
+	name        string
+	bind        bind
+	unbind      unbind
 	refRequired bool
+	args        []arg
 }
 
 type envSecretBinding struct {
@@ -46,25 +51,40 @@ func envSecretBindingFromString(envSecretBindingStr string) (*envSecretBinding, 
 	return binding, nil
 }
 
-func registerProvider(name string, bind Bind, unbind UnBind, refRequired bool) {
+func Register(name string, bind bind, unbind unbind, refRequired bool) {
 	providerMap[name] = &provider{
-		Name:        name,
-		bind:        &bind,
-		unbind:      &unbind,
+		name:        name,
+		bind:        bind,
+		unbind:      unbind,
 		refRequired: refRequired,
 	}
 }
 
-func RegisterEnvSecretProvider(name string, bind Bind, unbind UnBind, refRequired bool) error {
+func registerDefaultProviders() {
+	providerInitializer.Do(func() {
+		Register(passwordProviderName, bindWithPassword, unBindWithPassword, true)
+		Register(awsProviderName, bindWithAWSKMS, unBindFromAWSKMS, true)
+		Register(gcpProviderName, bindWithGCP, unBindWithGCP, true)
+	})
+}
+
+func ListNames() []string {
 	registerDefaultProviders()
-	if _, ok := providerMap[name]; ok {
-		return errProviderRegisteredAlready
+	providerNames := make([]string, 0, len(providerMap))
+	for name := range providerMap {
+		providerNames = append(providerNames, name)
 	}
-	registerProvider(name, bind, unbind, refRequired)
+	return providerNames
+}
+
+func GetArgs(providerName string) []arg {
+	if provider, ok := providerMap[providerName]; ok {
+		return provider.args
+	}
 	return nil
 }
 
-func NewEnvForProvider(providerName, envName string, envType environments.EnvType,
+func NewEnv(providerName, envName string, envType environments.EnvType,
 	inputs map[string][]byte, quantumSafe bool) (*environments.Environment, error) {
 	registerDefaultProviders()
 	provider, ok := providerMap[providerName]
@@ -79,7 +99,7 @@ func NewEnvForProvider(providerName, envName string, envType environments.EnvTyp
 	if err != nil {
 		return nil, err
 	}
-	ref, err := (*provider.bind)(skBytes, inputs)
+	ref, err := (provider.bind)(skBytes, inputs)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +135,7 @@ func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypt
 			}
 		}
 		for _, provider := range providersWithoutRef {
-			if secretKeyBytes, err = (*provider.unbind)(nil); err == nil {
+			if secretKeyBytes, err = (provider.unbind)(nil); err == nil {
 				return getSecretKeyFromBytesForBinding(secretKeyBytes)
 			}
 		}
@@ -123,18 +143,32 @@ func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypt
 	} else if esb, err = envSecretBindingFromString(envSecretBindingStr); err == nil {
 		if provider, ok := providerMap[esb.Provider]; !ok {
 			return nil, errProviderUnknown
-		} else if secretKeyBytes, err = (*provider.unbind)(esb.Ref); err == nil {
+		} else if secretKeyBytes, err = (provider.unbind)(esb.Ref); err == nil {
 			return getSecretKeyFromBytesForBinding(secretKeyBytes)
 		}
 	}
 	return nil, err
 }
 
-func registerDefaultProviders() {
-	if !defaultProvidersRegistered {
-		registerProvider(passwordProviderName, bindWithPassword, unBindWithPassword, true)
-		registerProvider(awsProviderName, bindWithAWSKMS, unBindFromAWSKMS, true)
-		registerProvider(gcpProviderName, bindWithGCP, unBindWithGCP, true)
-		defaultProvidersRegistered = true
-	}
+type arg struct {
+	name        string
+	required    bool
+	sensitive   bool
+	description string
+}
+
+func (a *arg) Name() string {
+	return a.name
+}
+
+func (a *arg) Required() bool {
+	return a.required
+}
+
+func (a *arg) Sensitive() bool {
+	return a.sensitive
+}
+
+func (a *arg) Description() string {
+	return a.description
 }
