@@ -1,4 +1,4 @@
-package providers
+package envproviders
 
 import (
 	"crypto/rand"
@@ -9,7 +9,6 @@ import (
 )
 
 func rsaEncrypt(plain, rsaPublicKey []byte) (encrypted []byte, err error) {
-	// Encrypting Environment Secret Key with RSA OAEP SHA256
 	block, _ := pem.Decode(rsaPublicKey)
 	if block == nil {
 		return nil, errInvalidRSAPublicKey

@@ -84,11 +84,16 @@ func FromEnvDef(envDef string) (env *Environment, err error) {
 	return
 }
 
-func (env *Environment) ToEnvDef() (string, error) {
+func (env *Environment) ToEnvDef(omitSecretBinding bool) (string, error) {
+	sb := env.SecretBinding
+	if omitSecretBinding {
+		env.SecretBinding = ""
+	}
 	data, err := commons.Serialize(env)
 	if err != nil {
 		return "", err
 	}
+	env.SecretBinding = sb
 	return fmt.Sprintf("%s_%s_%s", slvPrefix, envDefStringAbbrev, data), nil
 }
 

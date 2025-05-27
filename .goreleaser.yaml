@@ -24,6 +24,8 @@ builds:
       - CGO_ENABLED=0
     flags: "-mod=readonly"
     ldflags:
+      - -s
+      - -w
       - -X slv.sh/slv/internal/core/config.version={{.Version}}
       - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
@@ -43,6 +45,8 @@ builds:
       - CXX=o64-clang++
     flags: "-mod=readonly"
     ldflags:
+      - -s
+      - -w
       - -X slv.sh/slv/internal/core/config.version={{.Version}}
       - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
@@ -61,6 +65,8 @@ builds:
       - CXX=oa64-clang++
     flags: "-mod=readonly"
     ldflags:
+      - -s
+      - -w
       - -X slv.sh/slv/internal/core/config.version={{.Version}}
       - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
@@ -79,6 +85,8 @@ builds:
       - CXX=x86_64-w64-mingw32-g++
     flags: "-mod=readonly"
     ldflags:
+      - -s
+      - -w
       - -X slv.sh/slv/internal/core/config.version={{.Version}}
       - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
@@ -97,6 +105,8 @@ builds:
       - CXX=/llvm-mingw/bin/aarch64-w64-mingw32-g++
     flags: "-mod=readonly"
     ldflags:
+      - -s
+      - -w
       - -X slv.sh/slv/internal/core/config.version={{.Version}}
       - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
@@ -115,6 +125,8 @@ builds:
       - CXX=x86_64-linux-gnu-g++
     flags: "-mod=readonly"
     ldflags:
+      - -s
+      - -w
       - -X slv.sh/slv/internal/core/config.version={{.Version}}
       - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
@@ -134,6 +146,8 @@ builds:
       - CXX=aarch64-linux-gnu-g++
     flags: "-mod=readonly"
     ldflags:
+      - -s
+      - -w
       - -X slv.sh/slv/internal/core/config.version={{.Version}}
       - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
@@ -155,6 +169,8 @@ builds:
       - CXX=arm-linux-gnueabihf-g++
     flags: "-mod=readonly"
     ldflags:
+      - -s
+      - -w
       - -X slv.sh/slv/internal/core/config.version={{.Version}}
       - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}

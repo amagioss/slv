@@ -14,7 +14,7 @@ import (
 	k8sutils "slv.sh/slv/internal/k8s/utils"
 )
 
-func ShowEnv(env environments.Environment, includeEDS, excludeBindingFromEds bool) {
+func ShowEnv(env environments.Environment, includeEDS, omitBindingFromEDS bool) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.TabIndent)
 	fmt.Fprintln(w, "Public Key:\t", env.PublicKey)
 	fmt.Fprintln(w, "Name:\t", env.Name)
@@ -24,15 +24,10 @@ func ShowEnv(env environments.Environment, includeEDS, excludeBindingFromEds boo
 		fmt.Fprintln(w, "Secret Binding:\t", env.SecretBinding)
 	}
 	if includeEDS {
-		secretBinding := env.SecretBinding
-		if excludeBindingFromEds {
-			env.SecretBinding = ""
-		}
-		if envDef, err := env.ToEnvDef(); err == nil {
+		if envDef, err := env.ToEnvDef(omitBindingFromEDS); err == nil {
 			fmt.Fprintln(w, "------------------------------------------------------------")
 			fmt.Fprintln(w, "Env Definition:\t", color.CyanString(envDef))
 		}
-		env.SecretBinding = secretBinding
 	}
 	w.Flush()
 }

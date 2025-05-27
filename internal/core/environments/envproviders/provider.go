@@ -1,4 +1,4 @@
-package providers
+package envproviders
 
 import (
 	"fmt"
@@ -108,8 +108,7 @@ func NewEnv(providerName, envName string, envType environments.EnvType,
 			Provider: providerName,
 			Ref:      ref,
 		}
-		env.SecretBinding, err = esb.string()
-		if err != nil {
+		if env.SecretBinding, err = esb.string(); err != nil {
 			return nil, err
 		}
 	}

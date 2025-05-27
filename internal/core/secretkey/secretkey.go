@@ -6,7 +6,7 @@ import (
 	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/crypto"
 	"slv.sh/slv/internal/core/environments"
-	"slv.sh/slv/internal/core/environments/providers"
+	"slv.sh/slv/internal/core/environments/envproviders"
 )
 
 var (
@@ -38,7 +38,7 @@ func Get() (*crypto.SecretKey, error) {
 		}
 	}
 	if envSecretBindingStr != "" {
-		secretKey, err = providers.GetSecretKeyFromSecretBinding(envSecretBindingStr)
+		secretKey, err = envproviders.GetSecretKeyFromSecretBinding(envSecretBindingStr)
 	}
 	if secretKey == nil && err == nil {
 		err = errEnvironmentAccessNotFound

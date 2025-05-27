@@ -9,9 +9,9 @@ import (
 	"slv.sh/slv/internal/core/profiles"
 )
 
-func envListSearchCommand() *cobra.Command {
-	if envListSearchCmd == nil {
-		envListSearchCmd = &cobra.Command{
+func envListCommand() *cobra.Command {
+	if envListCmd == nil {
+		envListCmd = &cobra.Command{
 			Use:     "list",
 			Aliases: []string{"ls", "search", "find", "get"},
 			Short:   "List/Search environments from the active profile",
@@ -40,12 +40,12 @@ func envListSearchCommand() *cobra.Command {
 				utils.SafeExit()
 			},
 		}
-		envListSearchCmd.Flags().StringSliceP(EnvSearchFlag.Name, EnvSearchFlag.Shorthand, []string{}, EnvSearchFlag.Usage)
-		if err := envListSearchCmd.RegisterFlagCompletionFunc(EnvSearchFlag.Name, EnvSearchCompletion); err != nil {
+		envListCmd.Flags().StringSliceP(EnvSearchFlag.Name, EnvSearchFlag.Shorthand, []string{}, EnvSearchFlag.Usage)
+		if err := envListCmd.RegisterFlagCompletionFunc(EnvSearchFlag.Name, EnvSearchCompletion); err != nil {
 			utils.ExitOnError(err)
 		}
 	}
-	return envListSearchCmd
+	return envListCmd
 }
 
 func EnvSearchCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

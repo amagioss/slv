@@ -11,7 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"slv.sh/slv/internal/core/crypto"
-	"slv.sh/slv/internal/core/environments/providers"
+	"slv.sh/slv/internal/core/environments/envproviders"
 )
 
 const (
@@ -58,7 +58,7 @@ func ExtractSecretKeyFromSecret(slvSecret *corev1.Secret) (*crypto.SecretKey, er
 			return crypto.SecretKeyFromString(string(v))
 		}
 		if lowerCaseKey == "secretbinding" || lowerCaseKey == "secret_binding" {
-			return providers.GetSecretKeyFromSecretBinding(string(v))
+			return envproviders.GetSecretKeyFromSecretBinding(string(v))
 		}
 	}
 	return nil, nil
@@ -68,7 +68,7 @@ func ExtractSecretKeyFromConfigMapBinding(configMap *corev1.ConfigMap) (*crypto.
 	for k, v := range configMap.Data {
 		lowerCaseKey := strings.ToLower(k)
 		if lowerCaseKey == "secretbinding" || lowerCaseKey == "secret_binding" {
-			return providers.GetSecretKeyFromSecretBinding(v)
+			return envproviders.GetSecretKeyFromSecretBinding(v)
 		}
 	}
 	return nil, nil

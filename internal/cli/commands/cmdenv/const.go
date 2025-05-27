@@ -6,18 +6,19 @@ import (
 )
 
 var (
-	envCmd           *cobra.Command
-	envNewCmd        *cobra.Command
-	envNewServiceCmd *cobra.Command
-	envNewUserCmd    *cobra.Command
-	envAddCmd        *cobra.Command
-	envListSearchCmd *cobra.Command
-	envDeleteCmd     *cobra.Command
-	envSetSelfSCmd   *cobra.Command
-	envShowCmd       *cobra.Command
-	envShowRootCmd   *cobra.Command
-	envShowSelfCmd   *cobra.Command
-	envShowK8sCmd    *cobra.Command
+	envCmd                    *cobra.Command
+	envNewCmd                 *cobra.Command
+	envNewServiceCmd          *cobra.Command
+	envNewServicePlaintextCmd *cobra.Command
+	envNewUserCmd             *cobra.Command
+	envAddCmd                 *cobra.Command
+	envListCmd                *cobra.Command
+	envDeleteCmd              *cobra.Command
+	envSetSelfSCmd            *cobra.Command
+	envShowCmd                *cobra.Command
+	envShowRootCmd            *cobra.Command
+	envShowSelfCmd            *cobra.Command
+	envShowK8sCmd             *cobra.Command
 )
 
 var (

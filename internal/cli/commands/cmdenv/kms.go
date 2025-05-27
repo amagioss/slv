@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/environments"
-	"slv.sh/slv/internal/core/environments/providers"
+	"slv.sh/slv/internal/core/environments/envproviders"
 	"slv.sh/slv/internal/core/profiles"
 )
 
@@ -48,7 +48,7 @@ func newKMSEnvCommand(kmsName, kmsProviderDesc string, keyIdFlag utils.FlagDef) 
 				}
 			}
 			pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
-			env, err = providers.NewEnv(kmsName, envName, environments.SERVICE, inputs, pq)
+			env, err = envproviders.NewEnv(kmsName, envName, environments.SERVICE, inputs, pq)
 			if err != nil {
 				utils.ExitOnError(err)
 			}
