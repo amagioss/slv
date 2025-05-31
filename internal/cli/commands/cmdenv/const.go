@@ -6,19 +6,19 @@ import (
 )
 
 var (
-	envCmd                    *cobra.Command
-	envNewCmd                 *cobra.Command
-	envNewServiceCmd          *cobra.Command
-	envNewServicePlaintextCmd *cobra.Command
-	envNewUserCmd             *cobra.Command
-	envAddCmd                 *cobra.Command
-	envListCmd                *cobra.Command
-	envDeleteCmd              *cobra.Command
-	envSetSelfSCmd            *cobra.Command
-	envShowCmd                *cobra.Command
-	envShowRootCmd            *cobra.Command
-	envShowSelfCmd            *cobra.Command
-	envShowK8sCmd             *cobra.Command
+	envCmd                     *cobra.Command
+	envNewCmd                  *cobra.Command
+	envNewServiceCmd           *cobra.Command
+	envNewDirectServicetextCmd *cobra.Command
+	envNewUserCmd              *cobra.Command
+	envAddCmd                  *cobra.Command
+	envListCmd                 *cobra.Command
+	envDeleteCmd               *cobra.Command
+	envSetSelfSCmd             *cobra.Command
+	envShowCmd                 *cobra.Command
+	envShowRootCmd             *cobra.Command
+	envShowSelfCmd             *cobra.Command
+	envShowK8sCmd              *cobra.Command
 )
 
 var (
@@ -76,21 +76,5 @@ var (
 	EnvK8sFlag = utils.FlagDef{
 		Name:  "env-k8s",
 		Usage: "Shares vault access with the accessible k8s cluster",
-	}
-
-	// Provider Flags
-	awsARNFlag = utils.FlagDef{
-		Name:  "arn",
-		Usage: "ARN for the AWS KMS key",
-	}
-
-	gcpKmsResNameFlag = utils.FlagDef{
-		Name:  "resource-name",
-		Usage: "GCP KMS resource name",
-	}
-
-	kmsRSAPublicKey = utils.FlagDef{
-		Name:  "rsa-pubkey",
-		Usage: "KMS public key [RSA 4096] as pem file (Recommended to perform offline access binding)",
 	}
 )

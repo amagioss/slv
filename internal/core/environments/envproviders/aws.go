@@ -1,6 +1,7 @@
 package envproviders
 
 import (
+	"errors"
 	"regexp"
 	"strings"
 
@@ -9,6 +10,30 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"slv.sh/slv/internal/core/commons"
+)
+
+const (
+	awsProviderId                       = "aws"
+	awsProviderName                     = "AWS Key Management Service (AWS KMS)"
+	awsARNRefName                       = "arn"
+	awsAlgRefName                       = "alg"
+	awsKMSAsymmetricEncryptionAlgorithm = "RSAES_OAEP_SHA_256"
+	awsKMSARNPattern                    = `^arn:aws:kms:[a-z0-9-]+:[0-9]+:key/[a-z0-9-]+$`
+)
+
+var (
+	errAWSConfiguration       = errors.New("please configure AWS access")
+	errInvalidAWSKMSARN       = errors.New("invalid AWS KMS ARN")
+	errInvalidAWSKMSAlgorithm = errors.New("invalid AWS KMS algorithm")
+
+	awsArgs = []arg{
+		{
+			name:        awsARNRefName,
+			required:    true,
+			description: "ARN of the AWS KMS key to use",
+		},
+		rsaArg,
+	}
 )
 
 func isValidARN(arn string) bool {
@@ -72,20 +97,20 @@ func bindWithAWSKMS(skBytes []byte, inputs map[string][]byte) (ref map[string][]
 			if sealedSecretKeyBytes, algorithm, err = encryptWithAWSKMSAPI(skBytes, arn); err != nil {
 				return nil, err
 			}
-			ref["alg"] = []byte(*algorithm)
+			ref[awsAlgRefName] = []byte(*algorithm)
 		} else if sealedSecretKeyBytes, err = rsaEncrypt(skBytes, rsaPublicKey); err == nil {
-			ref["alg"] = []byte(awsKMSAsymmetricEncryptionAlgorithm)
+			ref[awsAlgRefName] = []byte(awsKMSAsymmetricEncryptionAlgorithm)
 		} else {
 			return nil, err
 		}
-		ref["ssk"] = sealedSecretKeyBytes
+		ref[sealedSecretKeyRefName] = sealedSecretKeyBytes
 		return
 	}
 	return nil, errInvalidAWSKMSARN
 }
 
 func unBindFromAWSKMS(ref map[string][]byte) (secretKeyBytes []byte, err error) {
-	arn := string(ref["arn"])
+	arn := string(ref[awsARNRefName])
 	if !isValidARN(arn) {
 		return nil, errInvalidAWSKMSARN
 	}
@@ -97,11 +122,11 @@ func unBindFromAWSKMS(ref map[string][]byte) (secretKeyBytes []byte, err error) 
 	if err != nil {
 		return nil, err
 	}
-	sealedSecretKeyBytes := ref["ssk"]
+	sealedSecretKeyBytes := ref[sealedSecretKeyRefName]
 	if len(sealedSecretKeyBytes) == 0 {
 		return nil, errSealedSecretKeyRef
 	}
-	algorithm := ref["alg"]
+	algorithm := ref[awsAlgRefName]
 	if len(algorithm) == 0 {
 		return nil, errInvalidAWSKMSAlgorithm
 	}

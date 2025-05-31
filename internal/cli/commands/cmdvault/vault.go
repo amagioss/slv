@@ -113,7 +113,7 @@ func showVault(vault *vaults.Vault) {
 	}
 	accessTable.AppendRows(accessTableRows)
 
-	fmt.Println("Vault ID: ", vault.Spec.Config.PublicKey)
+	fmt.Printf("Vault Name: %s\n", vault.Name)
 	fmt.Println("Vault Data:")
 	dataTable.SetStyle(table.StyleLight)
 	dataTable.Render()

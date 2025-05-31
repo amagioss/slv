@@ -1,11 +1,22 @@
 package envproviders
 
 import (
+	"errors"
 	"fmt"
 
 	"slv.sh/slv/internal/core/input"
 	"slv.sh/slv/internal/core/keystore"
 	"xipher.org/xipher"
+)
+
+const (
+	passwordProviderId   = "password"
+	passwordProviderName = "Password"
+)
+
+var (
+	errPasswordNotSet  = errors.New("password not set: please set password through the environment variable or use the interactive terminal to enter the password")
+	errInvalidPassword = errors.New("invalid password")
 )
 
 func bindWithPassword(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {

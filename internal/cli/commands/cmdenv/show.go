@@ -24,7 +24,7 @@ func ShowEnv(env environments.Environment, includeEDS, omitBindingFromEDS bool) 
 		fmt.Fprintln(w, "Secret Binding:\t", env.SecretBinding)
 	}
 	if includeEDS {
-		if envDef, err := env.ToEnvDef(omitBindingFromEDS); err == nil {
+		if envDef, err := env.ToDefStr(omitBindingFromEDS); err == nil {
 			fmt.Fprintln(w, "------------------------------------------------------------")
 			fmt.Fprintln(w, "Env Definition:\t", color.CyanString(envDef))
 		}
@@ -40,7 +40,7 @@ func envShowCommand() *cobra.Command {
 			Short:   "Shows the requested environment",
 			Run: func(cmd *cobra.Command, args []string) {
 				envdef, _ := cmd.Flags().GetString(envDefFlag.Name)
-				if env, err := environments.FromEnvDef(envdef); err == nil {
+				if env, err := environments.FromDefStr(envdef); err == nil {
 					ShowEnv(*env, true, false)
 				} else {
 					utils.ExitOnError(err)

@@ -2,10 +2,32 @@ package envproviders
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	kms "cloud.google.com/go/kms/apiv1"
 	kmspb "cloud.google.com/go/kms/apiv1/kmspb"
+)
+
+const (
+	gcpProviderId      = "gcp"
+	gcpProviderName    = "Google Cloud Key Management Service (Cloud KMS)"
+	gcpResourceNameRef = "resource-name"
+	gcpSymmAlgoRef     = "sym"
+)
+
+var (
+	errInvalidGCPKMSResourceName = errors.New("invalid Cloud KMS resource name")
+	errInvalidGCPKMSAlgorithm    = errors.New("invalid Cloud KMS algorithm")
+
+	gcpArgs = []arg{
+		{
+			name:        gcpResourceNameRef,
+			required:    true,
+			description: "GCP KMS resource name to use",
+		},
+		rsaArg,
+	}
 )
 
 func isValidGCPResourceName(resourcePath string, symmetricAlgo bool) bool {
@@ -47,7 +69,7 @@ func bindWithGCP(skBytes []byte, inputs map[string][]byte) (ref map[string][]byt
 			symmetricAlgoByte = 0
 		}
 		ref[gcpSymmAlgoRef] = []byte{symmetricAlgoByte}
-		ref["ssk"] = sealedSecretKeyBytes
+		ref[sealedSecretKeyRefName] = sealedSecretKeyBytes
 		return
 	}
 	return nil, errInvalidGCPKMSResourceName
@@ -62,7 +84,7 @@ func unBindWithGCP(ref map[string][]byte) (secretKeyBytes []byte, err error) {
 	if !isValidGCPResourceName(resourceName, symmetricAlgo) {
 		return nil, errInvalidGCPKMSResourceName
 	}
-	sealedSecretKeyBytes := ref["ssk"]
+	sealedSecretKeyBytes := ref[sealedSecretKeyRefName]
 	if len(sealedSecretKeyBytes) == 0 {
 		return nil, errSealedSecretKeyRef
 	}

@@ -18,7 +18,7 @@ func envSetSelfCommand() *cobra.Command {
 			Short:   "Registers an environment in the current host as self",
 			Run: func(cmd *cobra.Command, args []string) {
 				envDef := cmd.Flag(envDefFlag.Name).Value.String()
-				env, err := environments.FromEnvDef(envDef)
+				env, err := environments.FromDefStr(envDef)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -32,7 +32,7 @@ func envSetSelfCommand() *cobra.Command {
 					}
 					env.SecretBinding = secretBinding
 				}
-				if err = env.MarkAsSelf(); err != nil {
+				if err = env.SetAsSelf(); err != nil {
 					utils.ExitOnError(err)
 				}
 				ShowEnv(*env, true, true)

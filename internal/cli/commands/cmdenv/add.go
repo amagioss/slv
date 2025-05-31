@@ -31,7 +31,7 @@ func envAddCommand() *cobra.Command {
 				}
 				var successMessage string
 				var env *environments.Environment
-				if env, err = environments.FromEnvDef(envdef); err == nil && env != nil {
+				if env, err = environments.FromDefStr(envdef); err == nil && env != nil {
 					if setAsRoot {
 						err = profile.SetRoot(env)
 						successMessage = fmt.Sprintf("Successfully set %s as root environment for profile %s", color.GreenString(env.Name), color.GreenString(profile.Name()))

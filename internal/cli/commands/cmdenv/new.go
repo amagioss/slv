@@ -43,19 +43,22 @@ func envNewServiceCommand() *cobra.Command {
 		envNewServiceCmd.PersistentFlags().StringSliceP(envTagsFlag.Name, envTagsFlag.Shorthand, []string{}, envTagsFlag.Usage)
 		envNewServiceCmd.PersistentFlags().BoolP(envAddFlag.Name, envAddFlag.Shorthand, false, envAddFlag.Usage)
 		envNewServiceCmd.MarkPersistentFlagRequired(envNameFlag.Name)
-		envNewServiceCmd.AddCommand(envNewServicePlaintextCommand())
-		envNewServiceCmd.AddCommand(newKMSEnvCommand("aws", "Create a service environment for AWS KMS", awsARNFlag))
-		envNewServiceCmd.AddCommand(newKMSEnvCommand("gcp", "Create a service environment for GCP KMS", gcpKmsResNameFlag))
+		envNewServiceCmd.AddCommand(envNewDirectServiceCommand())
+		for _, envProviderId := range envproviders.ListIds() {
+			if envProviderId != "password" {
+				envNewServiceCmd.AddCommand(getEnvProviderCommand(envProviderId))
+			}
+		}
 	}
 	return envNewServiceCmd
 }
 
-func envNewServicePlaintextCommand() *cobra.Command {
-	if envNewServicePlaintextCmd == nil {
-		envNewServicePlaintextCmd = &cobra.Command{
-			Use:     "plaintext",
-			Aliases: []string{"direct", "raw"},
-			Short:   "Creates a new service environment and returns the secret key in plaintext",
+func envNewDirectServiceCommand() *cobra.Command {
+	if envNewDirectServicetextCmd == nil {
+		envNewDirectServicetextCmd = &cobra.Command{
+			Use:     "direct",
+			Aliases: []string{"self-managed", "unmanaged"},
+			Short:   "Creates a new service environment and returns the secret key as plaintext (self-managed)",
 			Run: func(cmd *cobra.Command, args []string) {
 				name, _ := cmd.Flags().GetString(envNameFlag.Name)
 				email, _ := cmd.Flags().GetString(envEmailFlag.Name)
@@ -77,7 +80,7 @@ func envNewServicePlaintextCommand() *cobra.Command {
 				var env *environments.Environment
 				var secretKey *crypto.SecretKey
 				pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
-				env, secretKey, err = environments.NewEnvironment(name, environments.SERVICE, pq)
+				env, secretKey, err = environments.New(name, environments.SERVICE, pq)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -96,7 +99,7 @@ func envNewServicePlaintextCommand() *cobra.Command {
 			},
 		}
 	}
-	return envNewServicePlaintextCmd
+	return envNewDirectServicetextCmd
 }
 
 func envNewUserCommand() *cobra.Command {
@@ -151,7 +154,7 @@ func envNewUserCommand() *cobra.Command {
 				}
 				env.SetEmail(envEmail)
 				env.AddTags(envTags...)
-				if err = env.MarkAsSelf(); err != nil {
+				if err = env.SetAsSelf(); err != nil {
 					utils.ExitOnError(err)
 				}
 				secretBinding := env.SecretBinding

@@ -41,7 +41,7 @@ func newEnvironmentForPublicKey(name string, envType EnvType, publicKey *crypto.
 	}, nil
 }
 
-func NewEnvironment(name string, envType EnvType, pq bool) (*Environment, *crypto.SecretKey, error) {
+func New(name string, envType EnvType, pq bool) (*Environment, *crypto.SecretKey, error) {
 	secretKey, err := crypto.NewSecretKey(EnvironmentKey)
 	if err == nil {
 		publicKey, err := secretKey.PublicKey(pq)
@@ -75,7 +75,7 @@ func (env *Environment) AddTags(tags ...string) {
 	env.Tags = append(env.Tags, tags...)
 }
 
-func FromEnvDef(envDef string) (env *Environment, err error) {
+func FromDefStr(envDef string) (env *Environment, err error) {
 	sliced := strings.Split(envDef, "_")
 	if len(sliced) != 3 || sliced[0] != slvPrefix || sliced[1] != envDefStringAbbrev {
 		return nil, errInvalidEnvDef
@@ -84,7 +84,7 @@ func FromEnvDef(envDef string) (env *Environment, err error) {
 	return
 }
 
-func (env *Environment) ToEnvDef(omitSecretBinding bool) (string, error) {
+func (env *Environment) ToDefStr(omitSecretBinding bool) (string, error) {
 	sb := env.SecretBinding
 	if omitSecretBinding {
 		env.SecretBinding = ""
@@ -112,7 +112,7 @@ func GetSelf() *Environment {
 	return env
 }
 
-func (env *Environment) MarkAsSelf() error {
+func (env *Environment) SetAsSelf() error {
 	if env.SecretBinding == "" {
 		return errMarkingSelfEnvBindingNotFound
 	}

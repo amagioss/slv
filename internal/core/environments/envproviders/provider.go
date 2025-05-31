@@ -1,11 +1,13 @@
 package envproviders
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
 
 	"slv.sh/slv/internal/core/commons"
+	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/crypto"
 	"slv.sh/slv/internal/core/environments"
 )
@@ -13,12 +15,20 @@ import (
 type bind func(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error)
 type unbind func(ref map[string][]byte) (secretKeyBytes []byte, err error)
 
+const (
+	envSecretBindingAbbrev = "ESB"
+)
+
 var (
 	providerMap         = make(map[string]*provider)
 	providerInitializer sync.Once
+
+	errInvalidEnvSecretBindingFormat = errors.New("invalid environment secret binding format")
+	errEnvSecretBindingUnspecified   = errors.New("environment secret binding unspecified")
 )
 
 type provider struct {
+	id          string
 	name        string
 	bind        bind
 	unbind      unbind
@@ -36,12 +46,12 @@ func (esb *envSecretBinding) string() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s_%s_%s", slvPrefix, envSecretBindingAbbrev, data), nil
+	return fmt.Sprintf("%s_%s_%s", config.AppNameUpperCase, envSecretBindingAbbrev, data), nil
 }
 
 func envSecretBindingFromString(envSecretBindingStr string) (*envSecretBinding, error) {
 	sliced := strings.Split(envSecretBindingStr, "_")
-	if len(sliced) != 3 || sliced[0] != slvPrefix || sliced[1] != envSecretBindingAbbrev {
+	if len(sliced) != 3 || sliced[0] != config.AppNameUpperCase || sliced[1] != envSecretBindingAbbrev {
 		return nil, errInvalidEnvSecretBindingFormat
 	}
 	binding := new(envSecretBinding)
@@ -51,47 +61,59 @@ func envSecretBindingFromString(envSecretBindingStr string) (*envSecretBinding, 
 	return binding, nil
 }
 
-func Register(name string, bind bind, unbind unbind, refRequired bool) {
-	providerMap[name] = &provider{
+func Register(id, name string, bind bind, unbind unbind, refRequired bool, args []arg) {
+	providerMap[id] = &provider{
+		id:          id,
 		name:        name,
 		bind:        bind,
 		unbind:      unbind,
 		refRequired: refRequired,
+		args:        args,
 	}
 }
 
 func registerDefaultProviders() {
 	providerInitializer.Do(func() {
-		Register(passwordProviderName, bindWithPassword, unBindWithPassword, true)
-		Register(awsProviderName, bindWithAWSKMS, unBindFromAWSKMS, true)
-		Register(gcpProviderName, bindWithGCP, unBindWithGCP, true)
+		Register(passwordProviderId, passwordProviderName, bindWithPassword, unBindWithPassword, true, nil)
+		Register(awsProviderId, awsProviderName, bindWithAWSKMS, unBindFromAWSKMS, true, awsArgs)
+		Register(gcpProviderId, gcpProviderName, bindWithGCP, unBindWithGCP, true, gcpArgs)
+		Register(azureProviderId, azureProviderName, bindWithAzure, unBindFromAzure, true, azureArgs)
 	})
 }
 
-func ListNames() []string {
+func ListIds() []string {
 	registerDefaultProviders()
-	providerNames := make([]string, 0, len(providerMap))
-	for name := range providerMap {
-		providerNames = append(providerNames, name)
+	providerIds := make([]string, 0, len(providerMap))
+	for providerId := range providerMap {
+		providerIds = append(providerIds, providerId)
 	}
-	return providerNames
+	return providerIds
 }
 
-func GetArgs(providerName string) []arg {
-	if provider, ok := providerMap[providerName]; ok {
+func GetName(providerId string) string {
+	registerDefaultProviders()
+	if provider, ok := providerMap[providerId]; ok {
+		return provider.name
+	}
+	return ""
+}
+
+func GetArgs(providerId string) []arg {
+	registerDefaultProviders()
+	if provider, ok := providerMap[providerId]; ok {
 		return provider.args
 	}
 	return nil
 }
 
-func NewEnv(providerName, envName string, envType environments.EnvType,
+func NewEnv(providerId, envName string, envType environments.EnvType,
 	inputs map[string][]byte, quantumSafe bool) (*environments.Environment, error) {
 	registerDefaultProviders()
-	provider, ok := providerMap[providerName]
+	provider, ok := providerMap[providerId]
 	if !ok {
-		return nil, errProviderUnknown
+		return nil, fmt.Errorf("unknown environment provider: %s", providerId)
 	}
-	env, sk, err := environments.NewEnvironment(envName, envType, quantumSafe)
+	env, sk, err := environments.New(envName, envType, quantumSafe)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +127,7 @@ func NewEnv(providerName, envName string, envType environments.EnvType,
 	}
 	if provider.refRequired {
 		esb := &envSecretBinding{
-			Provider: providerName,
+			Provider: providerId,
 			Ref:      ref,
 		}
 		if env.SecretBinding, err = esb.string(); err != nil {
@@ -141,7 +163,7 @@ func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypt
 		return nil, errEnvSecretBindingUnspecified
 	} else if esb, err = envSecretBindingFromString(envSecretBindingStr); err == nil {
 		if provider, ok := providerMap[esb.Provider]; !ok {
-			return nil, errProviderUnknown
+			return nil, fmt.Errorf("unknown environment provider: %s", esb.Provider)
 		} else if secretKeyBytes, err = (provider.unbind)(esb.Ref); err == nil {
 			return getSecretKeyFromBytesForBinding(secretKeyBytes)
 		}
@@ -152,7 +174,6 @@ func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypt
 type arg struct {
 	name        string
 	required    bool
-	sensitive   bool
 	description string
 }
 
@@ -162,10 +183,6 @@ func (a *arg) Name() string {
 
 func (a *arg) Required() bool {
 	return a.required
-}
-
-func (a *arg) Sensitive() bool {
-	return a.sensitive
 }
 
 func (a *arg) Description() string {
