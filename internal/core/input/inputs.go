@@ -78,9 +78,6 @@ func GetConfirmation(prompt, allowFor string) (bool, error) {
 	return strings.EqualFold(input, allowFor), err
 }
 
-func IsInteractive() error {
-	if !term.IsTerminal(int(syscall.Stdin)) {
-		return errNonInteractiveTerminal
-	}
-	return nil
+func IsInteractive() bool {
+	return term.IsTerminal(int(syscall.Stdin))
 }

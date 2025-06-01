@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	passwordProviderId   = "password"
+	PasswordProviderId   = "password"
 	passwordProviderName = "Password"
 )
 
@@ -44,14 +44,14 @@ func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error
 	}
 	var password []byte
 	setPasswordToKeystore := false
-	if input.IsInteractive() == nil {
-		if password, err = keystore.Get(sealedSecretKeyBytes, false); err == keystore.ErrNotFound {
-			setPasswordToKeystore = true
+	if input.IsInteractive() {
+		if password, err = keystore.Get(sealedSecretKeyBytes, false); err != nil {
+			if err == keystore.ErrNotFound {
+				setPasswordToKeystore = true
+			}
 			if password, err = input.GetHiddenInput("Enter Password: "); err != nil {
 				return nil, err
 			}
-		} else if err != nil {
-			return nil, fmt.Errorf("failed to get password from keystore: %w", err)
 		}
 	}
 	if password == nil {

@@ -74,10 +74,10 @@ func runVaultCommand(shell bool, vaultFile, prefix, command string, args ...stri
 		fullCommand += " " + strings.Join(args, " ")
 	}
 	if shell {
-		fmt.Printf("Initializing %s session with secrets loaded into environment variables from the vault %s...\n",
+		fmt.Printf("Initialized %s session with secrets loaded as environment variables from the vault %s.\n",
 			config.AppNameUpperCase, color.CyanString(vaultFile))
 	} else {
-		fmt.Printf("Running command [%s] with secrets loaded into environment variables from the vault %s...\n",
+		fmt.Printf("Running command [%s] with secrets loaded as environment variables from the vault %s.\n",
 			color.CyanString(fullCommand), color.CyanString(vaultFile))
 	}
 	if prefix != "" {

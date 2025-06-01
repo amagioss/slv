@@ -45,7 +45,7 @@ func envNewServiceCommand() *cobra.Command {
 		envNewServiceCmd.MarkPersistentFlagRequired(envNameFlag.Name)
 		envNewServiceCmd.AddCommand(envNewDirectServiceCommand())
 		for _, envProviderId := range envproviders.ListIds() {
-			if envProviderId != "password" {
+			if envProviderId != envproviders.PasswordProviderId {
 				envNewServiceCmd.AddCommand(getEnvProviderCommand(envProviderId))
 			}
 		}
@@ -148,7 +148,7 @@ func envNewUserCommand() *cobra.Command {
 				inputs["password"] = password
 				var env *environments.Environment
 				pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
-				env, err = envproviders.NewEnv("password", envName, environments.USER, inputs, pq)
+				env, err = envproviders.NewEnv(envproviders.PasswordProviderId, envName, environments.USER, inputs, pq)
 				if err != nil {
 					utils.ExitOnError(err)
 				}

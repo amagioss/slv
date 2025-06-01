@@ -74,7 +74,7 @@ func Register(id, name string, bind bind, unbind unbind, refRequired bool, args 
 
 func registerDefaultProviders() {
 	providerInitializer.Do(func() {
-		Register(passwordProviderId, passwordProviderName, bindWithPassword, unBindWithPassword, true, nil)
+		Register(PasswordProviderId, passwordProviderName, bindWithPassword, unBindWithPassword, true, nil)
 		Register(awsProviderId, awsProviderName, bindWithAWSKMS, unBindFromAWSKMS, true, awsArgs)
 		Register(gcpProviderId, gcpProviderName, bindWithGCP, unBindWithGCP, true, gcpArgs)
 		Register(azureProviderId, azureProviderName, bindWithAzure, unBindFromAzure, true, azureArgs)

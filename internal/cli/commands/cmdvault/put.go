@@ -57,7 +57,7 @@ func vaultPutCommand() *cobra.Command {
 					if err = vault.Put(itemName, secret, !plaintextValue); err != nil {
 						utils.ExitOnError(err)
 					}
-					fmt.Println("Updated secret: ", color.GreenString(itemName), " to vault: ", color.GreenString(vaultFile))
+					fmt.Printf("Successfully added/updated secret %s into the vault %s\n", color.GreenString(itemName), color.GreenString(vaultFile))
 				}
 				if importFile != "" || itemName == "" {
 					var importData []byte

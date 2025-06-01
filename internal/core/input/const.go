@@ -1,10 +1,10 @@
 package input
 
-import "fmt"
+import "sync"
 
 var (
-	errNonInteractiveTerminal = fmt.Errorf("non-interactive terminal")
-	defaultPwdPolicy          *PasswordPolicy
+	defaultPwdPolicyMutex sync.Mutex
+	defaultPwdPolicy      *PasswordPolicy
 )
 
 const (

@@ -17,12 +17,16 @@ type PasswordPolicy struct {
 
 func DefaultPasswordPolicy() *PasswordPolicy {
 	if defaultPwdPolicy == nil {
-		defaultPwdPolicy = &PasswordPolicy{
-			MinLength:       pwdDefaultMinLength,
-			MinUppercase:    pwdDefaultMinUppercase,
-			MinLowercase:    pwdDefaultMinLowercase,
-			MinDigits:       pwdDefaultMinDigits,
-			MinSpecialChars: pwdDefaultMinSpecialChars,
+		defaultPwdPolicyMutex.Lock()
+		defer defaultPwdPolicyMutex.Unlock()
+		if defaultPwdPolicy == nil {
+			defaultPwdPolicy = &PasswordPolicy{
+				MinLength:       pwdDefaultMinLength,
+				MinUppercase:    pwdDefaultMinUppercase,
+				MinLowercase:    pwdDefaultMinLowercase,
+				MinDigits:       pwdDefaultMinDigits,
+				MinSpecialChars: pwdDefaultMinSpecialChars,
+			}
 		}
 	}
 	return defaultPwdPolicy
