@@ -13,8 +13,8 @@ require (
 	github.com/go-logr/logr v1.4.3
 	github.com/jedib0t/go-pretty/v6 v6.6.7
 	github.com/onsi/ginkgo/v2 v2.23.4
-	github.com/onsi/gomega v1.36.3
-	github.com/open-policy-agent/cert-controller v0.12.0
+	github.com/onsi/gomega v1.37.0
+	github.com/open-policy-agent/cert-controller v0.13.0
 	github.com/spf13/cobra v1.9.1
 	github.com/zalando/go-keyring v0.2.6
 	golang.org/x/crypto v0.38.0
@@ -23,7 +23,7 @@ require (
 	k8s.io/api v0.33.1
 	k8s.io/apimachinery v0.33.1
 	k8s.io/client-go v0.33.1
-	sigs.k8s.io/controller-runtime v0.20.4
+	sigs.k8s.io/controller-runtime v0.21.0
 	xipher.org/xipher v1.17.1
 )
 
@@ -39,6 +39,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/security/keyvault/internal v1.1.1 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.4.2 // indirect
+	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/danieljoos/wincred v1.2.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
@@ -97,7 +98,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/gnostic-models v0.6.9 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20250501235452-c0086092b71a // indirect
+	github.com/google/pprof v0.0.0-20250602020802-c6617b811d0e // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect

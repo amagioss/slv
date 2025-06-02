@@ -32,7 +32,7 @@ var (
 
 	errInvalidVaultFileName         = errors.New("invalid vault file name [vault file name must end with ." + vaultFileNameRawExt + ".yaml or ." + vaultFileNameRawExt + ".yml]")
 	errVaultDirPathCreation         = errors.New("error in creating a new vault directory path")
-	errVaultNotAccessible           = errors.New("vault is not accessible using the given environment key")
+	errVaultNotAccessible           = errors.New("vault is not accessible by the environment")
 	errVaultLocked                  = errors.New("the vault is currently locked")
 	errVaultExists                  = errors.New("vault exists already")
 	errVaultNotFound                = errors.New("vault not found")
