@@ -105,8 +105,8 @@ func (vlt *Vault) GetAllValues() (map[string][]byte, error) {
 }
 
 func (vlt *Vault) Get(name string) (*VaultItem, error) {
-	rawValue := vlt.Spec.Data[name]
-	if rawValue == "" {
+	rawValue, ok := vlt.Spec.Data[name]
+	if !ok {
 		return nil, errVaultItemNotFound
 	}
 	item := vlt.getFromCache(name)

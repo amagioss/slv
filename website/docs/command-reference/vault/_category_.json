@@ -1,0 +1,9 @@
+{
+    "label": "Vault",
+    "position": 2,
+    "link": {
+      "type": "generated-index",
+      "description": " The vault command always works within the context of a vault file. Therefore, the `--vault` flag will have to be set for all commands. The vault file must end with either `.slv.yaml` or `slv.yml`."
+    }
+}
+  

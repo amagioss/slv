@@ -1,16 +1,8 @@
 ---
-sidebar_position: 4
+sidebar_position: 1
 ---
 
-# System
-Documentation for the `slv system` command.
-
-Aliases: `system`,`systems`
-
-#### Commands Available: 
-- [`reset`](#reset-slv)
-
-## Reset SLV 
+# Reset SLV 
 Wipe clean of all profile configurations and delete environments in your local SLV installation. This does not touch remote profile configurations.
 
 #### General Usage:

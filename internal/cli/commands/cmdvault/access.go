@@ -63,7 +63,7 @@ func vaultAccessAddCommand() *cobra.Command {
 							}
 						}
 						if err == nil {
-							fmt.Println("Shared vault:", color.GreenString(vaultFile))
+							fmt.Println("Added vault access:", color.GreenString(vaultFile))
 							utils.SafeExit()
 						}
 					}
@@ -97,7 +97,7 @@ func vaultAccessRemoveCommand() *cobra.Command {
 					if err == nil {
 						pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
 						if err = vault.Revoke(publicKeys, pq); err == nil {
-							fmt.Println("Shared vault:", color.GreenString(vaultFile))
+							fmt.Println("Revoked vault access:", color.GreenString(vaultFile))
 							utils.SafeExit()
 						}
 					}
