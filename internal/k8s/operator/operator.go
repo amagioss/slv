@@ -64,8 +64,6 @@ var (
 	secretName     = getEnvOrDefault("SLV_WEBHOOK_SECRET_NAME", "slv-webhook-server-cert")
 	caName         = getEnvOrDefault("SLV_WEBHOOK_CA_NAME", "slv-webhook-ca")
 	caOrganization = getEnvOrDefault("SLV_WEBHOOK_CA_ORG", "slv")
-	certName       = getEnvOrDefault("SLV_WEBHOOK_CERT_NAME", "tls.crt")
-	keyName        = getEnvOrDefault("SLV_WEBHOOK_KEY_NAME", "tls.key")
 	certDir        = getEnvOrDefault("SLV_WEBHOOK_CERT_DIR", "/tmp/k8s-webhook-server/serving-certs")
 
 	// Certificate rotation durations
@@ -151,7 +149,7 @@ func Run() {
 	setupLog.Info(config.VersionInfo())
 
 	if _, err := utils.SecretKey(); err != nil {
-		setupLog.Error(err, "unable to initialize SLV Environment Secret Key")
+		setupLog.Error(err, "unable to initialize slv environment")
 		os.Exit(1)
 	}
 

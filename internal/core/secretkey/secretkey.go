@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	secretKey                    *crypto.SecretKey
-	errEnvironmentAccessNotFound = errors.New("environment doesn't have access. please set the required environment variables")
+	secretKey          *crypto.SecretKey
+	ErrEnvSecretNotSet = errors.New("environment secret key or secret binding not set")
 )
 
 func Get() (*crypto.SecretKey, error) {
@@ -20,20 +20,13 @@ func Get() (*crypto.SecretKey, error) {
 	}
 	var err error
 	// Read direct secret key from environment variable
-	secretKeyStr := config.GetEnvSecretKey()
-	if secretKeyStr != "" {
-		secretKey, err = crypto.SecretKeyFromString(secretKeyStr)
-		if err != nil {
-			return nil, err
-		} else {
-			return secretKey, nil
-		}
+	if secretKeyStr := config.GetEnvSecretKey(); secretKeyStr != "" {
+		return crypto.SecretKeyFromString(secretKeyStr)
 	}
 	// Read secret key from secret binding
 	envSecretBindingStr := config.GetEnvSecretBinding()
 	if envSecretBindingStr == "" {
-		selfEnv := environments.GetSelf()
-		if selfEnv != nil {
+		if selfEnv := environments.GetSelf(); selfEnv != nil {
 			envSecretBindingStr = selfEnv.SecretBinding
 		}
 	}
@@ -41,7 +34,7 @@ func Get() (*crypto.SecretKey, error) {
 		secretKey, err = envproviders.GetSecretKeyFromSecretBinding(envSecretBindingStr)
 	}
 	if secretKey == nil && err == nil {
-		err = errEnvironmentAccessNotFound
+		err = ErrEnvSecretNotSet
 	}
 	return secretKey, err
 }

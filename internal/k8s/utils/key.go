@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"slv.sh/slv/internal/core/crypto"
@@ -10,35 +11,40 @@ import (
 )
 
 var (
-	sKey            *crypto.SecretKey
-	sKeyInitialized bool
+	sKey    *crypto.SecretKey
+	skMutex sync.Mutex
 )
 
-func SecretKey() (secretKey *crypto.SecretKey, err error) {
-	if sKey == nil && !sKeyInitialized {
-		sKeyInitialized = true
-		sk, _ := secretkey.Get()
-		if clientset, _ := getKubeClientSet(); clientset != nil {
-			if sk == nil {
-				sk, err = GetSecretKeyFor(clientset, GetCurrentNamespace())
+func SecretKey() (sk *crypto.SecretKey, err error) {
+	if sKey == nil {
+		skMutex.Lock()
+		defer skMutex.Unlock()
+		if sKey == nil {
+			if sk, err = secretkey.Get(); err != nil && err != secretkey.ErrEnvSecretNotSet {
+				return nil, err
 			}
-			if err == nil && sk != nil {
-				sKey = sk
-				var pkEC, pkPQ *crypto.PublicKey
-				if pkEC, err = sk.PublicKey(false); err == nil {
-					if pkPQ, err = sk.PublicKey(true); err == nil {
-						var publicKeyEC, publicKeyPQ string
-						if publicKeyEC, err = pkEC.String(); err == nil {
-							if publicKeyPQ, err = pkPQ.String(); err == nil {
-								err = putPublicKeyToConfigMap(clientset, publicKeyEC, publicKeyPQ)
+			if clientset, _ := getKubeClientSet(); clientset != nil {
+				if sk == nil {
+					sk, err = GetSecretKeyFor(clientset, GetCurrentNamespace())
+				}
+				if err == nil && sk != nil {
+					sKey = sk
+					var pkEC, pkPQ *crypto.PublicKey
+					if pkEC, err = sk.PublicKey(false); err == nil {
+						if pkPQ, err = sk.PublicKey(true); err == nil {
+							var publicKeyEC, publicKeyPQ string
+							if publicKeyEC, err = pkEC.String(); err == nil {
+								if publicKeyPQ, err = pkPQ.String(); err == nil {
+									err = putPublicKeyToConfigMap(clientset, publicKeyEC, publicKeyPQ)
+								}
 							}
 						}
 					}
 				}
 			}
-		}
-		if err != nil {
-			sKey = nil
+			if err != nil {
+				sKey = nil
+			}
 		}
 	}
 	return sKey, err
