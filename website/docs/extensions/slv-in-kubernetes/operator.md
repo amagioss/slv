@@ -63,11 +63,11 @@ helm upgrade --install slv slv/slv-operator --namespace slv --create-namespace
 | `secretBinding` | Secret binding string used for the environment. Either this or `k8sSecret` must be specified. | `""` |
 | `k8sSecret` | Name of the Kubernetes Secret that contains either the `SecretKey` or `SecretBinding` under keys `SecretKey` or `SecretBinding` respectively. Must be in the release namespace. | `""` |
 | `image` | Full image URL including tag. Must match the Helm chart version. | `"ghcr.io/amagioss/slv:<CHART_VERSION>"` |
-| `imagePullPolicy` | Image pull policy. | `"IfNotPresent"` |
 | `resource` | CPU and memory resource limits/requests for the operator pods. Use standard `limits` and `requests` structure. | Refer Helm |
 | `labels` | Additional labels to add to the Deployment | `{}` |
 | `podLabels` | Additional labels to add to individual SLV pods. | `{}` |
-| `serviceAccountName` | If provided, SLV will not install cluster roles or bindings. Ensure this SA has correct permissions. | `""` |
+| `serviceAccount.labels` | Labels to be added to the ServiceAccount. | `{}` |
+| `serviceAccount.annotations` | Annotations to be added to the ServiceAccount. | `{}` |
 | `volumes` | Additional volumes to mount in the SLV pods. | `[]` |
 | `volumeMounts` | Volume mounts for the volumes specified above. | `[]` |
 | `replicas` | Number of SLV operator replicas. | `1` |

@@ -15,8 +15,6 @@ k8sSecret: ""
 # You must ensure that the tag that you use is the same as Chart.Version
 # Otherwise, helm will throw an error.
 image: ""
-# The image pull policy.
-imagePullPolicy: ""
 
 # Setting resource constraints for the operator.
 resource:
@@ -33,11 +31,20 @@ labels: {}
 # The pod Labels to be set for SLV pods.
 podLabels: {}
 
-# The name with which the serviceAccount to be attached to the SLV pods. 
-# If you set this value, the helm chart will not set up cluster roles or cluster role bindings. 
-# You will have to make sure that the service account attached has necessary permissions for SLV to run smoothly. 
-# Understand the consequenses of filling this value carefully.
-serviceAccountName: ""
+# Configuration for the ServiceAccount labels and annotations
+serviceAccount:
+  # Labels to be added to the ServiceAccount
+  # Example:
+  # labels:
+  #   app.kubernetes.io/name: slv
+  #   app.kubernetes.io/instance: slv
+  labels: {}
+
+  # Annotations to be added to the ServiceAccount
+  # Example:
+  # annotations:
+  #   eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/slv-role
+  annotations: {}
 
 # The volumes to be used inside the SLV pods. 
 # You may need this when you are using cert-manager to inject CA certs into the SLV pods.

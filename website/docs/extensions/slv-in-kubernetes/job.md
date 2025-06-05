@@ -45,11 +45,11 @@ helm upgrade --install slv slv/slv-job --set jobName=my-job-$(date +%s)
 | `secretBinding` | Secret binding string for the environment. | None |
 | `k8sSecret` | Name of the Kubernetes Secret containing the `SecretKey` or `SecretBinding`. | `slv` |
 | `image` | Full image URL including tag. Tag must match the chart version. | `ghcr.io/amagioss/slv:<CHART_VERSION>` |
-| `imagePullPolicy` | Image pull policy. | `IfNotPresent` |
 | `resource` | CPU and memory resource limits. | `250m` CPU, `250Mi` Memory |
 | `labels` | Additional labels for the deployment. | None |
 | `podLabels` | Additional labels for the pods. | None |
-| `serviceAccountName` | Custom service account for SLV job. | None |
+| `serviceAccount.labels` | Labels to be added to the ServiceAccount. | `{}` |
+| `serviceAccount.annotations` | Annotations to be added to the ServiceAccount. | `{}` |
 | `backoffLimit` | Number of retries if the job fails. | `4` |
 | `ttlSecondsAfterFinished` | Time to retain job resource after completion (seconds). | `3600` |
 | `schedule` | Cron expression to run as a CronJob. | None |

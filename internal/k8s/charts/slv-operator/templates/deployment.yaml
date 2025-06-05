@@ -21,7 +21,7 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ .Values.serviceAccountName | default "slv-serviceaccount" }}
+      serviceAccountName: slv-serviceaccount
       volumes:
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
@@ -37,7 +37,6 @@ spec:
       {{- end }}
         - name: slv
           image: {{ .Values.image | default (printf "ghcr.io/amagioss/slv:%s" .Chart.AppVersion) }}
-          imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
           resources:
             {{- if .Values.webhook.disableAutomaticCertManagement | default false }}
             limits:

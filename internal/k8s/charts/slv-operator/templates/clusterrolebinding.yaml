@@ -9,7 +9,7 @@ metadata:
   name: slv-webhook-rolebinding
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.serviceAccountName | default "slv-serviceaccount" }}
+  name: slv-serviceaccount
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole

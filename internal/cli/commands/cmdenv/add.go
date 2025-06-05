@@ -49,7 +49,7 @@ func envAddCommand() *cobra.Command {
 				utils.SafeExit()
 			},
 		}
-		envAddCmd.Flags().StringSliceP(envDefFlag.Name, envDefFlag.Shorthand, []string{}, envDefFlag.Usage)
+		envAddCmd.Flags().StringP(envDefFlag.Name, envDefFlag.Shorthand, "", envDefFlag.Usage)
 		envAddCmd.Flags().Bool(envSetRootFlag.Name, false, envSetRootFlag.Usage)
 		envAddCmd.MarkFlagRequired(envDefFlag.Name)
 	}

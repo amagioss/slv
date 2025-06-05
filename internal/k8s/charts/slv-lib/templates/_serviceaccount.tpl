@@ -1,10 +1,16 @@
 {{- define "slvlib.serviceaccount" -}}
-{{- if eq .Values.serviceAccountName "" -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: slv-serviceaccount
   namespace: {{ .Release.Namespace }}
+  {{- with .Values.serviceAccount.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 automountServiceAccountToken: true
-{{- end -}}
 {{- end -}}

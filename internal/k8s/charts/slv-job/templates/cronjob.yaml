@@ -30,7 +30,6 @@ spec:
             {{- fail (printf "The image tag must be set to the Chart.Version '%s'" .Chart.Version) -}}
             {{- end }}
             image: {{ .Values.image | default (printf "ghcr.io/amagioss/slv:%s" .Chart.AppVersion) }}
-            imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
             resources:
               {{- toYaml .Values.resource | nindent 14 }}
             env:
@@ -45,6 +44,6 @@ spec:
               - name: SLV_MODE
                 value: "k8s_job"
           restartPolicy: Never
-          serviceAccountName: {{ .Values.serviceAccountName | default "slv-serviceaccount" }}
+          serviceAccountName: slv-serviceaccount
       backoffLimit: {{ .Values.backoffLimit | default 4 }}
 {{- end}}
