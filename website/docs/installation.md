@@ -29,11 +29,11 @@ irm https://slv.sh/scripts/install.ps1 | iex
 You can use the same install script to install specific versions of SLV 
 ### MacOS/Linux
 ```bash
-curl -fsSL https://slv.sh/scripts/install.sh | sh -s v0.1.7
+curl -fsSL https://slv.sh/scripts/install.sh | sh -s v0.16.3
 ```
 ### Windows (Powershell)
 ```powershell
-$v="0.1.7"; irm https://slv.sh/scripts/install.ps1 | iex
+$v="v0.16.3"; irm https://slv.sh/scripts/install.ps1 | iex
 ```
 
 ---

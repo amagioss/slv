@@ -25,7 +25,7 @@ steps:
 - name: Setup SLV
   uses: amagioss/slv@v<MAJOR_VERSION>
   with:
-    version: 0.9.2
+    version: 0.16.3
 ```
 
 ### Load SLV Secrets Into Environment Variables

@@ -39,7 +39,7 @@ apiVersion: slv.sh/v1
 kind: SLV
 metadata:
     annotations:
-        slv.sh/version: v0.9.0
+        slv.sh/version: v0.16.3
     creationTimestamp: "2025-04-25T07:54:38Z"
     name: test
 spec:
@@ -78,7 +78,7 @@ apiVersion: slv.sh/v1
 kind: SLV
 metadata:
     annotations:
-        slv.sh/version: v0.9.0
+        slv.sh/version: v0.16.3
     creationTimestamp: "2025-04-25T07:54:38Z"
     name: test
 spec:

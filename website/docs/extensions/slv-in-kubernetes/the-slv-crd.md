@@ -32,8 +32,6 @@ spec:
 
 The structure mirrors the local file-based vault, ensuring consistency between local and Kubernetes deployments.
 
-Starting with version `0.9.0`, SLV maintains a **unified vault structure** across all environments. Older vault formats remain compatible and are automatically migrated upon updates.
-
 ---
 
 ## Reconciling Secrets from the Vault
