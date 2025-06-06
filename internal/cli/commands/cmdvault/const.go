@@ -76,9 +76,9 @@ var (
 		Usage: "Value of the item to be used (Use - to read from stdin)",
 	}
 
-	itemValueFlagDeprecated = utils.FlagDef{
+	deprecatedSecretFlag = utils.FlagDef{
 		Name:  "secret",
-		Usage: "Secret to be added to the vault (Deprecated: Use --value instead)",
+		Usage: "Secret to be added to the vault",
 	}
 
 	vaultImportFileFlag = utils.FlagDef{

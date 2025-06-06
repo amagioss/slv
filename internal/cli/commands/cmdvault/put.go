@@ -22,7 +22,7 @@ func vaultPutCommand() *cobra.Command {
 				itemName := cmd.Flag(itemNameFlag.Name).Value.String()
 				itemValue := cmd.Flag(itemValueFlag.Name).Value.String()
 				if itemValue == "" {
-					itemValue = cmd.Flag(itemValueFlagDeprecated.Name).Value.String()
+					itemValue = cmd.Flag(deprecatedSecretFlag.Name).Value.String()
 				}
 				importFile := cmd.Flag(vaultImportFileFlag.Name).Value.String()
 				plaintextValue, _ := cmd.Flags().GetBool(plaintextValueFlag.Name)
@@ -82,7 +82,8 @@ func vaultPutCommand() *cobra.Command {
 			utils.ExitOnError(err)
 		}
 		vaultPutCmd.Flags().StringP(itemValueFlag.Name, itemValueFlag.Shorthand, "", itemValueFlag.Usage)
-		vaultPutCmd.Flags().StringP(itemValueFlagDeprecated.Name, itemValueFlagDeprecated.Shorthand, "", itemValueFlagDeprecated.Usage)
+		vaultPutCmd.Flags().StringP(deprecatedSecretFlag.Name, deprecatedSecretFlag.Shorthand, "", deprecatedSecretFlag.Usage)
+		vaultPutCmd.Flags().MarkDeprecated(deprecatedSecretFlag.Name, "use --"+itemValueFlag.Name+" instead")
 		vaultPutCmd.Flags().StringP(vaultImportFileFlag.Name, vaultImportFileFlag.Shorthand, "", vaultImportFileFlag.Usage)
 		vaultPutCmd.Flags().Bool(plaintextValueFlag.Name, false, plaintextValueFlag.Usage)
 		vaultPutCmd.Flags().Bool(secretForceUpdateFlag.Name, false, secretForceUpdateFlag.Usage)
