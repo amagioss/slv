@@ -8,7 +8,7 @@ import (
 	"slv.sh/slv/internal/cli/commands/cmdenv"
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/crypto"
-	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
 )
 
@@ -43,7 +43,7 @@ func vaultAccessAddCommand() *cobra.Command {
 			Aliases: []string{"allow", "add", "share"},
 			Short:   "Grants read access to a vault for the given environments/public keys",
 			Run: func(cmd *cobra.Command, args []string) {
-				envSecretKey, err := secretkey.Get()
+				envSecretKey, err := session.GetSecretKey()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
@@ -91,7 +91,7 @@ func vaultAccessRemoveCommand() *cobra.Command {
 				vault, err := vaults.Get(vaultFile)
 				if err == nil {
 					var envSecretKey *crypto.SecretKey
-					if envSecretKey, err = secretkey.Get(); err == nil {
+					if envSecretKey, err = session.GetSecretKey(); err == nil {
 						err = vault.Unlock(envSecretKey)
 					}
 					if err == nil {

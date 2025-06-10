@@ -2,10 +2,7 @@ package cmdvault
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -13,7 +10,7 @@ import (
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/profiles"
-	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
 )
 
@@ -134,7 +131,7 @@ func VaultCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				envSecretKey, _ := secretkey.Get()
+				envSecretKey, _ := session.GetSecretKey()
 				if envSecretKey != nil {
 					vault.Unlock(envSecretKey)
 				}
@@ -160,30 +157,11 @@ func VaultCommand() *cobra.Command {
 }
 
 func vaultFilePathCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	var vaultFiles []string
-	wd, err := os.Getwd()
-	if err != nil {
+	if vaultFiles, err := vaults.ListVaultFiles(); err != nil {
 		return nil, cobra.ShellCompDirectiveError
+	} else {
+		return vaultFiles, cobra.ShellCompDirectiveDefault
 	}
-	err = filepath.WalkDir(wd, func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() {
-			return nil
-		}
-		if strings.HasSuffix(d.Name(), "."+vaultFileNameExt) ||
-			strings.HasSuffix(d.Name(), vaultFileNameExt+".yaml") ||
-			strings.HasSuffix(d.Name(), vaultFileNameExt+".yml") {
-			if relPath, err := filepath.Rel(wd, path); err == nil {
-				vaultFiles = append(vaultFiles, relPath)
-			} else {
-				vaultFiles = append(vaultFiles, path)
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveError
-	}
-	return vaultFiles, cobra.ShellCompDirectiveDefault
 }
 
 func vaultItemNameCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

@@ -123,6 +123,26 @@ func (vlt *Vault) ListAccessors() ([]crypto.PublicKey, error) {
 	return accessors, nil
 }
 
+func (vlt *Vault) IsAccessibleBy(secretKey *crypto.SecretKey) bool {
+	pubKeyEC, err := secretKey.PublicKey(false)
+	if err != nil {
+		return false
+	}
+	pubKeyPQ, err := secretKey.PublicKey(true)
+	if err != nil {
+		return false
+	}
+	for _, wrappedKeyStr := range vlt.Spec.Config.WrappedKeys {
+		wrappedKey := &crypto.WrappedKey{}
+		if err := wrappedKey.FromString(wrappedKeyStr); err == nil {
+			if wrappedKey.IsEncryptedBy(pubKeyEC) || wrappedKey.IsEncryptedBy(pubKeyPQ) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (vlt *Vault) Unlock(secretKey *crypto.SecretKey) error {
 	if !vlt.IsLocked() {
 		return nil

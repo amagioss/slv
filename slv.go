@@ -1,12 +1,12 @@
 package slv
 
 import (
-	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
 )
 
 func unlockVault(vaultFile string) (*vaults.Vault, error) {
-	secretKey, err := secretkey.Get()
+	secretKey, err := session.GetSecretKey()
 	if err != nil {
 		return nil, err
 	}

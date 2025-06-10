@@ -57,7 +57,7 @@ func (pc *profileConfig) write() error {
 			pc.Config[arg.Name()] = base64.StdEncoding.EncodeToString(ct)
 		}
 	}
-	err = commons.WriteToYAML(pc.file, "", pc)
+	err = commons.WriteToYAML(pc.file, pc)
 	for k, v := range ptMap {
 		pc.Config[k] = v
 	}

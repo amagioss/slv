@@ -6,7 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
-	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
 )
 
@@ -16,7 +16,7 @@ func vaultDerefCommand() *cobra.Command {
 			Use:   "deref",
 			Short: "Dereferences and updates values from a vault to a given file with vault references",
 			Run: func(cmd *cobra.Command, args []string) {
-				envSecretKey, err := secretkey.Get()
+				envSecretKey, err := session.GetSecretKey()
 				if err != nil {
 					utils.ExitOnError(err)
 				}

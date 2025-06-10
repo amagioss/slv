@@ -19,7 +19,7 @@ type profileManagerConfig struct {
 }
 
 func (pmc *profileManagerConfig) write() error {
-	return commons.WriteToYAML(pmc.file, "", pmc)
+	return commons.WriteToYAML(pmc.file, pmc)
 }
 
 func (pmc *profileManagerConfig) getActiveProfile() (*Profile, error) {
@@ -51,7 +51,7 @@ func (pm *profileManager) getConfig() (*profileManagerConfig, error) {
 				return nil, fmt.Errorf("error reading profile manager config file: %w", err)
 			}
 		} else {
-			if err := commons.WriteToYAML(pmcFile, "", pmc); err != nil {
+			if err := commons.WriteToYAML(pmcFile, pmc); err != nil {
 				return nil, fmt.Errorf("error creating profile manager config file: %w", err)
 			}
 		}

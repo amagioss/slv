@@ -23,7 +23,7 @@ type Environment struct {
 }
 
 func (eType *EnvType) isValid() bool {
-	return *eType == SERVICE || *eType == USER || *eType == ROOT
+	return *eType == SERVICE || *eType == USER
 }
 
 func newEnvironmentForPublicKey(name string, envType EnvType, publicKey *crypto.PublicKey) (*Environment, error) {
@@ -120,5 +120,5 @@ func (env *Environment) SetAsSelf() error {
 		return errMarkingSelfNonUserEnv
 	}
 	selfEnvFilePath := filepath.Join(config.GetAppDataDir(), selfEnvFileName)
-	return commons.WriteToYAML(selfEnvFilePath, "", env)
+	return commons.WriteToYAML(selfEnvFilePath, env)
 }

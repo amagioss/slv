@@ -12,7 +12,6 @@ const (
 	EnvironmentKey     crypto.KeyType = 'E'
 	USER               EnvType        = "user"
 	SERVICE            EnvType        = "service"
-	ROOT               EnvType        = "root"
 	slvPrefix                         = config.AppNameUpperCase
 	selfEnvFileName                   = ".self"
 )

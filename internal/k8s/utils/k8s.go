@@ -4,14 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"slv.sh/slv/internal/core/crypto"
-	"slv.sh/slv/internal/core/environments/envproviders"
 )
 
 const (
@@ -28,50 +25,6 @@ func getKubeClientSet() (*kubernetes.Clientset, error) {
 		return nil, fmt.Errorf("failed to get kubeconfig: %w", err)
 	}
 	return kubernetes.NewForConfig(config)
-}
-
-func GetSecretKeyFor(clientset *kubernetes.Clientset, namespace string) (secretKey *crypto.SecretKey, err error) {
-	if clientset == nil {
-		if clientset, err = getKubeClientSet(); err != nil {
-			return nil, fmt.Errorf("failed to get k8s clientset: %w", err)
-		}
-	}
-	secret, err := clientset.CoreV1().Secrets(namespace).Get(context.Background(), slvK8sEnvSecret, metav1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
-	if secretKey, err = ExtractSecretKeyFromSecret(secret); secretKey != nil {
-		return secretKey, err
-	}
-	if configMap, err := clientset.CoreV1().ConfigMaps(namespace).Get(context.Background(), slvK8sEnvSecret, metav1.GetOptions{}); err == nil {
-		if secretKey, err = ExtractSecretKeyFromConfigMapBinding(configMap); secretKey != nil {
-			return secretKey, err
-		}
-	}
-	return nil, fmt.Errorf("secret key not found")
-}
-
-func ExtractSecretKeyFromSecret(slvSecret *corev1.Secret) (*crypto.SecretKey, error) {
-	for k, v := range slvSecret.Data {
-		lowerCaseKey := strings.ToLower(k)
-		if lowerCaseKey == "secretkey" || lowerCaseKey == "secret_key" {
-			return crypto.SecretKeyFromString(string(v))
-		}
-		if lowerCaseKey == "secretbinding" || lowerCaseKey == "secret_binding" {
-			return envproviders.GetSecretKeyFromSecretBinding(string(v))
-		}
-	}
-	return nil, nil
-}
-
-func ExtractSecretKeyFromConfigMapBinding(configMap *corev1.ConfigMap) (*crypto.SecretKey, error) {
-	for k, v := range configMap.Data {
-		lowerCaseKey := strings.ToLower(k)
-		if lowerCaseKey == "secretbinding" || lowerCaseKey == "secret_binding" {
-			return envproviders.GetSecretKeyFromSecretBinding(v)
-		}
-	}
-	return nil, nil
 }
 
 func putPublicKeyToConfigMap(clientset *kubernetes.Clientset, publicKeyStrEC, publicKeyStrPQ string) error {

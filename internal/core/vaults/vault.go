@@ -3,6 +3,7 @@ package vaults
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -181,9 +182,7 @@ func (vlt *Vault) commit() error {
 	if err = json.Unmarshal(jsonData, &data); err != nil {
 		return fmt.Errorf("error unmarshaling JSON: %w", err)
 	}
-	return commons.WriteToYAML(vlt.Spec.path,
-		"# Use the pattern "+vlt.getDataRef("YOUR_SECRET_NAME")+
-			" as placeholder to reference data from this vault into files.\n", data)
+	return commons.WriteToYAML(vlt.Spec.path, data)
 }
 
 func (vlt *Vault) reload() error {
@@ -217,4 +216,28 @@ func (vlt *Vault) validateAndUpdate() error {
 		return errVaultWrappedKeysNotFound
 	}
 	return nil
+}
+
+func ListVaultFiles() ([]string, error) {
+	var vaultFiles []string
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	err = filepath.WalkDir(wd, func(path string, d fs.DirEntry, err error) error {
+		if d.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(d.Name(), "."+vaultFileNameRawExt) ||
+			strings.HasSuffix(d.Name(), vaultFileNameRawExt+".yaml") ||
+			strings.HasSuffix(d.Name(), vaultFileNameRawExt+".yml") {
+			if relPath, err := filepath.Rel(wd, path); err == nil {
+				vaultFiles = append(vaultFiles, relPath)
+			} else {
+				vaultFiles = append(vaultFiles, path)
+			}
+		}
+		return nil
+	})
+	return vaultFiles, err
 }

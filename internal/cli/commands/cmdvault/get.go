@@ -10,13 +10,13 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"slv.sh/slv/internal/cli/commands/utils"
-	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
 )
 
 func unlockVault(vault *vaults.Vault) {
 	if vault.IsLocked() {
-		envSecretKey, err := secretkey.Get()
+		envSecretKey, err := session.GetSecretKey()
 		if err != nil {
 			utils.ExitOnError(err)
 		}

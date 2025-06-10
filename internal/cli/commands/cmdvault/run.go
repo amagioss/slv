@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/config"
-	"slv.sh/slv/internal/core/secretkey"
+	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
 )
 
@@ -42,7 +42,7 @@ func runVaultCommand(shell bool, vaultFile, prefix, command string, args ...stri
 	if err != nil {
 		utils.ExitOnError(err)
 	}
-	envSecretKey, err := secretkey.Get()
+	envSecretKey, err := session.GetSecretKey()
 	if err != nil {
 		utils.ExitOnError(err)
 	}

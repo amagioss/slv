@@ -35,7 +35,7 @@ func GetManifest(path string) (envManifest *EnvManifest, err error) {
 }
 
 func (envManifest *EnvManifest) write() error {
-	if commons.WriteToYAML(*envManifest.path, "", envManifest) != nil {
+	if commons.WriteToYAML(*envManifest.path, envManifest) != nil {
 		return errWritingManifest
 	}
 	return nil
