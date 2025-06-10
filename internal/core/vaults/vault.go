@@ -3,7 +3,6 @@ package vaults
 import (
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -60,7 +59,7 @@ func isValidVaultFileName(fileName string) bool {
 }
 
 // Returns new vault instance and the vault contents set into the specified field. The vault file name must end with .slv.yaml or .slv.yml.
-func New(vaultFile, name, k8sNamespace string, k8SecretContent []byte, hash, quantumSafe bool, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
+func New(vaultFile, name, k8sNamespace string, hash, quantumSafe bool, publicKeys ...*crypto.PublicKey) (vlt *Vault, err error) {
 	if !isValidVaultFileName(vaultFile) {
 		vaultFile = vaultFile + vaultFileNameDesiredExt
 	}
@@ -109,12 +108,7 @@ func New(vaultFile, name, k8sNamespace string, k8SecretContent []byte, hash, qua
 			return nil, err
 		}
 	}
-	if k8SecretContent != nil {
-		err = vlt.Update(name, k8sNamespace, k8SecretContent)
-	} else {
-		err = vlt.commit()
-	}
-	return
+	return vlt, vlt.commit()
 }
 
 // Returns the vault instance from a given yaml. The vault file name must end with .slv.yaml or .slv.yml.
@@ -216,28 +210,4 @@ func (vlt *Vault) validateAndUpdate() error {
 		return errVaultWrappedKeysNotFound
 	}
 	return nil
-}
-
-func ListVaultFiles() ([]string, error) {
-	var vaultFiles []string
-	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	err = filepath.WalkDir(wd, func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() {
-			return nil
-		}
-		if strings.HasSuffix(d.Name(), "."+vaultFileNameRawExt) ||
-			strings.HasSuffix(d.Name(), vaultFileNameRawExt+".yaml") ||
-			strings.HasSuffix(d.Name(), vaultFileNameRawExt+".yml") {
-			if relPath, err := filepath.Rel(wd, path); err == nil {
-				vaultFiles = append(vaultFiles, relPath)
-			} else {
-				vaultFiles = append(vaultFiles, path)
-			}
-		}
-		return nil
-	})
-	return vaultFiles, err
 }

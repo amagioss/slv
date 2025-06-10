@@ -12,6 +12,7 @@ import (
 	"slv.sh/slv/internal/core/profiles"
 	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
+	"slv.sh/slv/internal/helpers"
 )
 
 func showVault(vault *vaults.Vault) {
@@ -157,7 +158,7 @@ func VaultCommand() *cobra.Command {
 }
 
 func vaultFilePathCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	if vaultFiles, err := vaults.ListVaultFiles(); err != nil {
+	if vaultFiles, err := helpers.ListVaultFiles("", true); err != nil {
 		return nil, cobra.ShellCompDirectiveError
 	} else {
 		return vaultFiles, cobra.ShellCompDirectiveDefault

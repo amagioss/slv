@@ -46,7 +46,7 @@ var (
 
 	vaultK8sSecretFlag = utils.FlagDef{
 		Name:  "k8s-secret",
-		Usage: "A K8s Secret that needs to be transformed to an SLV vault (Use - to read from stdin)",
+		Usage: "A K8s Secret that needs to be transformed to an SLV vault (Use '-' to read from stdin)",
 	}
 
 	varNamePrefixFlag = utils.FlagDef{

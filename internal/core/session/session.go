@@ -16,40 +16,64 @@ var (
 )
 
 type Session struct {
-	secretKey      *crypto.SecretKey
-	env            *environments.Environment
-	envInitialized bool
+	secretKey   *crypto.SecretKey
+	env         *environments.Environment
+	pubKeyEC    string
+	pubKeyPQ    string
+	initialized bool
+	initMutex   sync.Mutex
 }
 
 func (s *Session) SecretKey() *crypto.SecretKey {
 	return s.secretKey
 }
 
-func (s *Session) Env() *environments.Environment {
-	if !s.envInitialized && s.secretKey != nil {
-		profile, err := profiles.GetActiveProfile()
-		if err != nil {
-			return nil
-		}
-		if pubKeyEC, err := s.secretKey.PublicKey(false); err == nil && pubKeyEC != nil {
-			if pubKeyStr, _ := pubKeyEC.String(); pubKeyStr != "" {
-				if env, err := profile.GetEnv(pubKeyStr); err == nil {
-					s.env = env
-				}
+func (s *Session) Env() (*environments.Environment, error) {
+	if !s.initialized && s.secretKey != nil {
+		s.initMutex.Lock()
+		defer s.initMutex.Unlock()
+		if !s.initialized {
+			profile, err := profiles.GetActiveProfile()
+			if err != nil {
+				return nil, err
 			}
-		}
-		if s.env == nil {
-			if pubKeyPQ, err := s.secretKey.PublicKey(true); err == nil && pubKeyPQ != nil {
-				if pubKeyStr, _ := pubKeyPQ.String(); pubKeyStr != "" {
-					if env, err := profile.GetEnv(pubKeyStr); err == nil {
-						s.env = env
+			if s.env == nil {
+				var pubKeyEC, pubKeyPQ *crypto.PublicKey
+				if pubKeyEC, err = s.secretKey.PublicKey(false); err == nil && pubKeyEC != nil {
+					if s.pubKeyEC, _ = pubKeyEC.String(); s.pubKeyEC != "" {
+						if env, err := profile.GetEnv(s.pubKeyEC); err == nil {
+							s.env = env
+						}
+					}
+				}
+				if s.env == nil {
+					if pubKeyPQ, err = s.secretKey.PublicKey(true); err == nil && pubKeyPQ != nil {
+						if s.pubKeyPQ, _ = pubKeyPQ.String(); s.pubKeyPQ != "" {
+							if env, err := profile.GetEnv(s.pubKeyPQ); err == nil {
+								s.env = env
+							}
+						}
 					}
 				}
 			}
+			s.initialized = true
 		}
-		s.envInitialized = true
 	}
-	return s.env
+	return s.env, nil
+}
+
+func (s *Session) PublicKeyEC() string {
+	if s.pubKeyEC == "" {
+		s.Env()
+	}
+	return s.pubKeyEC
+}
+
+func (s *Session) PublicKeyPQ() string {
+	if s.pubKeyPQ == "" {
+		s.Env()
+	}
+	return s.pubKeyPQ
 }
 
 func GetSession() (*Session, error) {
@@ -71,7 +95,7 @@ func GetSession() (*Session, error) {
 			if envSecretBindingStr == "" {
 				if selfEnv := environments.GetSelf(); selfEnv != nil {
 					session.env = selfEnv
-					session.envInitialized = true
+					session.initialized = true
 					envSecretBindingStr = selfEnv.SecretBinding
 				}
 			}
