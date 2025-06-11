@@ -12,7 +12,7 @@ import (
 	"slv.sh/slv/internal/core/environments"
 )
 
-type bind func(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error)
+type bind func(skBytes []byte, inputs map[string]string) (ref map[string][]byte, err error)
 type unbind func(ref map[string][]byte) (secretKeyBytes []byte, err error)
 
 const (
@@ -30,6 +30,7 @@ var (
 type provider struct {
 	id          string
 	name        string
+	desc        string
 	bind        bind
 	unbind      unbind
 	refRequired bool
@@ -61,10 +62,11 @@ func envSecretBindingFromString(envSecretBindingStr string) (*envSecretBinding, 
 	return binding, nil
 }
 
-func Register(id, name string, bind bind, unbind unbind, refRequired bool, args []arg) {
+func Register(id, name, desc string, bind bind, unbind unbind, refRequired bool, args []arg) {
 	providerMap[id] = &provider{
 		id:          id,
 		name:        name,
+		desc:        desc,
 		bind:        bind,
 		unbind:      unbind,
 		refRequired: refRequired,
@@ -74,10 +76,10 @@ func Register(id, name string, bind bind, unbind unbind, refRequired bool, args 
 
 func registerDefaultProviders() {
 	providerInitializer.Do(func() {
-		Register(PasswordProviderId, passwordProviderName, bindWithPassword, unBindWithPassword, true, nil)
-		Register(awsProviderId, awsProviderName, bindWithAWSKMS, unBindFromAWSKMS, true, awsArgs)
-		Register(gcpProviderId, gcpProviderName, bindWithGCP, unBindWithGCP, true, gcpArgs)
-		Register(azureProviderId, azureProviderName, bindWithAzure, unBindFromAzure, true, azureArgs)
+		Register(PasswordProviderId, passwordProviderName, passwordProviderDesc, bindWithPassword, unBindWithPassword, true, pwdArgs)
+		Register(awsProviderId, awsProviderName, awsProviderDesc, bindWithAWSKMS, unBindFromAWSKMS, true, awsArgs)
+		Register(gcpProviderId, gcpProviderName, gcpProviderDesc, bindWithGCP, unBindWithGCP, true, gcpArgs)
+		Register(azureProviderId, azureProviderName, azureProviderDesc, bindWithAzure, unBindFromAzure, true, azureArgs)
 	})
 }
 
@@ -98,6 +100,14 @@ func GetName(providerId string) string {
 	return ""
 }
 
+func GetDesc(providerId string) string {
+	registerDefaultProviders()
+	if provider, ok := providerMap[providerId]; ok {
+		return provider.desc
+	}
+	return ""
+}
+
 func GetArgs(providerId string) []arg {
 	registerDefaultProviders()
 	if provider, ok := providerMap[providerId]; ok {
@@ -107,11 +117,16 @@ func GetArgs(providerId string) []arg {
 }
 
 func NewEnv(providerId, envName string, envType environments.EnvType,
-	inputs map[string][]byte, quantumSafe bool) (*environments.Environment, error) {
+	inputs map[string]string, quantumSafe bool) (*environments.Environment, error) {
 	registerDefaultProviders()
 	provider, ok := providerMap[providerId]
 	if !ok {
 		return nil, fmt.Errorf("unknown environment provider: %s", providerId)
+	}
+	for _, arg := range provider.args {
+		if arg.required && inputs[arg.id] == "" {
+			return nil, fmt.Errorf("missing required input: %s", arg.id)
+		}
 	}
 	env, sk, err := environments.New(envName, envType, quantumSafe)
 	if err != nil {
@@ -172,9 +187,14 @@ func GetSecretKeyFromSecretBinding(envSecretBindingStr string) (secretKey *crypt
 }
 
 type arg struct {
+	id          string
 	name        string
 	required    bool
 	description string
+}
+
+func (a *arg) Id() string {
+	return a.id
 }
 
 func (a *arg) Name() string {

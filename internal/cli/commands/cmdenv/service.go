@@ -15,7 +15,8 @@ func getEnvProviderCommand(providerId string) *cobra.Command {
 	providerArgs := envproviders.GetArgs(providerId)
 	envProviderCmd := &cobra.Command{
 		Use:   providerId,
-		Short: "Creates a new environment using " + envproviders.GetName(providerId),
+		Short: "Creates a new service environment using " + envproviders.GetName(providerId),
+		Long:  "Creates a new service environment using " + envproviders.GetDesc(providerId),
 		Run: func(cmd *cobra.Command, args []string) {
 			envName, _ := cmd.Flags().GetString(envNameFlag.Name)
 			envEmail, _ := cmd.Flags().GetString(envEmailFlag.Name)
@@ -34,10 +35,10 @@ func getEnvProviderCommand(providerId string) *cobra.Command {
 					utils.ExitOnError(fmt.Errorf("profile (%s) does not support adding environments", profile.Name()))
 				}
 			}
-			inputs := make(map[string][]byte)
+			inputs := make(map[string]string)
 			for _, arg := range providerArgs {
-				if value, _ := cmd.Flags().GetString(arg.Name()); value != "" {
-					inputs[arg.Name()] = []byte(value)
+				if value, _ := cmd.Flags().GetString(arg.Id()); value != "" {
+					inputs[arg.Id()] = value
 				}
 			}
 			var env *environments.Environment
@@ -56,9 +57,9 @@ func getEnvProviderCommand(providerId string) *cobra.Command {
 		},
 	}
 	for _, arg := range providerArgs {
-		envProviderCmd.Flags().StringP(arg.Name(), "", "", arg.Description())
+		envProviderCmd.Flags().StringP(arg.Id(), "", "", arg.Description())
 		if arg.Required() {
-			envProviderCmd.MarkFlagRequired(arg.Name())
+			envProviderCmd.MarkFlagRequired(arg.Id())
 		}
 	}
 	return envProviderCmd

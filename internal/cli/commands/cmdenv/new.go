@@ -140,12 +140,12 @@ func envNewUserCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				inputs := make(map[string][]byte)
+				inputs := make(map[string]string)
 				password, err := input.NewPasswordFromUser(input.DefaultPasswordPolicy())
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				inputs["password"] = password
+				inputs["password"] = string(password)
 				var env *environments.Environment
 				pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
 				env, err = envproviders.NewEnv(envproviders.PasswordProviderId, envName, environments.USER, inputs, pq)

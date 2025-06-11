@@ -13,11 +13,11 @@ import (
 type EnvType string
 
 type Environment struct {
-	PublicKey     string   `json:"publicKey" yaml:"publicKey"`
-	Name          string   `json:"name" yaml:"name"`
-	Email         string   `json:"email" yaml:"email"`
-	EnvType       EnvType  `json:"type" yaml:"type"`
-	Tags          []string `json:"tags" yaml:"tags"`
+	PublicKey     string   `json:"publicKey,omitempty" yaml:"publicKey,omitempty"`
+	Name          string   `json:"name,omitempty" yaml:"name,omitempty"`
+	Email         string   `json:"email,omitempty" yaml:"email,omitempty"`
+	EnvType       EnvType  `json:"type,omitempty" yaml:"type,omitempty"`
+	Tags          []string `json:"tags,omitempty" yaml:"tags,omitempty"`
 	SecretBinding string   `json:"binding,omitempty" yaml:"binding,omitempty"`
 	publicKey     *crypto.PublicKey
 }

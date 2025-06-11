@@ -11,7 +11,8 @@ import (
 
 const (
 	azureProviderId    = "azure"
-	azureProviderName  = "Azure Key Vault (only RSA 4096 with AES 256 GCM supported)"
+	azureProviderName  = "Azure Key Vault"
+	azureProviderDesc  = "Azure Key Vault (only RSA 4096 with AES 256 GCM supported)"
 	azureVaultUrlRef   = "vault-url"
 	azureKeyNameRef    = "key-name"
 	azureKeyVersionRef = "key-version"
@@ -23,17 +24,20 @@ const (
 var (
 	azureArgs = []arg{
 		{
-			name:        azureVaultUrlRef,
+			id:          azureVaultUrlRef,
+			name:        "Vault URL",
 			required:    true,
-			description: "Azure Key Vault URL to use (e.g., https://myvault.vault.azure.net/)",
+			description: "URL of the Azure Key Vault to use (e.g., https://myvault.vault.azure.net/)",
 		},
 		{
-			name:        azureKeyNameRef,
+			id:          azureKeyNameRef,
+			name:        "Key Name",
 			required:    true,
-			description: "Name of the key in Azure Key Vault to use",
+			description: "Name of the key in the Azure Key Vault to use",
 		},
 		{
-			name:        azureKeyVersionRef,
+			id:          azureKeyVersionRef,
+			name:        "Key Version",
 			required:    false,
 			description: "Version of the key in Azure Key Vault to use (optional, latest version will be used if not specified)",
 		},
@@ -46,7 +50,7 @@ func isValidKeyVaultUrl(url string) bool {
 	return validUrl
 }
 
-func bindWithAzure(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {
+func bindWithAzure(skBytes []byte, inputs map[string]string) (ref map[string][]byte, err error) {
 	akvUrl := string(inputs[azureVaultUrlRef])
 	if !isValidKeyVaultUrl(akvUrl) {
 		return nil, fmt.Errorf("invalid Azure Key Vault URL: %s", akvUrl)
@@ -73,7 +77,7 @@ func bindWithAzure(skBytes []byte, inputs map[string][]byte) (ref map[string][]b
 		} else {
 			sealedSecretKeyBytes = encResp.Result
 		}
-	} else if sealedSecretKeyBytes, err = rsaEncrypt(skBytes, rsaPublicKey); err != nil {
+	} else if sealedSecretKeyBytes, err = rsaEncrypt(skBytes, []byte(rsaPublicKey)); err != nil {
 		return nil, err
 	}
 	ref = make(map[string][]byte)

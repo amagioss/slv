@@ -14,7 +14,8 @@ import (
 
 const (
 	awsProviderId                       = "aws"
-	awsProviderName                     = "AWS Key Management Service (AWS KMS)"
+	awsProviderName                     = "AWS KMS"
+	awsProviderDesc                     = "AWS Key Management Service"
 	awsARNRefName                       = "arn"
 	awsAlgRefName                       = "alg"
 	awsKMSAsymmetricEncryptionAlgorithm = "RSAES_OAEP_SHA_256"
@@ -28,7 +29,8 @@ var (
 
 	awsArgs = []arg{
 		{
-			name:        awsARNRefName,
+			id:          awsARNRefName,
+			name:        "ARN",
 			required:    true,
 			description: "ARN of the AWS KMS key to use",
 		},
@@ -86,7 +88,7 @@ func encryptWithAWSKMSAPI(secretKeyBytes []byte, arn string) (sealedSecretKeyByt
 	return result.CiphertextBlob, algorithm, err
 }
 
-func bindWithAWSKMS(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {
+func bindWithAWSKMS(skBytes []byte, inputs map[string]string) (ref map[string][]byte, err error) {
 	if arn := string(inputs[awsARNRefName]); isValidARN(arn) {
 		var sealedSecretKeyBytes []byte
 		rsaPublicKey, ok := inputs[rsaPubKeyRefName]
@@ -98,7 +100,7 @@ func bindWithAWSKMS(skBytes []byte, inputs map[string][]byte) (ref map[string][]
 				return nil, err
 			}
 			ref[awsAlgRefName] = []byte(*algorithm)
-		} else if sealedSecretKeyBytes, err = rsaEncrypt(skBytes, rsaPublicKey); err == nil {
+		} else if sealedSecretKeyBytes, err = rsaEncrypt(skBytes, []byte(rsaPublicKey)); err == nil {
 			ref[awsAlgRefName] = []byte(awsKMSAsymmetricEncryptionAlgorithm)
 		} else {
 			return nil, err

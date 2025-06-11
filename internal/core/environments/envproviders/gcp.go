@@ -11,7 +11,8 @@ import (
 
 const (
 	gcpProviderId      = "gcp"
-	gcpProviderName    = "Google Cloud Key Management Service (Cloud KMS)"
+	gcpProviderName    = "GCP KMS"
+	gcpProviderDesc    = "Google Cloud Key Management Service"
 	gcpResourceNameRef = "resource-name"
 	gcpSymmAlgoRef     = "sym"
 )
@@ -22,9 +23,10 @@ var (
 
 	gcpArgs = []arg{
 		{
-			name:        gcpResourceNameRef,
+			id:          gcpResourceNameRef,
+			name:        "Resource Name",
 			required:    true,
-			description: "GCP KMS resource name to use",
+			description: "Resource name of the GCP KMS key to use",
 		},
 		rsaArg,
 	}
@@ -36,7 +38,7 @@ func isValidGCPResourceName(resourcePath string, symmetricAlgo bool) bool {
 		(symmetricAlgo != strings.Contains(resourcePath, "cryptoKeyVersions/"))
 }
 
-func bindWithGCP(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {
+func bindWithGCP(skBytes []byte, inputs map[string]string) (ref map[string][]byte, err error) {
 	rsaPublicKey, ok := inputs[rsaPubKeyRefName]
 	symmetricAlgo := !ok || len(rsaPublicKey) == 0
 	if resourceName := string(inputs[gcpResourceNameRef]); isValidGCPResourceName(resourceName, symmetricAlgo) {
@@ -59,7 +61,7 @@ func bindWithGCP(skBytes []byte, inputs map[string][]byte) (ref map[string][]byt
 			}
 			sealedSecretKeyBytes = result.Ciphertext
 			symmetricAlgo = true
-		} else if sealedSecretKeyBytes, err = rsaEncrypt(skBytes, rsaPublicKey); err != nil {
+		} else if sealedSecretKeyBytes, err = rsaEncrypt(skBytes, []byte(rsaPublicKey)); err != nil {
 			return nil, err
 		}
 		var symmetricAlgoByte byte

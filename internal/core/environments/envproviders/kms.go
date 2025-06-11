@@ -22,7 +22,8 @@ var (
 	errSealedSecretKeyRef  = errors.New("invalid sealed secret key from provider binding")
 
 	rsaArg = arg{
-		name:        rsaPubKeyRefName,
+		id:          rsaPubKeyRefName,
+		name:        "RSA public key",
 		required:    false,
 		description: "RSA public key (file path or PEM encoded content) for offline binding [Only RSA OAEP SHA-256 will be supported - recommended 4096 bits key]",
 	}

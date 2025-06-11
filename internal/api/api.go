@@ -29,7 +29,14 @@ func Serve(jwtSecret []byte, session *session.Session, port uint16) {
 		getVault(context, session.SecretKey())
 	})
 	router.GET("/envs", getEnvs)
+	router.POST("/envs", newEnv)
+	router.GET("/envs/self", getSelf)
+	router.GET("/envs/providers", getEnvProviders)
 
+	router.GET("/profiles", getProfiles)
+	router.POST("/profiles", newProfile)
+	router.PUT("/profiles/:profileName", setActiveProfile)
+	router.GET("/profiles/remotes", getProfileRemotes)
 	router.Run(fmt.Sprintf(":%d", port))
 }
 

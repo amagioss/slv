@@ -12,19 +12,29 @@ import (
 const (
 	PasswordProviderId   = "password"
 	passwordProviderName = "Password"
+	passwordProviderDesc = "Password to set for the environment"
+	passwordRefName      = "password"
 )
 
 var (
 	errPasswordNotSet  = errors.New("password not set: please set password through the environment variable or use the interactive terminal to enter the password")
 	errInvalidPassword = errors.New("invalid password")
+
+	pwdArgs = []arg{
+		{
+			id:          passwordRefName,
+			required:    true,
+			description: "Password to use",
+		},
+	}
 )
 
-func bindWithPassword(skBytes []byte, inputs map[string][]byte) (ref map[string][]byte, err error) {
-	password := inputs["password"]
+func bindWithPassword(skBytes []byte, inputs map[string]string) (ref map[string][]byte, err error) {
+	password := inputs[passwordRefName]
 	if len(password) == 0 {
 		return nil, err
 	}
-	xipherKey, err := xipher.NewSecretKeyForPassword(password)
+	xipherKey, err := xipher.NewSecretKeyForPassword([]byte(password))
 	if err != nil {
 		return nil, err
 	}
