@@ -21,7 +21,7 @@ func cleanUnsupportedNameChars(name string) string {
 
 func (vlt *Vault) getUnusedName(name string) string {
 	nameToUse := name
-	for i := 1; vlt.Exists(nameToUse); i++ {
+	for i := 1; vlt.ItemExists(nameToUse); i++ {
 		nameToUse = name + "_" + fmt.Sprint(i)
 	}
 	return nameToUse
@@ -31,7 +31,7 @@ func (vlt *Vault) refBlob(data []byte, secretName string, forceUpdate, encrypt b
 	if !secretNameRegex.MatchString(secretName) {
 		return "", false, errInvalidVaultItemName
 	}
-	if !forceUpdate && vlt.Exists(secretName) {
+	if !forceUpdate && vlt.ItemExists(secretName) {
 		return "", true, errVaultItemExistsAlready
 	}
 	return vlt.getDataRef(secretName), false, vlt.putWithoutCommit(secretName, data, encrypt)

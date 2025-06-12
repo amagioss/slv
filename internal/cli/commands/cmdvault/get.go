@@ -42,8 +42,8 @@ func getVaultItemMap(vault *vaults.Vault, itemName string, encodeToBase64, withM
 			utils.ExitOnError(err)
 		}
 	} else {
-		var item *vaults.VaultItem
-		if !vault.Exists(itemName) {
+		item, _ := vault.Get(itemName)
+		if item == nil {
 			utils.ExitOnError(fmt.Errorf("item %s not found", itemName))
 		}
 		if !item.IsPlaintext() {
@@ -128,7 +128,7 @@ func vaultGetCommand() *cobra.Command {
 						unlockVault(vault)
 						showVault(vault)
 					} else {
-						if !vault.Exists(itemName) {
+						if !vault.ItemExists(itemName) {
 							utils.ExitOnError(fmt.Errorf("item %s not found", itemName))
 						}
 						item, err := vault.Get(itemName)

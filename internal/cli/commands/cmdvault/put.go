@@ -32,7 +32,7 @@ func vaultPutCommand() *cobra.Command {
 				}
 				forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.Name)
 				if itemName != "" {
-					if !forceUpdate && vault.Exists(itemName) {
+					if !forceUpdate && vault.ItemExists(itemName) {
 						confirmation, err := input.GetVisibleInput("Secret already exists. Do you wish to overwrite it? (y/n): ")
 						if err != nil {
 							utils.ExitOnError(err)

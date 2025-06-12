@@ -47,7 +47,7 @@ func (vlt *Vault) Import(importData []byte, force, encrypt bool) (err error) {
 	}
 	if !force {
 		for name := range dataMap {
-			if vlt.Exists(name) {
+			if vlt.ItemExists(name) {
 				return fmt.Errorf("the name %s already exists", name)
 			}
 		}
@@ -60,7 +60,7 @@ func (vlt *Vault) Import(importData []byte, force, encrypt bool) (err error) {
 	return vlt.commit()
 }
 
-func (vlt *Vault) Exists(name string) (exists bool) {
+func (vlt *Vault) ItemExists(name string) (exists bool) {
 	if vlt.Spec.Data != nil {
 		_, exists = vlt.Spec.Data[name]
 	}
