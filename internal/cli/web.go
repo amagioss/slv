@@ -8,8 +8,9 @@ import (
 func webCommand() *cobra.Command {
 	if webCmd == nil {
 		webCmd = &cobra.Command{
-			Use:   "web",
-			Short: "Starts the web server",
+			Use:    "web",
+			Short:  "Starts the web server",
+			Hidden: true,
 			Run: func(cmd *cobra.Command, args []string) {
 				api.Run()
 			},

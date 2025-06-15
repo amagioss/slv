@@ -20,23 +20,24 @@ func Serve(jwtSecret []byte, session *session.Session, port uint16) {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	router.GET("/session", func(context *gin.Context) {
+	router.GET("/api/session", func(context *gin.Context) {
 		getSession(context, session)
 	})
-	router.POST("/vaults", newVault)
-	router.GET("/vaults", listDirForVaults)
-	router.GET("/vaults/:vaultFile", func(context *gin.Context) {
+	router.POST("/api/vaults", newVault)
+	router.GET("/api/vaults", listDirForVaults)
+	router.PUT("/api/vaults/:vaultFile", putToVault)
+	router.GET("/api/vaults/:vaultFile", func(context *gin.Context) {
 		getVault(context, session.SecretKey())
 	})
-	router.GET("/envs", getEnvs)
-	router.POST("/envs", newEnv)
-	router.GET("/envs/self", getSelf)
-	router.GET("/envs/providers", getEnvProviders)
+	router.GET("/api/envs", getEnvs)
+	router.POST("/api/envs", newEnv)
+	router.GET("/api/envs/self", getSelf)
+	router.GET("/api/envs/providers", getEnvProviders)
 
-	router.GET("/profiles", getProfiles)
-	router.POST("/profiles", newProfile)
-	router.PUT("/profiles/:profileName", setActiveProfile)
-	router.GET("/profiles/remotes", getProfileRemotes)
+	router.GET("/api/profiles", getProfiles)
+	router.POST("/api/profiles", newProfile)
+	router.PUT("/api/profiles/:profileName", setActiveProfile)
+	router.GET("/api/profiles/remotes", getProfileRemotes)
 	router.Run(fmt.Sprintf(":%d", port))
 }
 

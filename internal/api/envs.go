@@ -9,6 +9,25 @@ import (
 	"slv.sh/slv/internal/core/profiles"
 )
 
+func getSelf(context *gin.Context) {
+	context.JSON(http.StatusOK, apiResponse{Success: true, Data: environments.GetSelf()})
+}
+
+// func setSelf(context *gin.Context) {
+// 	var request struct {
+// 		SecretBinding string `json:"secretBinding,omitempty"`
+// 	}
+// 	if err := context.ShouldBindJSON(&request); err != nil {
+// 		context.AbortWithStatusJSON(http.StatusBadRequest, apiResponse{Success: false, Error: err.Error()})
+// 		return
+// 	}x
+// 	env, err := environments.GetSelf()
+// 	if err != nil {
+// 		context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
+// 		return
+// 	}
+// }
+
 func getEnvs(context *gin.Context) {
 	profile, err := profiles.GetActiveProfile()
 	if err != nil {

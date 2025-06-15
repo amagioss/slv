@@ -102,3 +102,30 @@ func newVault(context *gin.Context) {
 	vaultInfo := helpers.GetVaultInfo(vault, true, false)
 	context.JSON(http.StatusOK, apiResponse{Success: true, Data: vaultInfo})
 }
+
+func putToVault(context *gin.Context) {
+	vaultFile := context.Param("vaultFile")
+	dir := context.Query("dir")
+	if dir != "" {
+		vaultFile = filepath.Join(dir, vaultFile)
+	}
+	var request struct {
+		Key       string `json:"key,omitempty" binding:"required"`
+		Value     string `json:"value,omitempty" binding:"required"`
+		PlainText bool   `json:"plainText,omitempty"`
+	}
+	if err := context.ShouldBindJSON(&request); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, apiResponse{Success: false, Error: err.Error()})
+		return
+	}
+	vault, err := vaults.Get(vaultFile)
+	if err != nil {
+		context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
+		return
+	}
+	if err = vault.Put(request.Key, []byte(request.Value), !request.PlainText); err != nil {
+		context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, apiResponse{Success: true, Data: helpers.GetVaultInfo(vault, true, false)})
+}
