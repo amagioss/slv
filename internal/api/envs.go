@@ -10,23 +10,41 @@ import (
 )
 
 func getSelf(context *gin.Context) {
-	context.JSON(http.StatusOK, apiResponse{Success: true, Data: environments.GetSelf()})
+	self := environments.GetSelf()
+	if self == nil {
+		context.AbortWithStatusJSON(http.StatusNotFound, apiResponse{Success: false, Error: "self environment not found"})
+		return
+	}
+	context.JSON(http.StatusOK, apiResponse{Success: true, Data: self})
 }
 
-// func setSelf(context *gin.Context) {
-// 	var request struct {
-// 		SecretBinding string `json:"secretBinding,omitempty"`
-// 	}
-// 	if err := context.ShouldBindJSON(&request); err != nil {
-// 		context.AbortWithStatusJSON(http.StatusBadRequest, apiResponse{Success: false, Error: err.Error()})
-// 		return
-// 	}x
-// 	env, err := environments.GetSelf()
-// 	if err != nil {
-// 		context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
-// 		return
-// 	}
-// }
+func setSelf(context *gin.Context) {
+	var request struct {
+		EnvDef        string `json:"envDef,omitempty" binding:"required"`
+		SecretBinding string `json:"secretBinding,omitempty"`
+	}
+	if err := context.ShouldBindJSON(&request); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, apiResponse{Success: false, Error: err.Error()})
+		return
+	}
+	env, err := environments.FromDefStr(request.EnvDef)
+	if err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, apiResponse{Success: false, Error: err.Error()})
+		return
+	}
+	if request.SecretBinding != "" {
+		env.SecretBinding = request.SecretBinding
+	}
+	if env.SecretBinding == "" {
+		context.AbortWithStatusJSON(http.StatusBadRequest, apiResponse{Success: false, Error: "secret binding is required"})
+		return
+	}
+	if err = env.SetAsSelf(); err != nil {
+		context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, apiResponse{Success: true, Data: env})
+}
 
 func getEnvs(context *gin.Context) {
 	profile, err := profiles.GetActiveProfile()

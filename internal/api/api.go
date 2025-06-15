@@ -1,12 +1,19 @@
 package api
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
-	"os"
+	"net"
 
 	"github.com/gin-gonic/gin"
 	"slv.sh/slv/internal/cli/commands/utils"
 	"slv.sh/slv/internal/core/session"
+)
+
+const (
+	defaultPort = 55555
+	slvLocalUrl = "http://local.slv.sh"
 )
 
 type apiResponse struct {
@@ -15,38 +22,68 @@ type apiResponse struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-func Serve(jwtSecret []byte, session *session.Session, port uint16) {
+func Serve(jwtSecret []byte, session *session.Session, port uint16) error {
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	router.GET("/api/session", func(context *gin.Context) {
+	apiGroup := router.Group("/api")
+	apiGroup.Use(authMiddleware(jwtSecret))
+
+	// Session API
+	apiGroup.GET("/session", func(context *gin.Context) {
 		getSession(context, session)
 	})
-	router.POST("/api/vaults", newVault)
-	router.GET("/api/vaults", listDirForVaults)
-	router.PUT("/api/vaults/:vaultFile", putItem)
-	router.GET("/api/vaults/:vaultFile", func(context *gin.Context) {
+
+	// Vaults API
+	vaultAPI := apiGroup.Group("/vaults")
+	vaultAPI.POST("", newVault)
+	vaultAPI.GET("", listDirForVaults)
+	vaultAPI.PUT("/:vaultFile", putItem)
+	vaultAPI.GET("/:vaultFile", func(context *gin.Context) {
 		getVault(context, session.SecretKey())
 	})
-	router.GET("/api/envs", getEnvs)
-	router.POST("/api/envs", newEnv)
-	router.GET("/api/envs/self", getSelf)
-	router.GET("/api/envs/providers", getEnvProviders)
 
-	router.GET("/api/profiles", getProfiles)
-	router.POST("/api/profiles", newProfile)
-	router.PUT("/api/profiles/:profileName", setActiveProfile)
-	router.GET("/api/profiles/remotes", getProfileRemotes)
-	router.Run(fmt.Sprintf(":%d", port))
+	// Environments API
+	envAPI := apiGroup.Group("/envs")
+	envAPI.GET("/self", getSelf)
+	envAPI.PUT("/self", setSelf)
+	envAPI.GET("", getEnvs)
+	envAPI.POST("", newEnv)
+	envAPI.GET("/providers", getEnvProviders)
+
+	// Profiles API
+	profileAPI := apiGroup.Group("/profiles")
+	profileAPI.GET("", getProfiles)
+	profileAPI.POST("", newProfile)
+	profileAPI.PUT("/:profileName", setActiveProfile)
+	profileAPI.GET("/remotes", getProfileRemotes)
+
+	return router.Run(fmt.Sprintf(":%d", port))
 }
 
-func Run() {
+func Run(port uint16) error {
 	session, err := session.GetSession()
 	if err != nil {
 		utils.ExitOnError(err)
 	}
-	jwtSecret := []byte(os.Getenv("SLV_JWT_SECRET"))
-	port := uint16(8888)
-	Serve(jwtSecret, session, port)
+	jwtSecret := make([]byte, 32)
+	if _, err = rand.Read(jwtSecret); err != nil {
+		return err
+	}
+	jwtSecretStr := base64.RawURLEncoding.EncodeToString(jwtSecret)
+	if port == 0 {
+		port = defaultPort
+		for {
+			if conn, err := net.Listen("tcp", fmt.Sprintf(":%d", port)); err == nil {
+				conn.Close()
+				break
+			}
+			port++
+		}
+	}
+	url := fmt.Sprintf("%s:%d/#%s", slvLocalUrl, port, jwtSecretStr)
+	fmt.Printf("Open this URL in your browser: %s\n", url)
+	return Serve(jwtSecret, session, port)
 }
