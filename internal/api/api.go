@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	defaultPort = 55555
+	defaultPort = 47474
 	slvLocalUrl = "http://local.slv.sh"
 )
 
