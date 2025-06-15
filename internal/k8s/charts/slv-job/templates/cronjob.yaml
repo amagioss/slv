@@ -33,6 +33,9 @@ spec:
             resources:
               {{- toYaml .Values.resource | nindent 14 }}
             env:
+              {{- with .Values.env }}
+                {{- toYaml . | nindent 14 }}
+              {{- end }}
                 {{- if ne .Values.k8sSecret ""}}
               - name: SLV_K8S_ENV_SECRET
                 value: {{ .Values.k8sSecret }}

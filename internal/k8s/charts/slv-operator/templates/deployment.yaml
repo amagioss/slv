@@ -54,6 +54,9 @@ spec:
               memory: {{ .Values.resource.limits.memory | default "256Mi"}}
             {{- end }}
           env:
+            {{- with .Values.env }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
               {{- if ne .Values.k8sSecret ""}}
             - name: SLV_K8S_ENV_SECRET
               value: {{ .Values.k8sSecret }}

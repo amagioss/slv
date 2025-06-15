@@ -31,6 +31,14 @@ labels: {}
 # The pod Labels to be set for SLV pods.
 podLabels: {}
 
+# Environment variables to be set for the SLV operator.
+# Cannot override existing environment variables.
+# E.g. - name: AWS_ROLE_ARN
+#        value: "arn:aws:iam::123456789012:role/slv-role"
+#      - name: SOME_ENV_VAR
+#        value: "some-value"
+env: {}
+
 # Configuration for the ServiceAccount labels and annotations
 serviceAccount:
   # Labels to be added to the ServiceAccount
