@@ -105,9 +105,11 @@ func GetVaultInfo(vault *vaults.Vault, includeAccessors, encodeValuesToBase64 bo
 	}
 	for itemName, item := range items {
 		itemInfo := VaultItemInfo{
-			Plaintext:   item.IsPlaintext(),
-			EncryptedAt: item.EncryptedAt().Format(time.RFC3339),
-			Hash:        item.Hash(),
+			Plaintext: item.IsPlaintext(),
+			Hash:      item.Hash(),
+		}
+		if !item.IsPlaintext() {
+			itemInfo.EncryptedAt = item.EncryptedAt().Format(time.RFC3339)
 		}
 		if item.IsPlaintext() || !vault.IsLocked() {
 			itemValue, err := item.Value()

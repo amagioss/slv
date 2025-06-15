@@ -25,7 +25,7 @@ func Serve(jwtSecret []byte, session *session.Session, port uint16) {
 	})
 	router.POST("/api/vaults", newVault)
 	router.GET("/api/vaults", listDirForVaults)
-	router.PUT("/api/vaults/:vaultFile", putToVault)
+	router.PUT("/api/vaults/:vaultFile", putItem)
 	router.GET("/api/vaults/:vaultFile", func(context *gin.Context) {
 		getVault(context, session.SecretKey())
 	})

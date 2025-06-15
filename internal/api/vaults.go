@@ -61,14 +61,12 @@ func getVault(context *gin.Context, secretKey *crypto.SecretKey) {
 		return
 	}
 	if context.Query("unlocked") == "true" || context.Query("unlock") == "true" {
-		err = vault.Unlock(secretKey)
-		if err != nil {
+		if err = vault.Unlock(secretKey); err != nil {
 			context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
 			return
 		}
 	}
-	vaultInfo := helpers.GetVaultInfo(vault, true, false)
-	context.JSON(http.StatusOK, apiResponse{Success: true, Data: vaultInfo})
+	context.JSON(http.StatusOK, apiResponse{Success: true, Data: helpers.GetVaultInfo(vault, true, false)})
 }
 
 type newVaultRequest struct {
@@ -99,18 +97,16 @@ func newVault(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
 		return
 	}
-	vaultInfo := helpers.GetVaultInfo(vault, true, false)
-	context.JSON(http.StatusOK, apiResponse{Success: true, Data: vaultInfo})
+	context.JSON(http.StatusOK, apiResponse{Success: true, Data: helpers.GetVaultInfo(vault, true, false)})
 }
 
-func putToVault(context *gin.Context) {
+func putItem(context *gin.Context) {
 	vaultFile := context.Param("vaultFile")
 	dir := context.Query("dir")
 	if dir != "" {
 		vaultFile = filepath.Join(dir, vaultFile)
 	}
-	var request struct {
-		Key       string `json:"key,omitempty" binding:"required"`
+	var request map[string]*struct {
 		Value     string `json:"value,omitempty" binding:"required"`
 		PlainText bool   `json:"plainText,omitempty"`
 	}
@@ -123,9 +119,11 @@ func putToVault(context *gin.Context) {
 		context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
 		return
 	}
-	if err = vault.Put(request.Key, []byte(request.Value), !request.PlainText); err != nil {
-		context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
-		return
+	for key, item := range request {
+		if err = vault.Put(key, []byte(item.Value), !item.PlainText); err != nil {
+			context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
+			return
+		}
 	}
-	context.JSON(http.StatusOK, apiResponse{Success: true, Data: helpers.GetVaultInfo(vault, true, false)})
+	context.JSON(http.StatusOK, apiResponse{Success: true})
 }
