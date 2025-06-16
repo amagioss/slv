@@ -58,8 +58,11 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
               {{- if ne .Values.k8sSecret ""}}
-            - name: SLV_K8S_ENV_SECRET
-              value: {{ .Values.k8sSecret }}
+            - name: SLV_ENV_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.k8sSecret }}
+                  key: SecretKey
               {{- end }}
               {{- if ne .Values.secretBinding "" }}
             - name: SLV_ENV_SECRET_BINDING
