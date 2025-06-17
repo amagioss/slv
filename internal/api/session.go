@@ -16,12 +16,14 @@ func getSession(context *gin.Context, session *session.Session) {
 	if err != nil {
 		context.AbortWithStatusJSON(http.StatusInternalServerError, apiResponse{Success: false, Error: err.Error()})
 	}
-	if env == nil {
-		context.JSON(http.StatusNotFound, apiResponse{Success: true, Data: map[string]string{
+	data := map[string]any{
+		"publicKeys": map[string]string{
 			"publicKeyEC": session.PublicKeyEC(),
 			"publicKeyPQ": session.PublicKeyPQ(),
-		}})
-		return
+		},
 	}
-	context.JSON(http.StatusOK, apiResponse{Success: true, Data: env})
+	if env != nil {
+		data["env"] = env
+	}
+	context.JSON(http.StatusOK, apiResponse{Success: true, Data: data})
 }

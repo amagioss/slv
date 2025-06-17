@@ -42,9 +42,9 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/session"
 	slvv1 "slv.sh/slv/internal/k8s/api/v1"
 	"slv.sh/slv/internal/k8s/internal/controller"
-	"slv.sh/slv/internal/k8s/utils"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -148,7 +148,7 @@ func Run() {
 	setupLog.Info("initializing SLV operator...")
 	setupLog.Info(config.VersionInfo())
 
-	if _, err := utils.SecretKey(); err != nil {
+	if _, err := session.GetSecretKey(); err != nil {
 		setupLog.Error(err, "unable to initialize slv environment")
 		os.Exit(1)
 	}
@@ -201,19 +201,21 @@ func Run() {
 		os.Exit(1)
 	}
 
+	namespace := session.GetK8sNamespace()
+
 	setupFinished := make(chan struct{})
 	if !disableCertRotation {
 		setupLog.Info("setting up cert rotation")
 
 		if err := rotator.AddRotator(mgr, &rotator.CertRotator{
 			SecretKey: types.NamespacedName{
-				Namespace: utils.GetCurrentNamespace(),
+				Namespace: namespace,
 				Name:      secretName,
 			},
 			CertDir:                certDir,
 			CAName:                 caName,
 			CAOrganization:         caOrganization,
-			DNSName:                fmt.Sprintf("%s.%s.svc", certServiceName, utils.GetCurrentNamespace()),
+			DNSName:                fmt.Sprintf("%s.%s.svc", certServiceName, namespace),
 			IsReady:                setupFinished,
 			Webhooks:               webhooks,
 			RequireLeaderElection:  enableLeaderElection,
@@ -221,6 +223,7 @@ func Run() {
 			ServerCertDuration:     serverCertDuration,
 			RotationCheckFrequency: rotationCheckFrequency,
 			LookaheadInterval:      lookaheadInterval,
+			EnableReadinessCheck:   true,
 			// ExtKeyUsages:   &keyUsages,
 		}); err != nil {
 			setupLog.Error(err, "unable to set up cert rotation")

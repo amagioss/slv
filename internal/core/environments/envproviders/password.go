@@ -3,6 +3,7 @@ package envproviders
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"slv.sh/slv/internal/core/input"
 	"slv.sh/slv/internal/core/keystore"
@@ -14,6 +15,8 @@ const (
 	passwordProviderName = "Password"
 	passwordProviderDesc = "Password to set for the environment"
 	passwordRefName      = "password"
+
+	envar_SLV_ENV_SECRET_PASSWORD = "SLV_ENV_SECRET_PASSWORD"
 )
 
 var (
@@ -54,7 +57,9 @@ func unBindWithPassword(ref map[string][]byte) (secretKeyBytes []byte, err error
 	}
 	var password []byte
 	setPasswordToKeystore := false
-	if input.IsInteractive() {
+	if passwordStr := os.Getenv(envar_SLV_ENV_SECRET_PASSWORD); passwordStr != "" {
+		password = []byte(passwordStr)
+	} else if input.IsInteractive() {
 		if password, err = keystore.Get(sealedSecretKeyBytes, false); err != nil {
 			if err == keystore.ErrNotFound {
 				setPasswordToKeystore = true

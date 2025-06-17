@@ -11,7 +11,7 @@ import (
 	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/profiles"
-	k8sutils "slv.sh/slv/internal/k8s/utils"
+	"slv.sh/slv/internal/core/session"
 )
 
 func ShowEnv(env environments.Environment, includeEDS, omitBindingFromEDS bool) {
@@ -107,12 +107,12 @@ func envShowK8sCommand() *cobra.Command {
 			Aliases: []string{"k8s-cluster"},
 			Short:   "Shows the environment registered with the accessible k8s cluster",
 			Run: func(cmd *cobra.Command, args []string) {
-				name, address, user, err := k8sutils.GetClusterInfo()
+				name, address, user, err := session.GetK8sClusterInfo()
 				if err != nil {
 					utils.ExitOnError(err)
 				}
 				pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)
-				pk, err := k8sutils.GetPublicKeyFromK8s(config.AppNameLowerCase, pq)
+				pk, err := session.GetPublicKeyFromK8s(config.AppNameLowerCase, pq)
 				if err != nil {
 					utils.ExitOnError(err)
 				}

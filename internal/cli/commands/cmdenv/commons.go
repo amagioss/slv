@@ -9,7 +9,7 @@ import (
 	"slv.sh/slv/internal/core/crypto"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/profiles"
-	k8sutils "slv.sh/slv/internal/k8s/utils"
+	"slv.sh/slv/internal/core/session"
 )
 
 func GetPublicKeys(cmd *cobra.Command, root, pq bool) (publicKeys []*crypto.PublicKey, err error) {
@@ -62,7 +62,7 @@ func GetPublicKeys(cmd *cobra.Command, root, pq bool) (publicKeys []*crypto.Publ
 		}
 	}
 	if shareWithK8s {
-		pk, err := k8sutils.GetPublicKeyFromK8s(config.AppNameLowerCase, pq)
+		pk, err := session.GetPublicKeyFromK8s(config.AppNameLowerCase, pq)
 		if err != nil {
 			return nil, err
 		}

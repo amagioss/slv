@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/crypto"
-	"slv.sh/slv/internal/k8s/utils"
+	"slv.sh/slv/internal/core/session"
 )
 
 // log is for logging in this package.
@@ -57,7 +57,7 @@ func (r *SLV) Default() {
 func (r *SLV) validateSLV() (err error) {
 	vault := r
 	var secretKey *crypto.SecretKey
-	if secretKey, err = utils.SecretKey(); err != nil {
+	if secretKey, err = session.GetSecretKey(); err != nil {
 		slvlog.Error(err, "failed to retrieve secret key", "name", r.Name, "error", err.Error())
 		return err
 	}

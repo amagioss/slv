@@ -33,8 +33,8 @@ import (
 
 	"github.com/go-logr/logr"
 	"slv.sh/slv/internal/core/config"
+	"slv.sh/slv/internal/core/session"
 	slvv1 "slv.sh/slv/internal/k8s/api/v1"
-	"slv.sh/slv/internal/k8s/utils"
 )
 
 const (
@@ -115,7 +115,7 @@ func (r *SLVReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	}
 
 	vault := slvObj.Vault
-	if secretKey, err := utils.SecretKey(); err != nil {
+	if secretKey, err := session.GetSecretKey(); err != nil {
 		return r.returnError(ctx, &slvObj, &logger, err, "Failed to get secret key")
 	} else {
 		if err = vault.Unlock(secretKey); err != nil {

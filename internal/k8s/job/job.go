@@ -4,8 +4,9 @@ import (
 	"log"
 
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 	"slv.sh/slv/internal/core/config"
-	"slv.sh/slv/internal/k8s/utils"
+	"slv.sh/slv/internal/core/session"
 )
 
 var logger = log.Default()
@@ -14,12 +15,17 @@ func Run() {
 	logger.Println("Starting SLV job...")
 	logger.Println(config.VersionInfo())
 
-	secretKey, err := utils.SecretKey()
+	secretKey, err := session.GetSecretKey()
 	if err != nil {
 		panic(err)
 	}
 
-	config, err := utils.GetKubeClientConfig()
+	kubeCfg := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		clientcmd.NewDefaultClientConfigLoadingRules(),
+		&clientcmd.ConfigOverrides{},
+	)
+
+	config, err := kubeCfg.ClientConfig()
 	if err != nil {
 		panic(err)
 	}
