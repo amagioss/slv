@@ -153,11 +153,9 @@ func GetK8sNamespace() string {
 			ns = os.Getenv(envar_SLV_K8S_NAMESPACE)
 		}
 		if ns == "" {
-			namespaceBytes, err := os.ReadFile(namespaceFile)
-			if err != nil {
-				panic(err)
+			if namespaceBytes, err := os.ReadFile(namespaceFile); err == nil {
+				ns = string(namespaceBytes)
 			}
-			ns = string(namespaceBytes)
 		}
 		currentNamespace = &ns
 	}

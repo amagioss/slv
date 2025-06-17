@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 	"slv.sh/slv/internal/cli/commands/cmdenv"
@@ -52,6 +51,6 @@ func slvCommand() *cobra.Command {
 
 func Run() {
 	if err := slvCommand().Execute(); err != nil {
-		os.Exit(1)
+		utils.ExitOnError(err)
 	}
 }

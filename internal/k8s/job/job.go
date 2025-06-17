@@ -17,7 +17,7 @@ func Run() {
 
 	secretKey, err := session.GetSecretKey()
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 
 	kubeCfg := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -27,20 +27,20 @@ func Run() {
 
 	config, err := kubeCfg.ClientConfig()
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 
 	slvObjs, err := listSLVs(config)
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 
 	if err = slvsToSecrets(clientset, secretKey, slvObjs); err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 }

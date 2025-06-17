@@ -38,7 +38,7 @@ func isAnnotationUpdateRequred(slvAnnotations, secretAnnotations map[string]stri
 func listSLVs(cfg *rest.Config) ([]slvv1.SLV, error) {
 	dynamicClient, err := dynamic.NewForConfig(cfg)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	unstructuredList, err := dynamicClient.Resource(
 		schema.GroupVersionResource{
