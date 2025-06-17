@@ -224,7 +224,6 @@ func Run() {
 			RotationCheckFrequency: rotationCheckFrequency,
 			LookaheadInterval:      lookaheadInterval,
 			EnableReadinessCheck:   true,
-			// ExtKeyUsages:   &keyUsages,
 		}); err != nil {
 			setupLog.Error(err, "unable to set up cert rotation")
 			os.Exit(1)

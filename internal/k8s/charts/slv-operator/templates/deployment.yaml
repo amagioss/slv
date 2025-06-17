@@ -37,6 +37,12 @@ spec:
       {{- end }}
         - name: slv
           image: {{ .Values.image | default (printf "ghcr.io/amagioss/slv:%s" .Chart.AppVersion) }}
+          startupProbe:
+            tcpSocket:
+              port: 9443
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            failureThreshold: 100
           resources:
             {{- if .Values.webhook.disableAutomaticCertManagement | default false }}
             limits:
