@@ -6,12 +6,12 @@ import (
 
 type Settings struct {
 	path              *string
-	AllowChanges      bool `yaml:"allow_changes"`
-	AllowCreateEnv    bool `yaml:"allow_create_env"`
-	AllowCreateGroup  bool `yaml:"allow_create_group"`
-	SyncInterval      int  `yaml:"sync_interval"`
-	AllowGroups       bool `yaml:"allow_groups"`
-	AllowVaultSharing bool `yaml:"allow_vault_sharing"`
+	AllowChanges      bool `json:"allowChanges" yaml:"allowChanges"`
+	AllowCreateEnv    bool `json:"allowCreateEnv" yaml:"allowCreateEnv"`
+	AllowCreateGroup  bool `json:"allowCreateGroup" yaml:"allowCreateGroup"`
+	SyncInterval      int  `json:"syncInterval" yaml:"syncInterval"`
+	AllowGroups       bool `json:"allowGroups" yaml:"allowGroups"`
+	AllowVaultSharing bool `json:"allowVaultSharing" yaml:"allowVaultSharing"`
 }
 
 func NewManifest(path string) (settings *Settings, err error) {

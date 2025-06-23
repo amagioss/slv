@@ -12,8 +12,8 @@ import (
 func envListCommand() *cobra.Command {
 	if envListCmd == nil {
 		envListCmd = &cobra.Command{
-			Use:     "list",
-			Aliases: []string{"ls", "search", "find", "get"},
+			Use:     "ls",
+			Aliases: []string{"list", "search", "find", "get"},
 			Short:   "List/Search environments from the active profile",
 			Run: func(cmd *cobra.Command, args []string) {
 				profile, err := profiles.GetActiveProfile()
@@ -24,6 +24,7 @@ func envListCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
+				showEnvDef, _ := cmd.Flags().GetBool(showEnvDefFlag.Name)
 				var envs []*environments.Environment
 				if len(queries) == 0 {
 					envs, err = profile.ListEnvs()
@@ -33,14 +34,17 @@ func envListCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				for _, env := range envs {
-					ShowEnv(*env, false, false)
-					fmt.Println()
+				for i, env := range envs {
+					ShowEnv(*env, showEnvDef, false)
+					if i < len(envs)-1 {
+						fmt.Println()
+					}
 				}
 				utils.SafeExit()
 			},
 		}
 		envListCmd.Flags().StringSliceP(EnvSearchFlag.Name, EnvSearchFlag.Shorthand, []string{}, EnvSearchFlag.Usage)
+		envListCmd.Flags().BoolP(showEnvDefFlag.Name, showEnvDefFlag.Shorthand, false, showEnvDefFlag.Usage)
 		if err := envListCmd.RegisterFlagCompletionFunc(EnvSearchFlag.Name, EnvSearchCompletion); err != nil {
 			utils.ExitOnError(err)
 		}

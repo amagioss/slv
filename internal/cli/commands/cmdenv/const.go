@@ -56,6 +56,11 @@ var (
 		Usage:     "Searches query to filter environments",
 	}
 
+	showEnvDefFlag = utils.FlagDef{
+		Name:  "show-env-def",
+		Usage: "Shows the environment definition in the output",
+	}
+
 	EnvSelfFlag = utils.FlagDef{
 		Name:  "env-self",
 		Usage: "References to the self environment (the local environment where the command is executed)",

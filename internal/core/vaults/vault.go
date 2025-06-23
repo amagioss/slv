@@ -22,8 +22,8 @@ type vaultConfig struct {
 }
 
 type Vault struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata"`
+	metav1.TypeMeta   `json:",inline" yaml:",inline"`
+	metav1.ObjectMeta `json:"metadata" yaml:"metadata"`
 
 	Type string     `json:"type,omitempty" yaml:"type,omitempty"`
 	Spec *VaultSpec `json:"spec" yaml:"spec"`
@@ -32,11 +32,11 @@ type Vault struct {
 type VaultSpec struct {
 	Data                map[string]string     `json:"slvData,omitempty" yaml:"slvData,omitempty"`
 	Config              vaultConfig           `json:"slvConfig" yaml:"slvConfig"`
-	path                string                `json:"-"`
-	publicKey           *crypto.PublicKey     `json:"-"`
-	secretKey           *crypto.SecretKey     `json:"-"`
-	cache               map[string]*VaultItem `json:"-"`
-	vaultSecretRefRegex *regexp.Regexp        `json:"-"`
+	path                string                `json:"-" yaml:"-"`
+	publicKey           *crypto.PublicKey     `json:"-" yaml:"-"`
+	secretKey           *crypto.SecretKey     `json:"-" yaml:"-"`
+	cache               map[string]*VaultItem `json:"-" yaml:"-"`
+	vaultSecretRefRegex *regexp.Regexp        `json:"-" yaml:"-"`
 }
 
 func (vlt *Vault) getPublicKey() (publicKey *crypto.PublicKey, err error) {

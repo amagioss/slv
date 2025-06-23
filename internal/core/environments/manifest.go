@@ -8,8 +8,8 @@ import (
 
 type EnvManifest struct {
 	path         *string
-	Root         *Environment            `yaml:"root,omitempty"`
-	Environments map[string]*Environment `yaml:"environments,omitempty"`
+	Root         *Environment            `json:"root,omitempty" yaml:"root,omitempty"`
+	Environments map[string]*Environment `json:"environments,omitempty" yaml:"environments,omitempty"`
 }
 
 func NewManifest(path string) (envManifest *EnvManifest, err error) {
