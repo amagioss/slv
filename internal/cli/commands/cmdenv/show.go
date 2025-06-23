@@ -20,6 +20,7 @@ func ShowEnv(env environments.Environment, includeEDS, omitBindingFromEDS bool) 
 	fmt.Fprintln(w, "Name:\t", env.Name)
 	fmt.Fprintln(w, "Email:\t", env.Email)
 	fmt.Fprintln(w, "Tags:\t", env.Tags)
+	fmt.Fprintln(w, "Type:\t", env.EnvType)
 	if env.SecretBinding != "" {
 		fmt.Fprintln(w, "Secret Binding:\t", env.SecretBinding)
 	}
