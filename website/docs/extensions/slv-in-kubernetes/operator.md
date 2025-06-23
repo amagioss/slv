@@ -66,6 +66,10 @@ helm upgrade --install slv slv/slv-operator --namespace slv --create-namespace
 | `resource` | CPU and memory resource limits/requests for the operator pods. Use standard `limits` and `requests` structure. | Refer Helm |
 | `labels` | Additional labels to add to the Deployment | `{}` |
 | `podLabels` | Additional labels to add to individual SLV pods. | `{}` |
+| `podAnnotations` | Additional annotations to add to individual SLV pods. | `{}` |
+| `nodeSelector` | Node selector for scheduling SLV pods on specific nodes. | `{}` |
+| `affinity` | Pod affinity/anti-affinity rules for scheduling SLV pods. | `{}` |
+| `tolerations` | Tolerations for scheduling SLV pods on tainted nodes. | `[]` |
 | `env` | Environment variables to be set for the SLV operator container. | `{}` |
 | `serviceAccount.labels` | Labels to be added to the ServiceAccount. | `{}` |
 | `serviceAccount.annotations` | Annotations to be added to the ServiceAccount. | `{}` |

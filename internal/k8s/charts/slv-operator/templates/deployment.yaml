@@ -20,8 +20,24 @@ spec:
         {{- with .Values.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: slv-serviceaccount
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
@@ -96,6 +112,3 @@ spec:
             {{- if gt (int .Values.replicas) 1 }}
             - "--leader-elect=true"
             {{- end }}
-
-
-

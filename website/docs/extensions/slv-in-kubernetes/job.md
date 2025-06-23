@@ -48,6 +48,10 @@ helm upgrade --install slv slv/slv-job --set jobName=my-job-$(date +%s)
 | `resource` | CPU and memory resource limits. | `250m` CPU, `250Mi` Memory |
 | `labels` | Additional labels for the deployment. | None |
 | `podLabels` | Additional labels for the pods. | None |
+| `podAnnotations` | Additional annotations for the pods. | `{}` |
+| `nodeSelector` | Node selector for scheduling SLV pods on specific nodes. | `{}` |
+| `affinity` | Pod affinity/anti-affinity rules for scheduling SLV pods. | `{}` |
+| `tolerations` | Tolerations for scheduling SLV pods on tainted nodes. | `[]` |
 | `env` | Environment variables to be set for the SLV job container. | `{}` |
 | `serviceAccount.labels` | Labels to be added to the ServiceAccount. | `{}` |
 | `serviceAccount.annotations` | Annotations to be added to the ServiceAccount. | `{}` |
