@@ -31,6 +31,18 @@ labels: {}
 # The pod Labels to be set for SLV pods.
 podLabels: {}
 
+# The pod Annotations to be set for SLV pods.
+podAnnotations: {}
+
+# The nodeSelector to be set for SLV pods.
+nodeSelector: {}
+
+# The affinity to be set for SLV pods.
+affinity: {}
+
+# The tolerations to be set for SLV pods.
+tolerations: []
+
 # Environment variables to be set for the SLV operator.
 # Cannot override existing environment variables.
 # E.g. - name: AWS_ROLE_ARN
