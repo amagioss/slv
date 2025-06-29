@@ -40,7 +40,8 @@ func vaultUpdateCommand() *cobra.Command {
 						utils.ExitOnError(err)
 					}
 				}
-				if err = vault.Update(name, namespace, data); err != nil {
+				secretType := cmd.Flag(vaultK8sSecretTypeFlag.Name).Value.String()
+				if err = vault.Update(name, namespace, secretType, data); err != nil {
 					utils.ExitOnError(err)
 				}
 				fmt.Printf("Vault %s transformed to K8s resource %s\n", color.GreenString(vaultFilePath), color.GreenString(name))
@@ -49,6 +50,7 @@ func vaultUpdateCommand() *cobra.Command {
 		vaultUpdateCmd.Flags().StringP(vaultNameFlag.Name, vaultNameFlag.Shorthand, "", vaultNameFlag.Usage)
 		vaultUpdateCmd.Flags().StringP(vaultK8sNamespaceFlag.Name, vaultK8sNamespaceFlag.Shorthand, "", vaultK8sNamespaceFlag.Usage)
 		vaultUpdateCmd.Flags().StringP(vaultK8sSecretFlag.Name, vaultK8sSecretFlag.Shorthand, "", vaultK8sSecretFlag.Usage)
+		vaultUpdateCmd.Flags().StringP(vaultK8sSecretTypeFlag.Name, vaultK8sSecretTypeFlag.Shorthand, "", vaultK8sSecretTypeFlag.Usage)
 	}
 	return vaultUpdateCmd
 }

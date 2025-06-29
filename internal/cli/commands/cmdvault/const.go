@@ -44,6 +44,11 @@ var (
 		Usage: "Namespace for the K8s SLV resource",
 	}
 
+	vaultK8sSecretTypeFlag = utils.FlagDef{
+		Name:  "k8s-secret-type",
+		Usage: "Type of the K8s Secret (e.g. Opaque, kubernetes.io/tls, etc.)",
+	}
+
 	vaultK8sSecretFlag = utils.FlagDef{
 		Name:  "k8s-secret",
 		Usage: "A K8s Secret that needs to be transformed to an SLV vault (Use '-' to read from stdin)",

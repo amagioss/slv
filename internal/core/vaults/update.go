@@ -9,7 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func (vlt *Vault) Update(name, namespace string, k8SecretContent []byte) (err error) {
+func (vlt *Vault) Update(name, namespace, secretType string, k8SecretContent []byte) (err error) {
 	if err = vlt.validateAndUpdate(); err != nil {
 		return err
 	}
@@ -61,6 +61,9 @@ func (vlt *Vault) Update(name, namespace string, k8SecretContent []byte) (err er
 	}
 	if namespace != "" {
 		vlt.Namespace = namespace
+	}
+	if secretType != "" {
+		vlt.Type = secretType
 	}
 	return vlt.commit()
 }
