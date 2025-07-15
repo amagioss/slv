@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"os"
 	"sync"
 
@@ -125,9 +126,11 @@ func GetSession() (*Session, error) {
 }
 
 func GetSecretKey() (*crypto.SecretKey, error) {
-	if session, err := GetSession(); err == nil {
-		return session.SecretKey(), nil
-	} else {
+	if session, err := GetSession(); err != nil {
 		return nil, err
+	} else if session.SecretKey() == nil {
+		return nil, fmt.Errorf("environment access not configured")
+	} else {
+		return session.SecretKey(), nil
 	}
 }
