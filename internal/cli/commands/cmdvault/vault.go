@@ -46,7 +46,7 @@ func showVault(vault *vaults.Vault) {
 		} else {
 			itemValueStr, err := item.ValueString()
 			if err != nil {
-				utils.ExitOnError(err)
+				utils.ExitOnError(fmt.Errorf("error getting value for %s: %w", name, err))
 			}
 			row = append(row, itemValueStr)
 		}

@@ -13,8 +13,9 @@ import (
 func vaultNewCommand() *cobra.Command {
 	if vaultNewCmd == nil {
 		vaultNewCmd = &cobra.Command{
-			Use:   "new",
-			Short: "Creates a new vault",
+			Use:     "new",
+			Aliases: []string{"create"},
+			Short:   "Creates a new vault",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 				pq, _ := cmd.Flags().GetBool(utils.QuantumSafeFlag.Name)

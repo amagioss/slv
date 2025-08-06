@@ -57,7 +57,7 @@ func getVaultItemMap(vault *vaults.Vault, itemName string, encodeToBase64, withM
 	for name, item := range vaultItemMap {
 		itemValue, err := item.Value()
 		if err != nil {
-			utils.ExitOnError(err)
+			utils.ExitOnError(fmt.Errorf("error getting value for %s: %w", name, err))
 		}
 		var valueStr string
 		if encodeToBase64 {

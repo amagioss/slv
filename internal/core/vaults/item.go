@@ -29,6 +29,9 @@ func (vi *VaultItem) Value() (value []byte, err error) {
 			if err = sealedSecret.FromString(vi.rawValue); err == nil {
 				vi.value, err = vi.vlt.Spec.secretKey.DecryptSecret(*sealedSecret)
 			}
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			vi.value = []byte(vi.rawValue)
 		}
@@ -37,7 +40,8 @@ func (vi *VaultItem) Value() (value []byte, err error) {
 }
 
 func (vi *VaultItem) ValueString() (value string, err error) {
-	if valueBytes, err := vi.Value(); err == nil {
+	var valueBytes []byte
+	if valueBytes, err = vi.Value(); err == nil {
 		value = string(valueBytes)
 	}
 	return
