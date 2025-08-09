@@ -20,35 +20,42 @@ func vaultDerefCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				vaultFiles, err := cmd.Flags().GetStringSlice(vaultFileFlag.Name)
+				vaultFile, err := cmd.Flags().GetString(vaultFileFlag.Name)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				paths, err := cmd.Flags().GetStringSlice(vaultRefFileFlag.Name)
+				file, err := cmd.Flags().GetString(vaultRefFileFlag.Name)
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				for _, vaultFile := range vaultFiles {
-					vault, err := vaults.Get(vaultFile)
-					if err != nil {
-						utils.ExitOnError(err)
+				previewOnlyMode, _ := cmd.Flags().GetBool(secretSubstitutionPreviewOnlyFlag.Name)
+				vault, err := vaults.Get(vaultFile)
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				err = vault.Unlock(envSecretKey)
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				result, err := vault.DeRef(file, previewOnlyMode)
+				if err != nil {
+					utils.ExitOnError(err)
+				}
+				if previewOnlyMode {
+					if len(result) > 0 && result[len(result)-1] == '\n' {
+						fmt.Print(result)
+					} else {
+						fmt.Println(result)
 					}
-					err = vault.Unlock(envSecretKey)
-					if err != nil {
-						utils.ExitOnError(err)
-					}
-					for _, path := range paths {
-						if err = vault.DeRef(path); err != nil {
-							utils.ExitOnError(err)
-						}
-						fmt.Println("Dereferenced", color.GreenString(path), "with the vault", color.GreenString(vaultFile))
-					}
+				} else {
+					fmt.Println("Dereferenced", color.GreenString(file), "with the vault", color.GreenString(vaultFile))
 				}
 				utils.SafeExit()
 			},
 		}
-		vaultDerefCmd.Flags().StringSliceP(vaultFileFlag.Name, vaultFileFlag.Shorthand, []string{}, vaultFileFlag.Usage)
-		vaultDerefCmd.Flags().StringSliceP(vaultRefFileFlag.Name, vaultRefFileFlag.Shorthand, []string{}, vaultRefFileFlag.Usage)
+		vaultDerefCmd.Flags().StringP(vaultFileFlag.Name, vaultFileFlag.Shorthand, "", vaultFileFlag.Usage)
+		vaultDerefCmd.Flags().StringP(vaultRefFileFlag.Name, vaultRefFileFlag.Shorthand, "", vaultRefFileFlag.Usage)
+		vaultDerefCmd.Flags().BoolP(secretSubstitutionPreviewOnlyFlag.Name, secretSubstitutionPreviewOnlyFlag.Shorthand, false, secretSubstitutionPreviewOnlyFlag.Usage)
 		vaultDerefCmd.MarkFlagRequired(vaultRefFileFlag.Name)
 	}
 	return vaultDerefCmd

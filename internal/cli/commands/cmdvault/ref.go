@@ -55,18 +55,18 @@ func vaultRefCommand() *cobra.Command {
 				if err != nil {
 					utils.ExitOnError(err)
 				}
-				previewOnly, _ := cmd.Flags().GetBool(secretRefPreviewOnlyFlag.Name)
+				previewMode, _ := cmd.Flags().GetBool(secretSubstitutionPreviewOnlyFlag.Name)
 				forceUpdate, _ := cmd.Flags().GetBool(secretForceUpdateFlag.Name)
 				if secretNamePrefix == "" && refType == "" {
 					utils.ExitOnErrorWithMessage("please provide --" + itemNameFlag.Name + " since the file is neither json nor yaml")
 				}
-				result, conflicting, err := vault.Ref(refType, refFile, secretNamePrefix, forceUpdate, true, previewOnly)
+				result, conflicting, err := vault.Ref(refType, refFile, secretNamePrefix, forceUpdate, true, previewMode)
 				if conflicting {
 					utils.ExitOnErrorWithMessage("conflict found. please use the --" + itemNameFlag.Name + " flag to set a different name or --" + secretForceUpdateFlag.Name + " flag to overwrite them.")
 				} else if err != nil {
 					utils.ExitOnError(err)
 				}
-				if previewOnly {
+				if previewMode {
 					fmt.Println(result)
 				} else {
 					if refType == "" {
@@ -80,7 +80,7 @@ func vaultRefCommand() *cobra.Command {
 		}
 		vaultRefCmd.Flags().StringP(vaultRefFileFlag.Name, vaultRefFileFlag.Shorthand, "", vaultRefFileFlag.Usage)
 		vaultRefCmd.Flags().StringP(itemNameFlag.Name, itemNameFlag.Shorthand, "", itemNameFlag.Usage)
-		vaultRefCmd.Flags().BoolP(secretRefPreviewOnlyFlag.Name, secretRefPreviewOnlyFlag.Shorthand, false, secretRefPreviewOnlyFlag.Usage)
+		vaultRefCmd.Flags().BoolP(secretSubstitutionPreviewOnlyFlag.Name, secretSubstitutionPreviewOnlyFlag.Shorthand, false, secretSubstitutionPreviewOnlyFlag.Usage)
 		vaultRefCmd.Flags().BoolP(secretForceUpdateFlag.Name, secretForceUpdateFlag.Shorthand, false, secretForceUpdateFlag.Usage)
 		vaultRefCmd.MarkFlagRequired(vaultRefFileFlag.Name)
 	}

@@ -116,8 +116,8 @@ var (
 		Usage: "Path to the YAML/JSON/blob file to be referenced",
 	}
 
-	secretRefPreviewOnlyFlag = utils.FlagDef{
+	secretSubstitutionPreviewOnlyFlag = utils.FlagDef{
 		Name:  "preview",
-		Usage: "Preview only mode",
+		Usage: "Enables preview mode (shows the substitution result without writing to the file)",
 	}
 )

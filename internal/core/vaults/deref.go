@@ -1,10 +1,12 @@
 package vaults
 
 import (
+	"fmt"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
+
+	"slv.sh/slv/internal/core/commons"
 )
 
 func (vlt *Vault) getDataByReference(secretRef string) ([]byte, error) {
@@ -29,7 +31,7 @@ func (vlt *Vault) getVaultSecretRefRegex() *regexp.Regexp {
 	return vlt.Spec.vaultSecretRefRegex
 }
 
-func (vlt *Vault) deRefFromContent(content string) ([]byte, error) {
+func (vlt *Vault) deRefContent(content string) ([]byte, error) {
 	vaultSecretRefRegex := vlt.getVaultSecretRefRegex()
 	secretRefs := vaultSecretRefRegex.FindAllString(content, -1)
 	if len(secretRefs) == 1 && len(content) == len(secretRefs[0]) {
@@ -46,25 +48,23 @@ func (vlt *Vault) deRefFromContent(content string) ([]byte, error) {
 	return []byte(content), nil
 }
 
-func (vlt *Vault) DeRef(path string) error {
+func (vlt *Vault) DeRef(file string, previewOnlyMode bool) (string, error) {
 	if vlt.IsLocked() {
-		return errVaultLocked
+		return "", errVaultLocked
 	}
-	return filepath.WalkDir(path, func(currentPath string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
-		data, err := os.ReadFile(currentPath)
-		if err != nil {
-			return err
-		}
-		dereferncedBytes, err := vlt.deRefFromContent(string(data))
-		if err != nil {
-			return err
-		}
-		return os.WriteFile(currentPath, dereferncedBytes, 0644)
-	})
+	if !commons.FileExists(file) {
+		return "", fmt.Errorf("file does not exist")
+	}
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return "", err
+	}
+	derefedBytes, err := vlt.deRefContent(string(data))
+	if err != nil {
+		return "", err
+	}
+	if previewOnlyMode {
+		return string(derefedBytes), nil
+	}
+	return "", os.WriteFile(file, derefedBytes, 0644)
 }
