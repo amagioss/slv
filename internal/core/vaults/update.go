@@ -10,6 +10,9 @@ import (
 )
 
 func (vlt *Vault) Update(name, namespace, secretType string, k8SecretContent []byte) (err error) {
+	if !vlt.Spec.writable {
+		return errVaultNotWritable
+	}
 	if err = vlt.validateAndUpdate(); err != nil {
 		return err
 	}

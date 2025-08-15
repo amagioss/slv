@@ -34,6 +34,9 @@ func (vlt *Vault) putWithoutCommit(name string, value []byte, encrypt bool) (err
 }
 
 func (vlt *Vault) Put(name string, value []byte, encrypt bool) (err error) {
+	if !vlt.Spec.writable {
+		return errVaultNotWritable
+	}
 	if err = vlt.putWithoutCommit(name, value, encrypt); err == nil {
 		err = vlt.commit()
 	}
@@ -41,6 +44,9 @@ func (vlt *Vault) Put(name string, value []byte, encrypt bool) (err error) {
 }
 
 func (vlt *Vault) Import(importData []byte, force, encrypt bool) (err error) {
+	if !vlt.Spec.writable {
+		return errVaultNotWritable
+	}
 	dataMap := make(map[string]string)
 	if err = yaml.Unmarshal(importData, &dataMap); err != nil {
 		return errInvalidImportDataFormat
@@ -143,6 +149,9 @@ func (vlt *Vault) DeleteItem(name string) error {
 }
 
 func (vlt *Vault) DeleteItems(names []string) error {
+	if !vlt.Spec.writable {
+		return errVaultNotWritable
+	}
 	for _, name := range names {
 		delete(vlt.Spec.Data, name)
 		vlt.deleteFromCache(name)

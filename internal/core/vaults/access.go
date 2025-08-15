@@ -5,6 +5,9 @@ import (
 )
 
 func (vlt *Vault) Share(publicKey *crypto.PublicKey) (bool, error) {
+	if !vlt.Spec.writable {
+		return false, errVaultNotWritable
+	}
 	return vlt.share(publicKey, true)
 }
 
@@ -35,6 +38,9 @@ func (vlt *Vault) share(publicKey *crypto.PublicKey, commit bool) (bool, error) 
 }
 
 func (vlt *Vault) Revoke(publicKeys []*crypto.PublicKey, quantumSafe bool) (err error) {
+	if !vlt.Spec.writable {
+		return errVaultNotWritable
+	}
 	var vaultItemsMap map[string]*VaultItem
 	if vaultItemsMap, err = vlt.GetAllItems(); err != nil {
 		return err
@@ -141,22 +147,4 @@ func (vlt *Vault) IsAccessibleBy(secretKey *crypto.SecretKey) bool {
 		}
 	}
 	return false
-}
-
-func (vlt *Vault) Unlock(secretKey *crypto.SecretKey) error {
-	if !vlt.IsLocked() {
-		return nil
-	}
-	for _, wrappedKeyStr := range vlt.Spec.Config.WrappedKeys {
-		wrappedKey := &crypto.WrappedKey{}
-		if err := wrappedKey.FromString(wrappedKeyStr); err != nil {
-			return err
-		}
-		decryptedKey, err := secretKey.DecryptKey(*wrappedKey)
-		if err == nil {
-			vlt.Spec.secretKey = decryptedKey
-			return nil
-		}
-	}
-	return errVaultNotAccessible
 }

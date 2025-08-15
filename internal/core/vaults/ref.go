@@ -105,6 +105,9 @@ func (vlt *Vault) yamlJsonRef(data []byte, prefixOrName string, forceUpdate, enc
 }
 
 func (vlt *Vault) Ref(refType, file, name string, forceUpdate, encrypt, dryRun bool) (result string, conflicting bool, err error) {
+	if !vlt.Spec.writable {
+		return "", false, errVaultNotWritable
+	}
 	var data []byte
 	data, err = os.ReadFile(file)
 	updated := true
