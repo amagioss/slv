@@ -13,7 +13,7 @@ slv vault --vault <PATH_TO_VAULT> deref [flags]
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- |
 | --file | String | True | NA | The file to be dereferenced |
-| --vault | String | True | NA | Path to the SLV Vault file |
+| --vault | String | True | NA | Path to the SLV Vault file or Vault URL|
 | --help | None | NA | NA | Help text for `slv vault deref` |
 
 #### Usage:

@@ -13,7 +13,7 @@ slv vault --vault <PATH_TO_VAULT> run [flags]
 | -- | -- | -- | -- | -- |
 | --command | String | False | $SHELL | The command to be run |
 | --prefix | String | False | None | Prefix to add to the ENVAR |
-| --vault | String | True | NA | Path to the SLV Vault file |
+| --vault | String | True | NA | Path to the SLV Vault file or Vault URL |
 | --help | None | NA | NA | Help text for `slv vault run` |
 
 #### Usage:

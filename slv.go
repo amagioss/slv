@@ -5,12 +5,12 @@ import (
 	"slv.sh/slv/internal/core/vaults"
 )
 
-func unlockVault(vaultFile string) (*vaults.Vault, error) {
+func unlockVault(vaultFileOrURL string) (*vaults.Vault, error) {
 	secretKey, err := session.GetSecretKey()
 	if err != nil {
 		return nil, err
 	}
-	vault, err := vaults.Get(vaultFile)
+	vault, err := vaults.Get(vaultFileOrURL)
 	if err != nil {
 		return nil, err
 	}
@@ -21,8 +21,8 @@ func unlockVault(vaultFile string) (*vaults.Vault, error) {
 }
 
 // GetAllVaultItems returns all secrets from the vault
-func GetAllVaultItems(vaultFile string) (map[string]*vaults.VaultItem, error) {
-	vault, err := unlockVault(vaultFile)
+func GetAllVaultItems(vaultFileOrURL string) (map[string]*vaults.VaultItem, error) {
+	vault, err := unlockVault(vaultFileOrURL)
 	if err != nil {
 		return nil, err
 	}
@@ -30,8 +30,8 @@ func GetAllVaultItems(vaultFile string) (map[string]*vaults.VaultItem, error) {
 }
 
 // GetVaultItem returns a named secret from the vault
-func GetVaultItem(vaultFile, name string) (vaultItem *vaults.VaultItem, err error) {
-	if vault, err := unlockVault(vaultFile); err != nil {
+func GetVaultItem(vaultFileOrURL, name string) (vaultItem *vaults.VaultItem, err error) {
+	if vault, err := unlockVault(vaultFileOrURL); err != nil {
 		return nil, err
 	} else {
 		return vault.Get(name)

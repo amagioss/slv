@@ -15,7 +15,7 @@ slv vault --vault <PATH_TO_VAULT> get [flags]
 | --format | String | False | None | List secrets as one of [`json`, `yaml`, `envar`] |
 | --with-metadata | None | NA | NA | Print metadata of items when using `--format` |
 | --base64 | None | NA | NA | Encode the item values as base64 |
-| --vault | String | True | NA | Path to the SLV Vault file |
+| --vault | String | True | NA | Path to the SLV Vault file or Vault URL|
 | --help | None | NA | NA | Help text for `slv vault get` |
 ---
 ## Get everything from the Vault
