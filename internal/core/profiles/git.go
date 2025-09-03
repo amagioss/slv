@@ -19,11 +19,13 @@ import (
 )
 
 const (
-	configGitRepoKey      = "repo"
-	configGitBranchKey    = "branch"
-	configGitHTTPUserKey  = "username"
-	configGitHTTPTokenKey = "token"
-	configGitSSHKey       = "ssh-key"
+	configGitRepoKey              = "repo"
+	configGitBranchKey            = "branch"
+	configGitCommitAuthorEmailKey = "committer-email"
+	configGitCommitAuthorNameKey  = "committer-name"
+	configGitHTTPUserKey          = "username"
+	configGitHTTPTokenKey         = "token"
+	configGitSSHKey               = "ssh-key"
 
 	gitUrlRegexPattern = `(?i)^(?:(https?|git|ssh):\/\/[\w.@\-~:/]+\.git|git@[\w.\-]+:[\w./~-]+\.git)$`
 )
@@ -32,26 +34,34 @@ var gitArgs = []arg{
 	{
 		name:        configGitRepoKey,
 		required:    true,
-		description: "The Git repository URL of the remote profile",
+		description: "Git repository URL of the remote profile",
 	},
 	{
 		name:        configGitBranchKey,
-		description: "The Git branch to be used for the remote profile",
+		description: "Git branch to be used for the remote profile",
+	},
+	{
+		name:        configGitCommitAuthorEmailKey,
+		description: "Email address to be used as the author of the commit",
+	},
+	{
+		name:        configGitCommitAuthorNameKey,
+		description: "Name to be used as the author of the commit",
 	},
 	{
 		name:        configGitHTTPUserKey,
 		sensitive:   true,
-		description: "The username to authenticate with the git repository over HTTP",
+		description: "Username to authenticate with the git repository over HTTP",
 	},
 	{
 		name:        configGitHTTPTokenKey,
 		sensitive:   true,
-		description: "The token to authenticate with the git repository over HTTP",
+		description: "Token to authenticate with the git repository over HTTP",
 	},
 	{
 		name:        configGitSSHKey,
 		sensitive:   true,
-		description: "The path to the SSH private key file to authenticate with the git repository over SSH",
+		description: "Path to the SSH private key file to authenticate with the git repository over SSH",
 	},
 }
 
@@ -95,7 +105,7 @@ func getGitAuth(config map[string]string) (auth transport.AuthMethod, err error)
 	return
 }
 
-func gitCommit(repo *git.Repository, msg string) error {
+func gitCommit(repo *git.Repository, msg string, config map[string]string) error {
 	worktree, err := repo.Worktree()
 	if err != nil {
 		return err
@@ -106,14 +116,12 @@ func gitCommit(repo *git.Repository, msg string) error {
 	signature := &object.Signature{
 		When: time.Now(),
 	}
-	cfg, err := gitconfig.LoadConfig(gitconfig.GlobalScope)
-	if err == nil {
-		if userEmail := cfg.User.Email; userEmail != "" {
-			signature.Email = userEmail
-		}
-		if userName := cfg.User.Name; userName != "" {
-			signature.Name = userName
-		}
+	cfg, _ := gitconfig.LoadConfig(gitconfig.GlobalScope)
+	if signature.Email = config[configGitCommitAuthorEmailKey]; signature.Email == "" && cfg != nil {
+		signature.Email = cfg.User.Email
+	}
+	if signature.Name = config[configGitCommitAuthorNameKey]; signature.Name == "" && cfg != nil {
+		signature.Name = cfg.User.Name
 	}
 	_, err = worktree.Commit(msg, &git.CommitOptions{
 		Author: signature,
@@ -165,7 +173,7 @@ func gitPush(dir string, config map[string]string, note string) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = gitCommit(repo, note); err != nil {
+	if err = gitCommit(repo, note, config); err != nil {
 		return err
 	}
 	var auth transport.AuthMethod
