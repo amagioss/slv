@@ -67,10 +67,24 @@ func (s *Session) Env() (*environments.Environment, error) {
 }
 
 func (s *Session) PublicKeyEC() string {
+	if s.pubKeyEC == "" {
+		if s.secretKey != nil {
+			if pkEC, _ := s.secretKey.PublicKey(false); pkEC != nil {
+				s.pubKeyEC, _ = pkEC.String()
+			}
+		}
+	}
 	return s.pubKeyEC
 }
 
 func (s *Session) PublicKeyPQ() string {
+	if s.pubKeyPQ == "" {
+		if s.secretKey != nil {
+			if pkPQ, _ := s.secretKey.PublicKey(true); pkPQ != nil {
+				s.pubKeyPQ, _ = pkPQ.String()
+			}
+		}
+	}
 	return s.pubKeyPQ
 }
 
@@ -103,22 +117,15 @@ func GetSession() (*Session, error) {
 					}
 				}
 			}
-			if session.secretKey == nil {
+			if session.secretKey == nil && isInKubernetesCluster() {
 				if kubeClientSet, _ := getKubeClientSet(); kubeClientSet != nil {
 					session.secretKey, _ = getSecretKeyFor(kubeClientSet, GetK8sNamespace())
 				}
 			}
-			if session.secretKey != nil {
-				var pkEC, pkPQ *crypto.PublicKey
-				if pkEC, _ = session.secretKey.PublicKey(false); pkEC != nil {
-					session.pubKeyEC, _ = pkEC.String()
+			if isInKubernetesCluster() {
+				if kubeClientSet, _ := getKubeClientSet(); kubeClientSet != nil && (session.PublicKeyEC() != "" || session.PublicKeyPQ() != "") {
+					putPublicKeyToConfigMap(kubeClientSet, session.PublicKeyEC(), session.PublicKeyPQ())
 				}
-				if pkPQ, _ = session.secretKey.PublicKey(true); pkPQ != nil {
-					session.pubKeyPQ, _ = pkPQ.String()
-				}
-			}
-			if kubeClientSet, _ := getKubeClientSet(); kubeClientSet != nil && (session.pubKeyEC != "" || session.pubKeyPQ != "") {
-				putPublicKeyToConfigMap(kubeClientSet, session.pubKeyEC, session.pubKeyPQ)
 			}
 		}
 	}

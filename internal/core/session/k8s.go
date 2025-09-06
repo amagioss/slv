@@ -162,6 +162,19 @@ func GetK8sNamespace() string {
 	return *currentNamespace
 }
 
+func isInKubernetesCluster() bool {
+	if _, err := os.Stat("/var/run/secrets/kubernetes.io/serviceaccount/token"); err == nil {
+		return true
+	}
+	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" || os.Getenv("KUBERNETES_SERVICE_PORT") != "" {
+		return true
+	}
+	if _, err := os.Stat("/var/run/secrets/kubernetes.io"); err == nil {
+		return true
+	}
+	return false
+}
+
 func GetK8sClusterInfo() (name, address, user string, err error) {
 	kubeconfig := getKubeConfig()
 	rawConfig, err := kubeconfig.RawConfig()
