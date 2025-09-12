@@ -21,8 +21,13 @@ type TUIInterface interface {
 
 // NavigationInterface defines the interface for navigation functionality
 type NavigationInterface interface {
+	ShowMainMenu()
 	ShowVaults()
+	ShowVaultsReplace()
 	ShowProfiles()
 	ShowEnvironments()
 	ShowHelp()
+	UpdateStatus()
+	SetVaultDir(dir string)
+	GetVaultDir() string
 }

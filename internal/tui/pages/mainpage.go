@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"slv.sh/slv/internal/tui/interfaces"
 )
@@ -19,22 +20,51 @@ func NewMainPage(tui interfaces.TUIInterface) *MainPage {
 
 // CreateMainPage creates the main menu page
 func (mp *MainPage) CreateMainPage() tview.Primitive {
+	// Create a welcome message
+	welcomeText := "\n\n" + `[white::b]Welcome to SLV - Secure Local Vault[white::-]
+
+[yellow]Your decentralized secrets management solution[yellow::-]
+
+[cyan]Navigate using arrow keys or press the highlighted letter[cyan::-]
+[gray]Press ESC to go back, Ctrl+C to exit[gray::-]` + "\n\n"
+
+	welcome := tview.NewTextView().
+		SetText(welcomeText).
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignCenter).
+		SetWrap(true)
+
+	// Create the main menu list wit`h enhanced styling
 	list := tview.NewList().
-		AddItem("Vaults", "Manage secret vaults", 'v', func() {
+		AddItem("🔐 Vaults", "Manage and organize your vaults", 'v', func() {
 			mp.tui.GetNavigation().ShowVaults()
 		}).
-		AddItem("Profiles", "Manage user profiles", 'p', func() {
+		AddItem("👤 Profiles", "View Profile settings and Environments", 'p', func() {
 			mp.tui.GetNavigation().ShowProfiles()
 		}).
-		AddItem("Environments", "Manage environments", 'e', func() {
+		AddItem("🌍 Environments", "Manage Environments", 'e', func() {
 			mp.tui.GetNavigation().ShowEnvironments()
 		}).
-		AddItem("Help", "Show help", 'h', func() {
+		AddItem("❓ Help", "View documentation and help", 'h', func() {
 			mp.tui.GetNavigation().ShowHelp()
-		}).
-		AddItem("Exit", "Exit application", 'q', func() {
-			mp.tui.Quit()
 		})
 
-	return mp.tui.CreatePageLayout("Main Menu", list)
+	// Style the list
+	list.SetSelectedTextColor(tcell.ColorYellow).
+		SetSelectedBackgroundColor(tcell.ColorNavy).
+		SetSecondaryTextColor(tcell.ColorGray).
+		SetMainTextColor(tcell.ColorWhite)
+	// Create a centered layout using grid
+	content := tview.NewGrid().
+		SetRows(10, 0).         // Two flexible rows for equal centering
+		SetColumns(-1, 50, -1). // Single column
+		SetBorders(false)
+
+	// Center the welcome text
+	content.AddItem(welcome, 0, 1, 1, 1, 0, 0, false)
+
+	// Center the menu list
+	content.AddItem(list, 1, 1, 1, 1, 0, 0, true) // Add padding for centering
+
+	return mp.tui.CreatePageLayout("Main Menu", content)
 }

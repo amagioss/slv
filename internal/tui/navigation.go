@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -14,13 +15,21 @@ type Navigation struct {
 	currentPage string
 	pageStack   []string
 	statusBar   *tview.TextView
+	vaultDir    string // Store current vault directory
 }
 
 // NewNavigation creates a new navigation controller
 func NewNavigation(app interface{}) *Navigation {
+	// Get user's home directory
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		homeDir = "."
+	}
+
 	nav := &Navigation{
 		app:       app.(*TUI),
 		pageStack: make([]string, 0),
+		vaultDir:  homeDir,
 	}
 
 	nav.createStatusBar()
@@ -54,10 +63,39 @@ func (n *Navigation) ShowMainMenu() {
 
 // ShowVaults displays the vaults page
 func (n *Navigation) ShowVaults() {
-	vaults := n.app.createVaultsPage()
+	// Create VaultPage using the pages package
+	vaultPage := pages.NewVaultPage(n.app, n.vaultDir)
+	vaults := vaultPage.CreateVaultPage()
 	n.addPage("vaults", vaults)
 	n.setCurrentPage("vaults")
 	n.UpdateStatus()
+}
+
+// ShowVaultsReplace replaces the current vault page (for directory navigation)
+func (n *Navigation) ShowVaultsReplace() {
+	// Create VaultPage using the pages package
+	vaultPage := pages.NewVaultPage(n.app, n.vaultDir)
+	vaults := vaultPage.CreateVaultPage()
+	n.addPage("vaults", vaults)
+
+	// Replace current page without adding to stack
+	if n.currentPage != "" {
+		n.currentPage = "vaults"
+		n.app.GetPages().SwitchToPage("vaults")
+		n.UpdateStatus()
+	} else {
+		n.setCurrentPage("vaults")
+	}
+}
+
+// SetVaultDir sets the current vault directory
+func (n *Navigation) SetVaultDir(dir string) {
+	n.vaultDir = dir
+}
+
+// GetVaultDir gets the current vault directory
+func (n *Navigation) GetVaultDir() string {
+	return n.vaultDir
 }
 
 // ShowProfiles displays the profiles page

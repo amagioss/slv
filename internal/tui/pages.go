@@ -39,22 +39,22 @@ func (t *TUI) createHelpPage() tview.Primitive {
 	return t.createPageLayout("Help", text)
 }
 
-// createPageLayout creates a common layout for all pages with border, background, and info bar
+// createPageLayout creates a common layout for all pages with border
 func (t *TUI) createPageLayout(title string, content tview.Primitive) tview.Primitive {
 	theme := t.GetTheme()
 
-	// Add border directly to the content if it supports Box methods
-	if list, ok := content.(*tview.List); ok {
-		list.SetBorder(true).
-			SetBorderColor(theme.Accent).
-			SetTitle(title).
-			SetTitleAlign(tview.AlignCenter)
-	} else if textView, ok := content.(*tview.TextView); ok {
-		textView.SetBorder(true).
-			SetBorderColor(theme.Accent).
-			SetTitle(title).
-			SetTitleAlign(tview.AlignCenter)
-	}
+	// Create a flex container
+	flex := tview.NewFlex().
+		SetDirection(tview.FlexRow)
 
-	return content
+	// Set border properties
+	flex.SetBorder(true).
+		SetBorderColor(theme.Accent).
+		SetTitle(title).
+		SetTitleAlign(tview.AlignCenter)
+
+	// Add the content to the flex
+	flex.AddItem(content, 0, 1, true)
+
+	return flex
 }
