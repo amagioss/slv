@@ -173,8 +173,8 @@ func (n *Navigation) UpdateStatus() {
 		return
 	}
 
-	status := fmt.Sprintf("[white]Page: [cyan]%s[white] | Stack: [cyan]%d[white] | F1: Help | Esc: Back | Ctrl+C: Quit",
-		n.currentPage, len(n.pageStack))
+	status := fmt.Sprintf("[white]Page: [cyan]%s[white] | F1: Help | Esc: Back | Ctrl+C: Quit",
+		n.currentPage)
 
 	n.statusBar.SetText(status)
 }

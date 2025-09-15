@@ -4,11 +4,23 @@ import (
 	"github.com/rivo/tview"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/profiles"
+	"slv.sh/slv/internal/core/session"
 )
 
 func (t *TUI) createInfoBar() {
 	profileName := getProfileName()
-	selfEnvironment := environments.GetSelf()
+	var selfEnvironment *environments.Environment
+
+	session, err := session.GetSession()
+	if err != nil {
+		session = nil
+	}
+	if session != nil {
+		selfEnvironment, err = session.Env()
+		if err != nil {
+			selfEnvironment = nil
+		}
+	}
 
 	var leftContent string
 
@@ -55,12 +67,12 @@ func (t *TUI) createInfoBar() {
 	// ║ [yellow]VAULT[cyan]  [white]║
 	// ╚══════════════╝`
 
-	rightContent := `  _________.____ ____   ____
- /   _____/|    |\   \ /   /
- \_____  \ |    | \   Y   / 
- /        \|    |__\     /  
-/_______  /|_______ \___/   
-        \/         \/       `
+	rightContent := `     ____  _ __     __
+	/ ___|| |\ \   / /
+	\___ \| | \ \ / / 
+	 ___) | |__\ V /  
+	|____/|_____\_/   
+	`
 
 	rightColumn := tview.NewTextView().
 		SetTextAlign(tview.AlignCenter).
