@@ -17,6 +17,7 @@ type TUIInterface interface {
 
 	// Application control
 	Quit()
+	GetApplication() *tview.Application
 }
 
 // NavigationInterface defines the interface for navigation functionality
@@ -27,6 +28,7 @@ type NavigationInterface interface {
 	ShowProfiles()
 	ShowEnvironments()
 	ShowHelp()
+	ShowVaultDetails(vaultDetailsPage tview.Primitive)
 	UpdateStatus()
 	SetVaultDir(dir string)
 	GetVaultDir() string

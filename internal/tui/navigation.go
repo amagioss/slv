@@ -216,3 +216,10 @@ func (n *Navigation) NavigateTo(pageName string) {
 		n.app.ShowError(fmt.Sprintf("Unknown page: %s", pageName))
 	}
 }
+
+// ShowVaultDetails shows a vault details page
+func (n *Navigation) ShowVaultDetails(vaultDetailsPage tview.Primitive) {
+	n.addPage("vault-details", vaultDetailsPage)
+	n.setCurrentPage("vault-details")
+	n.UpdateStatus()
+}
