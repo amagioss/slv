@@ -49,7 +49,7 @@ func (t *TUI) createPageLayout(title string, content tview.Primitive) tview.Prim
 
 	// Set border properties
 	flex.SetBorder(true).
-		SetBorderColor(theme.Accent).
+		SetBorderColor(theme.GetAccent()).
 		SetTitle(title).
 		SetTitleAlign(tview.AlignCenter)
 

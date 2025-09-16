@@ -51,9 +51,9 @@ func (t *TUI) setup() {
 
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(t.infoBar, 8, 1, false).
-		AddItem(t.pages, 0, 1, true).
-		AddItem(statusBar, 3, 1, false)
+		AddItem(t.infoBar, 8, 1, false). // Info bar
+		AddItem(t.pages, 0, 1, true).    // Pages
+		AddItem(statusBar, 3, 1, false)  // Status bar
 
 	t.app.SetRoot(flex, true)
 	// t.app.SetRoot(t.pages, true)
