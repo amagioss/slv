@@ -106,6 +106,8 @@ func (vp *VaultPage) CreateVaultPage() tview.Primitive {
 	// Center the list
 	content.AddItem(list, 1, 0, 1, 1, 0, 0, true)
 
+	// Update status bar with help text
+	vp.tui.UpdateStatusBar("[yellow]←/→: Move between directories | ↑/↓: Navigate | Enter: open vault/directory[white]")
 	return vp.tui.CreatePageLayout("Vault Management", content)
 }
 
@@ -272,12 +274,8 @@ func (vp *VaultPage) showVaultDetails(vault *vaults.Vault, filePath string) {
 		}
 	}
 
-	// Add close button
-	closeButton := tview.NewTextView().
-		SetText("[yellow]Press 'q' to close, 'u' to unlock, 'l' to lock, 'r' to reload, ESC to go back, Tab to switch tables, arrow/page keys to scroll[white]").
-		SetTextAlign(tview.AlignCenter).
-		SetDynamicColors(true)
-	flex.AddItem(closeButton, 2, 0, false) // Fixed height of 3 lines, no flex
+	// Update status bar with help text
+	vp.tui.UpdateStatusBar("[yellow]q: close | u: unlock | l: lock | r: reload | Tab: switch tables[white]")
 
 	// Set up input capture for the flex
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {

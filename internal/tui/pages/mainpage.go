@@ -66,5 +66,7 @@ func (mp *MainPage) CreateMainPage() tview.Primitive {
 	// Center the menu list
 	content.AddItem(list, 1, 1, 1, 1, 0, 0, true) // Add padding for centering
 
+	// Update status bar with help text
+	mp.tui.UpdateStatusBar("[yellow]↑/↓: Navigate | Enter: select[white]")
 	return mp.tui.CreatePageLayout("Main Menu", content)
 }

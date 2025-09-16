@@ -108,14 +108,14 @@ func (t *TUI) GetTheme() *Theme {
 	return t.theme
 }
 
+// GetInfoBar returns the info bar primitive
+func (t *TUI) GetInfoBar() tview.Primitive {
+	return t.infoBar
+}
+
 // GetNavigation returns the navigation interface
 func (t *TUI) GetNavigation() NavigationInterface {
 	return t.navigation
-}
-
-// GetInfoBar returns the shared info bar
-func (t *TUI) GetInfoBar() tview.Primitive {
-	return t.infoBar
 }
 
 // GetContext returns the context
@@ -156,4 +156,14 @@ func (t *TUI) LogError(err error, showToUser bool) {
 // CreatePageLayout creates a page layout (renamed from createPageLayout for interface)
 func (t *TUI) CreatePageLayout(title string, content tview.Primitive) tview.Primitive {
 	return t.createPageLayout(title, content)
+}
+
+func (t *TUI) UpdateStatusBar(helpText string) {
+	// Use the navigation's SetCustomHelp method which handles the status bar update
+	t.navigation.SetCustomHelp(helpText)
+}
+
+func (t *TUI) ClearStatusBar() {
+	// Use the navigation's ClearCustomHelp method which handles the status bar update
+	t.navigation.ClearCustomHelp()
 }

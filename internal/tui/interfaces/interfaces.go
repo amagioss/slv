@@ -11,6 +11,8 @@ type TUIInterface interface {
 
 	// UI components
 	GetInfoBar() tview.Primitive
+	UpdateStatusBar(text string)
+	ClearStatusBar()
 
 	// Page layout method
 	CreatePageLayout(title string, content tview.Primitive) tview.Primitive

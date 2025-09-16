@@ -16,6 +16,7 @@ type Navigation struct {
 	pageStack   []string
 	statusBar   *tview.TextView
 	vaultDir    string // Store current vault directory
+	customHelp  string // Store custom help text for current page
 }
 
 // NewNavigation creates a new navigation controller
@@ -176,12 +177,29 @@ func (n *Navigation) UpdateStatus() {
 	status := fmt.Sprintf("[white]Page: [cyan]%s[white] | F1: Help | Esc: Back | Ctrl+C: Quit",
 		n.currentPage)
 
+	// Add custom help text if available
+	if n.customHelp != "" {
+		status += " | " + n.customHelp
+	}
+
 	n.statusBar.SetText(status)
 }
 
 // GetStatusBar returns the status bar primitive
 func (n *Navigation) GetStatusBar() tview.Primitive {
 	return n.statusBar
+}
+
+// SetCustomHelp sets the custom help text for the current page
+func (n *Navigation) SetCustomHelp(helpText string) {
+	n.customHelp = helpText
+	n.UpdateStatus() // Update the status bar immediately
+}
+
+// ClearCustomHelp clears the custom help text
+func (n *Navigation) ClearCustomHelp() {
+	n.customHelp = ""
+	n.UpdateStatus() // Update the status bar immediately
 }
 
 // GetCurrentPage returns the current page name
