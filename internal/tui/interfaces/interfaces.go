@@ -17,6 +17,10 @@ type TUIInterface interface {
 	// Page layout method
 	CreatePageLayout(title string, content tview.Primitive) tview.Primitive
 
+	// Modal methods
+	ShowError(message string)
+	ShowInfo(message string)
+
 	// Application control
 	Quit()
 	GetApplication() *tview.Application
@@ -31,6 +35,7 @@ type NavigationInterface interface {
 	ShowEnvironments()
 	ShowHelp()
 	ShowVaultDetails(vaultDetailsPage tview.Primitive)
+	ShowNewVault()
 	UpdateStatus()
 	SetVaultDir(dir string)
 	GetVaultDir() string

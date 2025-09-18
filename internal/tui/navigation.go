@@ -241,3 +241,13 @@ func (n *Navigation) ShowVaultDetails(vaultDetailsPage tview.Primitive) {
 	n.setCurrentPage("vault-details")
 	n.UpdateStatus()
 }
+
+// ShowNewVault shows the new vault creation page
+func (n *Navigation) ShowNewVault() {
+	// Create NewVaultPage using the pages package
+	newVaultPage := pages.NewVaultPage(n.app, n.vaultDir)
+	page := newVaultPage.CreateNewVaultPage()
+	n.addPage("new-vault", page)
+	n.setCurrentPage("new-vault")
+	n.UpdateStatus()
+}
