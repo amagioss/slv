@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"github.com/rivo/tview"
+	"slv.sh/slv/internal/tui/theme"
 )
 
 // TUIInterface defines the interface that pages can use to interact with the TUI
@@ -24,19 +25,11 @@ type TUIInterface interface {
 	// Application control
 	Quit()
 	GetApplication() *tview.Application
-}
 
-// NavigationInterface defines the interface for navigation functionality
-type NavigationInterface interface {
-	ShowMainMenu()
-	ShowVaults()
-	ShowVaultsReplace()
-	ShowProfiles()
-	ShowEnvironments()
-	ShowHelp()
-	ShowVaultDetails(vaultDetailsPage tview.Primitive)
-	ShowNewVault()
-	UpdateStatus()
-	SetVaultDir(dir string)
-	GetVaultDir() string
+	// Theme access
+	GetTheme() *theme.Theme
+
+	// Core components access
+	GetComponents() ComponentManagerInterface
+	GetRouter() RouterInterface
 }

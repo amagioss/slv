@@ -1,0 +1,33 @@
+package interfaces
+
+import (
+	"github.com/rivo/tview"
+)
+
+// RouterInterface defines the interface for router functionality
+type RouterInterface interface {
+	// Basic tview.Pages operations
+	AddPage(name string, page tview.Primitive, resize, visible bool)
+	RemovePage(name string)
+	HasPage(name string) bool
+	GetPages() *tview.Pages
+
+	// Page stack management
+	PushPage(page string)
+	PopPage() string
+	ClearStack()
+	GetCurrentPage() string
+	SetCurrentPage(page string)
+	GetPageStack() []string
+
+	// Page interface support
+	RegisterPage(name string, page Page)
+	GetRegisteredPage(name string) Page
+	HasRegisteredPage(name string) bool
+	GetRegisteredPageNames() []string
+
+	// Infrastructure methods (to avoid duplication in Navigation)
+	AddPageToMainComponent(name string, page tview.Primitive, components ComponentManagerInterface)
+	NavigateToPage(name string, components ComponentManagerInterface)
+	GoBackWithComponents(components ComponentManagerInterface) error
+}

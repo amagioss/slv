@@ -1,25 +1,26 @@
-package pages
+package mainpage
 
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"slv.sh/slv/internal/tui/interfaces"
+	"slv.sh/slv/internal/tui/pages"
 )
 
 // MainPage handles the main menu page functionality
 type MainPage struct {
-	tui interfaces.TUIInterface
+	pages.BasePage
 }
 
 // NewMainPage creates a new MainPage instance
 func NewMainPage(tui interfaces.TUIInterface) *MainPage {
 	return &MainPage{
-		tui: tui,
+		BasePage: *pages.NewBasePage(tui, "Main Menu"),
 	}
 }
 
-// CreateMainPage creates the main menu page
-func (mp *MainPage) CreateMainPage() tview.Primitive {
+// Create implements the Page interface
+func (mp *MainPage) Create() tview.Primitive {
 	// Create a welcome message
 	welcomeText := "\n\n" + `[white::b]Welcome to SLV - Secure Local Vault[white::-]
 
@@ -34,19 +35,19 @@ func (mp *MainPage) CreateMainPage() tview.Primitive {
 		SetTextAlign(tview.AlignCenter).
 		SetWrap(true)
 
-	// Create the main menu list wit`h enhanced styling
+	// Create the main menu list with enhanced styling
 	list := tview.NewList().
 		AddItem("🔐 Vaults", "Manage and organize your vaults", 'v', func() {
-			mp.tui.GetNavigation().ShowVaults()
+			mp.NavigateTo("vaults")
 		}).
 		AddItem("👤 Profiles", "View Profile settings and Environments", 'p', func() {
-			mp.tui.GetNavigation().ShowProfiles()
+			mp.NavigateTo("profiles")
 		}).
 		AddItem("🌍 Environments", "Manage Environments", 'e', func() {
-			mp.tui.GetNavigation().ShowEnvironments()
+			mp.NavigateTo("environments")
 		}).
 		AddItem("❓ Help", "View documentation and help", 'h', func() {
-			mp.tui.GetNavigation().ShowHelp()
+			mp.NavigateTo("help")
 		})
 
 	// Style the list
@@ -54,6 +55,7 @@ func (mp *MainPage) CreateMainPage() tview.Primitive {
 		SetSelectedBackgroundColor(tcell.ColorNavy).
 		SetSecondaryTextColor(tcell.ColorGray).
 		SetMainTextColor(tcell.ColorWhite)
+
 	// Create a centered layout using grid
 	content := tview.NewGrid().
 		SetRows(10, 0).         // Two flexible rows for equal centering
@@ -66,7 +68,25 @@ func (mp *MainPage) CreateMainPage() tview.Primitive {
 	// Center the menu list
 	content.AddItem(list, 1, 1, 1, 1, 0, 0, true) // Add padding for centering
 
-	// Update status bar with help text
-	mp.tui.UpdateStatusBar("[yellow]↑/↓: Navigate | Enter: select[white]")
-	return mp.tui.CreatePageLayout("Main Menu", content)
+	// Update status bar with help text using BasePage method
+	mp.UpdateStatus("[yellow]↑/↓: Navigate | Enter: select[white]")
+
+	// Create layout using BasePage method
+	return mp.CreateLayout(content)
+}
+
+// Refresh implements the Page interface
+func (mp *MainPage) Refresh() {
+	// Main page doesn't need refresh logic
+}
+
+// HandleInput implements the Page interface
+func (mp *MainPage) HandleInput(event *tcell.EventKey) *tcell.EventKey {
+	// Main page doesn't handle specific input
+	return event
+}
+
+// GetTitle implements the Page interface
+func (mp *MainPage) GetTitle() string {
+	return mp.BasePage.GetTitle()
 }

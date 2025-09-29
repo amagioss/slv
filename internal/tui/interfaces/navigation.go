@@ -1,0 +1,42 @@
+package interfaces
+
+import (
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
+)
+
+// NavigationInterface defines the interface for navigation functionality
+type NavigationInterface interface {
+	// Page navigation
+	ShowMainMenu()
+	ShowVaults()
+	ShowVaultsReplace()
+	ShowProfiles()
+	ShowEnvironments()
+	ShowHelp()
+	ShowVaultDetails()
+	ShowNewVault()
+
+	// Routing and stack management
+	GoBack()
+	NavigateTo(pageName string)
+	GetCurrentPage() string
+	GetPageStack() []string
+	ClearStack()
+
+	// Input handling
+	HandleEscape() *tcell.EventKey
+
+	// Status and help
+	UpdateStatus()
+	GetStatusBar() tview.Primitive
+	SetCustomHelp(helpText string)
+	ClearCustomHelp()
+
+	// Vault directory management
+	GetVaultDir() string
+	SetVaultDir(dir string)
+
+	// App access
+	GetApp() TUIInterface
+}

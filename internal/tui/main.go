@@ -3,11 +3,13 @@ package tui
 import (
 	"fmt"
 	"os"
+
+	"slv.sh/slv/internal/tui/app"
 )
 
 // RunTUI starts the TUI application
 func RunTUI() error {
-	tui := NewTUI()
+	tui := app.NewTUI()
 	return tui.Run()
 }
 
