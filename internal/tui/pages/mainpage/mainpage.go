@@ -38,16 +38,16 @@ func (mp *MainPage) Create() tview.Primitive {
 	// Create the main menu list with enhanced styling
 	list := tview.NewList().
 		AddItem("🔐 Vaults", "Manage and organize your vaults", 'v', func() {
-			mp.NavigateTo("vaults")
+			mp.NavigateTo("vaults", false)
 		}).
 		AddItem("👤 Profiles", "View Profile settings and Environments", 'p', func() {
-			mp.NavigateTo("profiles")
+			mp.NavigateTo("profiles", false)
 		}).
 		AddItem("🌍 Environments", "Manage Environments", 'e', func() {
-			mp.NavigateTo("environments")
+			mp.NavigateTo("environments", false)
 		}).
 		AddItem("❓ Help", "View documentation and help", 'h', func() {
-			mp.NavigateTo("help")
+			mp.NavigateTo("help", false)
 		})
 
 	// Style the list

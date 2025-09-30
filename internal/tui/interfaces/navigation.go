@@ -24,7 +24,7 @@ type NavigationInterface interface {
 
 	// Routing and stack management
 	GoBack()
-	NavigateTo(pageName string)
+	NavigateTo(pageName string, replace bool)
 	GetCurrentPage() string
 	GetPageStack() []string
 	ClearStack()

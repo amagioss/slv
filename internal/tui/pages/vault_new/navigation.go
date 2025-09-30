@@ -11,6 +11,7 @@ type FormNavigation struct {
 	vnp          *VaultNewPage
 	currentFocus int
 	focusGroup   []tview.Primitive
+	helpTexts    map[tview.Primitive]string // Component-specific help texts
 }
 
 func (fn *FormNavigation) NewFormNavigation(vnp *VaultNewPage) *FormNavigation {
@@ -30,10 +31,14 @@ func (fn *FormNavigation) NewFormNavigation(vnp *VaultNewPage) *FormNavigation {
 		vnp:          vnp,
 		currentFocus: intialFocus,
 		focusGroup:   focusGroup,
+		helpTexts:    make(map[tview.Primitive]string),
 	}
 }
 
 func (fn *FormNavigation) SetupNavigation() {
+	// Set up help texts for each component
+	fn.setupHelpTexts()
+
 	fn.setInputCaptureForConfigForm()
 	fn.setInputCaptureForOptionsForm()
 	fn.setInputCaptureForShareWithSelfForm()
@@ -45,16 +50,20 @@ func (fn *FormNavigation) SetupNavigation() {
 
 	fn.vnp.GetTUI().GetApplication().SetFocus(fn.focusGroup[fn.currentFocus])
 
+	// Set initial help text
+	fn.updateHelpText()
 }
 
 func (fn *FormNavigation) ShiftFocusForward() {
 	fn.currentFocus = (fn.currentFocus + 1) % len(fn.focusGroup)
 	fn.vnp.GetTUI().GetApplication().SetFocus(fn.focusGroup[fn.currentFocus])
+	fn.updateHelpText()
 }
 
 func (fn *FormNavigation) ShiftFocusBackward() {
 	fn.currentFocus = (fn.currentFocus - 1 + len(fn.focusGroup)) % len(fn.focusGroup)
 	fn.vnp.GetTUI().GetApplication().SetFocus(fn.focusGroup[fn.currentFocus])
+	fn.updateHelpText()
 }
 
 func (fn *FormNavigation) defaultFormInputCapture(event *tcell.EventKey) *tcell.EventKey {
@@ -222,4 +231,31 @@ func (fn *FormNavigation) setInputCaptureForSubmitButton() {
 		event = fn.defaultFormInputCapture(event)
 		return event
 	})
+}
+
+// setupHelpTexts sets up help text for each component
+func (fn *FormNavigation) setupHelpTexts() {
+	fn.helpTexts[fn.vnp.vaultConfigForm] = "[yellow]Vault Config: ↑/↓: Navigate fields | Tab: Next section | Enter: Select field[white]"
+	fn.helpTexts[fn.vnp.optionsForm] = "[yellow]Options: ↑/↓: Navigate fields | Space: Toggle checkbox | Tab: Next section[white]"
+	fn.helpTexts[fn.vnp.grantAccessForm] = "[yellow]Grant Access: Type to search | Enter: Add environment | ↓: View results | Tab: Next section[white]"
+	fn.helpTexts[fn.vnp.shareWithSelfForm] = "[yellow]Share With Self: Space: Toggle checkbox | Tab: Next section[white]"
+	fn.helpTexts[fn.vnp.shareWithK8sForm] = "[yellow]Share With K8s: Space: Toggle checkbox | Tab: Next section[white]"
+	fn.helpTexts[fn.vnp.searchResults] = "[yellow]Search Results: ↑/↓: Navigate | Enter: Add to granted access | Tab: Next section[white]"
+	fn.helpTexts[fn.vnp.grantedAccess] = "[yellow]Granted Access: ↑/↓: Navigate | Ctrl+D: Remove environment | Tab: Next section[white]"
+	fn.helpTexts[fn.vnp.submitButton] = "[yellow]Submit: Enter: Create vault | Ctrl+S: Create vault | Tab: Previous section[white]"
+}
+
+// updateHelpText updates the status bar with help text for the currently focused component
+func (fn *FormNavigation) updateHelpText() {
+	if fn.currentFocus >= 0 && fn.currentFocus < len(fn.focusGroup) {
+		currentComponent := fn.focusGroup[fn.currentFocus]
+		if helpText, exists := fn.helpTexts[currentComponent]; exists {
+			fn.vnp.GetTUI().UpdateStatusBar(helpText)
+		}
+	}
+}
+
+// SetComponentHelpText sets help text for a specific component
+func (fn *FormNavigation) SetComponentHelpText(component tview.Primitive, helpText string) {
+	fn.helpTexts[component] = helpText
 }

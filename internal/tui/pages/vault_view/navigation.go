@@ -9,6 +9,7 @@ type FormNavigation struct {
 	vvp          *VaultViewPage
 	currentFocus int
 	focusGroup   []tview.Primitive
+	helpTexts    map[tview.Primitive]string // Component-specific help texts
 }
 
 func (fn *FormNavigation) NewFormNavigation(vvp *VaultViewPage) *FormNavigation {
@@ -23,6 +24,7 @@ func (fn *FormNavigation) NewFormNavigation(vvp *VaultViewPage) *FormNavigation 
 		vvp:          vvp,
 		currentFocus: intialFocus,
 		focusGroup:   focusGroup,
+		helpTexts:    make(map[tview.Primitive]string),
 	}
 }
 
@@ -33,10 +35,16 @@ func (fn *FormNavigation) resetSelectable() {
 }
 
 func (fn *FormNavigation) SetupNavigation() {
+	// Set up help texts for each component
+	fn.setupHelpTexts()
+
 	fn.vvp.GetTUI().GetApplication().SetFocus(fn.focusGroup[fn.currentFocus])
 	fn.resetSelectable()
 	fn.focusGroup[fn.currentFocus].(*tview.Table).SetSelectable(true, false)
 	fn.vvp.mainFlex.SetInputCapture(fn.handleInputCapture)
+
+	// Set initial help text
+	fn.updateHelpText()
 }
 
 func (fn *FormNavigation) ShiftFocusForward() {
@@ -44,6 +52,7 @@ func (fn *FormNavigation) ShiftFocusForward() {
 	fn.resetSelectable()
 	fn.focusGroup[fn.currentFocus].(*tview.Table).SetSelectable(true, false)
 	fn.vvp.GetTUI().GetApplication().SetFocus(fn.focusGroup[fn.currentFocus])
+	fn.updateHelpText()
 }
 
 func (fn *FormNavigation) ShiftFocusBackward() {
@@ -51,6 +60,7 @@ func (fn *FormNavigation) ShiftFocusBackward() {
 	fn.resetSelectable()
 	fn.focusGroup[fn.currentFocus].(*tview.Table).SetSelectable(true, false)
 	fn.vvp.GetTUI().GetApplication().SetFocus(fn.focusGroup[fn.currentFocus])
+	fn.updateHelpText()
 }
 
 func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.EventKey {
@@ -100,4 +110,26 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 		}
 		return event
 	}
+}
+
+// setupHelpTexts sets up help text for each component
+func (fn *FormNavigation) setupHelpTexts() {
+	fn.helpTexts[fn.vvp.vaultDetailsTable] = "[yellow]Vault Details: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload[white]"
+	fn.helpTexts[fn.vvp.accessorsTable] = "[yellow]Accessors: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload[white]"
+	fn.helpTexts[fn.vvp.itemsTable] = "[yellow]Items: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload[white]"
+}
+
+// updateHelpText updates the status bar with help text for the currently focused component
+func (fn *FormNavigation) updateHelpText() {
+	if fn.currentFocus >= 0 && fn.currentFocus < len(fn.focusGroup) {
+		currentComponent := fn.focusGroup[fn.currentFocus]
+		if helpText, exists := fn.helpTexts[currentComponent]; exists {
+			fn.vvp.GetTUI().UpdateStatusBar(helpText)
+		}
+	}
+}
+
+// SetComponentHelpText sets help text for a specific component
+func (fn *FormNavigation) SetComponentHelpText(component tview.Primitive, helpText string) {
+	fn.helpTexts[component] = helpText
 }

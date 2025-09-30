@@ -86,8 +86,8 @@ func (bp *BasePage) GetTUI() interfaces.TUIInterface {
 }
 
 // NavigateTo navigates to another page
-func (bp *BasePage) NavigateTo(pageName string) {
-	bp.tui.GetNavigation().NavigateTo(pageName)
+func (bp *BasePage) NavigateTo(pageName string, replace bool) {
+	bp.tui.GetNavigation().NavigateTo(pageName, replace)
 }
 
 // GoBack goes back to the previous page
