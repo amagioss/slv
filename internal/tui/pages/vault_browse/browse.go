@@ -11,7 +11,6 @@ import (
 	"slv.sh/slv/internal/core/vaults"
 	"slv.sh/slv/internal/tui/interfaces"
 	"slv.sh/slv/internal/tui/pages"
-	"slv.sh/slv/internal/tui/pages/vault_view"
 )
 
 // VaultFile represents a file or directory in the vault browser
@@ -196,7 +195,7 @@ func (vbp *VaultBrowsePage) handleItemSelection(item VaultFile) {
 		// Handle directory selection - navigate into the directory
 		vbp.currentDir = item.Path
 		// Replace the current vault page with new directory
-		vbp.GetTUI().GetNavigation().ShowVaults(true)
+		vbp.GetTUI().GetNavigation().ShowVaultsWithDir(item.Path, true)
 	}
 }
 
@@ -231,13 +230,12 @@ func (vbp *VaultBrowsePage) goBackDirectory() {
 	if parentDir != vbp.currentDir {
 		vbp.currentDir = parentDir
 		// Replace the current vault page with parent directory
-		vbp.GetTUI().GetNavigation().ShowVaults(true)
+		vbp.GetTUI().GetNavigation().ShowVaultsWithDir(parentDir, true)
 	}
 }
 
 // openVaultFile opens a vault file for viewing
-func (vbp *VaultBrowsePage) openVaultFile(filePath string) { // Check if we already have this vault loaded
-
+func (vbp *VaultBrowsePage) openVaultFile(filePath string) {
 	// Load the vault using vaults.Get
 	vault, err := vaults.Get(filePath)
 	if err != nil {
@@ -245,10 +243,6 @@ func (vbp *VaultBrowsePage) openVaultFile(filePath string) { // Check if we alre
 		return
 	}
 
-	// Store the vault instance and path
-	vbp.GetTUI().GetRouter().GetRegisteredPage("vaults_view").(*vault_view.VaultViewPage).SetVault(vault)
-	vbp.GetTUI().GetRouter().GetRegisteredPage("vaults_view").(*vault_view.VaultViewPage).SetFilePath(filePath)
-
-	// Create and show vault details page
-	vbp.GetTUI().GetNavigation().ShowVaultDetails(false)
+	// Show vault details page with the loaded vault and filepath
+	vbp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vault, filePath, false)
 }

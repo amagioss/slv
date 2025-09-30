@@ -3,9 +3,9 @@ package app
 import (
 	"context"
 	"log"
-	"os"
 
 	"github.com/rivo/tview"
+	"slv.sh/slv/internal/core/vaults"
 	"slv.sh/slv/internal/tui/components"
 	"slv.sh/slv/internal/tui/core"
 	"slv.sh/slv/internal/tui/interfaces"
@@ -69,42 +69,59 @@ func (t *TUI) setNavigator() {
 	t.navigation = navigation.NewNavigation(t)
 }
 
-// setupPages registers all pages with the router at startup
+// setupPages registers all page factories with the router at startup
 func (t *TUI) setupPages() {
-	// Register main page
-	mainPage := mainpage.NewMainPage(t)
-	t.app.GetRouter().RegisterPage("main", mainPage)
+	// Register main page factory
+	t.app.GetRouter().RegisterPageFactory("main", interfaces.PageFactoryFunc(func(params ...interface{}) interfaces.Page {
+		tui := params[0].(interfaces.TUIInterface)
+		return mainpage.NewMainPage(tui)
+	}))
 
-	// Register profiles page
-	profilesPage := profiles.NewProfilesPage(t)
-	t.app.GetRouter().RegisterPage("profiles", profilesPage)
+	// Register profiles page factory
+	t.app.GetRouter().RegisterPageFactory("profiles", interfaces.PageFactoryFunc(func(params ...interface{}) interfaces.Page {
+		tui := params[0].(interfaces.TUIInterface)
+		return profiles.NewProfilesPage(tui)
+	}))
 
-	// Register environments page
-	environmentsPage := environments.NewEnvironmentsPage(t)
-	t.app.GetRouter().RegisterPage("environments", environmentsPage)
+	// Register environments page factory
+	t.app.GetRouter().RegisterPageFactory("environments", interfaces.PageFactoryFunc(func(params ...interface{}) interfaces.Page {
+		tui := params[0].(interfaces.TUIInterface)
+		return environments.NewEnvironmentsPage(tui)
+	}))
 
-	// Register help page
-	helpPage := help.NewHelpPage(t)
-	t.app.GetRouter().RegisterPage("help", helpPage)
+	// Register help page factory
+	t.app.GetRouter().RegisterPageFactory("help", interfaces.PageFactoryFunc(func(params ...interface{}) interfaces.Page {
+		tui := params[0].(interfaces.TUIInterface)
+		return help.NewHelpPage(tui)
+	}))
 
-	// Register vault browse page (will be created with current directory when needed)
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		t.LogError(err, true)
-		homeDir = "."
-	}
+	// Register vault browse page factory (takes directory as parameter)
+	t.app.GetRouter().RegisterPageFactory("vaults_browse", interfaces.PageFactoryFunc(func(params ...interface{}) interfaces.Page {
+		tui := params[0].(interfaces.TUIInterface)
+		dir := params[1].(string)
+		return vault_browse.NewVaultBrowsePage(tui, dir)
+	}))
 
-	vaultBrowsePage := vault_browse.NewVaultBrowsePage(t, homeDir)
-	t.app.GetRouter().RegisterPage("vaults_browse", vaultBrowsePage)
+	// Register vault new page factory (takes directory as parameter)
+	t.app.GetRouter().RegisterPageFactory("vaults_new", interfaces.PageFactoryFunc(func(params ...interface{}) interfaces.Page {
+		tui := params[0].(interfaces.TUIInterface)
+		dir := params[1].(string)
+		return vault_new.NewVaultNewPage(tui, dir)
+	}))
 
-	// Register vault new page (will be created with current directory when needed)
-	vaultNewPage := vault_new.NewVaultNewPage(t, homeDir)
-	t.app.GetRouter().RegisterPage("vaults_new", vaultNewPage)
-
-	// Register vault view page (will be created with current directory when needed)
-	vaultViewPage := vault_view.NewVaultViewPage(t, nil, "")
-	t.app.GetRouter().RegisterPage("vaults_view", vaultViewPage)
-
+	// Register vault view page factory (takes vault and filepath as parameters)
+	t.app.GetRouter().RegisterPageFactory("vaults_view", interfaces.PageFactoryFunc(func(params ...interface{}) interfaces.Page {
+		tui := params[0].(interfaces.TUIInterface)
+		var vault *vaults.Vault = nil
+		if len(params) > 1 && params[1] != nil {
+			vault = params[1].(*vaults.Vault)
+		}
+		filePath := ""
+		if len(params) > 2 {
+			filePath = params[2].(string)
+		}
+		return vault_view.NewVaultViewPage(tui, vault, filePath)
+	}))
 }
 
 // Run starts the TUI

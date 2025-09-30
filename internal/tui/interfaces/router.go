@@ -20,11 +20,17 @@ type RouterInterface interface {
 	SetCurrentPage(page string)
 	GetPageStack() []string
 
-	// Page interface support
+	// Page interface support (legacy - for backward compatibility)
 	RegisterPage(name string, page Page)
 	GetRegisteredPage(name string) Page
 	HasRegisteredPage(name string) bool
 	GetRegisteredPageNames() []string
+
+	// Page factory support
+	RegisterPageFactory(name string, factory PageFactory)
+	CreatePage(tui TUIInterface, name string, params ...interface{}) Page
+	HasPageFactory(name string) bool
+	GetPageFactoryNames() []string
 
 	// Infrastructure methods (to avoid duplication in Navigation)
 	AddPageToMainComponent(name string, page tview.Primitive, components ComponentManagerInterface)

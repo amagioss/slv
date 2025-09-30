@@ -14,7 +14,6 @@ import (
 	"slv.sh/slv/internal/core/profiles"
 	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
-	"slv.sh/slv/internal/tui/pages/vault_view"
 )
 
 func (vnp *VaultNewPage) searchEnvironments(query string) {
@@ -208,16 +207,8 @@ func (vnp *VaultNewPage) createVaultFromForm() {
 
 // navigateToVaultDetails navigates to the vault details page and removes new vault page from stack
 func (vnp *VaultNewPage) navigateToVaultDetails(vault *vaults.Vault, vaultFilePath string) {
-	// Get the registered vault view page
-	vaultViewPage := vnp.GetTUI().GetRouter().GetRegisteredPage("vaults_view").(*vault_view.VaultViewPage)
-
-	// Set the vault and filepath for the registered page
-	vaultViewPage.SetVault(vault)
-	vaultViewPage.SetFilePath(vaultFilePath)
-
-	// Remove the new vault page from the stack first
-	// Use the existing ShowVaultDetails method with replace=true
-	vnp.GetTUI().GetNavigation().ShowVaultDetails(true)
+	// Show vault details page with the created vault and filepath
+	vnp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vault, vaultFilePath, true)
 
 	vnp.showSuccess(fmt.Sprintf("Vault '%s' created successfully at %s", vault.Name, vaultFilePath))
 }

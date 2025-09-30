@@ -3,6 +3,7 @@ package interfaces
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"slv.sh/slv/internal/core/vaults"
 )
 
 // NavigationInterface defines the interface for navigation functionality
@@ -15,6 +16,11 @@ type NavigationInterface interface {
 	ShowHelp(replace bool)
 	ShowVaultDetails(replace bool)
 	ShowNewVault(replace bool)
+
+	// Parameterized page navigation
+	ShowVaultsWithDir(dir string, replace bool)
+	ShowVaultDetailsWithVault(vault *vaults.Vault, filePath string, replace bool)
+	ShowNewVaultWithDir(dir string, replace bool)
 
 	// Routing and stack management
 	GoBack()

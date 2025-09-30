@@ -9,19 +9,21 @@ import (
 
 // Router handles page navigation and routing
 type Router struct {
-	pages        *tview.Pages
-	pageStack    []string
-	currentPage  string
-	pageRegistry map[string]interfaces.Page // Registry of Page interfaces
+	pages         *tview.Pages
+	pageStack     []string
+	currentPage   string
+	pageRegistry  map[string]interfaces.Page        // Registry of Page interfaces (legacy)
+	pageFactories map[string]interfaces.PageFactory // Registry of Page factories
 }
 
 // NewRouter creates a new Router instance
 func NewRouter() *Router {
 	return &Router{
-		pages:        tview.NewPages(),
-		pageStack:    make([]string, 0),
-		currentPage:  "",
-		pageRegistry: make(map[string]interfaces.Page),
+		pages:         tview.NewPages(),
+		pageStack:     make([]string, 0),
+		currentPage:   "",
+		pageRegistry:  make(map[string]interfaces.Page),
+		pageFactories: make(map[string]interfaces.PageFactory),
 	}
 }
 
@@ -148,6 +150,36 @@ func (r *Router) HasRegisteredPage(name string) bool {
 func (r *Router) GetRegisteredPageNames() []string {
 	names := make([]string, 0, len(r.pageRegistry))
 	for name := range r.pageRegistry {
+		names = append(names, name)
+	}
+	return names
+}
+
+// RegisterPageFactory registers a Page factory with the router
+func (r *Router) RegisterPageFactory(name string, factory interfaces.PageFactory) {
+	r.pageFactories[name] = factory
+}
+
+// CreatePage creates a new page instance using the registered factory
+func (r *Router) CreatePage(tui interfaces.TUIInterface, name string, params ...interface{}) interfaces.Page {
+	if factory, exists := r.pageFactories[name]; exists {
+		// Prepend TUI to params for the factory
+		allParams := append([]interface{}{tui}, params...)
+		return factory.CreatePage(allParams...)
+	}
+	return nil
+}
+
+// HasPageFactory checks if a page factory is registered
+func (r *Router) HasPageFactory(name string) bool {
+	_, exists := r.pageFactories[name]
+	return exists
+}
+
+// GetPageFactoryNames returns all registered page factory names
+func (r *Router) GetPageFactoryNames() []string {
+	names := make([]string, 0, len(r.pageFactories))
+	for name := range r.pageFactories {
 		names = append(names, name)
 	}
 	return names
