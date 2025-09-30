@@ -28,6 +28,6 @@ type RouterInterface interface {
 
 	// Infrastructure methods (to avoid duplication in Navigation)
 	AddPageToMainComponent(name string, page tview.Primitive, components ComponentManagerInterface)
-	NavigateToPage(name string, components ComponentManagerInterface)
+	NavigateToPage(name string, components ComponentManagerInterface, replace bool)
 	GoBackWithComponents(components ComponentManagerInterface) error
 }

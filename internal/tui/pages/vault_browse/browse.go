@@ -96,7 +96,7 @@ func (vbp *VaultBrowsePage) Create() tview.Primitive {
 			return nil
 		case tcell.KeyCtrlN:
 			// Create new vault
-			vbp.GetTUI().GetNavigation().ShowNewVault()
+			vbp.GetTUI().GetNavigation().ShowNewVault(false)
 			return nil
 		}
 		return event
@@ -196,7 +196,7 @@ func (vbp *VaultBrowsePage) handleItemSelection(item VaultFile) {
 		// Handle directory selection - navigate into the directory
 		vbp.currentDir = item.Path
 		// Replace the current vault page with new directory
-		vbp.GetTUI().GetNavigation().ShowVaultsReplace()
+		vbp.GetTUI().GetNavigation().ShowVaults(true)
 	}
 }
 
@@ -231,7 +231,7 @@ func (vbp *VaultBrowsePage) goBackDirectory() {
 	if parentDir != vbp.currentDir {
 		vbp.currentDir = parentDir
 		// Replace the current vault page with parent directory
-		vbp.GetTUI().GetNavigation().ShowVaultsReplace()
+		vbp.GetTUI().GetNavigation().ShowVaults(true)
 	}
 }
 
@@ -250,5 +250,5 @@ func (vbp *VaultBrowsePage) openVaultFile(filePath string) { // Check if we alre
 	vbp.GetTUI().GetRouter().GetRegisteredPage("vaults_view").(*vault_view.VaultViewPage).SetFilePath(filePath)
 
 	// Create and show vault details page
-	vbp.GetTUI().GetNavigation().ShowVaultDetails()
+	vbp.GetTUI().GetNavigation().ShowVaultDetails(false)
 }

@@ -17,21 +17,35 @@ import (
 	"slv.sh/slv/internal/core/vaults"
 	"slv.sh/slv/internal/tui/interfaces"
 	"slv.sh/slv/internal/tui/pages"
+	"slv.sh/slv/internal/tui/pages/vault_view"
 )
 
 // VaultNewPage handles the new vault creation functionality
 type VaultNewPage struct {
 	pages.BasePage
-	currentDir            string
-	searchResults         *tview.List
-	grantedAccess         *tview.List
-	publicKeys            []string
-	grantedEnvs           []*environments.Environment
-	searchEnvMap          map[string]*environments.Environment // Map environment names to environment structs for search results
-	currentQuery          string                               // Store the current search query for refreshing
-	shareWithSelfCheckbox *tview.Checkbox                      // Reference to the Share with Self checkbox
-	grantAccessForm       *tview.Form                          // Reference to the Grant Access form
-	currentPage           tview.Primitive                      // Store reference to current page for modal navigation
+	currentDir   string
+	publicKeys   []string
+	grantedEnvs  []*environments.Environment
+	searchEnvMap map[string]*environments.Environment // Map environment names to environment structs for search results
+	currentQuery string                               // Store the current search query for refreshing
+
+	// Form references
+	vaultConfigForm   *tview.Form   // Vault Configuration form
+	optionsForm       *tview.Form   // Options form
+	grantAccessForm   *tview.Form   // Grant Access form
+	shareWithSelfForm *tview.Form   // Share with Self form
+	shareWithK8sForm  *tview.Form   // Share with K8s Context form
+	submitButton      *tview.Button // Submit button
+
+	// Lists
+	searchResults *tview.List
+	grantedAccess *tview.List
+
+	// Checkbox references
+	shareWithSelfCheckbox *tview.Checkbox // Reference to the Share with Self checkbox
+	shareWithK8sCheckbox  *tview.Checkbox // Reference to the Share with K8s Context checkbox
+
+	currentPage tview.Primitive // Store reference to current page for modal navigation
 }
 
 // NewVaultNewPage creates a new VaultNewPage instance
@@ -220,6 +234,10 @@ func (vnp *VaultNewPage) createComprehensiveVaultForm() tview.Primitive {
 	// Add Grant Access section
 	mainFlex.AddItem(grantAccessFlex, 0, 1, false)
 
+	// Add Submit Button section
+	submitButtonFlex, submitButton := vnp.createSubmitButtonSection(leftForm, optionsForm)
+	mainFlex.AddItem(submitButtonFlex, 3, 1, false) // Increased from 3 to 5 for more space
+
 	// Store references for real-time updates
 	vnp.searchResults = searchResults
 	vnp.grantedAccess = grantedAccess
@@ -228,7 +246,7 @@ func (vnp *VaultNewPage) createComprehensiveVaultForm() tview.Primitive {
 	vnp.searchEnvMap = make(map[string]*environments.Environment)
 
 	// Set up navigation between forms while preserving within-form navigation
-	vnp.setupComprehensiveFormNavigation(leftForm, optionsForm, grantAccessForm, shareWithSelfForm, shareWithK8sForm, searchResults, grantedAccess)
+	vnp.setupComprehensiveFormNavigation(leftForm, optionsForm, grantAccessForm, shareWithSelfForm, shareWithK8sForm, searchResults, grantedAccess, submitButton)
 
 	// Store reference to current page for modal navigation
 	vnp.currentPage = mainFlex
@@ -236,8 +254,45 @@ func (vnp *VaultNewPage) createComprehensiveVaultForm() tview.Primitive {
 	return mainFlex
 }
 
+// createSubmitButtonSection creates the submit button section with border
+func (vnp *VaultNewPage) createSubmitButtonSection(leftForm, optionsForm *tview.Form) (tview.Primitive, *tview.Button) {
+	// Create a flex container for the submit button section
+	submitFlex := tview.NewFlex().SetDirection(tview.FlexRow)
+
+	// Create the submit button
+	submitButton := tview.NewButton("Create Vault").
+		SetSelectedFunc(func() {
+			vnp.createVaultFromForm(leftForm, optionsForm)
+		})
+
+	// Style the submit button
+	submitButton.SetBorder(true).
+		// SetTitle("Actions").
+		SetTitleAlign(tview.AlignCenter).
+		SetBorderColor(vnp.GetTheme().GetAccent()).
+		SetBackgroundColor(vnp.GetTheme().GetBackground())
+
+	// Set button text and background colors for better visibility
+	submitButton.SetLabelColor(vnp.GetTheme().GetTextPrimary()).
+		SetLabelColorActivated(vnp.GetTheme().GetBackground()).
+		SetBackgroundColorActivated(vnp.GetTheme().GetAccent())
+
+	// Center the button horizontally
+	centeredFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
+	centeredFlex.AddItem(nil, 0, 1, false)          // Left spacer
+	centeredFlex.AddItem(submitButton, 20, 1, true) // Button (20 chars wide)
+	centeredFlex.AddItem(nil, 0, 1, false)          // Right spacer
+
+	// Add some vertical spacing
+	// submitFlex.AddItem(nil, 1, 1, false)         // Top spacer
+	submitFlex.AddItem(centeredFlex, 3, 1, true) // Button row
+	submitFlex.AddItem(nil, 1, 1, false)         // Bottom spacer (increased from 1 to 2)
+
+	return submitFlex, submitButton
+}
+
 // setupComprehensiveFormNavigation sets up navigation between all forms
-func (vnp *VaultNewPage) setupComprehensiveFormNavigation(leftForm, optionsForm, grantAccessForm, shareWithSelfForm, shareWithK8sForm *tview.Form, searchResults, grantedAccess *tview.List) {
+func (vnp *VaultNewPage) setupComprehensiveFormNavigation(leftForm, optionsForm, grantAccessForm, shareWithSelfForm, shareWithK8sForm *tview.Form, searchResults, grantedAccess *tview.List, submitButton *tview.Button) {
 	// Create a focus group for inter-form navigation
 	focusGroup := []tview.Primitive{
 		leftForm,          // Vault Configuration
@@ -247,6 +302,7 @@ func (vnp *VaultNewPage) setupComprehensiveFormNavigation(leftForm, optionsForm,
 		shareWithK8sForm,  // Share with K8s Context
 		searchResults,     // Search Results list
 		grantedAccess,     // Granted Access list
+		submitButton,      // Submit Button
 	}
 
 	currentFocus := 0
@@ -368,6 +424,10 @@ func (vnp *VaultNewPage) setupComprehensiveFormNavigation(leftForm, optionsForm,
 			// Create vault with Ctrl+S
 			vnp.createVaultFromForm(leftForm, optionsForm)
 			return nil
+		case tcell.KeyDown:
+			// Move to next field
+			vnp.GetTUI().GetApplication().SetFocus(focusGroup[5])
+			return nil
 		}
 		// Let all other keys pass through to the primitive for within-form navigation
 		return event
@@ -442,6 +502,8 @@ func (vnp *VaultNewPage) setupComprehensiveFormNavigation(leftForm, optionsForm,
 		// Let all other keys pass through for list navigation
 		return event
 	})
+
+	submitButton.SetInputCapture(createInterFormInputCapture())
 
 	// Set initial focus to the first form
 	vnp.GetTUI().GetApplication().SetFocus(focusGroup[currentFocus])
@@ -609,7 +671,7 @@ func (vnp *VaultNewPage) createVaultFromForm(leftForm, optionsForm *tview.Form) 
 	}
 
 	// Create the vault
-	_, err := vaults.New(vaultFilePath, vaultName, namespace, enableHashing, quantumSafe, publicKeys...)
+	vault, err := vaults.New(vaultFilePath, vaultName, namespace, enableHashing, quantumSafe, publicKeys...)
 	if err != nil {
 		vnp.showError(fmt.Sprintf("Failed to create vault: %v", err))
 		return
@@ -618,7 +680,24 @@ func (vnp *VaultNewPage) createVaultFromForm(leftForm, optionsForm *tview.Form) 
 	// Show success message
 	vnp.showSuccess(fmt.Sprintf("Vault '%s' created successfully at %s", vaultName, vaultFilePath))
 
-	// TODO: Navigate back to vault browser or refresh the current view
+	// Navigate to vault details page and remove new vault page from stack
+	vnp.navigateToVaultDetails(vault, vaultFilePath)
+}
+
+// navigateToVaultDetails navigates to the vault details page and removes new vault page from stack
+func (vnp *VaultNewPage) navigateToVaultDetails(vault *vaults.Vault, vaultFilePath string) {
+	// Get the registered vault view page
+	vaultViewPage := vnp.GetTUI().GetRouter().GetRegisteredPage("vaults_view").(*vault_view.VaultViewPage)
+
+	// Set the vault and filepath for the registered page
+	vaultViewPage.SetVault(vault)
+	vaultViewPage.SetFilePath(vaultFilePath)
+
+	// Remove the new vault page from the stack first
+	// Use the existing ShowVaultDetails method with replace=true
+	vnp.GetTUI().GetNavigation().ShowVaultDetails(true)
+
+	vnp.showSuccess(fmt.Sprintf("Vault '%s' created successfully at %s", vault.Name, vaultFilePath))
 }
 
 // validateVaultInputs validates the vault creation inputs

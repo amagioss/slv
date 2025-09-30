@@ -90,17 +90,23 @@ func (r *Router) AddPageToMainComponent(name string, page tview.Primitive, compo
 }
 
 // NavigateToPage navigates to a page with full stack management and component switching
-func (r *Router) NavigateToPage(name string, components interfaces.ComponentManagerInterface) {
-	// Push current page to stack if it exists
-	if r.currentPage != "" {
-		r.pageStack = append(r.pageStack, r.currentPage)
+func (r *Router) NavigateToPage(name string, components interfaces.ComponentManagerInterface, replace bool) {
+	if replace {
+		// Replace mode: don't push to stack, just switch
+		r.currentPage = name
+		components.GetMainContentPages().SwitchToPage(name)
+	} else {
+		// Normal mode: push current page to stack if it exists
+		if r.currentPage != "" {
+			r.pageStack = append(r.pageStack, r.currentPage)
+		}
+
+		// Set new current page
+		r.currentPage = name
+
+		// Switch to the page in components (this is the main UI switching)
+		components.GetMainContentPages().SwitchToPage(name)
 	}
-
-	// Set new current page
-	r.currentPage = name
-
-	// Switch to the page in components (this is the main UI switching)
-	components.GetMainContentPages().SwitchToPage(name)
 }
 
 // GoBackWithComponents goes back using the stack and updates components

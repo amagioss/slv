@@ -12,8 +12,8 @@ func (n *Navigation) addPage(name string, page tview.Primitive) {
 }
 
 // setCurrentPage sets the current active page (now uses Router infrastructure)
-func (n *Navigation) setCurrentPage(name string) {
-	n.app.GetRouter().NavigateToPage(name, n.app.GetComponents())
+func (n *Navigation) setCurrentPage(name string, replace bool) {
+	n.app.GetRouter().NavigateToPage(name, n.app.GetComponents(), replace)
 	n.UpdateStatus()
 }
 
@@ -31,15 +31,17 @@ func (n *Navigation) GoBack() {
 func (n *Navigation) NavigateTo(pageName string) {
 	switch pageName {
 	case "main":
-		n.ShowMainMenu()
+		n.ShowMainMenu(false)
 	case "vaults":
-		n.ShowVaults()
+		n.ShowVaults(false)
 	case "profiles":
-		n.ShowProfiles()
+		n.ShowProfiles(false)
 	case "environments":
-		n.ShowEnvironments()
+		n.ShowEnvironments(false)
 	case "help":
-		n.ShowHelp()
+		n.ShowHelp(false)
+	case "new-vault":
+		n.ShowNewVault(false)
 	default:
 		n.app.ShowError(fmt.Sprintf("Unknown page: %s", pageName))
 	}

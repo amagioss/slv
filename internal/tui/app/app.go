@@ -61,7 +61,7 @@ func (t *TUI) setup() {
 	rootLayout := t.app.GetLayoutManager().BuildLayout()
 
 	t.app.GetApplication().SetRoot(rootLayout, true)
-	t.navigation.ShowMainMenu()
+	t.navigation.ShowMainMenu(false)
 }
 
 // setNavigator initializes the navigation after theme is applied
@@ -163,9 +163,11 @@ func (t *TUI) ShowError(message string) {
 		SetText("Error: " + message).
 		AddButtons([]string{"OK"}).
 		SetDoneFunc(func(int, string) {
-			t.app.GetRouter().RemovePage("error")
+			t.components.GetMainContentPages().RemovePage("error")
 		})
-	t.app.GetRouter().AddPage("error", modal, true, true)
+
+	// Add modal to the main content pages
+	t.components.GetMainContentPages().AddPage("error", modal, true, true)
 }
 
 // ShowInfo shows an info modal
@@ -174,9 +176,11 @@ func (t *TUI) ShowInfo(message string) {
 		SetText(message).
 		AddButtons([]string{"OK"}).
 		SetDoneFunc(func(int, string) {
-			t.app.GetRouter().RemovePage("info")
+			t.components.GetMainContentPages().RemovePage("info")
 		})
-	t.app.GetRouter().AddPage("info", modal, true, true)
+
+	// Add modal to the main content pages
+	t.components.GetMainContentPages().AddPage("info", modal, true, true)
 }
 
 // LogError logs an error

@@ -87,7 +87,7 @@ func (vvp *VaultViewPage) Create() tview.Primitive { // Create a flex layout to 
 		case tcell.KeyRune:
 			switch event.Rune() {
 			case 'q', 'Q':
-				vvp.GetTUI().GetNavigation().ShowVaults()
+				vvp.GetTUI().GetNavigation().ShowVaults(false)
 				return nil
 			case 'u', 'U':
 				// Unlock vault
@@ -105,12 +105,12 @@ func (vvp *VaultViewPage) Create() tview.Primitive { // Create a flex layout to 
 				// Reload vault
 				if vvp.filePath != "" {
 					vvp.reloadVault()
-					vvp.GetTUI().GetNavigation().ShowVaultDetails()
+					vvp.GetTUI().GetNavigation().ShowVaultDetails(false)
 				}
 				return nil
 			}
 		case tcell.KeyEsc:
-			vvp.GetTUI().GetNavigation().ShowVaults()
+			vvp.GetTUI().GetNavigation().ShowVaults(false)
 			return nil
 		case tcell.KeyUp, tcell.KeyDown, tcell.KeyLeft, tcell.KeyRight, tcell.KeyPgUp, tcell.KeyPgDn, tcell.KeyHome, tcell.KeyEnd:
 			// Allow arrow keys and page keys to scroll
@@ -169,7 +169,7 @@ func (vvp *VaultViewPage) unlockVault() {
 
 	// If already unlocked, just refresh the display
 	if !vvp.vault.IsLocked() {
-		vvp.GetTUI().GetNavigation().ShowVaultDetails()
+		vvp.GetTUI().GetNavigation().ShowVaultDetails(false)
 		return
 	}
 
@@ -186,7 +186,7 @@ func (vvp *VaultViewPage) unlockVault() {
 		return
 	}
 
-	vvp.GetTUI().GetNavigation().ShowVaultDetails()
+	vvp.GetTUI().GetNavigation().ShowVaultDetails(false)
 }
 
 // lockVault locks the vault
@@ -199,7 +199,7 @@ func (vvp *VaultViewPage) lockVault() {
 
 	// If already locked, just refresh the display
 	if vvp.vault.IsLocked() {
-		vvp.GetTUI().GetNavigation().ShowVaultDetails()
+		vvp.GetTUI().GetNavigation().ShowVaultDetails(false)
 		return
 	}
 
@@ -207,7 +207,7 @@ func (vvp *VaultViewPage) lockVault() {
 	vvp.vault.Lock()
 
 	// Refresh the vault details page using the stored instance
-	vvp.GetTUI().GetNavigation().ShowVaultDetails()
+	vvp.GetTUI().GetNavigation().ShowVaultDetails(false)
 }
 
 // reloadVault reloads the vault
@@ -227,7 +227,7 @@ func (vvp *VaultViewPage) reloadVault() {
 	vvp.vault = vault
 
 	// Refresh the vault details page using the stored instance
-	vvp.GetTUI().GetNavigation().ShowVaultDetails()
+	vvp.GetTUI().GetNavigation().ShowVaultDetails(false)
 }
 
 // func (vvp *VaultViewPage) clearVault() {

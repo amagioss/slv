@@ -34,7 +34,7 @@ func (n *Navigation) handleGlobalInput(event *tcell.EventKey) *tcell.EventKey {
 		n.app.Quit()
 		return nil
 	case tcell.KeyF1:
-		n.ShowHelp()
+		n.ShowHelp(false)
 		return nil
 	case tcell.KeyEsc:
 		return n.HandleEscape()

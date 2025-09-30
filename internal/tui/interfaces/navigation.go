@@ -8,14 +8,13 @@ import (
 // NavigationInterface defines the interface for navigation functionality
 type NavigationInterface interface {
 	// Page navigation
-	ShowMainMenu()
-	ShowVaults()
-	ShowVaultsReplace()
-	ShowProfiles()
-	ShowEnvironments()
-	ShowHelp()
-	ShowVaultDetails()
-	ShowNewVault()
+	ShowMainMenu(replace bool)
+	ShowVaults(replace bool)
+	ShowProfiles(replace bool)
+	ShowEnvironments(replace bool)
+	ShowHelp(replace bool)
+	ShowVaultDetails(replace bool)
+	ShowNewVault(replace bool)
 
 	// Routing and stack management
 	GoBack()
