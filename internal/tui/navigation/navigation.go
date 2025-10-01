@@ -8,9 +8,10 @@ import (
 
 // Navigation handles page navigation and routing
 type Navigation struct {
-	app        interfaces.TUIInterface
-	vaultDir   string // Store current vault directory
-	customHelp string // Store custom help text for current page
+	app           interfaces.TUIInterface
+	vaultDir      string                     // Store current vault directory
+	customHelp    string                     // Store custom help text for current page
+	pageInstances map[string]interfaces.Page // Store actual page instances for refresh
 }
 
 // NewNavigation creates a new navigation controller
@@ -22,8 +23,9 @@ func NewNavigation(app interfaces.TUIInterface) *Navigation {
 	}
 
 	nav := &Navigation{
-		app:      app,
-		vaultDir: homeDir,
+		app:           app,
+		vaultDir:      homeDir,
+		pageInstances: make(map[string]interfaces.Page),
 	}
 
 	nav.UpdateStatus()       // Initialize status bar with content
@@ -49,4 +51,20 @@ func (n *Navigation) SetVaultDir(dir string) {
 // GetCustomHelp returns the custom help text
 func (n *Navigation) GetCustomHelp() string {
 	return n.customHelp
+}
+
+// StorePageInstance stores a page instance for later refresh
+func (n *Navigation) StorePageInstance(pageName string, page interfaces.Page) {
+	n.pageInstances[pageName] = page
+}
+
+// GetPageInstance retrieves a stored page instance
+func (n *Navigation) GetPageInstance(pageName string) (interfaces.Page, bool) {
+	page, exists := n.pageInstances[pageName]
+	return page, exists
+}
+
+// RemovePageInstance removes a page instance from storage
+func (n *Navigation) RemovePageInstance(pageName string) {
+	delete(n.pageInstances, pageName)
 }

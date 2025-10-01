@@ -8,6 +8,7 @@ import (
 func (n *Navigation) ShowMainMenu(replace bool) {
 	// Create fresh MainPage instance using factory
 	mainPage := n.app.GetRouter().CreatePage(n.app, "main")
+	n.StorePageInstance("main", mainPage) // Store page instance for refresh
 	menu := mainPage.Create()
 	n.addPage("main", menu)
 	n.setCurrentPage("main", replace)
@@ -17,6 +18,7 @@ func (n *Navigation) ShowMainMenu(replace bool) {
 func (n *Navigation) ShowVaults(replace bool) {
 	// Create fresh VaultPage instance using factory
 	vaultPage := n.app.GetRouter().CreatePage(n.app, "vaults_browse", n.GetVaultDir())
+	n.StorePageInstance("vaults", vaultPage) // Store page instance for refresh
 	vaults := vaultPage.Create()
 	n.addPage("vaults", vaults)
 	n.setCurrentPage("vaults", replace)
@@ -27,6 +29,7 @@ func (n *Navigation) ShowVaults(replace bool) {
 func (n *Navigation) ShowProfiles(replace bool) {
 	// Create fresh ProfilesPage instance using factory
 	profilesPage := n.app.GetRouter().CreatePage(n.app, "profiles")
+	n.StorePageInstance("profiles", profilesPage) // Store page instance for refresh
 	page := profilesPage.Create()
 	n.addPage("profiles", page)
 	n.setCurrentPage("profiles", replace)
@@ -37,6 +40,7 @@ func (n *Navigation) ShowProfiles(replace bool) {
 func (n *Navigation) ShowEnvironments(replace bool) {
 	// Create fresh EnvironmentsPage instance using factory
 	environmentsPage := n.app.GetRouter().CreatePage(n.app, "environments")
+	n.StorePageInstance("environments", environmentsPage) // Store page instance for refresh
 	page := environmentsPage.Create()
 	n.addPage("environments", page)
 	n.setCurrentPage("environments", replace)
@@ -47,6 +51,7 @@ func (n *Navigation) ShowEnvironments(replace bool) {
 func (n *Navigation) ShowHelp(replace bool) {
 	// Create fresh HelpPage instance using factory
 	helpPage := n.app.GetRouter().CreatePage(n.app, "help")
+	n.StorePageInstance("help", helpPage) // Store page instance for refresh
 	page := helpPage.Create()
 	n.addPage("help", page)
 	n.setCurrentPage("help", replace)
@@ -59,6 +64,7 @@ func (n *Navigation) ShowVaultDetails(replace bool) {
 	// Note: This method needs to be updated to accept vault and filepath parameters
 	// For now, we'll create with nil vault and empty filepath
 	vaultViewPage := n.app.GetRouter().CreatePage(n.app, "vaults_view", nil, "")
+	n.StorePageInstance("vault-details", vaultViewPage) // Store page instance for refresh
 	vaultDetailsPage := vaultViewPage.Create()
 	n.addPage("vault-details", vaultDetailsPage)
 	n.setCurrentPage("vault-details", replace)
@@ -69,6 +75,7 @@ func (n *Navigation) ShowVaultDetails(replace bool) {
 func (n *Navigation) ShowNewVault(replace bool) {
 	// Create fresh VaultNewPage instance using factory with current directory
 	newVaultPage := n.app.GetRouter().CreatePage(n.app, "vaults_new", n.GetVaultDir())
+	n.StorePageInstance("new-vault", newVaultPage) // Store page instance for refresh
 	page := newVaultPage.Create()
 	n.addPage("new-vault", page)
 	n.setCurrentPage("new-vault", replace)
@@ -79,6 +86,7 @@ func (n *Navigation) ShowNewVault(replace bool) {
 func (n *Navigation) ShowVaultsWithDir(dir string, replace bool) {
 	// Create fresh VaultPage instance using factory with specified directory
 	vaultPage := n.app.GetRouter().CreatePage(n.app, "vaults_browse", dir)
+	n.StorePageInstance("vaults", vaultPage) // Store page instance for refresh
 	vaults := vaultPage.Create()
 	n.addPage("vaults", vaults)
 	n.setCurrentPage("vaults", replace)
@@ -89,6 +97,7 @@ func (n *Navigation) ShowVaultsWithDir(dir string, replace bool) {
 func (n *Navigation) ShowVaultDetailsWithVault(vault *vaults.Vault, filePath string, replace bool) {
 	// Create fresh VaultViewPage instance using factory with vault and filepath
 	vaultViewPage := n.app.GetRouter().CreatePage(n.app, "vaults_view", vault, filePath)
+	n.StorePageInstance("vault-details", vaultViewPage) // Store page instance for refresh
 	vaultDetailsPage := vaultViewPage.Create()
 	n.addPage("vault-details", vaultDetailsPage)
 	n.setCurrentPage("vault-details", replace)
@@ -99,6 +108,7 @@ func (n *Navigation) ShowVaultDetailsWithVault(vault *vaults.Vault, filePath str
 func (n *Navigation) ShowNewVaultWithDir(dir string, replace bool) {
 	// Create fresh VaultNewPage instance using factory with specified directory
 	newVaultPage := n.app.GetRouter().CreatePage(n.app, "vaults_new", dir)
+	n.StorePageInstance("new-vault", newVaultPage) // Store page instance for refresh
 	page := newVaultPage.Create()
 	n.addPage("new-vault", page)
 	n.setCurrentPage("new-vault", replace)

@@ -24,6 +24,20 @@ func (n *Navigation) GoBack() {
 		n.app.ShowError("No previous page to go back to")
 		return
 	}
+
+	// Refresh the page that we just navigated back to
+	currentPage := n.app.GetRouter().GetCurrentPage()
+	if page, exists := n.pageInstances[currentPage]; exists && page != nil {
+		// Only refresh pages that have meaningful refresh logic
+		// Skip refresh for static pages (like main page)
+		switch currentPage {
+		case "main", "help", "profiles", "environments":
+			// These pages don't need refresh - they're static
+		case "vaults", "vault-details", "new-vault":
+			// These pages need refresh to show current state
+			page.Refresh()
+		}
+	}
 	n.UpdateStatus()
 }
 

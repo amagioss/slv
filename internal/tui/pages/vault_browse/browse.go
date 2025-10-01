@@ -57,7 +57,39 @@ func (vbp *VaultBrowsePage) Create() tview.Primitive {
 
 // Refresh implements the Page interface
 func (vbp *VaultBrowsePage) Refresh() {
-	// TODO: Implement vault browsing page refresh
+	// Refresh content by recreating the page primitive
+	vbp.refreshContent()
+
+	// Update help text for the current focus
+	if vbp.navigation != nil {
+		vbp.navigation.updateHelpText()
+	}
+}
+
+// refreshContent safely refreshes the page content by recreating the primitive
+func (vbp *VaultBrowsePage) refreshContent() {
+	// Recreate the main content with fresh file list
+	vbp.mainContent = vbp.createMainSection()
+
+	// Populate the file list with current directory contents
+	vbp.updateFileList()
+
+	// Set up navigation for the new components
+	if vbp.navigation != nil {
+		vbp.navigation.SetupNavigation()
+	}
+
+	// Get the current page name from the router
+	currentPageName := vbp.GetTUI().GetRouter().GetCurrentPage()
+	if currentPageName != "" {
+		// Replace the page in the main content pages
+		vbp.GetTUI().GetComponents().GetMainContentPages().AddPage(currentPageName, vbp.CreateLayout(vbp.mainContent), true, true)
+
+		// Ensure focus is set to the file list after page replacement
+		if vbp.navigation != nil {
+			vbp.GetTUI().GetApplication().SetFocus(vbp.fileList)
+		}
+	}
 }
 
 // HandleInput implements the Page interface

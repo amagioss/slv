@@ -24,7 +24,7 @@ func (vvp *VaultViewPage) reloadVault() {
 	vvp.vault = vault
 
 	// Refresh the vault details page using the stored instance
-	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vault, vvp.filePath, false)
+	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vault, vvp.filePath, true)
 }
 
 // unlockVault unlocks the vault
@@ -37,7 +37,7 @@ func (vvp *VaultViewPage) unlockVault() {
 
 	// If already unlocked, just refresh the display
 	if !vvp.vault.IsLocked() {
-		vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, false)
+		vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
 		return
 	}
 
@@ -54,7 +54,7 @@ func (vvp *VaultViewPage) unlockVault() {
 		return
 	}
 
-	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, false)
+	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
 }
 
 // lockVault locks the vault
@@ -67,7 +67,7 @@ func (vvp *VaultViewPage) lockVault() {
 
 	// If already locked, just refresh the display
 	if vvp.vault.IsLocked() {
-		vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, false)
+		vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
 		return
 	}
 
@@ -75,5 +75,5 @@ func (vvp *VaultViewPage) lockVault() {
 	vvp.vault.Lock()
 
 	// Refresh the vault details page using the stored instance
-	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, false)
+	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
 }
