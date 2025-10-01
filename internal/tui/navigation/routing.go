@@ -28,20 +28,20 @@ func (n *Navigation) GoBack() {
 }
 
 // NavigateTo navigates to a specific page
-func (n *Navigation) NavigateTo(pageName string) {
+func (n *Navigation) NavigateTo(pageName string, replace bool) {
 	switch pageName {
 	case "main":
-		n.ShowMainMenu(false)
+		n.ShowMainMenu(replace)
 	case "vaults":
-		n.ShowVaults(false)
+		n.ShowVaults(replace)
 	case "profiles":
-		n.ShowProfiles(false)
+		n.ShowProfiles(replace)
 	case "environments":
-		n.ShowEnvironments(false)
+		n.ShowEnvironments(replace)
 	case "help":
-		n.ShowHelp(false)
+		n.ShowHelp(replace)
 	case "new-vault":
-		n.ShowNewVault(false)
+		n.ShowNewVault(replace)
 	default:
 		n.app.ShowError(fmt.Sprintf("Unknown page: %s", pageName))
 	}
