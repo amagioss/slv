@@ -121,26 +121,11 @@ func (fn *FormNavigation) handleSecretItemsInputCapture(event *tcell.EventKey) *
 	} else {
 		switch event.Key() {
 		case tcell.KeyCtrlD:
-			selected, _ := fn.vvp.itemsTable.GetSelection()
-			if selected >= 0 && selected < fn.vvp.itemsTable.GetRowCount() {
-				itemKey := fn.vvp.itemsTable.GetCell(selected, 0).Text
-
-				// Show confirmation modal with focus restoration
-				fn.vvp.GetTUI().ShowConfirmationWithFocus(
-					fmt.Sprintf("Are you sure you want to delete the item '%s'?\n\nThis action cannot be undone.", itemKey),
-					func() {
-						// User confirmed deletion
-						fn.vvp.removeSecretItem(itemKey)
-					},
-					func() {
-						// User cancelled - do nothing
-					},
-					func() {
-						// Restore focus to items table after modal is dismissed
-						fn.vvp.GetTUI().GetApplication().SetFocus(fn.vvp.itemsTable)
-					},
-				)
-			}
+			fn.vvp.removeSecretItem()
+			return nil
+		case tcell.KeyCtrlN:
+			// Show add item modal form
+			fn.showAddItemModal()
 			return nil
 		}
 		return event
@@ -149,9 +134,46 @@ func (fn *FormNavigation) handleSecretItemsInputCapture(event *tcell.EventKey) *
 
 // setupHelpTexts sets up help text for each component
 func (fn *FormNavigation) setupHelpTexts() {
-	fn.helpTexts[fn.vvp.vaultDetailsTable] = "[yellow]Vault Details: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload[white]"
-	fn.helpTexts[fn.vvp.accessorsTable] = "[yellow]Accessors: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload[white]"
-	fn.helpTexts[fn.vvp.itemsTable] = "[yellow]Items: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload | Ctrl+D: Delete item[white]"
+	fn.helpTexts[fn.vvp.vaultDetailsTable] = "[yellow]Vault Details: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload[white]"
+	fn.helpTexts[fn.vvp.accessorsTable] = "[yellow]Accessors: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload[white]"
+	fn.helpTexts[fn.vvp.itemsTable] = "[yellow]Items: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload | Ctrl+D: Delete item | Ctrl+N: Add item[white]"
+}
+
+// showAddItemModal shows the modal form for adding a new item
+func (fn *FormNavigation) showAddItemModal() {
+	// Create the form with larger input fields
+	form := fn.vvp.createAddItemForm()
+	// Show the modal form
+	fn.vvp.GetTUI().ShowModalForm("Add New Item", form, "Add", "Cancel", func() {
+		// Confirm callback - TODO: implement item addition logic
+		// Get form values
+		nameField := form.GetFormItem(0).(*tview.InputField)
+		valueField := form.GetFormItem(1).(*tview.InputField)
+		plainTextCheckbox := form.GetFormItem(2).(*tview.Checkbox)
+
+		name := nameField.GetText()
+		value := valueField.GetText()
+		plainText := plainTextCheckbox.IsChecked()
+
+		if name == "" || value == "" {
+			fn.vvp.ShowError("Name and value are required")
+			return
+		}
+
+		if err := fn.vvp.vault.Put(name, []byte(value), plainText); err != nil {
+			fn.vvp.ShowError(err.Error())
+			return
+		}
+
+		// TODO: Add item to vault using name, value, and plainText
+		fn.vvp.GetTUI().ShowInfo(fmt.Sprintf("Item added: Name='%s', Value='%s', PlainText=%v", name, value, plainText))
+		fn.vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(fn.vvp.vault, fn.vvp.filePath, true)
+	}, func() {
+		// Cancel callback - do nothing
+	}, func() {
+		// Restore focus to items table
+		fn.vvp.GetTUI().GetApplication().SetFocus(fn.vvp.itemsTable)
+	})
 }
 
 // updateHelpText updates the status bar with help text for the currently focused component

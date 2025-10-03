@@ -78,12 +78,32 @@ func (vvp *VaultViewPage) lockVault() {
 	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
 }
 
-func (vvp *VaultViewPage) removeSecretItem(itemKey string) {
-	if vvp.vault == nil || vvp.filePath == "" {
-		vvp.ShowError("Vault not loaded. Please reopen the vault.")
-		return
+func (vvp *VaultViewPage) removeSecretItem() {
+
+	var itemKey string
+	selected, _ := vvp.itemsTable.GetSelection()
+	if selected >= 0 && selected < vvp.itemsTable.GetRowCount() {
+		itemKey = vvp.itemsTable.GetCell(selected, 0).Text
 	}
 
-	vvp.vault.DeleteItem(itemKey)
-	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
+	// Show confirmation modal with focus restoration
+	vvp.GetTUI().ShowConfirmationWithFocus(
+		fmt.Sprintf("Are you sure you want to delete the item '%s'?\n\nThis action cannot be undone.", itemKey),
+		func() {
+			if vvp.vault == nil || vvp.filePath == "" {
+				vvp.ShowError("Vault not loaded. Please reopen the vault.")
+				return
+			}
+
+			vvp.vault.DeleteItem(itemKey)
+			vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
+		},
+		func() {
+			// User cancelled - do nothing
+		},
+		func() {
+			// Restore focus to items table after modal is dismissed
+			vvp.GetTUI().GetApplication().SetFocus(vvp.itemsTable)
+		},
+	)
 }

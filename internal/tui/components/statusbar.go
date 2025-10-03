@@ -31,9 +31,9 @@ func (sb *StatusBar) createComponent() {
 	sb.primitive = tview.NewTextView().
 		SetDynamicColors(true).
 		SetRegions(true).
-		SetWordWrap(false).
+		SetWordWrap(true).
 		SetTextAlign(tview.AlignLeft).
-		SetScrollable(false)
+		SetScrollable(true)
 
 	sb.primitive.SetBorder(true).
 		SetBorderColor(tcell.ColorAqua).

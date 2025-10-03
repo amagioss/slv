@@ -242,6 +242,51 @@ func (t *TUI) ShowConfirmationWithFocus(message string, onConfirm func(), onCanc
 	t.components.GetMainContentPages().AddPage("confirmation", modal, true, true)
 }
 
+// ShowModalForm shows a modal form
+func (t *TUI) ShowModalForm(title string, form *tview.Form, confirmButtonText string, cancelButtonText string, onConfirm func(), onCancel func(), restoreFocus func()) {
+	// Add buttons to the form for Cancel and Add
+	form.AddButton(cancelButtonText, func() {
+		t.components.GetMainContentPages().RemovePage("modal-form")
+
+		// Restore focus after modal is removed
+		if restoreFocus != nil {
+			restoreFocus()
+		}
+
+		if onCancel != nil {
+			onCancel()
+		}
+	})
+
+	form.AddButton(confirmButtonText, func() {
+		t.components.GetMainContentPages().RemovePage("modal-form")
+
+		// Restore focus after modal is removed
+		if restoreFocus != nil {
+			restoreFocus()
+		}
+
+		if onConfirm != nil {
+			onConfirm()
+		}
+	})
+
+	// Create a centered modal-like container with more generous spacing
+	modalContainer := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false). // Top spacer
+		AddItem(tview.NewFlex().
+			SetDirection(tview.FlexColumn).
+			AddItem(nil, 0, 1, false). // Left spacer
+			AddItem(form, 0, 1, true). // Form in center
+			AddItem(nil, 0, 1, false), // Right spacer
+						0, 1, true). // Form row - let form determine its own height
+		AddItem(nil, 0, 1, false) // Bottom spacer
+
+	// Add modal to the main content pages
+	t.components.GetMainContentPages().AddPage("modal-form", modalContainer, true, true)
+}
+
 // LogError logs an error
 func (t *TUI) LogError(err error, showToUser bool) {
 	log.Printf("TUI Error: %v", err)
