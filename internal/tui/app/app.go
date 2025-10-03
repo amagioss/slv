@@ -200,6 +200,48 @@ func (t *TUI) ShowInfo(message string) {
 	t.components.GetMainContentPages().AddPage("info", modal, true, true)
 }
 
+// ShowConfirmation shows a confirmation modal
+func (t *TUI) ShowConfirmation(message string, onConfirm func(), onCancel func()) {
+	modal := tview.NewModal().
+		SetText(message).
+		AddButtons([]string{"Cancel", "Yes"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			t.components.GetMainContentPages().RemovePage("confirmation")
+			if buttonLabel == "Yes" && onConfirm != nil {
+				onConfirm()
+			} else if buttonLabel == "Cancel" && onCancel != nil {
+				onCancel()
+			}
+		})
+
+	// Add modal to the main content pages
+	t.components.GetMainContentPages().AddPage("confirmation", modal, true, true)
+}
+
+// ShowConfirmationWithFocus shows a confirmation modal with focus restoration
+func (t *TUI) ShowConfirmationWithFocus(message string, onConfirm func(), onCancel func(), restoreFocus func()) {
+	modal := tview.NewModal().
+		SetText(message).
+		AddButtons([]string{"Cancel", "Yes"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			t.components.GetMainContentPages().RemovePage("confirmation")
+
+			// Restore focus after modal is removed
+			if restoreFocus != nil {
+				restoreFocus()
+			}
+
+			if buttonLabel == "Yes" && onConfirm != nil {
+				onConfirm()
+			} else if buttonLabel == "Cancel" && onCancel != nil {
+				onCancel()
+			}
+		})
+
+	// Add modal to the main content pages
+	t.components.GetMainContentPages().AddPage("confirmation", modal, true, true)
+}
+
 // LogError logs an error
 func (t *TUI) LogError(err error, showToUser bool) {
 	log.Printf("TUI Error: %v", err)

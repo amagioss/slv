@@ -1,6 +1,8 @@
 package vault_view
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -42,6 +44,7 @@ func (fn *FormNavigation) SetupNavigation() {
 	fn.resetSelectable()
 	fn.focusGroup[fn.currentFocus].(*tview.Table).SetSelectable(true, false)
 	fn.vvp.mainFlex.SetInputCapture(fn.handleInputCapture)
+	fn.vvp.itemsTable.SetInputCapture(fn.handleSecretItemsInputCapture)
 
 	// Set initial help text
 	fn.updateHelpText()
@@ -112,11 +115,43 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 	}
 }
 
+func (fn *FormNavigation) handleSecretItemsInputCapture(event *tcell.EventKey) *tcell.EventKey {
+	if event == nil {
+		return event
+	} else {
+		switch event.Key() {
+		case tcell.KeyCtrlD:
+			selected, _ := fn.vvp.itemsTable.GetSelection()
+			if selected >= 0 && selected < fn.vvp.itemsTable.GetRowCount() {
+				itemKey := fn.vvp.itemsTable.GetCell(selected, 0).Text
+
+				// Show confirmation modal with focus restoration
+				fn.vvp.GetTUI().ShowConfirmationWithFocus(
+					fmt.Sprintf("Are you sure you want to delete the item '%s'?\n\nThis action cannot be undone.", itemKey),
+					func() {
+						// User confirmed deletion
+						fn.vvp.removeSecretItem(itemKey)
+					},
+					func() {
+						// User cancelled - do nothing
+					},
+					func() {
+						// Restore focus to items table after modal is dismissed
+						fn.vvp.GetTUI().GetApplication().SetFocus(fn.vvp.itemsTable)
+					},
+				)
+			}
+			return nil
+		}
+		return event
+	}
+}
+
 // setupHelpTexts sets up help text for each component
 func (fn *FormNavigation) setupHelpTexts() {
 	fn.helpTexts[fn.vvp.vaultDetailsTable] = "[yellow]Vault Details: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload[white]"
 	fn.helpTexts[fn.vvp.accessorsTable] = "[yellow]Accessors: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload[white]"
-	fn.helpTexts[fn.vvp.itemsTable] = "[yellow]Items: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload[white]"
+	fn.helpTexts[fn.vvp.itemsTable] = "[yellow]Items: ↑/↓: Navigate rows | Tab: Next table | q: Close | u: Unlock | l: Lock | r: Reload | Ctrl+D: Delete item[white]"
 }
 
 // updateHelpText updates the status bar with help text for the currently focused component

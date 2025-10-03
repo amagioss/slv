@@ -21,6 +21,8 @@ type TUIInterface interface {
 	// Modal methods
 	ShowError(message string)
 	ShowInfo(message string)
+	ShowConfirmation(message string, onConfirm func(), onCancel func())
+	ShowConfirmationWithFocus(message string, onConfirm func(), onCancel func(), restoreFocus func())
 
 	// Application control
 	Quit()

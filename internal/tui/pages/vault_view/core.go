@@ -77,3 +77,13 @@ func (vvp *VaultViewPage) lockVault() {
 	// Refresh the vault details page using the stored instance
 	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
 }
+
+func (vvp *VaultViewPage) removeSecretItem(itemKey string) {
+	if vvp.vault == nil || vvp.filePath == "" {
+		vvp.ShowError("Vault not loaded. Please reopen the vault.")
+		return
+	}
+
+	vvp.vault.DeleteItem(itemKey)
+	vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
+}
