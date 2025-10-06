@@ -1,6 +1,10 @@
 package vault_new
 
-import "github.com/rivo/tview"
+import (
+	"fmt"
+
+	"github.com/rivo/tview"
+)
 
 func (vnp *VaultNewPage) createVaultConfigForm() *tview.Form {
 	vaultConfigForm := tview.NewForm()
@@ -14,6 +18,7 @@ func (vnp *VaultNewPage) createVaultConfigForm() *tview.Form {
 		} else {
 			vaultConfigForm.GetFormItem(1).(*tview.InputField).SetText("")
 		}
+		vnp.SetTitle(fmt.Sprintf("New Vault at %s/%s.slv.yaml", vnp.currentDir, text))
 	}).
 		AddInputField("File Name", "", 40, nil, nil).
 		AddInputField("K8s Namespace (optional)", "", 30, nil, nil)

@@ -244,6 +244,11 @@ func (t *TUI) ShowConfirmationWithFocus(message string, onConfirm func(), onCanc
 
 // ShowModalForm shows a modal form
 func (t *TUI) ShowModalForm(title string, form *tview.Form, confirmButtonText string, cancelButtonText string, onConfirm func(), onCancel func(), restoreFocus func()) {
+	// Style the form for better button alignment
+	form.SetBorder(true).
+		SetTitle(title).
+		SetTitleAlign(tview.AlignCenter)
+
 	// Add buttons to the form for Cancel and Add
 	form.AddButton(cancelButtonText, func() {
 		t.components.GetMainContentPages().RemovePage("modal-form")
@@ -270,6 +275,9 @@ func (t *TUI) ShowModalForm(title string, form *tview.Form, confirmButtonText st
 			onConfirm()
 		}
 	})
+
+	// Set button alignment to center after adding buttons
+	form.SetButtonsAlign(tview.AlignCenter)
 
 	// Create a centered modal-like container with more generous spacing
 	modalContainer := tview.NewFlex().

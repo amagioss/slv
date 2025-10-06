@@ -9,7 +9,7 @@ import (
 func (vvp *VaultViewPage) showEditSecretItemModal() {
 
 	var itemKey, itemValue, itemType string
-	var isPlaintext bool
+	var isEncrypted bool
 	selected, _ := vvp.itemsTable.GetSelection()
 	if selected >= 0 && selected < vvp.itemsTable.GetRowCount() {
 		itemKey = vvp.itemsTable.GetCell(selected, 0).Text
@@ -20,23 +20,23 @@ func (vvp *VaultViewPage) showEditSecretItemModal() {
 			itemValue = ""
 		}
 		if itemType == "Secret" {
-			isPlaintext = false
+			isEncrypted = true
 		} else {
-			isPlaintext = true
+			isEncrypted = false
 		}
 	}
 
-	form := vvp.createEditItemForm(itemKey, itemValue, isPlaintext)
+	form := vvp.createEditItemForm(itemKey, itemValue, isEncrypted)
 	vvp.GetTUI().ShowModalForm("Edit Item", form, "Edit", "Cancel", func() {
 		nameField := form.GetFormItem(0).(*tview.InputField)
 		valueField := form.GetFormItem(1).(*tview.InputField)
-		plainTextCheckbox := form.GetFormItem(2).(*tview.Checkbox)
+		encryptedCheckbox := form.GetFormItem(2).(*tview.Checkbox)
 
 		name := nameField.GetText()
 		value := valueField.GetText()
-		plainText := plainTextCheckbox.IsChecked()
+		encrypted := encryptedCheckbox.IsChecked()
 
-		if err := vvp.vault.Put(name, []byte(value), !plainText); err != nil {
+		if err := vvp.vault.Put(name, []byte(value), encrypted); err != nil {
 			vvp.ShowError(fmt.Sprintf("Error updating item: %v", err))
 			return
 		}
@@ -64,24 +64,24 @@ func (fn *FormNavigation) showAddItemModal() {
 		// Get form values
 		nameField := form.GetFormItem(0).(*tview.InputField)
 		valueField := form.GetFormItem(1).(*tview.InputField)
-		plainTextCheckbox := form.GetFormItem(2).(*tview.Checkbox)
+		encryptedCheckbox := form.GetFormItem(2).(*tview.Checkbox)
 
 		name := nameField.GetText()
 		value := valueField.GetText()
-		plainText := plainTextCheckbox.IsChecked()
+		encrypted := encryptedCheckbox.IsChecked()
 
 		if name == "" || value == "" {
 			fn.vvp.ShowError("Name and value are required")
 			return
 		}
 
-		if err := fn.vvp.vault.Put(name, []byte(value), !plainText); err != nil {
+		if err := fn.vvp.vault.Put(name, []byte(value), encrypted); err != nil {
 			fn.vvp.ShowError(err.Error())
 			return
 		}
 
 		// TODO: Add item to vault using name, value, and plainText
-		fn.vvp.GetTUI().ShowInfo(fmt.Sprintf("Item added: Name='%s', Value='%s', PlainText=%v", name, value, plainText))
+		fn.vvp.GetTUI().ShowInfo(fmt.Sprintf("Item added: Name='%s', Value='%s', PlainText=%v", name, value, encrypted))
 		fn.vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(fn.vvp.vault, fn.vvp.filePath, true)
 	}, func() {
 		// Cancel callback - do nothing
