@@ -58,14 +58,12 @@ func (vbp *VaultBrowsePage) Create() tview.Primitive {
 // Refresh implements the Page interface
 func (vbp *VaultBrowsePage) Refresh() {
 	vbp.updateFileList()
-	oldFocus := vbp.navigation.currentFocus
 	// Recreate page using navigation system
 	vbp.GetTUI().GetNavigation().ShowVaultsWithDir(vbp.currentDir, true)
 
 	// Update help text for the current focus
 	if vbp.navigation != nil {
 		vbp.navigation.updateHelpText()
-		vbp.navigation.currentFocus = oldFocus
 	}
 
 }
