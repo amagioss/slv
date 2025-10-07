@@ -179,3 +179,134 @@ func (vbp *VaultBrowsePage) editSelectedVault() {
 		vbp.GetTUI().GetNavigation().ShowVaultEditWithVault(vault, item.Path, false)
 	}
 }
+
+// renameSelectedVault renames the selected vault file
+func (vbp *VaultBrowsePage) renameSelectedVault() {
+	// Get the current selection index
+	selectedIndex := vbp.fileList.GetCurrentItem()
+
+	// Skip the "Go Back" option (index 0)
+	if selectedIndex == 0 {
+		vbp.ShowError("Please select a vault file to edit")
+		return
+	}
+
+	// Adjust index for the "Go Back" option
+	itemIndex := selectedIndex - 1
+
+	// Get the items
+	items := vbp.getVaultFiles()
+
+	// Check if the index is valid
+	if itemIndex >= 0 && itemIndex < len(items) {
+		item := items[itemIndex]
+
+		// Check if it's a vault file
+		if !item.IsFile {
+			vbp.ShowError("Please select a vault file to edit")
+			return
+		}
+
+		// Create rename form
+		filePath := item.Path
+		fileName := item.Name
+		form := tview.NewForm().
+			AddInputField("New File Name", fileName, 40, nil, nil)
+
+		// Show modal form for renaming
+		vbp.GetTUI().ShowModalForm("Rename Vault", form, "Rename", "Cancel", func() {
+			newFileName := form.GetFormItem(0).(*tview.InputField).GetText()
+			if newFileName == "" {
+				vbp.ShowError("File name cannot be empty")
+				return
+			}
+			// Ensure the new filename has the correct extension
+			if !strings.HasSuffix(newFileName, ".slv.yaml") && !strings.HasSuffix(newFileName, ".slv.yml") {
+				vbp.ShowError("File name must end with .slv.yaml or .slv.yml")
+				return
+			}
+
+			// Construct new file path
+			dir := filepath.Dir(filePath)
+			newFilePath := filepath.Join(dir, newFileName)
+
+			// Check if new file already exists
+			if _, err := os.Stat(newFilePath); err == nil {
+				vbp.ShowError(fmt.Sprintf("File '%s' already exists", newFileName))
+				return
+			}
+			// Rename the file
+			if err := os.Rename(filePath, newFilePath); err != nil {
+				vbp.ShowError(fmt.Sprintf("Error renaming vault: %v", err))
+				return
+			}
+
+			vbp.ShowInfo(fmt.Sprintf("Vault renamed to '%s'", newFileName))
+			// Refresh the file list to show the renamed file
+			vbp.Refresh()
+		}, func() {
+			// Cancel - do nothing
+		}, func() {
+			// Restore focus to file list
+			vbp.GetTUI().GetApplication().SetFocus(vbp.fileList)
+		})
+	}
+}
+
+// deleteSelectedVault deletes the selected vault file after confirmation
+func (vbp *VaultBrowsePage) deleteSelectedVault() {
+	// Get the current selection index
+	selectedIndex := vbp.fileList.GetCurrentItem()
+
+	// Skip the "Go Back" option (index 0)
+	if selectedIndex == 0 {
+		vbp.ShowError("Please select a vault file to edit")
+		return
+	}
+
+	// Adjust index for the "Go Back" option
+	itemIndex := selectedIndex - 1
+
+	// Get the items
+	items := vbp.getVaultFiles()
+
+	// Check if the index is valid
+	if itemIndex >= 0 && itemIndex < len(items) {
+		item := items[itemIndex]
+
+		// Check if it's a vault file
+		if !item.IsFile {
+			vbp.ShowError("Please select a vault file to edit")
+			return
+		}
+		// Get just the filename for display
+		fileName := filepath.Base(item.Path)
+
+		if !strings.HasSuffix(fileName, ".slv.yaml") && !strings.HasSuffix(fileName, ".slv.yml") {
+			vbp.ShowError("File name must end with .slv.yaml or .slv.yml")
+			return
+		}
+		// Show confirmation modal
+		vbp.GetTUI().ShowConfirmationWithFocus(
+			fmt.Sprintf("Are you sure you want to delete vault '%s'?\n\nThis action cannot be undone.", fileName),
+			func() {
+				// Confirm deletion
+				if err := os.Remove(item.Path); err != nil {
+					vbp.ShowError(fmt.Sprintf("Error deleting vault: %v", err))
+					return
+				}
+
+				vbp.ShowInfo(fmt.Sprintf("Vault '%s' deleted successfully", fileName))
+				// Refresh the file list to remove the deleted file
+				vbp.Refresh()
+			},
+			func() {
+				// Cancel - do nothing
+			},
+			func() {
+				// Restore focus to file list
+				vbp.GetTUI().GetApplication().SetFocus(vbp.fileList)
+			},
+		)
+	}
+}

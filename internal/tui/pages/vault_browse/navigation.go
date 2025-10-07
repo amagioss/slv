@@ -39,7 +39,7 @@ func (fn *FormNavigation) SetupNavigation() {
 
 // setupHelpTexts sets up help text for each component
 func (fn *FormNavigation) setupHelpTexts() {
-	fn.helpTexts[fn.vbp.fileList] = "[yellow]File Browser: ↑/↓: Navigate | →: Open vault/directory | ←: Go back | Ctrl+N: New vault | Ctrl+E: Edit vault[white]"
+	fn.helpTexts[fn.vbp.fileList] = "[yellow]File Browser: ↑/↓: Navigate | →: Open vault/directory | ←: Go back | Ctrl+N: New vault | Ctrl+E: Edit vault | Ctrl+R: Rename vault | Ctrl+D: Delete vault[white]"
 }
 
 // updateHelpText updates the status bar with help text for the currently focused component
@@ -75,6 +75,14 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 	case tcell.KeyCtrlE:
 		// Edit selected vault
 		fn.vbp.editSelectedVault()
+		return nil
+	case tcell.KeyCtrlR:
+		// Rename selected vault
+		fn.vbp.renameSelectedVault()
+		return nil
+	case tcell.KeyCtrlD:
+		// Delete selected vault
+		fn.vbp.deleteSelectedVault()
 		return nil
 	}
 	return event
