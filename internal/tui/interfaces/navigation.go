@@ -20,6 +20,7 @@ type NavigationInterface interface {
 	// Parameterized page navigation
 	ShowVaultsWithDir(dir string, replace bool)
 	ShowVaultDetailsWithVault(vault *vaults.Vault, filePath string, replace bool)
+	ShowVaultEditWithVault(vault *vaults.Vault, filePath string, replace bool)
 	ShowNewVaultWithDir(dir string, replace bool)
 
 	// Routing and stack management

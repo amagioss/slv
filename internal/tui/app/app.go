@@ -16,6 +16,7 @@ import (
 	"slv.sh/slv/internal/tui/pages/mainpage"
 	"slv.sh/slv/internal/tui/pages/profiles"
 	"slv.sh/slv/internal/tui/pages/vault_browse"
+	"slv.sh/slv/internal/tui/pages/vault_edit"
 	"slv.sh/slv/internal/tui/pages/vault_new"
 	"slv.sh/slv/internal/tui/pages/vault_view"
 	"slv.sh/slv/internal/tui/theme"
@@ -121,6 +122,20 @@ func (t *TUI) setupPages() {
 			filePath = params[2].(string)
 		}
 		return vault_view.NewVaultViewPage(tui, vault, filePath)
+	}))
+
+	// Register vault edit page factory (takes vault and filepath as parameters)
+	t.app.GetRouter().RegisterPageFactory("vaults_edit", interfaces.PageFactoryFunc(func(params ...interface{}) interfaces.Page {
+		tui := params[0].(interfaces.TUIInterface)
+		var vault *vaults.Vault = nil
+		if len(params) > 1 && params[1] != nil {
+			vault = params[1].(*vaults.Vault)
+		}
+		filePath := ""
+		if len(params) > 2 {
+			filePath = params[2].(string)
+		}
+		return vault_edit.NewVaultEditPage(tui, vault, filePath)
 	}))
 }
 

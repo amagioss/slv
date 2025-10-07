@@ -70,35 +70,12 @@ func (vnp *VaultNewPage) Create() tview.Primitive {
 
 // Refresh implements the Page interface
 func (vnp *VaultNewPage) Refresh() {
-	// Refresh content by recreating the page primitive
-	vnp.refreshContent()
+	// Recreate page using navigation system
+	vnp.GetTUI().GetNavigation().ShowNewVaultWithDir(vnp.currentDir, true)
 
 	// Update help text for the current focus
 	if vnp.navigation != nil {
 		vnp.navigation.updateHelpText()
-	}
-}
-
-// refreshContent safely refreshes the page content by recreating the primitive
-func (vnp *VaultNewPage) refreshContent() {
-	// Recreate the main content with fresh forms
-	vnp.currentPage = vnp.createMainSection()
-
-	// Set up navigation for the new components
-	if vnp.navigation != nil {
-		vnp.navigation.SetupNavigation()
-	}
-
-	// Get the current page name from the router
-	currentPageName := vnp.GetTUI().GetRouter().GetCurrentPage()
-	if currentPageName != "" {
-		// Replace the page in the main content pages
-		vnp.GetTUI().GetComponents().GetMainContentPages().AddPage(currentPageName, vnp.CreateLayout(vnp.currentPage), true, true)
-
-		// Ensure focus is set to the first form after page replacement
-		if vnp.navigation != nil {
-			vnp.GetTUI().GetApplication().SetFocus(vnp.vaultConfigForm)
-		}
 	}
 }
 

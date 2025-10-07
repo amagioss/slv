@@ -114,3 +114,14 @@ func (n *Navigation) ShowNewVaultWithDir(dir string, replace bool) {
 	n.setCurrentPage("new-vault", replace)
 	n.UpdateStatus()
 }
+
+// ShowVaultEditWithVault shows vault edit page with specific vault and filepath
+func (n *Navigation) ShowVaultEditWithVault(vault *vaults.Vault, filePath string, replace bool) {
+	// Create fresh VaultEditPage instance using factory with vault and filepath
+	vaultEditPage := n.app.GetRouter().CreatePage(n.app, "vaults_edit", vault, filePath)
+	n.StorePageInstance("vault-edit", vaultEditPage) // Store page instance for refresh
+	vaultEditDetailsPage := vaultEditPage.Create()
+	n.addPage("vault-edit", vaultEditDetailsPage)
+	n.setCurrentPage("vault-edit", replace)
+	n.UpdateStatus()
+}

@@ -77,6 +77,12 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 			// Switch focus between tables
 			fn.ShiftFocusBackward()
 			return nil
+		case tcell.KeyCtrlE:
+			if fn.currentFocus == 0 || fn.currentFocus == 1 {
+				fn.vvp.GetTUI().GetNavigation().ShowVaultEditWithVault(fn.vvp.vault, fn.vvp.filePath, false)
+				return nil
+			}
+			return nil
 		case tcell.KeyRune:
 			switch event.Rune() {
 			case 'q', 'Q':
@@ -98,7 +104,7 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 				// Reload vault
 				if fn.vvp.filePath != "" {
 					fn.vvp.reloadVault()
-					fn.vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(fn.vvp.vault, fn.vvp.filePath, false)
+					fn.vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(fn.vvp.vault, fn.vvp.filePath, true)
 				}
 				return nil
 			}
@@ -136,8 +142,8 @@ func (fn *FormNavigation) handleSecretItemsInputCapture(event *tcell.EventKey) *
 
 // setupHelpTexts sets up help text for each component
 func (fn *FormNavigation) setupHelpTexts() {
-	fn.helpTexts[fn.vvp.vaultDetailsTable] = "[yellow]Vault Details: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload[white]"
-	fn.helpTexts[fn.vvp.accessorsTable] = "[yellow]Accessors: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload[white]"
+	fn.helpTexts[fn.vvp.vaultDetailsTable] = "[yellow]Vault Details: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload | Ctrl+E: Edit vault[white]"
+	fn.helpTexts[fn.vvp.accessorsTable] = "[yellow]Accessors: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload | Ctrl+E: Edit vault[white]"
 	fn.helpTexts[fn.vvp.itemsTable] = "[yellow]Items: ↑/↓: Navigate rows | Tab: Next table | u/l: Unlock/Lock | r: Reload | Ctrl+D: Delete | Ctrl+N: Add | Ctrl+E: Edit[white]"
 }
 
@@ -154,4 +160,12 @@ func (fn *FormNavigation) updateHelpText() {
 // SetComponentHelpText sets help text for a specific component
 func (fn *FormNavigation) SetComponentHelpText(component tview.Primitive, helpText string) {
 	fn.helpTexts[component] = helpText
+}
+
+func (fn *FormNavigation) SetCurrentFocus(focus int) {
+	fn.currentFocus = focus
+	fn.resetSelectable()
+	fn.focusGroup[fn.currentFocus].(*tview.Table).SetSelectable(true, false)
+	fn.vvp.GetTUI().GetApplication().SetFocus(fn.focusGroup[fn.currentFocus])
+	fn.updateHelpText()
 }

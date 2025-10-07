@@ -140,3 +140,42 @@ func (vbp *VaultBrowsePage) openVaultFile(filePath string) {
 	// Show vault details page with the loaded vault and filepath
 	vbp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vault, filePath, false)
 }
+
+// editSelectedVault edits the selected vault
+func (vbp *VaultBrowsePage) editSelectedVault() {
+	// Get the current selection index
+	selectedIndex := vbp.fileList.GetCurrentItem()
+
+	// Skip the "Go Back" option (index 0)
+	if selectedIndex == 0 {
+		vbp.ShowError("Please select a vault file to edit")
+		return
+	}
+
+	// Adjust index for the "Go Back" option
+	itemIndex := selectedIndex - 1
+
+	// Get the items
+	items := vbp.getVaultFiles()
+
+	// Check if the index is valid
+	if itemIndex >= 0 && itemIndex < len(items) {
+		item := items[itemIndex]
+
+		// Check if it's a vault file
+		if !item.IsFile {
+			vbp.ShowError("Please select a vault file to edit")
+			return
+		}
+
+		// Load the vault
+		vault, err := vaults.Get(item.Path)
+		if err != nil {
+			vbp.ShowError(fmt.Sprintf("Error loading vault: %v", err))
+			return
+		}
+
+		// Navigate to vault edit page
+		vbp.GetTUI().GetNavigation().ShowVaultEditWithVault(vault, item.Path, false)
+	}
+}
