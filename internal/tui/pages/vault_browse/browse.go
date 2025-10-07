@@ -48,7 +48,6 @@ func NewVaultBrowsePage(tui interfaces.TUIInterface, currentDir string) *VaultBr
 // Create implements the Page interface
 func (vbp *VaultBrowsePage) Create() tview.Primitive {
 	// Update status bar with help text
-	vbp.GetTUI().UpdateStatusBar("[yellow]←/→: Move between directories | ↑/↓: Navigate | Enter: open vault/directory | Ctrl+N: New vault[white]")
 
 	// Create layout using BasePage method
 	vbp.SetTitle("Vault Management")

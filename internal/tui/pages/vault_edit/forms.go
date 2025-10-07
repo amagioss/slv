@@ -20,7 +20,7 @@ func (vep *VaultEditPage) createVaultConfigForm() *tview.Form {
 		SetTitleAlign(tview.AlignLeft)
 
 	vaultConfigForm.GetFormItem(0).(*tview.InputField).SetText(vep.vault.Name)
-	vaultConfigForm.GetFormItem(1).(*tview.InputField).SetText(strings.Split(vep.filePath, "/")[len(strings.Split(vep.filePath, "/"))-1]).SetDisabled(true)
+	vaultConfigForm.GetFormItem(1).(*tview.InputField).SetText(strings.Split(vep.filePath, "/")[len(strings.Split(vep.filePath, "/"))-1])
 	vaultConfigForm.GetFormItem(2).(*tview.InputField).SetText(vep.vault.Namespace)
 
 	vep.vaultConfigForm = vaultConfigForm

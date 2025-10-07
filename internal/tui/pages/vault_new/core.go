@@ -225,6 +225,10 @@ func (vnp *VaultNewPage) validateVaultInputsForCreation(vaultName, fileName stri
 		return fmt.Errorf("file name is required")
 	}
 
+	if !strings.HasSuffix(fileName, ".slv.yaml") && !strings.HasSuffix(fileName, ".slv.yml") {
+		return fmt.Errorf("file name must end with .slv.yaml or .slv.yml")
+	}
+
 	// Check if file already exists
 	vaultFilePath := filepath.Join(vnp.currentDir, fileName)
 	if _, err := os.Stat(vaultFilePath); err == nil {
@@ -526,9 +530,15 @@ func (vnp *VaultNewPage) updateGrantedAccessList() {
 		if email == "" {
 			email = "Unknown"
 		}
-
-		mainText := fmt.Sprintf("🌍 %s", name)
-		secondaryText := fmt.Sprintf("Type: %s | Email: %s | Key: %s...", string(env.EnvType), email, env.PublicKey[:min(15, len(env.PublicKey))])
+		var mainText string
+		if env.EnvType == environments.SERVICE {
+			mainText = fmt.Sprintf("💻 %s", name)
+		} else if env.EnvType == environments.USER {
+			mainText = fmt.Sprintf("👤 %s", name)
+		} else {
+			mainText = fmt.Sprintf("🌍 %s", name)
+		}
+		secondaryText := fmt.Sprintf("Email: %s | Key: %s...", email, env.PublicKey[:min(15, len(env.PublicKey))])
 		vnp.grantedAccess.AddItem(mainText, secondaryText, 0, nil)
 	}
 

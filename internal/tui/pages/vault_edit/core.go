@@ -2,6 +2,8 @@ package vault_edit
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -180,9 +182,32 @@ func (vep *VaultEditPage) editVaultFromForm() {
 		vep.vault.Namespace = namespace
 	}
 
+	// Construct new file path
+	dir := filepath.Dir(vep.filePath)
+	newFilePath := filepath.Join(dir, fileName)
+
+	// Check if new file already exists
+	if _, err := os.Stat(newFilePath); err == nil {
+		vep.ShowError(fmt.Sprintf("File '%s' already exists", fileName))
+		return
+	}
+	// Rename the file
+	if err := os.Rename(vep.filePath, newFilePath); err != nil {
+		vep.ShowError(fmt.Sprintf("Error renaming vault: %v", err))
+		return
+	}
+
+	vep.filePath = newFilePath
+
 	vep.vault.Update(vaultName, namespace, "", nil)
 
 	if !vep.IsVaultUnlocked() {
+		// Show success message
+		vep.showSuccess(fmt.Sprintf("Vault '%s' edited successfully at %s", vaultName, vep.filePath))
+
+		// Navigate to vault details page and remove new vault page from stack
+		vep.navigateToVaultDetails(vep.vault, vep.filePath)
+
 		return
 	}
 	secretKey, err := session.GetSecretKey()
@@ -253,11 +278,9 @@ func (vep *VaultEditPage) validateVaultInputsForCreation(vaultName, fileName str
 		return fmt.Errorf("file name is required")
 	}
 
-	// // Check if file already exists
-	// vaultFilePath := filepath.Join(vep.currentDir, fileName)
-	// if _, err := os.Stat(vaultFilePath); err == nil {
-	// 	return fmt.Errorf("file already exists: %s", fileName)
-	// }
+	if !strings.HasSuffix(fileName, ".slv.yaml") && !strings.HasSuffix(fileName, ".slv.yml") {
+		return fmt.Errorf("file name must end with .slv.yaml or .slv.yml")
+	}
 
 	if len(vep.grantedEnvs) == 0 {
 		return fmt.Errorf("no environments granted access. please grant access to at least one environment")
@@ -551,8 +574,15 @@ func (vep *VaultEditPage) updateGrantedAccessList() {
 			env.Email = email
 		}
 
-		mainText := fmt.Sprintf("🌍 %s", name)
-		secondaryText := fmt.Sprintf("Type: %s | Email: %s | Key: %s...", string(env.EnvType), email, env.PublicKey[:min(15, len(env.PublicKey))])
+		var mainText string
+		if env.EnvType == environments.SERVICE {
+			mainText = fmt.Sprintf("💻 %s", name)
+		} else if env.EnvType == environments.USER {
+			mainText = fmt.Sprintf("👤 %s", name)
+		} else {
+			mainText = fmt.Sprintf("🌍 %s", name)
+		}
+		secondaryText := fmt.Sprintf("Email: %s | Key: %s...", email, env.PublicKey[:min(15, len(env.PublicKey))])
 		vep.grantedAccess.AddItem(mainText, secondaryText, 0, nil)
 	}
 

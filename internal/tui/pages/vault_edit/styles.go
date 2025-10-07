@@ -18,7 +18,7 @@ func (vep *VaultEditPage) applyDisabledStyling(component tview.Primitive) {
 	case *tview.List:
 		// Apply muted colors to lists
 		c.SetSelectedTextColor(tcell.ColorGray).
-			SetSelectedBackgroundColor(tcell.ColorDarkGray).
+			SetSelectedBackgroundColor(tcell.Color16).
 			SetSecondaryTextColor(tcell.ColorDarkGray).
 			SetMainTextColor(tcell.ColorGray).
 			SetBorderColor(tcell.ColorGray)
