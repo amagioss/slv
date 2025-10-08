@@ -43,8 +43,8 @@ func (fn *FormNavigation) SetupNavigation() {
 
 // setupHelpTexts sets up help text for each component
 func (fn *FormNavigation) setupHelpTexts() {
-	fn.helpTexts[fn.vbp.directoryList] = "Directories: ↑/↓: Navigate | Enter: Open directory | Tab: Switch to files | Ctrl+N: New vault"
-	fn.helpTexts[fn.vbp.fileList] = "Vault Files: ↑/↓: Navigate | Enter: Open vault | Tab: Switch to directories | Ctrl+E: Edit vault | Ctrl+R: Rename vault | Ctrl+D: Delete vault"
+	fn.helpTexts[fn.vbp.directoryList] = "Directories: Enter/→: Open directory | Backspace/←: Go back | Tab: Switch to files | Ctrl+N: New vault"
+	fn.helpTexts[fn.vbp.fileList] = "Vault Files: Enter/→: Open vault | Tab: Switch to directories | Ctrl+E: Edit vault | Ctrl+R: Rename vault | Ctrl+D: Delete vault"
 }
 
 // updateHelpText updates the status bar with help text for the currently focused component
@@ -72,7 +72,7 @@ func (fn *FormNavigation) handleDirectoryInputCapture(event *tcell.EventKey) *tc
 		fn.updateHelpText()
 		return nil
 
-	case tcell.KeyEnter:
+	case tcell.KeyEnter, tcell.KeyRight:
 		// Load selected directory (navigate into it)
 		fn.vbp.loadSelectedDirectory()
 		return nil
@@ -80,6 +80,10 @@ func (fn *FormNavigation) handleDirectoryInputCapture(event *tcell.EventKey) *tc
 		// Create new vault
 		dir := fn.vbp.getCurrentDisplayedDirectory()
 		fn.vbp.GetTUI().GetNavigation().ShowNewVaultWithDir(dir, false)
+		return nil
+	case tcell.KeyLeft, tcell.KeyBackspace2, tcell.KeyBackspace:
+		// Go back to parent directory
+		fn.vbp.goBackDirectory()
 		return nil
 	}
 	return event
@@ -94,7 +98,7 @@ func (fn *FormNavigation) handleFileInputCapture(event *tcell.EventKey) *tcell.E
 		fn.vbp.GetTUI().GetApplication().SetFocus(fn.focusGroup[fn.currentFocus])
 		fn.updateHelpText()
 		return nil
-	case tcell.KeyEnter:
+	case tcell.KeyEnter, tcell.KeyRight:
 		// Load selected file (only if it's a real vault file)
 		fn.vbp.loadSelectedFile()
 		return nil

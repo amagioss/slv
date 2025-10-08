@@ -62,7 +62,7 @@ func (vbp *VaultBrowsePage) loadSelectedDirectory() {
 
 	// Skip the "Go Back" option (index 0)
 	if selectedIndex == 0 {
-		vbp.goBackDirectory()
+		vbp.GetTUI().GetNavigation().ShowVaultsWithDir(vbp.currentDir, true)
 		return
 	}
 
@@ -117,9 +117,9 @@ func (vbp *VaultBrowsePage) updateFileList() {
 	// Update the directory list title to show current directory
 	vbp.directoryList.SetTitle(fmt.Sprintf("Directories (%s)", vbp.currentDir))
 
-	// Add "go back one directory" option at the top of directory list
-	vbp.directoryList.AddItem("⬆️ Go Back", "Go back to parent directory", 'b', func() {
-		vbp.goBackDirectory()
+	// Add "." entry to represent current directory
+	vbp.directoryList.AddItem("📁 . (current)", "Current directory", 0, func() {
+		vbp.updateVaultFilesForCurrentDir()
 	})
 
 	// Get directories and populate directory list
@@ -145,13 +145,13 @@ func (vbp *VaultBrowsePage) updateFileList() {
 // setupDynamicLoading sets up the directory list to dynamically update vault files
 func (vbp *VaultBrowsePage) setupDynamicLoading() {
 	vbp.directoryList.SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
-		// Skip the "Go Back" option (index 0)
+		// Handle "." entry (index 0) - show current directory files
 		if index == 0 {
 			vbp.updateVaultFilesForCurrentDir()
 			return
 		}
 
-		// Adjust index for the "Go Back" option
+		// Adjust index for the "." entry
 		itemIndex := index - 1
 		directories := vbp.getDirectories()
 
