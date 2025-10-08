@@ -235,14 +235,14 @@ func (fn *FormNavigation) setInputCaptureForSubmitButton() {
 
 // setupHelpTexts sets up help text for each component
 func (fn *FormNavigation) setupHelpTexts() {
-	fn.helpTexts[fn.vnp.vaultConfigForm] = "[yellow]Vault Config: ↑/↓: Navigate fields | Tab: Next section | Enter: Select field[white]"
-	fn.helpTexts[fn.vnp.optionsForm] = "[yellow]Options: ↑/↓: Navigate fields | Space: Toggle checkbox | Tab: Next section[white]"
-	fn.helpTexts[fn.vnp.grantAccessForm] = "[yellow]Grant Access: Type to search | Enter: Add environment | ↓: View results | Tab: Next section[white]"
-	fn.helpTexts[fn.vnp.shareWithSelfForm] = "[yellow]Share With Self: Space: Toggle checkbox | Tab: Next section[white]"
-	fn.helpTexts[fn.vnp.shareWithK8sForm] = "[yellow]Share With K8s: Space: Toggle checkbox | Tab: Next section[white]"
-	fn.helpTexts[fn.vnp.searchResults] = "[yellow]Search Results: ↑/↓: Navigate | Enter: Add to granted access | Tab: Next section[white]"
-	fn.helpTexts[fn.vnp.grantedAccess] = "[yellow]Granted Access: ↑/↓: Navigate | Ctrl+D: Remove environment | Tab: Next section[white]"
-	fn.helpTexts[fn.vnp.submitButton] = "[yellow]Submit: Enter: Create vault | Ctrl+S: Create vault | Tab: Previous section[white]"
+	fn.helpTexts[fn.vnp.vaultConfigForm] = "Vault Config: ↑/↓: Navigate fields | Tab: Next section | Enter: Select field"
+	fn.helpTexts[fn.vnp.optionsForm] = "Options: ↑/↓: Navigate fields | Space: Toggle checkbox | Tab: Next section"
+	fn.helpTexts[fn.vnp.grantAccessForm] = "Grant Access: Type to search | Enter: Add environment | ↓: View results | Tab: Next section"
+	fn.helpTexts[fn.vnp.shareWithSelfForm] = "Share With Self: Space: Toggle checkbox | Tab: Next section"
+	fn.helpTexts[fn.vnp.shareWithK8sForm] = "Share With K8s: Space: Toggle checkbox | Tab: Next section"
+	fn.helpTexts[fn.vnp.searchResults] = "Search Results: ↑/↓: Navigate | Enter: Add to granted access | Tab: Next section"
+	fn.helpTexts[fn.vnp.grantedAccess] = "Granted Access: ↑/↓: Navigate | Ctrl+D: Remove environment | Tab: Next section"
+	fn.helpTexts[fn.vnp.submitButton] = "Submit: Enter: Create vault | Ctrl+S: Create vault | Tab: Previous section"
 }
 
 // updateHelpText updates the status bar with help text for the currently focused component

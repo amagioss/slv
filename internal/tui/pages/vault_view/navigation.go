@@ -82,7 +82,7 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 				fn.vvp.GetTUI().GetNavigation().ShowVaultEditWithVault(fn.vvp.vault, fn.vvp.filePath, false)
 				return nil
 			}
-			return nil
+			return event
 		case tcell.KeyRune:
 			switch event.Rune() {
 			case 'q', 'Q':
@@ -142,9 +142,9 @@ func (fn *FormNavigation) handleSecretItemsInputCapture(event *tcell.EventKey) *
 
 // setupHelpTexts sets up help text for each component
 func (fn *FormNavigation) setupHelpTexts() {
-	fn.helpTexts[fn.vvp.vaultDetailsTable] = "[yellow]Vault Details: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload | Ctrl+E: Edit vault[white]"
-	fn.helpTexts[fn.vvp.accessorsTable] = "[yellow]Accessors: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload | Ctrl+E: Edit vault[white]"
-	fn.helpTexts[fn.vvp.itemsTable] = "[yellow]Items: ↑/↓: Navigate rows | Tab: Next table | u/l: Unlock/Lock | r: Reload | Ctrl+D: Delete | Ctrl+N: Add | Ctrl+E: Edit[white]"
+	fn.helpTexts[fn.vvp.vaultDetailsTable] = "Vault Details: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload | Ctrl+E: Edit vault"
+	fn.helpTexts[fn.vvp.accessorsTable] = "Accessors: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload | Ctrl+E: Edit vault"
+	fn.helpTexts[fn.vvp.itemsTable] = "Items: ↑/↓: Navigate rows | Tab: Next table | u/l: Unlock/Lock | r: Reload | Ctrl+D: Delete | Ctrl+N: Add | Ctrl+E: Edit"
 }
 
 // updateHelpText updates the status bar with help text for the currently focused component

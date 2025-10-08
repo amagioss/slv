@@ -5,6 +5,7 @@ import (
 	"github.com/rivo/tview"
 	"slv.sh/slv/internal/tui/interfaces"
 	"slv.sh/slv/internal/tui/pages"
+	"slv.sh/slv/internal/tui/theme"
 )
 
 // EnvironmentsPage handles the environments page functionality
@@ -28,10 +29,11 @@ func (ep *EnvironmentsPage) Create() tview.Primitive {
 		SetDynamicColors(true)
 
 	// Style the text
-	text.SetTextColor(tcell.ColorWhite)
+	colors := theme.GetCurrentPalette()
+	text.SetTextColor(colors.TextPrimary)
 
 	// Update status bar
-	ep.UpdateStatus("[yellow]Environment management - Coming soon[white]")
+	ep.UpdateStatus("Environment management - Coming soon")
 
 	// Create layout using BasePage method
 	return ep.CreateLayout(text)

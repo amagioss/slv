@@ -5,6 +5,7 @@ import (
 	"github.com/rivo/tview"
 	"slv.sh/slv/internal/tui/interfaces"
 	"slv.sh/slv/internal/tui/pages"
+	"slv.sh/slv/internal/tui/theme"
 )
 
 // ProfilesPage handles the profiles page functionality
@@ -28,10 +29,11 @@ func (pp *ProfilesPage) Create() tview.Primitive {
 		SetDynamicColors(true)
 
 	// Style the text
-	text.SetTextColor(tcell.ColorWhite)
+	colors := theme.GetCurrentPalette()
+	text.SetTextColor(colors.TextPrimary)
 
 	// Update status bar
-	pp.UpdateStatus("[yellow]Profiles management - Coming soon[white]")
+	pp.UpdateStatus("Profiles management - Coming soon")
 
 	// Create layout using BasePage method
 	return pp.CreateLayout(text)

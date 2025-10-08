@@ -252,20 +252,20 @@ func (fn *FormNavigation) setInputCaptureForSubmitButton() {
 // setupHelpTexts sets up help text for each component
 func (fn *FormNavigation) setupHelpTexts() {
 	// Always set up help texts for basic components
-	fn.helpTexts[fn.vep.vaultConfigForm] = "[gray]Vault Config (Read-Only): ↑/↓: Navigate fields | Tab: Next section[white]"
+	fn.helpTexts[fn.vep.vaultConfigForm] = "Vault Config (Read-Only): ↑/↓: Navigate fields | Tab: Next section"
 
 	// Set up help texts based on vault access state
 	if fn.vep.IsVaultUnlocked() {
 		// Unlocked state - all access components are interactive
-		fn.helpTexts[fn.vep.grantAccessForm] = "[yellow]Grant Access: Type to search | Enter: Add environment | ↓: View results | Tab: Next section[white]"
-		fn.helpTexts[fn.vep.shareWithSelfForm] = "[yellow]Share With Self: Space: Toggle checkbox | Tab: Next section[white]"
-		fn.helpTexts[fn.vep.shareWithK8sForm] = "[yellow]Share With K8s: Space: Toggle checkbox | Tab: Next section[white]"
-		fn.helpTexts[fn.vep.searchResults] = "[yellow]Search Results: ↑/↓: Navigate | Enter: Add to granted access | Tab: Next section[white]"
-		fn.helpTexts[fn.vep.grantedAccess] = "[yellow]Granted Access: ↑/↓: Navigate | Ctrl+D: Remove environment | Tab: Next section[white]"
-		fn.helpTexts[fn.vep.submitButton] = "[yellow]Submit: Enter: Update vault | Ctrl+S: Update vault | Tab: Previous section[white]"
+		fn.helpTexts[fn.vep.grantAccessForm] = "Grant Access: Type to search | Enter: Add environment | ↓: View results | Tab: Next section"
+		fn.helpTexts[fn.vep.shareWithSelfForm] = "Share With Self: Space: Toggle checkbox | Tab: Next section"
+		fn.helpTexts[fn.vep.shareWithK8sForm] = "Share With K8s: Space: Toggle checkbox | Tab: Next section"
+		fn.helpTexts[fn.vep.searchResults] = "Search Results: ↑/↓: Navigate | Enter: Add to granted access | Tab: Next section"
+		fn.helpTexts[fn.vep.grantedAccess] = "Granted Access: ↑/↓: Navigate | Ctrl+D: Remove environment | Tab: Next section"
+		fn.helpTexts[fn.vep.submitButton] = "Submit: Enter: Update vault | Ctrl+S: Update vault | Tab: Previous section"
 	} else {
 		// Locked state - submit button is disabled
-		fn.helpTexts[fn.vep.submitButton] = "[gray]Submit (Locked): No access to update vault | Tab: Previous section[white]"
+		fn.helpTexts[fn.vep.submitButton] = "Submit (Locked): No access to update vault | Tab: Previous section"
 	}
 }
 

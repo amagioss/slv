@@ -27,7 +27,7 @@ func (bp *BasePage) CreateLayout(content tview.Primitive) tview.Primitive {
 
 // CreatePageLayout creates a common page layout with title and border
 func CreatePageLayout(tui interfaces.TUIInterface, title string, content tview.Primitive) tview.Primitive {
-	theme := tui.GetTheme()
+	colors := theme.GetCurrentPalette()
 
 	// Create a flex container
 	flex := tview.NewFlex().
@@ -35,9 +35,10 @@ func CreatePageLayout(tui interfaces.TUIInterface, title string, content tview.P
 
 	// Set border properties
 	flex.SetBorder(true).
-		SetBorderColor(theme.GetAccent()).
+		SetBorderColor(colors.Border).
 		SetTitle(title).
-		SetTitleAlign(tview.AlignCenter)
+		SetTitleAlign(tview.AlignCenter).
+		SetTitleColor(colors.MainContentTitle)
 
 	// Add the content to the flex
 	flex.AddItem(content, 0, 1, true)

@@ -7,46 +7,39 @@ import (
 	"strings"
 
 	"github.com/rivo/tview"
+	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
 )
 
-// getVaultFiles returns a list of directories and .slv files in the current directory
-func (vbp *VaultBrowsePage) getVaultFiles() []VaultFile {
-	var items []VaultFile
+// getDirectories returns only directories from the current directory
+func (vbp *VaultBrowsePage) getDirectories() []VaultFile {
+	var directories []VaultFile
 
 	// Read the directory
 	entries, err := os.ReadDir(vbp.currentDir)
 	if err != nil {
-		return items
+		return directories
 	}
 
-	// Filter and collect items
+	// Filter and collect directories only
 	for _, entry := range entries {
-		// Skip hidden files (except .slv files)
-		if strings.HasPrefix(entry.Name(), ".") && !strings.HasSuffix(entry.Name(), ".slv.yaml") && !strings.HasSuffix(entry.Name(), ".slv.yml") {
+		// Skip hidden directories
+		if strings.HasPrefix(entry.Name(), ".") {
 			continue
 		}
 
 		// Check if it's a directory
 		if entry.IsDir() {
-			items = append(items, VaultFile{
-				Name:   entry.Name(),
-				Path:   filepath.Join(vbp.currentDir, entry.Name()),
-				IsFile: false,
+			directories = append(directories, VaultFile{
+				Name:         entry.Name(),
+				Path:         filepath.Join(vbp.currentDir, entry.Name()),
+				IsFile:       false,
+				IsAccessible: true,
 			})
-		} else {
-			// Check if it's a .slv file
-			if strings.HasSuffix(entry.Name(), ".slv.yaml") || strings.HasSuffix(entry.Name(), ".slv.yml") {
-				items = append(items, VaultFile{
-					Name:   entry.Name(),
-					Path:   filepath.Join(vbp.currentDir, entry.Name()),
-					IsFile: true,
-				})
-			}
 		}
 	}
 
-	return items
+	return directories
 }
 
 // handleItemSelection handles selection of a file or directory
@@ -62,10 +55,10 @@ func (vbp *VaultBrowsePage) handleItemSelection(item VaultFile) {
 	}
 }
 
-// loadSelectedItem loads the currently selected item
-func (vbp *VaultBrowsePage) loadSelectedItem(list *tview.List) {
+// loadSelectedDirectory loads the currently selected directory
+func (vbp *VaultBrowsePage) loadSelectedDirectory() {
 	// Get the current selection index
-	selectedIndex := list.GetCurrentItem()
+	selectedIndex := vbp.directoryList.GetCurrentItem()
 
 	// Skip the "Go Back" option (index 0)
 	if selectedIndex == 0 {
@@ -76,13 +69,31 @@ func (vbp *VaultBrowsePage) loadSelectedItem(list *tview.List) {
 	// Adjust index for the "Go Back" option
 	itemIndex := selectedIndex - 1
 
-	// Get the items
-	items := vbp.getVaultFiles()
+	// Get the directories
+	directories := vbp.getDirectories()
 
 	// Check if the index is valid
-	if itemIndex >= 0 && itemIndex < len(items) {
-		item := items[itemIndex]
-		vbp.handleItemSelection(item)
+	if itemIndex >= 0 && itemIndex < len(directories) {
+		dir := directories[itemIndex]
+		vbp.handleItemSelection(dir)
+	}
+}
+
+// loadSelectedFile loads the currently selected vault file
+func (vbp *VaultBrowsePage) loadSelectedFile() {
+	// Get the current selection index
+	selectedIndex := vbp.fileList.GetCurrentItem()
+
+	// Get the files from the currently displayed directory
+	files := vbp.getVaultFilesFromDirectory(vbp.getCurrentDisplayedDirectory())
+
+	// Check if the index is valid and not the "no files found" placeholder
+	if selectedIndex >= 0 && selectedIndex < len(files) {
+		file := files[selectedIndex]
+		vbp.handleItemSelection(file)
+	} else {
+		// Handle case when "No vault files found" is selected
+		vbp.ShowError("No vault files available to open")
 	}
 }
 
@@ -97,35 +108,170 @@ func (vbp *VaultBrowsePage) goBackDirectory() {
 	}
 }
 
-// updateFileList refreshes the file list displayed in the UI
+// updateFileList refreshes both directory and file lists displayed in the UI
 func (vbp *VaultBrowsePage) updateFileList() {
+	// Clear both lists
+	vbp.directoryList.Clear()
 	vbp.fileList.Clear()
-	vbp.pwdTextView.SetText(fmt.Sprintf("\n[white]Browse Vaults[white::-]\n[gray](Use arrow keys [←] and [→] to navigate directories)[gray::-]\n\nCurrent Directory: %s", vbp.currentDir))
 
-	// Add "go back one directory" option at the top
-	vbp.fileList.AddItem("⬆️ Go Back", "Go back to parent directory", 'b', func() {
+	// Update the directory list title to show current directory
+	vbp.directoryList.SetTitle(fmt.Sprintf("Directories (%s)", vbp.currentDir))
+
+	// Add "go back one directory" option at the top of directory list
+	vbp.directoryList.AddItem("⬆️ Go Back", "Go back to parent directory", 'b', func() {
 		vbp.goBackDirectory()
 	})
 
-	// Get directories and .slv files
-	items := vbp.getVaultFiles()
-
-	// Add items to the list
-	for _, item := range items {
-		icon := "📁"
-		if item.IsFile {
-			icon = "📄"
-		}
-
-		vbp.fileList.AddItem(
-			fmt.Sprintf("%s %s", icon, item.Name),
+	// Get directories and populate directory list
+	directories := vbp.getDirectories()
+	for _, dir := range directories {
+		vbp.directoryList.AddItem(
+			fmt.Sprintf("📁 %s", dir.Name),
 			"",
 			0,
 			func() {
-				vbp.handleItemSelection(item)
+				vbp.handleItemSelection(dir)
 			},
 		)
 	}
+
+	// Set up dynamic loading for directory list
+	vbp.setupDynamicLoading()
+
+	// Initially populate file list with current directory files
+	vbp.updateVaultFilesForCurrentDir()
+}
+
+// setupDynamicLoading sets up the directory list to dynamically update vault files
+func (vbp *VaultBrowsePage) setupDynamicLoading() {
+	vbp.directoryList.SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
+		// Skip the "Go Back" option (index 0)
+		if index == 0 {
+			vbp.updateVaultFilesForCurrentDir()
+			return
+		}
+
+		// Adjust index for the "Go Back" option
+		itemIndex := index - 1
+		directories := vbp.getDirectories()
+
+		// Check if the index is valid
+		if itemIndex >= 0 && itemIndex < len(directories) {
+			selectedDir := directories[itemIndex]
+			vbp.updateVaultFilesForDirectory(selectedDir.Path)
+		}
+	})
+}
+
+// updateVaultFilesForCurrentDir updates the vault files list for the current directory
+func (vbp *VaultBrowsePage) updateVaultFilesForCurrentDir() {
+	vbp.updateVaultFilesForDirectory(vbp.currentDir)
+}
+
+// updateVaultFilesForDirectory updates the vault files list for a specific directory
+func (vbp *VaultBrowsePage) updateVaultFilesForDirectory(dirPath string) {
+	// Clear the file list
+	vbp.fileList.Clear()
+
+	// Update the title to show the directory path
+	vbp.fileList.SetTitle(fmt.Sprintf("Vault Files (%s)", dirPath))
+
+	// Get vault files from the specified directory
+	files := vbp.getVaultFilesFromDirectory(dirPath)
+
+	if len(files) == 0 {
+		// Add "no vault files found" entry when directory is empty
+		vbp.fileList.AddItem(
+			"📄 No vault files found",
+			"",
+			0,
+			nil, // No action for this placeholder item
+		)
+	} else {
+		// Add actual vault files
+		for _, file := range files {
+			if !file.IsAccessible {
+				vbp.fileList.AddItem(
+					fmt.Sprintf("📄 [red]%s[white]", file.Name),
+					"",
+					0,
+					func() {
+						vbp.handleItemSelection(file)
+					},
+				)
+			} else {
+				vbp.fileList.AddItem(
+					fmt.Sprintf("📄 [green]%s[white]", file.Name),
+					"",
+					0,
+					func() {
+						vbp.handleItemSelection(file)
+					},
+				)
+			}
+
+		}
+	}
+}
+
+// getCurrentDisplayedDirectory returns the directory path currently being displayed in the vault files list
+func (vbp *VaultBrowsePage) getCurrentDisplayedDirectory() string {
+	// Get the current selection index from directory list
+	selectedIndex := vbp.directoryList.GetCurrentItem()
+
+	// Skip the "Go Back" option (index 0)
+	if selectedIndex == 0 {
+		return vbp.currentDir
+	}
+
+	// Adjust index for the "Go Back" option
+	itemIndex := selectedIndex - 1
+	directories := vbp.getDirectories()
+
+	// Check if the index is valid
+	if itemIndex >= 0 && itemIndex < len(directories) {
+		return directories[itemIndex].Path
+	}
+
+	// Fallback to current directory
+	return vbp.currentDir
+}
+
+// getVaultFilesFromDirectory returns only .slv files from a specific directory
+func (vbp *VaultBrowsePage) getVaultFilesFromDirectory(dirPath string) []VaultFile {
+	var files []VaultFile
+
+	// Read the directory
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return files
+	}
+	session, _ := session.GetSession()
+	secretKey := session.SecretKey()
+
+	// Filter and collect .slv files only
+	for _, entry := range entries {
+		// Skip hidden files (except .slv files)
+		if strings.HasPrefix(entry.Name(), ".") && !strings.HasSuffix(entry.Name(), ".slv.yaml") && !strings.HasSuffix(entry.Name(), ".slv.yml") {
+			continue
+		}
+		vault, err := vaults.Get(filepath.Join(dirPath, entry.Name()))
+		if err != nil {
+			continue
+		}
+		isVaultAccessible := vault.IsAccessibleBy(secretKey)
+		// Check if it's a .slv file
+		if !entry.IsDir() && (strings.HasSuffix(entry.Name(), ".slv.yaml") || strings.HasSuffix(entry.Name(), ".slv.yml")) {
+			files = append(files, VaultFile{
+				Name:         entry.Name(),
+				Path:         filepath.Join(dirPath, entry.Name()),
+				IsFile:       true,
+				IsAccessible: isVaultAccessible,
+			})
+		}
+	}
+
+	return files
 }
 
 // openVaultFile opens a vault file for viewing
@@ -146,37 +292,24 @@ func (vbp *VaultBrowsePage) editSelectedVault() {
 	// Get the current selection index
 	selectedIndex := vbp.fileList.GetCurrentItem()
 
-	// Skip the "Go Back" option (index 0)
-	if selectedIndex == 0 {
-		vbp.ShowError("Please select a vault file to edit")
-		return
-	}
+	// Get the files from the currently displayed directory
+	files := vbp.getVaultFilesFromDirectory(vbp.getCurrentDisplayedDirectory())
 
-	// Adjust index for the "Go Back" option
-	itemIndex := selectedIndex - 1
-
-	// Get the items
-	items := vbp.getVaultFiles()
-
-	// Check if the index is valid
-	if itemIndex >= 0 && itemIndex < len(items) {
-		item := items[itemIndex]
-
-		// Check if it's a vault file
-		if !item.IsFile {
-			vbp.ShowError("Please select a vault file to edit")
-			return
-		}
+	// Check if the index is valid and not the "no files found" placeholder
+	if selectedIndex >= 0 && selectedIndex < len(files) {
+		file := files[selectedIndex]
 
 		// Load the vault
-		vault, err := vaults.Get(item.Path)
+		vault, err := vaults.Get(file.Path)
 		if err != nil {
 			vbp.ShowError(fmt.Sprintf("Error loading vault: %v", err))
 			return
 		}
 
 		// Navigate to vault edit page
-		vbp.GetTUI().GetNavigation().ShowVaultEditWithVault(vault, item.Path, false)
+		vbp.GetTUI().GetNavigation().ShowVaultEditWithVault(vault, file.Path, false)
+	} else {
+		vbp.ShowError("No vault files available to edit")
 	}
 }
 
@@ -185,31 +318,16 @@ func (vbp *VaultBrowsePage) renameSelectedVault() {
 	// Get the current selection index
 	selectedIndex := vbp.fileList.GetCurrentItem()
 
-	// Skip the "Go Back" option (index 0)
-	if selectedIndex == 0 {
-		vbp.ShowError("Please select a vault file to edit")
-		return
-	}
+	// Get the files from the currently displayed directory
+	files := vbp.getVaultFilesFromDirectory(vbp.getCurrentDisplayedDirectory())
 
-	// Adjust index for the "Go Back" option
-	itemIndex := selectedIndex - 1
-
-	// Get the items
-	items := vbp.getVaultFiles()
-
-	// Check if the index is valid
-	if itemIndex >= 0 && itemIndex < len(items) {
-		item := items[itemIndex]
-
-		// Check if it's a vault file
-		if !item.IsFile {
-			vbp.ShowError("Please select a vault file to edit")
-			return
-		}
+	// Check if the index is valid and not the "no files found" placeholder
+	if selectedIndex >= 0 && selectedIndex < len(files) {
+		file := files[selectedIndex]
 
 		// Create rename form
-		filePath := item.Path
-		fileName := item.Name
+		filePath := file.Path
+		fileName := file.Name
 		form := tview.NewForm().
 			AddInputField("New File Name", fileName, 40, nil, nil)
 
@@ -226,7 +344,7 @@ func (vbp *VaultBrowsePage) renameSelectedVault() {
 				return
 			}
 
-			// Construct new file path
+			// Construct new file path using the file's actual directory
 			dir := filepath.Dir(filePath)
 			newFilePath := filepath.Join(dir, newFileName)
 
@@ -250,6 +368,8 @@ func (vbp *VaultBrowsePage) renameSelectedVault() {
 			// Restore focus to file list
 			vbp.GetTUI().GetApplication().SetFocus(vbp.fileList)
 		})
+	} else {
+		vbp.ShowError("No vault files available to rename")
 	}
 }
 
@@ -258,29 +378,15 @@ func (vbp *VaultBrowsePage) deleteSelectedVault() {
 	// Get the current selection index
 	selectedIndex := vbp.fileList.GetCurrentItem()
 
-	// Skip the "Go Back" option (index 0)
-	if selectedIndex == 0 {
-		vbp.ShowError("Please select a vault file to edit")
-		return
-	}
+	// Get the files from the currently displayed directory
+	files := vbp.getVaultFilesFromDirectory(vbp.getCurrentDisplayedDirectory())
 
-	// Adjust index for the "Go Back" option
-	itemIndex := selectedIndex - 1
+	// Check if the index is valid and not the "no files found" placeholder
+	if selectedIndex >= 0 && selectedIndex < len(files) {
+		file := files[selectedIndex]
 
-	// Get the items
-	items := vbp.getVaultFiles()
-
-	// Check if the index is valid
-	if itemIndex >= 0 && itemIndex < len(items) {
-		item := items[itemIndex]
-
-		// Check if it's a vault file
-		if !item.IsFile {
-			vbp.ShowError("Please select a vault file to edit")
-			return
-		}
 		// Get just the filename for display
-		fileName := filepath.Base(item.Path)
+		fileName := filepath.Base(file.Path)
 
 		if !strings.HasSuffix(fileName, ".slv.yaml") && !strings.HasSuffix(fileName, ".slv.yml") {
 			vbp.ShowError("File name must end with .slv.yaml or .slv.yml")
@@ -291,7 +397,7 @@ func (vbp *VaultBrowsePage) deleteSelectedVault() {
 			fmt.Sprintf("Are you sure you want to delete vault '%s'?\n\nThis action cannot be undone.", fileName),
 			func() {
 				// Confirm deletion
-				if err := os.Remove(item.Path); err != nil {
+				if err := os.Remove(file.Path); err != nil {
 					vbp.ShowError(fmt.Sprintf("Error deleting vault: %v", err))
 					return
 				}
@@ -308,5 +414,7 @@ func (vbp *VaultBrowsePage) deleteSelectedVault() {
 				vbp.GetTUI().GetApplication().SetFocus(vbp.fileList)
 			},
 		)
+	} else {
+		vbp.ShowError("No vault files available to delete")
 	}
 }

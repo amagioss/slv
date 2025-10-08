@@ -150,9 +150,9 @@ func (vep *VaultEditPage) Create() tview.Primitive {
 	flex := vep.currentPage
 	// Update status bar with help text based on vault access state
 	if vep.IsVaultUnlocked() {
-		vep.GetTUI().UpdateStatusBar("[yellow]Tab: Navigate forms | Esc: Back | Ctrl+C: Quit | [green]Vault Unlocked - Full Access[white]")
+		vep.GetTUI().UpdateStatusBar("Tab: Navigate forms | Esc: Back | Ctrl+C: Quit | Vault Unlocked - Full Access")
 	} else {
-		vep.GetTUI().UpdateStatusBar("[yellow]Tab: Navigate forms | Esc: Back | Ctrl+C: Quit | [red]Vault Locked - Limited Access[white]")
+		vep.GetTUI().UpdateStatusBar("Tab: Navigate forms | Esc: Back | Ctrl+C: Quit | Vault Locked - Limited Access")
 	}
 
 	vep.SetTitle("Edit Vault at " + vep.filePath)

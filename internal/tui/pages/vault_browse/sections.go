@@ -3,39 +3,46 @@ package vault_browse
 import (
 	"fmt"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"slv.sh/slv/internal/tui/theme"
 )
 
 func (vbp *VaultBrowsePage) createMainSection() *tview.Grid {
-	welcomeText := fmt.Sprintf("\n[white]Browse Vaults[white::-]\n[gray](Use arrow keys [←] and [→] to navigate directories)[gray::-]\n\nCurrent Directory: %s", vbp.currentDir)
+	colors := theme.GetCurrentPalette()
 
-	vbp.pwdTextView = tview.NewTextView().
-		SetText(welcomeText).
-		SetDynamicColors(true).
-		SetTextAlign(tview.AlignCenter).
-		SetWrap(true)
+	// Create the directory list (left column)
+	vbp.directoryList = tview.NewList()
+	vbp.directoryList.SetTitle(fmt.Sprintf("Directories (%s)", vbp.currentDir)).SetTitleAlign(tview.AlignLeft)
+	vbp.directoryList.SetBorder(true)
 
-	// Create the list
+	// Style the directory list
+	vbp.directoryList.SetSelectedTextColor(colors.ListSelectedText).
+		SetSelectedBackgroundColor(colors.ListSelectedBg).
+		SetSecondaryTextColor(colors.ListSecondaryText).
+		SetMainTextColor(colors.ListMainText)
+
+	// Create the file list (right column)
 	vbp.fileList = tview.NewList()
+	vbp.fileList.SetTitle("Vault Files").SetTitleAlign(tview.AlignLeft)
+	vbp.fileList.SetBorder(true)
 
-	// Style the list
-	vbp.fileList.SetSelectedTextColor(tcell.ColorYellow).
-		SetSelectedBackgroundColor(tcell.ColorNavy).
-		SetSecondaryTextColor(tcell.ColorGray).
-		SetMainTextColor(tcell.ColorWhite)
+	// Style the file list
+	vbp.fileList.SetSelectedTextColor(colors.ListSelectedText).
+		SetSelectedBackgroundColor(colors.ListSelectedBg).
+		SetSecondaryTextColor(colors.ListSecondaryText).
+		SetMainTextColor(colors.ListMainText)
 
-	// Create a centered layout using grid
+	// Create a two-column layout using grid
 	mainContent := tview.NewGrid().
-		SetRows(6, 0). // Two flexible rows
-		SetColumns(0). // Single column
+		SetRows(0).       // Single row taking full height
+		SetColumns(0, 0). // Two equal columns
 		SetBorders(false)
 
-	// Center the welcome text
-	mainContent.AddItem(vbp.pwdTextView, 0, 0, 1, 1, 0, 0, false)
+	// Add the directory list (left column)
+	mainContent.AddItem(vbp.directoryList, 0, 0, 1, 1, 0, 0, true)
 
-	// Center the list
-	mainContent.AddItem(vbp.fileList, 1, 0, 1, 1, 0, 0, true)
+	// Add the file list (right column)
+	mainContent.AddItem(vbp.fileList, 0, 1, 1, 1, 0, 0, false)
 
 	return mainContent
 }

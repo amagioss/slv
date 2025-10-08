@@ -10,9 +10,10 @@ import (
 
 // VaultFile represents a file or directory in the vault browser
 type VaultFile struct {
-	Name   string
-	Path   string
-	IsFile bool
+	Name         string
+	Path         string
+	IsFile       bool
+	IsAccessible bool
 }
 
 // VaultBrowsePage handles the vault browsing functionality
@@ -23,9 +24,9 @@ type VaultBrowsePage struct {
 	vaultPath  string        // Store the current vault path
 
 	// UI components
-	mainContent *tview.Grid
-	pwdTextView *tview.TextView
-	fileList    *tview.List
+	mainContent   *tview.Grid
+	directoryList *tview.List
+	fileList      *tview.List
 
 	navigation *FormNavigation
 }

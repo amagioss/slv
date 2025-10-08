@@ -61,7 +61,6 @@ func (vnp *VaultNewPage) Create() tview.Primitive {
 	form := vnp.currentPage
 
 	// Update status bar
-	vnp.GetTUI().UpdateStatusBar("[yellow]Tab: Navigate fields | Enter: Submit | Esc: Cancel[white]")
 
 	// Create the page layout and show it
 	vnp.SetTitle("New Vault at " + vnp.currentDir)

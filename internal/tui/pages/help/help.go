@@ -5,6 +5,7 @@ import (
 	"github.com/rivo/tview"
 	"slv.sh/slv/internal/tui/interfaces"
 	"slv.sh/slv/internal/tui/pages"
+	"slv.sh/slv/internal/tui/theme"
 )
 
 // HelpPage handles the help page functionality
@@ -51,10 +52,11 @@ Visit the documentation or use the CLI commands.`
 		SetTextAlign(tview.AlignLeft)
 
 	// Style the text
-	text.SetTextColor(tcell.ColorWhite)
+	colors := theme.GetCurrentPalette()
+	text.SetTextColor(colors.TextPrimary)
 
 	// Update status bar
-	hp.UpdateStatus("[yellow]Help - Press ESC to go back[white]")
+	hp.UpdateStatus("Help - Press ESC to go back")
 
 	// Create layout using BasePage method
 	return hp.CreateLayout(text)

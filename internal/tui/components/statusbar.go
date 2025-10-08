@@ -3,9 +3,9 @@ package components
 import (
 	"fmt"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"slv.sh/slv/internal/tui/interfaces"
+	"slv.sh/slv/internal/tui/theme"
 )
 
 // StatusBar represents the status bar component
@@ -28,6 +28,7 @@ func NewStatusBar(tui interfaces.TUIInterface) *StatusBar {
 
 // createComponent creates the underlying UI component
 func (sb *StatusBar) createComponent() {
+	colors := theme.GetCurrentPalette()
 	sb.primitive = tview.NewTextView().
 		SetDynamicColors(true).
 		SetRegions(true).
@@ -36,9 +37,10 @@ func (sb *StatusBar) createComponent() {
 		SetScrollable(true)
 
 	sb.primitive.SetBorder(true).
-		SetBorderColor(tcell.ColorAqua).
+		SetBorderColor(colors.Border).
 		SetTitle("Status").
-		SetTitleAlign(tview.AlignLeft)
+		SetTitleAlign(tview.AlignLeft).
+		SetTitleColor(colors.MainContentTitle)
 }
 
 // Render returns the primitive for this component
@@ -59,9 +61,9 @@ func (sb *StatusBar) SetFocus(focus bool) {
 // UpdateStatus updates the status bar with the current page name
 func (sb *StatusBar) UpdateStatus(pageName string) {
 	sb.pageName = pageName
+	colors := theme.GetCurrentPalette()
 
-	status := fmt.Sprintf("[white]Page: [cyan]%s[white] | F1: Help | Esc: Back | Ctrl+C: Quit",
-		pageName)
+	status := fmt.Sprintf("Page: %s | F1: Help | Esc: Back | Ctrl+C: Quit", pageName)
 
 	// Add custom help text if available
 	if sb.customHelp != "" {
@@ -69,6 +71,7 @@ func (sb *StatusBar) UpdateStatus(pageName string) {
 	}
 
 	sb.primitive.SetText(status)
+	sb.primitive.SetTextColor(colors.TextPrimary)
 }
 
 // SetCustomHelp sets the custom help text for the current page

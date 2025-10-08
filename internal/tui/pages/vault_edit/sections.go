@@ -77,6 +77,10 @@ func (vep *VaultEditPage) createAccessSection() tview.Primitive {
 	accessFlex.AddItem(accessRow, 5, 1, false)
 	accessFlex.AddItem(resultsFlex, 0, 1, false)
 
+	if !vep.IsVaultUnlocked() {
+		vep.applyDisabledStyling(accessCheckboxesFlex)
+	}
+
 	return accessFlex
 }
 

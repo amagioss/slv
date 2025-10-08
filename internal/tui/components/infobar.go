@@ -1,12 +1,12 @@
 package components
 
 import (
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/profiles"
 	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/tui/interfaces"
+	"slv.sh/slv/internal/tui/theme"
 )
 
 // InfoBar represents the info bar component
@@ -29,6 +29,7 @@ func NewInfoBar(tui interfaces.TUIInterface) *InfoBar {
 
 // createComponents creates the underlying UI components
 func (ib *InfoBar) createComponents() {
+	colors := theme.GetCurrentPalette()
 	// Create info table
 	ib.infoTable = tview.NewTable()
 	ib.infoTable.SetBorder(false)
@@ -47,7 +48,8 @@ func (ib *InfoBar) createComponents() {
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true).
 		SetWrap(false).
-		SetText(logoContent)
+		SetText(logoContent).
+		SetTextColor(colors.InfobarASCIIArt)
 
 	// Create flex container
 	flex := tview.NewFlex().
@@ -56,9 +58,10 @@ func (ib *InfoBar) createComponents() {
 		AddItem(ib.logoView, 30, 0, false)
 
 	flex.SetBorder(true).
-		SetBorderColor(tcell.ColorAqua).
+		SetBorderColor(colors.InfobarBorder).
 		SetTitle("Secure Local Vault").
-		SetTitleAlign(tview.AlignCenter)
+		SetTitleAlign(tview.AlignCenter).
+		SetTitleColor(colors.InfobarTitle)
 
 	ib.primitive = flex
 }
@@ -70,6 +73,7 @@ func (ib *InfoBar) Render() tview.Primitive {
 
 // Refresh refreshes the component with current data
 func (ib *InfoBar) Refresh() {
+	colors := theme.GetCurrentPalette()
 	profileName := ib.getProfileName()
 	var selfEnvironment *environments.Environment
 
@@ -89,8 +93,8 @@ func (ib *InfoBar) Refresh() {
 
 	// Add profile and environment info to the table
 	row := 0
-	ib.infoTable.SetCell(row, 0, tview.NewTableCell("Profile:").SetTextColor(tcell.ColorDarkCyan).SetMaxWidth(20))
-	ib.infoTable.SetCell(row, 1, tview.NewTableCell(profileName).SetTextColor(tcell.ColorWhite))
+	ib.infoTable.SetCell(row, 0, tview.NewTableCell("Profile:").SetTextColor(colors.InfoTableLabel).SetMaxWidth(20))
+	ib.infoTable.SetCell(row, 1, tview.NewTableCell(profileName).SetTextColor(colors.InfoTableValue))
 	row++
 
 	if selfEnvironment != nil {
@@ -110,24 +114,24 @@ func (ib *InfoBar) Refresh() {
 			publicKey = "No key available"
 		}
 
-		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Environment:").SetTextColor(tcell.ColorDarkCyan).SetMaxWidth(20))
-		ib.infoTable.SetCell(row, 1, tview.NewTableCell(envName).SetTextColor(tcell.ColorWhite))
+		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Environment:").SetTextColor(colors.InfoTableLabel).SetMaxWidth(20))
+		ib.infoTable.SetCell(row, 1, tview.NewTableCell(envName).SetTextColor(colors.InfoTableValue))
 		row++
 
-		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Email:").SetTextColor(tcell.ColorDarkCyan).SetMaxWidth(20))
-		ib.infoTable.SetCell(row, 1, tview.NewTableCell(envEmail).SetTextColor(tcell.ColorWhite))
+		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Email:").SetTextColor(colors.InfoTableLabel).SetMaxWidth(20))
+		ib.infoTable.SetCell(row, 1, tview.NewTableCell(envEmail).SetTextColor(colors.InfoTableValue))
 		row++
 
-		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Type:").SetTextColor(tcell.ColorDarkCyan).SetMaxWidth(20))
-		ib.infoTable.SetCell(row, 1, tview.NewTableCell(envType).SetTextColor(tcell.ColorWhite))
+		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Type:").SetTextColor(colors.InfoTableLabel).SetMaxWidth(20))
+		ib.infoTable.SetCell(row, 1, tview.NewTableCell(envType).SetTextColor(colors.InfoTableValue))
 		row++
 
-		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Public Key:").SetTextColor(tcell.ColorDarkCyan).SetMaxWidth(20))
-		ib.infoTable.SetCell(row, 1, tview.NewTableCell(publicKey).SetTextColor(tcell.ColorWhite))
+		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Public Key:").SetTextColor(colors.InfoTableLabel).SetMaxWidth(20))
+		ib.infoTable.SetCell(row, 1, tview.NewTableCell(publicKey).SetTextColor(colors.InfoTableValue))
 	} else {
 		// No environment - show minimal info
-		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Status:").SetTextColor(tcell.ColorAqua).SetMaxWidth(20))
-		ib.infoTable.SetCell(row, 1, tview.NewTableCell("No self environment is set").SetTextColor(tcell.ColorYellow))
+		ib.infoTable.SetCell(row, 0, tview.NewTableCell("Status:").SetTextColor(colors.InfoTableLabel).SetMaxWidth(20))
+		ib.infoTable.SetCell(row, 1, tview.NewTableCell("No self environment is set").SetTextColor(colors.InfoTableValue))
 	}
 }
 

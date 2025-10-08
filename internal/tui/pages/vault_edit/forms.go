@@ -99,6 +99,8 @@ func (vep *VaultEditPage) createVaultShareWithSelfForm() *tview.Form {
 		// Disable checkbox if vault is locked
 		if !vep.IsVaultUnlocked() {
 			checkbox.SetDisabled(true)
+			// Apply disabled styling to the form
+			vep.applyDisabledStyling(shareWithSelfForm)
 		}
 	}
 
@@ -129,6 +131,8 @@ func (vep *VaultEditPage) createVaultShareWithK8sForm() *tview.Form {
 		// Disable checkbox if vault is locked
 		if !vep.IsVaultUnlocked() {
 			checkbox.SetDisabled(true)
+			// Apply disabled styling to the form
+			vep.applyDisabledStyling(shareWithK8sForm)
 		}
 	}
 	vep.shareWithK8sForm = shareWithK8sForm
