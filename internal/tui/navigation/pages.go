@@ -12,6 +12,9 @@ func (n *Navigation) ShowMainMenu(replace bool) {
 	menu := mainPage.Create()
 	n.addPage("main", menu)
 	n.setCurrentPage("main", replace)
+
+	// Restore navigation state after setCurrentPage
+	mainPage.RestoreNavigationState()
 }
 
 // ShowVaults displays the vaults page
@@ -19,9 +22,22 @@ func (n *Navigation) ShowVaults(replace bool) {
 	// Create fresh VaultPage instance using factory
 	vaultPage := n.app.GetRouter().CreatePage(n.app, "vaults_browse", n.GetVaultDir())
 	n.StorePageInstance("vaults", vaultPage) // Store page instance for refresh
+
+	// // Check if we have saved state for this page
+	// if n.HasPageState("vaults") {
+	// 	// If we have saved state, restore it after creating the page
+	// 	if vbp, ok := vaultPage.(*vault_browse.VaultBrowsePage); ok {
+	// 		vbp.RestoreNavigationState()
+	// 	}
+	// }
+
 	vaults := vaultPage.Create()
 	n.addPage("vaults", vaults)
 	n.setCurrentPage("vaults", replace)
+
+	// Restore navigation state after setCurrentPage
+	vaultPage.RestoreNavigationState()
+
 	n.UpdateStatus()
 }
 
@@ -33,6 +49,10 @@ func (n *Navigation) ShowProfiles(replace bool) {
 	page := profilesPage.Create()
 	n.addPage("profiles", page)
 	n.setCurrentPage("profiles", replace)
+
+	// Restore navigation state after setCurrentPage
+	profilesPage.RestoreNavigationState()
+
 	n.UpdateStatus()
 }
 
@@ -44,6 +64,10 @@ func (n *Navigation) ShowEnvironments(replace bool) {
 	page := environmentsPage.Create()
 	n.addPage("environments", page)
 	n.setCurrentPage("environments", replace)
+
+	// Restore navigation state after setCurrentPage
+	environmentsPage.RestoreNavigationState()
+
 	n.UpdateStatus()
 }
 
@@ -55,6 +79,10 @@ func (n *Navigation) ShowHelp(replace bool) {
 	page := helpPage.Create()
 	n.addPage("help", page)
 	n.setCurrentPage("help", replace)
+
+	// Restore navigation state after setCurrentPage
+	helpPage.RestoreNavigationState()
+
 	n.UpdateStatus()
 }
 
@@ -68,6 +96,10 @@ func (n *Navigation) ShowVaultDetails(replace bool) {
 	vaultDetailsPage := vaultViewPage.Create()
 	n.addPage("vault-details", vaultDetailsPage)
 	n.setCurrentPage("vault-details", replace)
+
+	// Restore navigation state after setCurrentPage
+	vaultViewPage.RestoreNavigationState()
+
 	n.UpdateStatus()
 }
 
@@ -79,6 +111,10 @@ func (n *Navigation) ShowNewVault(replace bool) {
 	page := newVaultPage.Create()
 	n.addPage("new-vault", page)
 	n.setCurrentPage("new-vault", replace)
+
+	// Restore navigation state after setCurrentPage
+	newVaultPage.RestoreNavigationState()
+
 	n.UpdateStatus()
 }
 
@@ -87,41 +123,76 @@ func (n *Navigation) ShowVaultsWithDir(dir string, replace bool) {
 	// Create fresh VaultPage instance using factory with specified directory
 	vaultPage := n.app.GetRouter().CreatePage(n.app, "vaults_browse", dir)
 	n.StorePageInstance("vaults", vaultPage) // Store page instance for refresh
+
+	// // Check if we have saved state for this page
+	// if n.HasPageState("vaults") {
+	// 	// If we have saved state, restore it after creating the page
+	// 	if vbp, ok := vaultPage.(*vault_browse.VaultBrowsePage); ok {
+	// 		vbp.RestoreNavigationState()
+	// 	}
+	// }
+
 	vaults := vaultPage.Create()
 	n.addPage("vaults", vaults)
 	n.setCurrentPage("vaults", replace)
+
+	// Restore navigation state after setCurrentPage
+	vaultPage.RestoreNavigationState()
+
 	n.UpdateStatus()
 }
 
 // ShowVaultDetailsWithVault shows vault details page with specific vault and filepath
 func (n *Navigation) ShowVaultDetailsWithVault(vault *vaults.Vault, filePath string, replace bool) {
+	// Save current page state before navigating away
+	n.saveCurrentPageState()
+
 	// Create fresh VaultViewPage instance using factory with vault and filepath
 	vaultViewPage := n.app.GetRouter().CreatePage(n.app, "vaults_view", vault, filePath)
 	n.StorePageInstance("vault-details", vaultViewPage) // Store page instance for refresh
 	vaultDetailsPage := vaultViewPage.Create()
 	n.addPage("vault-details", vaultDetailsPage)
 	n.setCurrentPage("vault-details", replace)
+
+	// Restore navigation state after setCurrentPage (which resets focus)
+	vaultViewPage.RestoreNavigationState()
+
 	n.UpdateStatus()
+
 }
 
 // ShowNewVaultWithDir shows the new vault creation page with a specific directory
 func (n *Navigation) ShowNewVaultWithDir(dir string, replace bool) {
+	// Save current page state before navigating away
+	n.saveCurrentPageState()
+
 	// Create fresh VaultNewPage instance using factory with specified directory
 	newVaultPage := n.app.GetRouter().CreatePage(n.app, "vaults_new", dir)
 	n.StorePageInstance("new-vault", newVaultPage) // Store page instance for refresh
 	page := newVaultPage.Create()
 	n.addPage("new-vault", page)
 	n.setCurrentPage("new-vault", replace)
+
+	// Restore navigation state after setCurrentPage
+	newVaultPage.RestoreNavigationState()
+
 	n.UpdateStatus()
 }
 
 // ShowVaultEditWithVault shows vault edit page with specific vault and filepath
 func (n *Navigation) ShowVaultEditWithVault(vault *vaults.Vault, filePath string, replace bool) {
+	// Save current page state before navigating away
+	n.saveCurrentPageState()
+
 	// Create fresh VaultEditPage instance using factory with vault and filepath
 	vaultEditPage := n.app.GetRouter().CreatePage(n.app, "vaults_edit", vault, filePath)
 	n.StorePageInstance("vault-edit", vaultEditPage) // Store page instance for refresh
 	vaultEditDetailsPage := vaultEditPage.Create()
 	n.addPage("vault-edit", vaultEditDetailsPage)
 	n.setCurrentPage("vault-edit", replace)
+
+	// Restore navigation state after setCurrentPage
+	vaultEditPage.RestoreNavigationState()
+
 	n.UpdateStatus()
 }

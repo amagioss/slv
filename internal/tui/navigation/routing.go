@@ -19,6 +19,9 @@ func (n *Navigation) setCurrentPage(name string, replace bool) {
 
 // GoBack navigates to the previous page (now uses Router infrastructure)
 func (n *Navigation) GoBack() {
+	// Save current page state before navigating back
+	n.saveCurrentPageState()
+
 	if err := n.app.GetRouter().GoBackWithComponents(n.app.GetComponents()); err != nil {
 		// If no pages in stack, show error
 		n.app.ShowError("No previous page to go back to")
@@ -43,6 +46,9 @@ func (n *Navigation) GoBack() {
 
 // NavigateTo navigates to a specific page
 func (n *Navigation) NavigateTo(pageName string, replace bool) {
+	// Save current page state before navigating away
+	n.saveCurrentPageState()
+
 	switch pageName {
 	case "main":
 		n.ShowMainMenu(replace)

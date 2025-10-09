@@ -39,9 +39,20 @@ func NewVaultBrowsePage(tui interfaces.TUIInterface, currentDir string) *VaultBr
 		vault:      nil,
 		vaultPath:  "",
 	}
+
+	// Check if we have saved state and use that directory instead
+	nav := tui.GetNavigation()
+	if lastViewedDir, hasViewedDir := nav.GetPageState("vaults", "lastViewedDir"); hasViewedDir {
+		if viewedDir, ok := lastViewedDir.(string); ok {
+			vbp.currentDir = viewedDir
+		}
+	}
+
 	vbp.mainContent = vbp.createMainSection()
 	vbp.navigation = (&FormNavigation{}).NewFormNavigation(vbp)
-	vbp.updateFileList() // Initial population of the list
+	vbp.updateFileList()
+	vbp.RestoreNavigationState()
+	// Initial population of the list
 	vbp.navigation.SetupNavigation()
 	return vbp
 }
@@ -57,15 +68,12 @@ func (vbp *VaultBrowsePage) Create() tview.Primitive {
 
 // Refresh implements the Page interface
 func (vbp *VaultBrowsePage) Refresh() {
+	// Save current state before refreshing
+	vbp.SaveNavigationState()
+
 	vbp.updateFileList()
 	// Recreate page using navigation system
 	vbp.GetTUI().GetNavigation().ShowVaultsWithDir(vbp.currentDir, true)
-
-	// Update help text for the current focus
-	if vbp.navigation != nil {
-		vbp.navigation.updateHelpText()
-	}
-
 }
 
 // HandleInput implements the Page interface

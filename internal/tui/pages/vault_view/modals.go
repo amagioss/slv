@@ -82,9 +82,11 @@ func (fn *FormNavigation) showAddItemModal() {
 
 		// TODO: Add item to vault using name, value, and plainText
 		fn.vvp.GetTUI().ShowInfo(fmt.Sprintf("Item added: Name='%s', Value='%s', PlainText=%v", name, value, encrypted))
+		fn.vvp.SaveNavigationState()
 		fn.vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(fn.vvp.vault, fn.vvp.filePath, true)
 	}, func() {
 		// Cancel callback - do nothing
+		fn.vvp.GetTUI().GetApplication().SetFocus(fn.vvp.itemsTable)
 	}, func() {
 		// Restore focus to items table
 		fn.vvp.GetTUI().GetApplication().SetFocus(fn.vvp.itemsTable)

@@ -46,10 +46,14 @@ func (vbp *VaultBrowsePage) getDirectories() []VaultFile {
 func (vbp *VaultBrowsePage) handleItemSelection(item VaultFile) {
 	if item.IsFile {
 		// Handle .slv file selection - open for viewing
+		vbp.SaveNavigationState()
 		vbp.openVaultFile(item.Path)
 	} else {
 		// Handle directory selection - navigate into the directory
 		vbp.currentDir = item.Path
+		vbp.directoryList.SetCurrentItem(0)
+		vbp.fileList.SetCurrentItem(0)
+		vbp.SaveNavigationState()
 		// Replace the current vault page with new directory
 		vbp.GetTUI().GetNavigation().ShowVaultsWithDir(item.Path, true)
 	}
@@ -81,6 +85,9 @@ func (vbp *VaultBrowsePage) loadSelectedDirectory() {
 
 // loadSelectedFile loads the currently selected vault file
 func (vbp *VaultBrowsePage) loadSelectedFile() {
+	// Save navigation state before opening vault
+	vbp.SaveNavigationState()
+
 	// Get the current selection index
 	selectedIndex := vbp.fileList.GetCurrentItem()
 
@@ -102,8 +109,13 @@ func (vbp *VaultBrowsePage) goBackDirectory() {
 	parentDir := filepath.Dir(vbp.currentDir)
 	// Don't go back if we're already at the root
 	if parentDir != vbp.currentDir {
+		// Save the current directory name so we can focus on it when we return
+		currentDirName := filepath.Base(vbp.currentDir)
+		vbp.GetTUI().GetNavigation().SavePageState("vaults", "focusOnDirectory", currentDirName)
+
 		vbp.currentDir = parentDir
 		// Replace the current vault page with parent directory
+		vbp.SaveNavigationState()
 		vbp.GetTUI().GetNavigation().ShowVaultsWithDir(parentDir, true)
 	}
 }
@@ -289,6 +301,9 @@ func (vbp *VaultBrowsePage) openVaultFile(filePath string) {
 
 // editSelectedVault edits the selected vault
 func (vbp *VaultBrowsePage) editSelectedVault() {
+	// Save navigation state before editing vault
+	vbp.SaveNavigationState()
+
 	// Get the current selection index
 	selectedIndex := vbp.fileList.GetCurrentItem()
 

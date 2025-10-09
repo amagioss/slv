@@ -33,6 +33,9 @@ func NewVaultViewPage(tui interfaces.TUIInterface, vault *vaults.Vault, filePath
 	vvp.currentPage = vvp.createMainSection()
 	vvp.navigation = (&FormNavigation{}).NewFormNavigation(vvp)
 	vvp.navigation.SetupNavigation()
+
+	// Restore navigation state will be called after setCurrentPage in ShowVaultDetailsWithVault
+
 	return vvp
 }
 
@@ -48,6 +51,9 @@ func (vvp *VaultViewPage) Create() tview.Primitive { // Create a flex layout to 
 
 // Refresh implements the Page interface
 func (vvp *VaultViewPage) Refresh() {
+	// Save current state before refreshing
+	vvp.SaveNavigationState()
+
 	// Reload vault data from disk to get fresh state
 	vvp.reloadVaultData()
 

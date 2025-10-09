@@ -9,6 +9,9 @@ import (
 
 // reloadVault reloads the vault
 func (vvp *VaultViewPage) reloadVault() {
+	// Save current state before reloading
+	vvp.SaveNavigationState()
+
 	if vvp.filePath == "" {
 		return
 	}
@@ -29,6 +32,9 @@ func (vvp *VaultViewPage) reloadVault() {
 
 // unlockVault unlocks the vault
 func (vvp *VaultViewPage) unlockVault() {
+	// Save current state before unlocking
+	vvp.SaveNavigationState()
+
 	// Check if we have the vault loaded
 	if vvp.vault == nil || vvp.filePath == "" {
 		vvp.ShowError("Vault not loaded. Please reopen the vault.")
@@ -59,6 +65,9 @@ func (vvp *VaultViewPage) unlockVault() {
 
 // lockVault locks the vault
 func (vvp *VaultViewPage) lockVault() {
+	// Save current state before locking
+	vvp.SaveNavigationState()
+
 	// Check if we have the vault loaded
 	if vvp.vault == nil || vvp.filePath == "" {
 		vvp.ShowError("Vault not loaded. Please reopen the vault.")
@@ -96,6 +105,7 @@ func (vvp *VaultViewPage) removeSecretItem() {
 			}
 
 			vvp.vault.DeleteItem(itemKey)
+			vvp.SaveNavigationState()
 			vvp.GetTUI().GetNavigation().ShowVaultDetailsWithVault(vvp.vault, vvp.filePath, true)
 		},
 		func() {

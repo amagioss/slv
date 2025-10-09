@@ -12,6 +12,9 @@ type Navigation struct {
 	vaultDir      string                     // Store current vault directory
 	customHelp    string                     // Store custom help text for current page
 	pageInstances map[string]interfaces.Page // Store actual page instances for refresh
+
+	// General state management for all pages
+	pageStates map[string]map[string]interface{} // pageName -> stateKey -> stateValue
 }
 
 // NewNavigation creates a new navigation controller
@@ -26,6 +29,7 @@ func NewNavigation(app interfaces.TUIInterface) *Navigation {
 		app:           app,
 		vaultDir:      homeDir,
 		pageInstances: make(map[string]interfaces.Page),
+		pageStates:    make(map[string]map[string]interface{}),
 	}
 
 	nav.UpdateStatus()       // Initialize status bar with content

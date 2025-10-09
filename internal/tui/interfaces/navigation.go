@@ -42,7 +42,17 @@ type NavigationInterface interface {
 	// Vault directory management
 	GetVaultDir() string
 	SetVaultDir(dir string)
+	GetPageInstance(pageName string) (Page, bool)
+	StorePageInstance(pageName string, page Page)
+	RemovePageInstance(pageName string)
 
 	// App access
 	GetApp() TUIInterface
+
+	// Page state management
+	SavePageState(pageName, stateKey string, stateValue interface{})
+	GetPageState(pageName, stateKey string) (interface{}, bool)
+	ClearPageState(pageName string)
+	ClearPageStateKey(pageName, stateKey string)
+	HasPageState(pageName string) bool
 }

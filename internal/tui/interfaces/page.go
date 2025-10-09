@@ -18,6 +18,15 @@ type Page interface {
 
 	// GetTitle returns the page title
 	GetTitle() string
+
+	// SaveNavigationState saves the current navigation state for restoration
+	SaveNavigationState()
+
+	// RestoreNavigationState restores the saved navigation state
+	RestoreNavigationState()
+
+	// ClearNavigationState clears the saved navigation state
+	ClearNavigationState()
 }
 
 // PageFactory defines the interface for creating page instances

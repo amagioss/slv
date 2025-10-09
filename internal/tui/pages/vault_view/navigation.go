@@ -79,6 +79,8 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 			return nil
 		case tcell.KeyCtrlE:
 			if fn.currentFocus == 0 || fn.currentFocus == 1 {
+				// Save state before navigating to edit
+				fn.vvp.SaveNavigationState()
 				fn.vvp.GetTUI().GetNavigation().ShowVaultEditWithVault(fn.vvp.vault, fn.vvp.filePath, false)
 				return nil
 			}
@@ -86,6 +88,8 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 		case tcell.KeyRune:
 			switch event.Rune() {
 			case 'q', 'Q':
+				// Clear state when going back to vault browse
+				fn.vvp.ClearNavigationState()
 				fn.vvp.GetTUI().GetNavigation().ShowVaults(false)
 				return nil
 			case 'u', 'U':
@@ -109,8 +113,10 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 				return nil
 			}
 		case tcell.KeyEsc:
+			// Clear state when going back to vault browse
+			fn.vvp.ClearNavigationState()
 			fn.vvp.GetTUI().GetNavigation().ShowVaults(false)
-			return nil
+			return event
 		case tcell.KeyUp, tcell.KeyDown, tcell.KeyLeft, tcell.KeyRight, tcell.KeyPgUp, tcell.KeyPgDn, tcell.KeyHome, tcell.KeyEnd:
 			// Allow arrow keys and page keys to scroll
 			return event
@@ -134,6 +140,11 @@ func (fn *FormNavigation) handleSecretItemsInputCapture(event *tcell.EventKey) *
 		case tcell.KeyCtrlE:
 			fn.vvp.showEditSecretItemModal()
 			return nil
+		case tcell.KeyEsc:
+			// Clear state when going back to vault browse
+			fn.vvp.ClearNavigationState()
+			fn.vvp.GetTUI().GetNavigation().ShowVaults(false)
+			return event
 		}
 
 		return event
