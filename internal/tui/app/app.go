@@ -234,10 +234,10 @@ func (t *TUI) ShowConfirmation(message string, onConfirm func(), onCancel func()
 }
 
 // ShowConfirmationWithFocus shows a confirmation modal with focus restoration
-func (t *TUI) ShowConfirmationWithFocus(message string, onConfirm func(), onCancel func(), restoreFocus func()) {
+func (t *TUI) ShowConfirmationWithFocus(message string, confirmButtonText string, cancelButtonText string, onConfirm func(), onCancel func(), restoreFocus func()) {
 	modal := tview.NewModal().
 		SetText(message).
-		AddButtons([]string{"Cancel", "Yes"}).
+		AddButtons([]string{cancelButtonText, confirmButtonText}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 			t.components.GetMainContentPages().RemovePage("confirmation")
 
@@ -246,9 +246,9 @@ func (t *TUI) ShowConfirmationWithFocus(message string, onConfirm func(), onCanc
 				restoreFocus()
 			}
 
-			if buttonLabel == "Yes" && onConfirm != nil {
+			if buttonLabel == confirmButtonText && onConfirm != nil {
 				onConfirm()
-			} else if buttonLabel == "Cancel" && onCancel != nil {
+			} else if buttonLabel == cancelButtonText && onCancel != nil {
 				onCancel()
 			}
 		})

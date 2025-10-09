@@ -98,6 +98,8 @@ func (vvp *VaultViewPage) removeSecretItem() {
 	// Show confirmation modal with focus restoration
 	vvp.GetTUI().ShowConfirmationWithFocus(
 		fmt.Sprintf("Are you sure you want to delete the item '%s'?\n\nThis action cannot be undone.", itemKey),
+		"Delete",
+		"Cancel",
 		func() {
 			if vvp.vault == nil || vvp.filePath == "" {
 				vvp.ShowError("Vault not loaded. Please reopen the vault.")

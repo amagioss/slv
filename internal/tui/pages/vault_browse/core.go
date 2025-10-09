@@ -410,6 +410,8 @@ func (vbp *VaultBrowsePage) deleteSelectedVault() {
 		// Show confirmation modal
 		vbp.GetTUI().ShowConfirmationWithFocus(
 			fmt.Sprintf("Are you sure you want to delete vault '%s'?\n\nThis action cannot be undone.", fileName),
+			"Delete",
+			"Cancel",
 			func() {
 				// Confirm deletion
 				if err := os.Remove(file.Path); err != nil {

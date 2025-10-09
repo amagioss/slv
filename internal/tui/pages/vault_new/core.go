@@ -180,6 +180,18 @@ func (vnp *VaultNewPage) createVaultFromForm() {
 		return
 	}
 
+	if len(vnp.grantedEnvs) == 0 {
+		vnp.GetTUI().ShowConfirmationWithFocus(
+			"No environments granted access. Please grant access to at least one environment.",
+			"Create with Self Environment",
+			"Cancel",
+			func() {
+				vnp.grantedEnvs = append(vnp.grantedEnvs, environments.GetSelf())
+				vnp.createVaultFromForm()
+			}, nil, nil)
+		return
+	}
+
 	// Prepare vault file path
 	vaultFilePath := filepath.Join(vnp.currentDir, fileName)
 
@@ -233,10 +245,6 @@ func (vnp *VaultNewPage) validateVaultInputsForCreation(vaultName, fileName stri
 	vaultFilePath := filepath.Join(vnp.currentDir, fileName)
 	if _, err := os.Stat(vaultFilePath); err == nil {
 		return fmt.Errorf("file already exists: %s", fileName)
-	}
-
-	if len(vnp.grantedEnvs) == 0 {
-		return fmt.Errorf("no environments granted access. please grant access to at least one environment")
 	}
 
 	return nil
