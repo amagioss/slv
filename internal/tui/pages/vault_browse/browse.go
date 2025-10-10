@@ -3,7 +3,6 @@ package vault_browse
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"slv.sh/slv/internal/core/vaults"
 	"slv.sh/slv/internal/tui/interfaces"
 	"slv.sh/slv/internal/tui/pages"
 )
@@ -20,8 +19,7 @@ type VaultFile struct {
 type VaultBrowsePage struct {
 	pages.BasePage
 	currentDir string
-	vault      *vaults.Vault // Store the current vault instance
-	vaultPath  string        // Store the current vault path
+	vaultPath  string // Store the current vault path
 
 	// UI components
 	mainContent   *tview.Grid
@@ -29,15 +27,20 @@ type VaultBrowsePage struct {
 	fileList      *tview.List
 
 	navigation *FormNavigation
+
+	// Pre-loaded data for performance (lazy loading - only loaded when accessed)
+	directoryMap map[string][]VaultFile // dirPath -> []VaultFile
+	vaultFileMap map[string][]VaultFile // dirPath -> []VaultFile
 }
 
 // NewVaultBrowsePage creates a new VaultBrowsePage instance
 func NewVaultBrowsePage(tui interfaces.TUIInterface, currentDir string) *VaultBrowsePage {
 	vbp := &VaultBrowsePage{
-		BasePage:   *pages.NewBasePage(tui, "Vault Management"),
-		currentDir: currentDir,
-		vault:      nil,
-		vaultPath:  "",
+		BasePage:     *pages.NewBasePage(tui, "Vault Management"),
+		currentDir:   currentDir,
+		vaultPath:    "",
+		directoryMap: make(map[string][]VaultFile),
+		vaultFileMap: make(map[string][]VaultFile),
 	}
 
 	// Check if we have saved state and use that directory instead
@@ -47,6 +50,9 @@ func NewVaultBrowsePage(tui interfaces.TUIInterface, currentDir string) *VaultBr
 			vbp.currentDir = viewedDir
 		}
 	}
+
+	// Load current directory (lazy loading for subdirectories)
+	vbp.ensureDirectoryLoaded(vbp.currentDir)
 
 	vbp.mainContent = vbp.createMainSection()
 	vbp.navigation = (&FormNavigation{}).NewFormNavigation(vbp)

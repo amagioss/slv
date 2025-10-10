@@ -7,28 +7,104 @@ import (
 	"strings"
 
 	"github.com/rivo/tview"
+	"slv.sh/slv/internal/core/crypto"
 	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
 )
 
-// getDirectories returns only directories from the current directory
-func (vbp *VaultBrowsePage) getDirectories() []VaultFile {
-	var directories []VaultFile
+// ensureDirectoryLoaded ensures a directory is loaded (lazy loading)
+func (vbp *VaultBrowsePage) ensureDirectoryLoaded(dirPath string) {
+	// Check if directory is already loaded
+	if _, exists := vbp.vaultFileMap[dirPath]; exists {
+		return // Already loaded
+	}
 
+	// Get session and secret key for accessibility checking
+	session, err := session.GetSession()
+	if err != nil {
+		session = nil
+	}
+
+	var secretKey *crypto.SecretKey
+	if session != nil {
+		secretKey = session.SecretKey()
+	}
+
+	// Load the directory
+	vbp.scanDirectory(dirPath, secretKey)
+}
+
+// scanDirectory scans a single directory and stores its contents
+func (vbp *VaultBrowsePage) scanDirectory(dirPath string, secretKey *crypto.SecretKey) {
 	// Read the directory
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return
+	}
+
+	var directories []VaultFile
+	var vaultFiles []VaultFile
+
+	// Process each entry
+	for _, entry := range entries {
+		// Skip hidden files/directories
+		if strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+
+		entryPath := filepath.Join(dirPath, entry.Name())
+
+		if entry.IsDir() {
+			// It's a directory - add to directories list
+			directories = append(directories, VaultFile{
+				Name:         entry.Name(),
+				Path:         entryPath,
+				IsFile:       false,
+				IsAccessible: true, // Directories are always accessible
+			})
+		} else if strings.HasSuffix(entry.Name(), ".slv.yaml") || strings.HasSuffix(entry.Name(), ".slv.yml") {
+			// It's a vault file - check accessibility
+			isAccessible := false
+			if secretKey != nil {
+				vault, err := vaults.Get(entryPath)
+				if err == nil {
+					isAccessible = vault.IsAccessibleBy(secretKey)
+				}
+			}
+
+			vaultFiles = append(vaultFiles, VaultFile{
+				Name:         entry.Name(),
+				Path:         entryPath,
+				IsFile:       true,
+				IsAccessible: isAccessible,
+			})
+		}
+	}
+
+	// Store the pre-loaded data
+	vbp.directoryMap[dirPath] = directories
+	vbp.vaultFileMap[dirPath] = vaultFiles
+}
+
+// getDirectories returns only directories from the current directory (using pre-loaded data)
+func (vbp *VaultBrowsePage) getDirectories() []VaultFile {
+	// Use pre-loaded data if available
+	if directories, exists := vbp.directoryMap[vbp.currentDir]; exists {
+		return directories
+	}
+
+	// Fallback to real-time scanning if pre-loaded data is not available
+	var directories []VaultFile
 	entries, err := os.ReadDir(vbp.currentDir)
 	if err != nil {
 		return directories
 	}
 
-	// Filter and collect directories only
 	for _, entry := range entries {
-		// Skip hidden directories
 		if strings.HasPrefix(entry.Name(), ".") {
 			continue
 		}
 
-		// Check if it's a directory
 		if entry.IsDir() {
 			directories = append(directories, VaultFile{
 				Name:         entry.Name(),
@@ -182,6 +258,9 @@ func (vbp *VaultBrowsePage) updateVaultFilesForCurrentDir() {
 
 // updateVaultFilesForDirectory updates the vault files list for a specific directory
 func (vbp *VaultBrowsePage) updateVaultFilesForDirectory(dirPath string) {
+	// Ensure the directory is loaded (lazy loading)
+	vbp.ensureDirectoryLoaded(dirPath)
+
 	// Clear the file list
 	vbp.fileList.Clear()
 
@@ -204,7 +283,7 @@ func (vbp *VaultBrowsePage) updateVaultFilesForDirectory(dirPath string) {
 		for _, file := range files {
 			if !file.IsAccessible {
 				vbp.fileList.AddItem(
-					fmt.Sprintf("📄 [red]%s[white]", file.Name),
+					fmt.Sprintf("📄 [lightcoral]%s[white]", file.Name),
 					"",
 					0,
 					func() {
@@ -213,7 +292,7 @@ func (vbp *VaultBrowsePage) updateVaultFilesForDirectory(dirPath string) {
 				)
 			} else {
 				vbp.fileList.AddItem(
-					fmt.Sprintf("📄 [green]%s[white]", file.Name),
+					fmt.Sprintf("📄 [lightgreen]%s[white]", file.Name),
 					"",
 					0,
 					func() {
@@ -249,15 +328,20 @@ func (vbp *VaultBrowsePage) getCurrentDisplayedDirectory() string {
 	return vbp.currentDir
 }
 
-// getVaultFilesFromDirectory returns only .slv files from a specific directory
+// getVaultFilesFromDirectory returns only .slv files from a specific directory (using pre-loaded data)
 func (vbp *VaultBrowsePage) getVaultFilesFromDirectory(dirPath string) []VaultFile {
-	var files []VaultFile
+	// Use pre-loaded data if available
+	if vaultFiles, exists := vbp.vaultFileMap[dirPath]; exists {
+		return vaultFiles
+	}
 
-	// Read the directory
+	// Fallback to real-time scanning if pre-loaded data is not available
+	var files []VaultFile
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return files
 	}
+
 	session, _ := session.GetSession()
 	secretKey := session.SecretKey()
 
@@ -267,13 +351,15 @@ func (vbp *VaultBrowsePage) getVaultFilesFromDirectory(dirPath string) []VaultFi
 		if strings.HasPrefix(entry.Name(), ".") && !strings.HasSuffix(entry.Name(), ".slv.yaml") && !strings.HasSuffix(entry.Name(), ".slv.yml") {
 			continue
 		}
-		vault, err := vaults.Get(filepath.Join(dirPath, entry.Name()))
-		if err != nil {
-			continue
-		}
-		isVaultAccessible := vault.IsAccessibleBy(secretKey)
+
 		// Check if it's a .slv file
 		if !entry.IsDir() && (strings.HasSuffix(entry.Name(), ".slv.yaml") || strings.HasSuffix(entry.Name(), ".slv.yml")) {
+			vault, err := vaults.Get(filepath.Join(dirPath, entry.Name()))
+			isVaultAccessible := false
+			if err == nil && secretKey != nil {
+				isVaultAccessible = vault.IsAccessibleBy(secretKey)
+			}
+
 			files = append(files, VaultFile{
 				Name:         entry.Name(),
 				Path:         filepath.Join(dirPath, entry.Name()),
