@@ -1,16 +1,16 @@
 package environments
 
-// SaveNavigationState implements the Page interface (empty for environments page)
+// SaveNavigationState saves the current navigation state
 func (ep *EnvironmentsPage) SaveNavigationState() {
-	// Environments page doesn't need state management
+	// Environments page doesn't need to save state yet
 }
 
-// RestoreNavigationState implements the Page interface (empty for environments page)
+// RestoreNavigationState restores the saved navigation state
 func (ep *EnvironmentsPage) RestoreNavigationState() {
-	// Environments page doesn't need state management
+	// Environments page doesn't need to restore state yet
 }
 
-// ClearNavigationState implements the Page interface (empty for environments page)
+// ClearNavigationState clears the navigation state
 func (ep *EnvironmentsPage) ClearNavigationState() {
-	// Environments page doesn't need state management
+	// Environments page doesn't need to clear state yet
 }
