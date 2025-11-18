@@ -59,7 +59,7 @@ func (ep *EnvironmentsPage) showEditForm(fieldName string, row int) {
 		}
 	})
 
-	form.AddButton("Temporary Local", func() {
+	form.AddButton("Save Locally", func() {
 		formItem := form.GetFormItem(0)
 		if inputField, ok := formItem.(*tview.InputField); ok {
 			newValue := strings.TrimSpace(inputField.GetText())

@@ -19,7 +19,6 @@ type EnvironmentsPage struct {
 	// Environment tables (first row)
 	sessionEnvTable *tview.Table
 	selfEnvTable    *tview.Table
-	k8sEnvTable     *tview.Table
 
 	// Browse environments section (second row)
 	browseEnvsSearch   *tview.InputField

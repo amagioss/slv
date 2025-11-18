@@ -22,10 +22,6 @@ func (ep *EnvironmentsPage) createMainSection() *tview.Flex {
 	selfEnv := ep.getSelfEnvironment()
 	ep.selfEnvTable = ep.createEnvironmentTable("Self Environment", selfEnv, colors)
 
-	// Create K8s Environment table
-	k8sEnv := ep.getK8sEnvironment()
-	ep.k8sEnvTable = ep.createEnvironmentTable("K8s Environment ('slv' Namespace)", k8sEnv, colors)
-
 	// Create Browse Environments section with search and results
 	ep.browseEnvsSearch = ep.createSearchBox(colors)
 	ep.browseEnvsList = ep.createResultsList(colors)
@@ -39,16 +35,15 @@ func (ep *EnvironmentsPage) createMainSection() *tview.Flex {
 	// Initially show search view
 	ep.showSearchView()
 
-	// Create first row - horizontal flex with 3 equal columns
+	// Create first row - horizontal flex with 2 equal columns
 	// Make tables focusable so they can receive input for navigation and copying
 	firstRow := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
 		AddItem(ep.sessionEnvTable, 0, 1, sessionEnv != nil). // Focusable if environment exists
-		AddItem(ep.selfEnvTable, 0, 1, selfEnv != nil).       // Focusable if environment exists
-		AddItem(ep.k8sEnvTable, 0, 1, k8sEnv != nil)          // Focusable if environment exists
+		AddItem(ep.selfEnvTable, 0, 1, selfEnv != nil)        // Focusable if environment exists
 
 	// Create main content - vertical flex
-	// First row: 30% of space (3 columns)
+	// First row: 30% of space (2 columns)
 	// Second row: 70% of space (1 column)
 	ep.mainContent = tview.NewFlex().
 		SetDirection(tview.FlexRow).

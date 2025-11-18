@@ -31,11 +31,6 @@ func (fn *FormNavigation) NewFormNavigation(ep *EnvironmentsPage) *FormNavigatio
 		focusGroup = append(focusGroup, ep.selfEnvTable)
 	}
 
-	// Add K8s Environment table if environment exists
-	if ep.getK8sEnvironment() != nil {
-		focusGroup = append(focusGroup, ep.k8sEnvTable)
-	}
-
 	// Always add browse environments search and list
 	focusGroup = append(focusGroup, ep.browseEnvsSearch)
 	focusGroup = append(focusGroup, ep.browseEnvsList)
@@ -61,9 +56,6 @@ func (fn *FormNavigation) resetSelectable() {
 	if fn.ep.selfEnvTable != nil {
 		fn.ep.selfEnvTable.SetSelectable(false, false)
 	}
-	if fn.ep.k8sEnvTable != nil {
-		fn.ep.k8sEnvTable.SetSelectable(false, false)
-	}
 	// Reset details table to not selectable
 	if fn.ep.browseEnvsDetails != nil {
 		fn.ep.browseEnvsDetails.SetSelectable(false, false)
@@ -87,9 +79,6 @@ func (fn *FormNavigation) SetupNavigation() {
 	}
 	if selfEnv := fn.ep.getSelfEnvironment(); selfEnv != nil {
 		fn.setupEnvironmentTableInputCapture(fn.ep.selfEnvTable, selfEnv)
-	}
-	if k8sEnv := fn.ep.getK8sEnvironment(); k8sEnv != nil {
-		fn.setupEnvironmentTableInputCapture(fn.ep.k8sEnvTable, k8sEnv)
 	}
 
 	// Set up input capture for browse environments list (Enter to show details)
@@ -118,11 +107,6 @@ func (fn *FormNavigation) setupHelpTexts() {
 	// Help text for Self Environment
 	if fn.ep.getSelfEnvironment() != nil {
 		fn.helpTexts[fn.ep.selfEnvTable] = "Self Environment: ↑↓ Navigate | c: Copy field | Tab: Switch"
-	}
-
-	// Help text for K8s Environment
-	if fn.ep.getK8sEnvironment() != nil {
-		fn.helpTexts[fn.ep.k8sEnvTable] = "K8s Environment: ↑↓ Navigate | c: Copy field | Tab: Switch"
 	}
 
 	// Help text for Browse Environments search
@@ -450,11 +434,6 @@ func (fn *FormNavigation) updateFocusGroupForDetails() {
 		focusGroup = append(focusGroup, fn.ep.selfEnvTable)
 	}
 
-	// Add K8s Environment table if environment exists
-	if fn.ep.getK8sEnvironment() != nil {
-		focusGroup = append(focusGroup, fn.ep.k8sEnvTable)
-	}
-
 	// Add details table
 	if fn.ep.browseEnvsDetails != nil {
 		focusGroup = append(focusGroup, fn.ep.browseEnvsDetails)
@@ -487,11 +466,6 @@ func (fn *FormNavigation) updateFocusGroupForSearch() {
 		focusGroup = append(focusGroup, fn.ep.selfEnvTable)
 	}
 
-	// Add K8s Environment table if environment exists
-	if fn.ep.getK8sEnvironment() != nil {
-		focusGroup = append(focusGroup, fn.ep.k8sEnvTable)
-	}
-
 	// Add browse environments search and list
 	focusGroup = append(focusGroup, fn.ep.browseEnvsSearch)
 	focusGroup = append(focusGroup, fn.ep.browseEnvsList)
@@ -516,11 +490,6 @@ func (fn *FormNavigation) updateFocusGroupForEDS() {
 	// Add Self Environment table if environment exists
 	if fn.ep.getSelfEnvironment() != nil {
 		focusGroup = append(focusGroup, fn.ep.selfEnvTable)
-	}
-
-	// Add K8s Environment table if environment exists
-	if fn.ep.getK8sEnvironment() != nil {
-		focusGroup = append(focusGroup, fn.ep.k8sEnvTable)
 	}
 
 	// Add search box

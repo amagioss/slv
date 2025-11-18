@@ -29,37 +29,6 @@ func (ep *EnvironmentsPage) getSelfEnvironment() *environments.Environment {
 	return environments.GetSelf()
 }
 
-func (ep *EnvironmentsPage) createNoInformationK8sEnvironment(publicKeyStr string) *environments.Environment {
-	return &environments.Environment{
-		PublicKey: publicKeyStr,
-		Name:      "No information",
-		Email:     "Unknown",
-		EnvType:   environments.SERVICE,
-		Tags:      []string{"kubernetes", "context", "no-information"},
-	}
-}
-
-func (ep *EnvironmentsPage) getK8sEnvironment() *environments.Environment {
-	publicKeyStr, err := session.GetPublicKeyFromK8s(session.GetK8sNamespace(), false)
-	if err != nil {
-		return nil
-	}
-	profile, err := profiles.GetActiveProfile()
-	if err != nil {
-		return ep.createNoInformationK8sEnvironment(publicKeyStr)
-	}
-	envs, err := profile.ListEnvs()
-	if err != nil {
-		return ep.createNoInformationK8sEnvironment(publicKeyStr)
-	}
-	for _, env := range envs {
-		if env.PublicKey == publicKeyStr {
-			return env
-		}
-	}
-	return ep.createNoInformationK8sEnvironment(publicKeyStr)
-}
-
 // searchEnvironments searches for environments based on query string
 func (ep *EnvironmentsPage) searchEnvironments(query string) {
 	ep.currentQuery = query // Store the current query for refreshing
