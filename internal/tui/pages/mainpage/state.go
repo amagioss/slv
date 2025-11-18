@@ -7,7 +7,10 @@ func (mp *MainPage) SaveNavigationState() {
 
 // RestoreNavigationState implements the Page interface (empty for main page)
 func (mp *MainPage) RestoreNavigationState() {
-	// Main page doesn't need state management
+	// Update help text when navigating back
+	if mp.navigation != nil {
+		mp.navigation.updateHelpText()
+	}
 }
 
 // ClearNavigationState implements the Page interface (empty for main page)

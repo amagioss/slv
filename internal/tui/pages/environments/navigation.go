@@ -101,23 +101,23 @@ func (fn *FormNavigation) SetupNavigation() {
 func (fn *FormNavigation) setupHelpTexts() {
 	// Help text for Session Environment
 	if fn.ep.getSessionEnvironment() != nil {
-		fn.helpTexts[fn.ep.sessionEnvTable] = "Session Environment: ↑↓ Navigate | c: Copy field | Tab: Switch"
+		fn.helpTexts[fn.ep.sessionEnvTable] = "Session Environment: ↑↓ Navigate | c: Copy field | Tab: Switch | Ctrl+N: New Environment"
 	}
 
 	// Help text for Self Environment
 	if fn.ep.getSelfEnvironment() != nil {
-		fn.helpTexts[fn.ep.selfEnvTable] = "Self Environment: ↑↓ Navigate | c: Copy field | Tab: Switch"
+		fn.helpTexts[fn.ep.selfEnvTable] = "Self Environment: ↑↓ Navigate | c: Copy field | Tab: Switch | Ctrl+N: New Environment"
 	}
 
 	// Help text for Browse Environments search
-	fn.helpTexts[fn.ep.browseEnvsSearch] = "Search Environments: Type to search | Tab: Switch"
+	fn.helpTexts[fn.ep.browseEnvsSearch] = "Search Environments: Type to search | Tab: Switch | Ctrl+N: New Environment"
 
 	// Help text for Browse Environments list
-	fn.helpTexts[fn.ep.browseEnvsList] = "Environment Results: ↑↓ Navigate | Enter: View details | Tab: Switch"
+	fn.helpTexts[fn.ep.browseEnvsList] = "Environment Results: ↑↓ Navigate | Enter: View details | Tab: Switch | Ctrl+N: New Environment"
 
 	// Help text for Environment Details table (will be set when details view is shown)
 	if fn.ep.browseEnvsDetails != nil {
-		fn.helpTexts[fn.ep.browseEnvsDetails] = "Environment Details: ↑↓ Navigate | Enter: Edit (Name/Email/Tags) | c: Copy field | Backspace: Back | Tab: Switch"
+		fn.helpTexts[fn.ep.browseEnvsDetails] = "Environment Details: ↑↓ Navigate | Enter: Edit (Name/Email/Tags) | c: Copy field | Backspace: Back | Tab: Switch | Ctrl+N: New Environment"
 	}
 }
 
@@ -146,6 +146,10 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 	}
 
 	switch event.Key() {
+	case tcell.KeyCtrlN:
+		// Navigate to new environment page
+		fn.ep.GetTUI().GetNavigation().ShowNewEnvironment(false)
+		return nil
 	case tcell.KeyTab:
 		// Switch focus forward
 		fn.ShiftFocusForward()
@@ -306,7 +310,7 @@ func (fn *FormNavigation) setupBrowseEnvsListInputCapture() {
 						// Set up input capture for details table
 						fn.setupDetailsTableInputCapture()
 						// Set help text for details table
-						fn.helpTexts[fn.ep.browseEnvsDetails] = "Environment Details: ↑↓ Navigate | c: Copy field | Backspace: Back | Tab: Switch"
+						fn.helpTexts[fn.ep.browseEnvsDetails] = "Environment Details: ↑↓ Navigate | c: Copy field | Backspace: Back | Tab: Switch | Ctrl+N: New Environment"
 						// Update focus group to include details table
 						fn.updateFocusGroupForDetails()
 						// Set focus to details table
@@ -509,7 +513,7 @@ func (fn *FormNavigation) updateFocusGroupForEDS() {
 		// Setup input capture for EDS table
 		fn.setupEDSTableInputCapture()
 		// Set help text for EDS table
-		fn.helpTexts[fn.ep.browseEnvsEDSTable] = "Environment from EDS: ↑↓ Navigate | c: Copy field | Tab: Switch"
+		fn.helpTexts[fn.ep.browseEnvsEDSTable] = "Environment from EDS: ↑↓ Navigate | c: Copy field | Tab: Switch | Ctrl+N: New Environment"
 		// Set focus to EDS table
 		fn.ep.GetTUI().GetApplication().SetFocus(fn.ep.browseEnvsEDSTable)
 		// Update help text

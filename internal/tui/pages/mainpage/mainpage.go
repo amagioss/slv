@@ -11,6 +11,8 @@ import (
 // MainPage handles the main menu page functionality
 type MainPage struct {
 	pages.BasePage
+	list       *tview.List
+	navigation *FormNavigation
 }
 
 // NewMainPage creates a new MainPage instance
@@ -45,7 +47,7 @@ func (mp *MainPage) Create() tview.Primitive {
 		AddItem(subtitleText, 2, 0, false)
 
 	// Create the main menu list with enhanced styling
-	list := tview.NewList().
+	mp.list = tview.NewList().
 		AddItem("Vaults", "Manage and organize your vaults", 'v', func() {
 			mp.NavigateTo("vaults", false)
 		}).
@@ -60,7 +62,7 @@ func (mp *MainPage) Create() tview.Primitive {
 		})
 
 	// Style the list
-	list.SetSelectedTextColor(colors.ListSelectedText).
+	mp.list.SetSelectedTextColor(colors.ListSelectedText).
 		SetSelectedBackgroundColor(colors.ListSelectedBg).
 		SetSecondaryTextColor(colors.ListSecondaryText).
 		SetMainTextColor(colors.ListMainText)
@@ -75,10 +77,11 @@ func (mp *MainPage) Create() tview.Primitive {
 	content.AddItem(welcomeFlex, 0, 1, 1, 1, 0, 0, false)
 
 	// Center the menu list
-	content.AddItem(list, 1, 1, 1, 1, 0, 0, true) // Add padding for centering
+	content.AddItem(mp.list, 1, 1, 1, 1, 0, 0, true) // Add padding for centering
 
-	// Update status bar with help text using BasePage method
-	mp.UpdateStatus("↑/↓: Navigate | Enter: select")
+	// Set up navigation
+	mp.navigation = (&FormNavigation{}).NewFormNavigation(mp)
+	mp.navigation.SetupNavigation()
 
 	// Create layout using BasePage method
 	return mp.CreateLayout(content)

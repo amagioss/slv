@@ -28,9 +28,12 @@ func (n *Navigation) GoBack() {
 		return
 	}
 
-	// Refresh the page that we just navigated back to
+	// Restore navigation state for the page we just navigated back to
 	currentPage := n.app.GetRouter().GetCurrentPage()
 	if page, exists := n.pageInstances[currentPage]; exists && page != nil {
+		// Restore navigation state (this will update help text)
+		page.RestoreNavigationState()
+
 		// Only refresh pages that have meaningful refresh logic
 		// Skip refresh for static pages (like main page)
 		switch currentPage {

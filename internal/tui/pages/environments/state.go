@@ -8,6 +8,7 @@ func (ep *EnvironmentsPage) SaveNavigationState() {
 // RestoreNavigationState restores the saved navigation state
 func (ep *EnvironmentsPage) RestoreNavigationState() {
 	// Environments page doesn't need to restore state yet
+	ep.navigation.updateHelpText()
 }
 
 // ClearNavigationState clears the navigation state

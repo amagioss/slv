@@ -13,6 +13,7 @@ type NavigationInterface interface {
 	ShowVaults(replace bool)
 	ShowProfiles(replace bool)
 	ShowEnvironments(replace bool)
+	ShowNewEnvironment(replace bool)
 	ShowHelp(replace bool)
 	ShowVaultDetails(replace bool)
 	ShowNewVault(replace bool)

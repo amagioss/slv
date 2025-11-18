@@ -71,6 +71,21 @@ func (n *Navigation) ShowEnvironments(replace bool) {
 	n.UpdateStatus()
 }
 
+// ShowNewEnvironment displays the new environment creation page
+func (n *Navigation) ShowNewEnvironment(replace bool) {
+	// Create fresh EnvironmentNewPage instance using factory
+	newEnvPage := n.app.GetRouter().CreatePage(n.app, "environments_new")
+	n.StorePageInstance("environments_new", newEnvPage) // Store page instance for refresh
+	page := newEnvPage.Create()
+	n.addPage("environments_new", page)
+	n.setCurrentPage("environments_new", replace)
+
+	// Restore navigation state after setCurrentPage
+	newEnvPage.RestoreNavigationState()
+
+	n.UpdateStatus()
+}
+
 // ShowHelp displays the help page
 func (n *Navigation) ShowHelp(replace bool) {
 	// Create fresh HelpPage instance using factory

@@ -57,7 +57,7 @@ func NewEnvironmentsPage(tui interfaces.TUIInterface) *EnvironmentsPage {
 // Create implements the Page interface
 func (ep *EnvironmentsPage) Create() tview.Primitive {
 	ep.SetTitle("Environments")
-	ep.UpdateStatus("Use Tab to switch between environment tables | ↑↓ to navigate fields | c to copy field | d to copy EDS")
+	// ep.UpdateStatus("Use Tab to switch between environment tables | ↑↓ to navigate fields | c to copy field | d to copy EDS")
 	return ep.CreateLayout(ep.mainContent)
 }
 
