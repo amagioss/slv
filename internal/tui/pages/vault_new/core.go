@@ -113,12 +113,12 @@ func (vnp *VaultNewPage) refreshSearchResults() {
 	}
 }
 
-// removeFromGrantedAccess removes an environment from granted access
-func (vnp *VaultNewPage) removeFromGrantedAccess(envName string) {
+// removeFromGrantedAccess removes an environment from granted access by public key
+func (vnp *VaultNewPage) removeFromGrantedAccess(publicKey string) {
 	// Find and remove the environment from grantedEnvs
 	var removedEnv *environments.Environment
 	for i, env := range vnp.grantedEnvs {
-		if env.Name == envName {
+		if env.PublicKey == publicKey {
 			removedEnv = env
 			// Remove the environment at index i
 			vnp.grantedEnvs = append(vnp.grantedEnvs[:i], vnp.grantedEnvs[i+1:]...)
@@ -546,7 +546,9 @@ func (vnp *VaultNewPage) updateGrantedAccessList() {
 		} else {
 			mainText = fmt.Sprintf("🌍 %s", name)
 		}
-		secondaryText := fmt.Sprintf("Email: %s | Key: %s...", email, env.PublicKey[:min(15, len(env.PublicKey))])
+		// Store the full public key in the secondary text for later retrieval
+		// Format: "Email: xxx | PK: full_public_key"
+		secondaryText := fmt.Sprintf("Email: %s | PK: %s", email, env.PublicKey)
 		vnp.grantedAccess.AddItem(mainText, secondaryText, 0, nil)
 	}
 

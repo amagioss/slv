@@ -212,11 +212,15 @@ func (fn *FormNavigation) setInputCaptureForGrantedAccessForm() {
 				// Remove selected environment from granted access
 				selected := fn.vnp.grantedAccess.GetCurrentItem()
 				if selected >= 0 && selected < fn.vnp.grantedAccess.GetItemCount() {
-					mainText, _ := fn.vnp.grantedAccess.GetItemText(selected)
-					// Extract environment name from the formatted text
-					if strings.HasPrefix(mainText, "🌍 ") {
-						envName := strings.TrimPrefix(mainText, "🌍 ")
-						fn.vnp.removeFromGrantedAccess(envName)
+					_, secondaryText := fn.vnp.grantedAccess.GetItemText(selected)
+					// Extract public key from secondary text
+					// Format: "Email: xxx | PK: full_public_key"
+					if strings.Contains(secondaryText, " | Key: ") {
+						parts := strings.Split(secondaryText, " | Key: ")
+						if len(parts) == 2 {
+							publicKey := parts[1]
+							fn.vnp.removeFromGrantedAccess(publicKey)
+						}
 					}
 				}
 				return nil

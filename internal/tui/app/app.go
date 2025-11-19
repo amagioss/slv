@@ -12,7 +12,7 @@ import (
 	"slv.sh/slv/internal/tui/navigation"
 	"slv.sh/slv/internal/tui/pages"
 	"slv.sh/slv/internal/tui/pages/environments"
-	environments_new "slv.sh/slv/internal/tui/pages/environments_new"
+	"slv.sh/slv/internal/tui/pages/environments_new"
 	"slv.sh/slv/internal/tui/pages/help"
 	"slv.sh/slv/internal/tui/pages/mainpage"
 	"slv.sh/slv/internal/tui/pages/profiles"
@@ -94,7 +94,7 @@ func (t *TUI) setupPages() {
 	// Register new environment page factory
 	t.app.GetRouter().RegisterPageFactory("environments_new", interfaces.PageFactoryFunc(func(params ...interface{}) interfaces.Page {
 		tui := params[0].(interfaces.TUIInterface)
-		return environments_new.NewEnvironmentNewPage(tui)
+		return environments_new.NewNewEnvironmentPage(tui)
 	}))
 
 	// Register help page factory

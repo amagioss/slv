@@ -113,12 +113,12 @@ func (vep *VaultEditPage) refreshSearchResults() {
 	}
 }
 
-// removeFromGrantedAccess removes an environment from granted access
-func (vep *VaultEditPage) removeFromGrantedAccess(envName string) {
+// removeFromGrantedAccess removes an environment from granted access by public key
+func (vep *VaultEditPage) removeFromGrantedAccess(publicKey string) {
 	// Find and remove the environment from grantedEnvs
 	var removedEnv *environments.Environment
 	for i, env := range vep.grantedEnvs {
-		if env.Name == envName {
+		if env.PublicKey == publicKey {
 			removedEnv = env
 			// Remove the environment at index i
 			vep.grantedEnvs = append(vep.grantedEnvs[:i], vep.grantedEnvs[i+1:]...)
@@ -186,18 +186,21 @@ func (vep *VaultEditPage) editVaultFromForm() {
 	dir := filepath.Dir(vep.filePath)
 	newFilePath := filepath.Join(dir, fileName)
 
-	// Check if new file already exists
-	if _, err := os.Stat(newFilePath); err == nil {
-		vep.ShowError(fmt.Sprintf("File '%s' already exists", fileName))
-		return
-	}
-	// Rename the file
-	if err := os.Rename(vep.filePath, newFilePath); err != nil {
-		vep.ShowError(fmt.Sprintf("Error renaming vault: %v", err))
-		return
-	}
+	// Only rename if the filename has changed
+	if newFilePath != vep.filePath {
+		// Check if new file already exists
+		if _, err := os.Stat(newFilePath); err == nil {
+			vep.ShowError(fmt.Sprintf("File '%s' already exists", fileName))
+			return
+		}
+		// Rename the file
+		if err := os.Rename(vep.filePath, newFilePath); err != nil {
+			vep.ShowError(fmt.Sprintf("Error renaming vault: %v", err))
+			return
+		}
 
-	vep.filePath = newFilePath
+		vep.filePath = newFilePath
+	}
 
 	vep.vault.Update(vaultName, namespace, "", nil)
 
@@ -582,7 +585,9 @@ func (vep *VaultEditPage) updateGrantedAccessList() {
 		} else {
 			mainText = fmt.Sprintf("🌍 %s", name)
 		}
-		secondaryText := fmt.Sprintf("Email: %s | Key: %s...", email, env.PublicKey[:min(15, len(env.PublicKey))])
+		// Store the full public key in the secondary text for later retrieval
+		// Format: "Email: xxx | PK: full_public_key"
+		secondaryText := fmt.Sprintf("Email: %s | Public Key: %s", email, env.PublicKey)
 		vep.grantedAccess.AddItem(mainText, secondaryText, 0, nil)
 	}
 
