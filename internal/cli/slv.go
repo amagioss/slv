@@ -16,6 +16,7 @@ var (
 	slvCmd     *cobra.Command
 	versionCmd *cobra.Command
 	webCmd     *cobra.Command
+	tuiCmd     *cobra.Command
 
 	versionFlag = utils.FlagDef{
 		Name:      "version",
@@ -45,6 +46,7 @@ func slvCommand() *cobra.Command {
 		slvCmd.AddCommand(cmdprofile.ProfileCommand())
 		slvCmd.AddCommand(cmdvault.VaultCommand())
 		slvCmd.AddCommand(webCommand())
+		slvCmd.AddCommand(tuiCommand())
 	}
 	return slvCmd
 }
