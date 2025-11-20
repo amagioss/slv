@@ -74,10 +74,10 @@ const config: Config = {
     image: 'img/slv-social-card.jpg',
     navbar: {
       title: 'SLV',
-      // logo: {
-      //   alt: 'My Site Logo',
-      //   src: 'img/logo.svg',
-      // },
+      logo: {
+        alt: 'SLV Logo',
+        src: 'img/slv.svg',
+      },
       items: [
         {
           type: 'docSidebar',

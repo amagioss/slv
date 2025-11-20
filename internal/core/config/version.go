@@ -16,7 +16,7 @@ func VersionInfo() string {
 			committedAt = builtAtLocalTime.Format("02 Jan 2006 03:04:05 PM MST")
 		}
 		appInfoBuilder := strings.Builder{}
-		appInfoBuilder.WriteString(art)
+		appInfoBuilder.WriteString(Art)
 		appInfoBuilder.WriteString("\n")
 		appInfoBuilder.WriteString(description)
 		appInfoBuilder.WriteString("\n")
