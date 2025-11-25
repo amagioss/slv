@@ -14,6 +14,8 @@ jobs:
       contents: write
       packages: write
     steps:
+      - name: Free Disk Space (Ubuntu Runner)
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
       - name: Setting SLV Version
         run: echo "SLV_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
       - name: Checkout Code
@@ -33,7 +35,7 @@ jobs:
           -v $PWD:/workspace \
           -e GITHUB_TOKEN \
           -e HOMEBREW_SSH_KEY \
-          ghcr.io/goreleaser/goreleaser-cross:latest release \
+          ghcr.io/goreleaser/goreleaser-cross:v1.25.1 release \
           --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

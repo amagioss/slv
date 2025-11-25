@@ -1,14 +1,16 @@
 package envproviders
 
 import (
+	"context"
 	"errors"
 	"regexp"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms/types"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"slv.sh/slv/internal/core/commons"
 )
 
@@ -43,9 +45,11 @@ func isValidARN(arn string) bool {
 	return validARN
 }
 
-func isAWSConfigured(session *session.Session) bool {
-	if creds, err := session.Config.Credentials.Get(); err == nil && creds.AccessKeyID != "" && (creds.SecretAccessKey != "" || creds.SessionToken != "") {
-		_, err = sts.New(session).GetCallerIdentity(&sts.GetCallerIdentityInput{})
+func isAWSConfigured(ctx context.Context, cfg aws.Config) bool {
+	creds, err := cfg.Credentials.Retrieve(ctx)
+	if err == nil && creds.AccessKeyID != "" && (creds.SecretAccessKey != "" || creds.SessionToken != "") {
+		stsClient := sts.NewFromConfig(cfg)
+		_, err = stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 		return err == nil
 	}
 	return false
@@ -55,33 +59,36 @@ func encryptWithAWSKMSAPI(secretKeyBytes []byte, arn string) (sealedSecretKeyByt
 	if !isValidARN(arn) {
 		return nil, nil, errInvalidAWSKMSARN
 	}
+	ctx := context.Background()
 	arnParts := strings.Split(arn, ":")
 	region := arnParts[3]
-	awsSession, err := session.NewSession(&aws.Config{
-		Region: aws.String(region),
-	})
+
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
 	if err != nil {
 		return nil, nil, err
 	}
-	kmsClient := kms.New(awsSession)
+
+	kmsClient := kms.NewFromConfig(cfg)
 	input := &kms.DescribeKeyInput{
-		KeyId: aws.String(arn),
+		KeyId: commons.StringPtr(arn),
 	}
-	keyDesc, err := kmsClient.DescribeKey(input)
+	keyDesc, err := kmsClient.DescribeKey(ctx, input)
 	if err != nil {
-		if !isAWSConfigured(awsSession) {
+		if !isAWSConfigured(ctx, cfg) {
 			return nil, nil, errAWSConfiguration
 		}
 		return nil, nil, err
 	}
 	encryptionAlgos := keyDesc.KeyMetadata.EncryptionAlgorithms
-	algorithm = encryptionAlgos[len(encryptionAlgos)-1]
+	selectedAlgo := encryptionAlgos[len(encryptionAlgos)-1]
+	algoString := string(selectedAlgo)
+	algorithm = &algoString
 	kmsInput := &kms.EncryptInput{
 		KeyId:               commons.StringPtr(arn),
 		Plaintext:           secretKeyBytes,
-		EncryptionAlgorithm: algorithm,
+		EncryptionAlgorithm: selectedAlgo,
 	}
-	result, err := kmsClient.Encrypt(kmsInput)
+	result, err := kmsClient.Encrypt(ctx, kmsInput)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -116,14 +123,15 @@ func unBindFromAWSKMS(ref map[string][]byte) (secretKeyBytes []byte, err error) 
 	if !isValidARN(arn) {
 		return nil, errInvalidAWSKMSARN
 	}
+	ctx := context.Background()
 	arnParts := strings.Split(arn, ":")
 	region := arnParts[3]
-	awsSession, err := session.NewSession(&aws.Config{
-		Region: aws.String(region),
-	})
+
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
 	if err != nil {
 		return nil, err
 	}
+
 	sealedSecretKeyBytes := ref[sealedSecretKeyRefName]
 	if len(sealedSecretKeyBytes) == 0 {
 		return nil, errSealedSecretKeyRef
@@ -132,15 +140,16 @@ func unBindFromAWSKMS(ref map[string][]byte) (secretKeyBytes []byte, err error) 
 	if len(algorithm) == 0 {
 		return nil, errInvalidAWSKMSAlgorithm
 	}
-	kmsClient := kms.New(awsSession)
+
+	kmsClient := kms.NewFromConfig(cfg)
 	kmsInput := &kms.DecryptInput{
 		CiphertextBlob:      sealedSecretKeyBytes,
 		KeyId:               commons.StringPtr(arn),
-		EncryptionAlgorithm: commons.StringPtr(string(algorithm)),
+		EncryptionAlgorithm: types.EncryptionAlgorithmSpec(string(algorithm)),
 	}
-	result, err := kmsClient.Decrypt(kmsInput)
+	result, err := kmsClient.Decrypt(ctx, kmsInput)
 	if err != nil {
-		if !isAWSConfigured(awsSession) {
+		if !isAWSConfigured(ctx, cfg) {
 			return nil, errAWSConfiguration
 		}
 		return nil, err
