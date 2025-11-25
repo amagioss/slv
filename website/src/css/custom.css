@@ -4,83 +4,250 @@
  * work well for content-centric websites.
  */
 
-/* You can override the default Infima variables here. */
-/* :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-} */
-
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-/* [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-} */
-
 /**
- * Global CSS Theme for SLV (Polished Version)
- * Tuned for better readability in Light mode and a Night Sky feel in Dark mode.
+ * Global CSS Theme for SLV
+ * Using Titanium and Ruby metallic colors from the SLV logo
  */
 
  :root {
-  --ifm-background-color: #eef1f7; /* Soft pale blue-gray for light mode background */
-  --ifm-color-primary: #2e3a8a; /* Deep royal blue */
-  --ifm-color-primary-dark: #243174; 
-  --ifm-color-primary-darker: #1c2960; 
-  --ifm-color-primary-darkest: #151f4d; 
+  /* Titanium Metallic Colors - Primary theme */
+  --slv-titanium-light: #6b7478;
+  --slv-titanium-mid: #4f5559;
+  --slv-titanium-dark: #2c3135;
+  --slv-titanium-darker: #4a5054;
+  --slv-titanium-darkest: #2e3338;
+  --slv-titanium-deepest: #1f2326;
+  
+  /* Ruby Metallic Colors - Accents and hover states */
+  --slv-ruby-light: #c45a6f;
+  --slv-ruby-mid: #9d3a4f;
+  --slv-ruby-dark: #6e2736;
+  --slv-ruby-darker: #b34b60;
+  --slv-ruby-darkest: #8c3143;
+  --slv-ruby-deepest: #5f212e;
 
-  --ifm-color-primary-light: #485bb3; 
-  --ifm-color-primary-lighter: #697acf; 
-  --ifm-color-primary-lightest: #8b9bec; 
+  /* Light mode - Titanium based */
+  --ifm-background-color: #f5f6f7;
+  --ifm-color-primary: #4f5559; /* Titanium mid */
+  --ifm-color-primary-dark: #3e4245;
+  --ifm-color-primary-darker: #2c3135; /* Titanium dark */
+  --ifm-color-primary-darkest: #1f2326; /* Titanium deepest */
+
+  --ifm-color-primary-light: #6b7478; /* Titanium light */
+  --ifm-color-primary-lighter: #858a8e;
+  --ifm-color-primary-lightest: #9fa3a6;
 
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(30, 58, 138, 0.08); /* light royal background for code */
+  --docusaurus-highlighted-code-line-bg: rgba(107, 116, 120, 0.1);
 }
 
-/* Dark mode settings */
+/* Dark mode settings - Darker Titanium with Ruby accents */
 [data-theme='dark'] {
-  --ifm-background-color: #0b0f1a; /* Deep midnight navy */
-  --ifm-background-surface-color: #11163a; /* Slightly elevated panels */
+  --ifm-background-color: #1a1d20; /* Deep titanium */
+  --ifm-background-surface-color: #2c3135; /* Titanium dark for panels */
 
-  --ifm-color-primary: #7c95dc; /* Soft light blue for dark mode links */
-  --ifm-color-primary-dark: #6a83c2;
-  --ifm-color-primary-darker: #596fa8;
-  --ifm-color-primary-darkest: #475d8f;
+  --ifm-color-primary: #858a8e; /* Lighter titanium for better contrast */
+  --ifm-color-primary-dark: #6b7478;
+  --ifm-color-primary-darker: #4f5559;
+  --ifm-color-primary-darkest: #3e4245;
 
-  --ifm-color-primary-light: #9db4f2; 
-  --ifm-color-primary-lighter: #c7d5ff; 
-  --ifm-color-primary-lightest: #e6ecff;
+  --ifm-color-primary-light: #9fa3a6;
+  --ifm-color-primary-lighter: #b8bbbe;
+  --ifm-color-primary-lightest: #d1d3d5;
 
-  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.07);
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.05);
 }
 
-
+/* GitHub link icon - titanium by default, ruby on hover */
 .header-github-link:before {
   content: "";
   display: inline-flex;
   height: 24px;
   width: 24px;
-  background-color: var(--ifm-color-primary); /* Use primary color */
+  background-color: var(--ifm-color-primary);
   mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E")
     no-repeat center / contain;
   -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E")
     no-repeat center / contain;
   margin-top: 5px;
+  transition: background-color 0.3s ease;
 }
 
-/* Hover effect to match theme colors */
+/* Ruby hover effect for icons */
 .header-github-link:hover:before {
-  background-color: var(--ifm-color-primary-light); /* lighter version on hover */
+  background-color: var(--slv-ruby-mid);
 }
+
+[data-theme='dark'] .header-github-link:hover:before {
+  background-color: var(--slv-ruby-light);
+}
+
+/* Ruby accents for links on hover */
+a:hover {
+  color: var(--slv-ruby-mid) !important;
+}
+
+[data-theme='dark'] a:hover {
+  color: var(--slv-ruby-light) !important;
+}
+
+/* Ruby gradient for buttons and CTAs on hover */
+.button--primary:hover,
+.button.button--primary:hover {
+  background: linear-gradient(135deg, var(--slv-ruby-light), var(--slv-ruby-mid));
+  border-color: var(--slv-ruby-dark);
+}
+
+/* Ruby accent for active menu items */
+.menu__link--active {
+  border-left: 3px solid var(--slv-ruby-mid);
+}
+
+[data-theme='dark'] .menu__link--active {
+  border-left: 3px solid var(--slv-ruby-light);
+}
+
+/* Ruby highlight for code blocks on selection */
+code::-moz-selection,
+pre::-moz-selection {
+  background-color: rgba(157, 58, 79, 0.2);
+}
+
+code::selection,
+pre::selection {
+  background-color: rgba(157, 58, 79, 0.2);
+}
+
+/* Ruby accent for navbar logo on hover */
+.navbar__logo:hover {
+  filter: drop-shadow(0 0 8px var(--slv-ruby-mid));
+  transition: filter 0.3s ease;
+}
+
+[data-theme='dark'] .navbar__logo:hover {
+  filter: drop-shadow(0 0 8px var(--slv-ruby-light));
+}
+
+/* Subtle ruby gradient overlay for hero sections */
+.hero--primary {
+  background: linear-gradient(135deg, 
+    var(--ifm-background-color) 0%, 
+    rgba(157, 58, 79, 0.05) 100%);
+}
+
+[data-theme='dark'] .hero--primary {
+  background: linear-gradient(135deg, 
+    var(--ifm-background-color) 0%, 
+    rgba(196, 90, 111, 0.08) 100%);
+}
+
+/* Ruby accent for cards and containers on hover */
+.card:hover,
+article:hover {
+  box-shadow: 0 0 20px rgba(157, 58, 79, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+[data-theme='dark'] .card:hover,
+[data-theme='dark'] article:hover {
+  box-shadow: 0 0 20px rgba(196, 90, 111, 0.2);
+}
+
+/* Ruby accent for badges and tags */
+.badge--primary {
+  background: linear-gradient(135deg, var(--slv-ruby-mid), var(--slv-ruby-dark));
+  color: white;
+}
+
+/* Ruby accent for pagination active state */
+.pagination-nav__link--next:hover,
+.pagination-nav__link--prev:hover {
+  border-color: var(--slv-ruby-mid);
+}
+
+[data-theme='dark'] .pagination-nav__link--next:hover,
+[data-theme='dark'] .pagination-nav__link--prev:hover {
+  border-color: var(--slv-ruby-light);
+}
+
+/* Ruby glow for focus states */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--slv-ruby-mid);
+  box-shadow: 0 0 0 2px rgba(157, 58, 79, 0.2);
+}
+
+[data-theme='dark'] input:focus,
+[data-theme='dark'] textarea:focus,
+[data-theme='dark'] select:focus {
+  border-color: var(--slv-ruby-light);
+  box-shadow: 0 0 0 2px rgba(196, 90, 111, 0.2);
+}
+
+/* Subtle ruby accent for table headers */
+table thead tr {
+  background: linear-gradient(135deg, 
+    var(--ifm-background-surface-color) 0%, 
+    rgba(157, 58, 79, 0.03) 100%);
+}
+
+[data-theme='dark'] table thead tr {
+  background: linear-gradient(135deg, 
+    var(--ifm-background-surface-color) 0%, 
+    rgba(196, 90, 111, 0.05) 100%);
+}
+
+/* Ruby overlay for SVG logos and icons in content */
+article img[src$='.svg'],
+.markdown img[src$='.svg'],
+svg.themed-image {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 0 0px transparent);
+}
+
+article img[src$='.svg']:hover,
+.markdown img[src$='.svg']:hover,
+svg.themed-image:hover {
+  filter: drop-shadow(0 0 10px var(--slv-ruby-mid)) brightness(1.1);
+  transform: scale(1.02);
+}
+
+[data-theme='dark'] article img[src$='.svg']:hover,
+[data-theme='dark'] .markdown img[src$='.svg']:hover,
+[data-theme='dark'] svg.themed-image:hover {
+  filter: drop-shadow(0 0 12px var(--slv-ruby-light)) brightness(1.15);
+}
+
+/* Ruby glow for Kubernetes and other tech logos in docs */
+img[src*='kubernetes'],
+img[src*='docker'],
+img[src*='github'],
+img[src*='gitlab'],
+img[src*='aws'],
+img[src*='azure'],
+img[src*='gcp'] {
+  transition: all 0.3s ease;
+}
+
+img[src*='kubernetes']:hover,
+img[src*='docker']:hover,
+img[src*='github']:hover,
+img[src*='gitlab']:hover,
+img[src*='aws']:hover,
+img[src*='azure']:hover,
+img[src*='gcp']:hover {
+  filter: drop-shadow(0 0 15px var(--slv-ruby-mid));
+  transform: scale(1.05);
+}
+
+[data-theme='dark'] img[src*='kubernetes']:hover,
+[data-theme='dark'] img[src*='docker']:hover,
+[data-theme='dark'] img[src*='github']:hover,
+[data-theme='dark'] img[src*='gitlab']:hover,
+[data-theme='dark'] img[src*='aws']:hover,
+[data-theme='dark'] img[src*='azure']:hover,
+[data-theme='dark'] img[src*='gcp']:hover {
+  filter: drop-shadow(0 0 18px var(--slv-ruby-light));
+}
+

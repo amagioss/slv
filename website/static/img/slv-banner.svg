@@ -1,25 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 367.93 134.71">
   <defs>
+    <!-- Ruby Metallic Gradients -->
+    <radialGradient id="rubyGradient1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#c45a6f;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#9d3a4f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6e2736;stop-opacity:1" />
+    </radialGradient>
+    
+    <radialGradient id="rubyGradient2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#b34b60;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#8c3143;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5f212e;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Titanium Metallic Gradients -->
+    <radialGradient id="titaniumGradient1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#6b7478;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#4f5559;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2c3135;stop-opacity:1" />
+    </radialGradient>
+    
+    <radialGradient id="titaniumGradient2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4a5054;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#2e3338;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1f2326;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Text Gradient - Titanium metallic gradient -->
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b9599;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#6b7478;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4f5559;stop-opacity:1" />
+    </linearGradient>
+    
     <style>
       .cls-1 {
-        fill: #473c7c;
+        fill: url(#titaniumGradient1);
       }
 
       .cls-2 {
-        fill: #5a8bef;
+        fill: url(#rubyGradient1);
       }
 
       .cls-3 {
-        fill: #e6f3ff;
+        fill: url(#textGradient);
       }
 
       .cls-4 {
-        fill: #88c7f9;
+        fill: url(#titaniumGradient2);
       }
 
       .cls-5 {
-        fill: #342c58;
+        fill: url(#rubyGradient2);
       }
     </style>
   </defs>

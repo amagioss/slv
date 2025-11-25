@@ -41,7 +41,7 @@ var (
 	errVaultItemNotFound            = errors.New("no item found for the given name")
 	errVaultPublicKeyNotFound       = errors.New("vault public key not found")
 	errInvalidReferenceFormat       = errors.New("invalid reference format. references must follow the pattern {{" + config.AppNameUpperCase + ".<vault_name>.<secret_name>}} to allow dereferencing")
-	errInvalidImportDataFormat      = errors.New("invalid import data format - expected a map of string to string [secretName: secretValue] in YAML/JSON format")
+	errInvalidImportDataFormat      = errors.New("invalid import data format - expected a map of string to string [secretName: secretValue] in YAML/JSON/ENV format")
 	errK8sNameRequired              = errors.New("k8s resource name is required for a k8s compatible SLV vault")
 	errVaultWrappedKeysNotFound     = errors.New("vault wrapped keys not found - vault will be inaccessible by any environment")
 	errVaultNotWritable             = errors.New("vault is not writable")

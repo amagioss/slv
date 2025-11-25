@@ -83,7 +83,7 @@ var (
 
 	vaultImportFileFlag = utils.FlagDef{
 		Name:  "file",
-		Usage: "Path to the YAML/JSON file to be imported",
+		Usage: "Path to the YAML/JSON/ENV file to be imported",
 	}
 
 	plaintextValueFlag = utils.FlagDef{

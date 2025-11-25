@@ -1,23 +1,87 @@
 /* HERO SECTION STYLING */
 .heroBanner {
   padding: 6rem 0;
-  background: linear-gradient(
-    135deg,
-    var(--ifm-color-primary) 0%,
-    var(--ifm-color-primary-light) 50%,
-    var(--ifm-color-primary-lighter) 100%
-  );
+  background: 
+    radial-gradient(
+      ellipse at 30% 50%,
+      rgba(157, 58, 79, 0.25) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 70% 50%,
+      rgba(196, 90, 111, 0.15) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      var(--slv-titanium-dark) 0%,
+      var(--slv-titanium-mid) 30%,
+      var(--slv-titanium-light) 70%,
+      var(--slv-titanium-mid) 100%
+    );
   color: white;
   text-align: center;
   overflow: hidden;
+  position: relative;
 }
+
+/* Add animated ruby glow */
+.heroBanner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(157, 58, 79, 0.12) 0%,
+      rgba(157, 58, 79, 0.08) 25%,
+      transparent 50%
+    );
+  animation: rotateGlow 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rotateGlow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 [data-theme='dark'] .heroBanner {
-  background: linear-gradient(
-    135deg,
-    var(--ifm-color-primary-darkest) 0%,
-    var(--ifm-color-primary-dark) 50%,
-    var(--ifm-color-primary) 100%
-  );
+  background: 
+    radial-gradient(
+      ellipse at 30% 50%,
+      rgba(196, 90, 111, 0.35) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 70% 50%,
+      rgba(157, 58, 79, 0.25) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      var(--slv-titanium-deepest) 0%,
+      var(--slv-titanium-darkest) 30%,
+      var(--slv-titanium-dark) 70%,
+      var(--slv-titanium-darkest) 100%
+    );
+}
+
+[data-theme='dark'] .heroBanner::before {
+  background: 
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(196, 90, 111, 0.18) 0%,
+      rgba(196, 90, 111, 0.12) 25%,
+      transparent 50%
+    );
 }
 
 /* Hero Title with animation */
@@ -27,6 +91,8 @@
   opacity: 0;
   animation: fadeInUp 1s ease forwards;
   animation-delay: 0.2s;
+  position: relative;
+  z-index: 1;
 }
 
 /* Hero Subtitle with animation */
@@ -36,6 +102,8 @@
   opacity: 0;
   animation: fadeInUp 1s ease forwards;
   animation-delay: 0.5s;
+  position: relative;
+  z-index: 1;
 }
 
 /* Buttons container */
@@ -45,6 +113,8 @@
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* Get Started Button */
@@ -55,6 +125,13 @@
   opacity: 0;
   animation: fadeInUp 1s ease forwards;
   animation-delay: 0.8s;
+  transition: all 0.3s ease;
+}
+
+/* Subtle hover effect for Get Started button */
+.getStartedButton:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 /* Features Section Wrapper */

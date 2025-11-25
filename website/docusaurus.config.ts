@@ -7,7 +7,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Secure Local Vault (SLV)',
   tagline: 'Securely store, share, and access secrets alongside the codebase.',
-  // favicon: 'img/favicon.ico',
+  favicon: 'img/slv.svg',
 
   // Set the production url of your site here
   url: 'https://slv.sh',
@@ -72,6 +72,11 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: 'img/slv-social-card.jpg',
+    colorMode: {
+      defaultMode: 'dark',
+      disableSwitch: false,
+      respectPrefersColorScheme: true,
+    },
     navbar: {
       title: 'SLV',
       logo: {

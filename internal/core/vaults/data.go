@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
 	"slv.sh/slv/internal/core/crypto"
 )
@@ -49,7 +50,11 @@ func (vlt *Vault) Import(importData []byte, force, encrypt bool) (err error) {
 	}
 	dataMap := make(map[string]string)
 	if err = yaml.Unmarshal(importData, &dataMap); err != nil {
-		return errInvalidImportDataFormat
+		if envMap, err := godotenv.Unmarshal(string(importData)); err != nil {
+			return errInvalidImportDataFormat
+		} else {
+			dataMap = envMap
+		}
 	}
 	if !force {
 		for name := range dataMap {
