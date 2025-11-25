@@ -38,10 +38,14 @@ const (
 	K8SLVVaultField           = "spec"
 )
 
-func coloredArt() string {
-	rubyColored := strings.ReplaceAll(art, "▓", color.RGB(157, 58, 79).Sprint("▓"))
-	grayColored := strings.ReplaceAll(rubyColored, "░", color.RGB(79, 85, 89).Sprint("░"))
-	return strings.ReplaceAll(grayColored, "▒", color.RGB(79, 85, 89).Sprint("▒"))
+func ColorizedArt() string {
+	if colorizedArt == nil {
+		colorizedArt = new(string)
+		*colorizedArt = strings.ReplaceAll(art, "▓", color.RGB(157, 58, 79).Sprint("▓"))
+		*colorizedArt = strings.ReplaceAll(*colorizedArt, "░", color.RGB(79, 85, 89).Sprint("░"))
+		*colorizedArt = strings.ReplaceAll(*colorizedArt, "▒", color.RGB(79, 85, 89).Sprint("▒"))
+	}
+	return *colorizedArt
 }
 
 var (
@@ -54,5 +58,5 @@ var (
 
 	appDataDir *string
 
-	Art = coloredArt()
+	colorizedArt *string
 )
