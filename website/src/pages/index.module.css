@@ -1,17 +1,19 @@
 /* HERO SECTION STYLING */
 .heroBanner {
-  padding: 6rem 0;
+  padding: 4rem 2rem;
+  min-height: 400px;
   background: 
     radial-gradient(
       ellipse at 30% 50%,
-      rgba(157, 58, 79, 0.25) 0%,
+      rgba(157, 58, 79, 0.075) 0%,
       transparent 50%
     ),
     radial-gradient(
       ellipse at 70% 50%,
-      rgba(196, 90, 111, 0.15) 0%,
+      rgba(196, 90, 111, 0.05) 0%,
       transparent 50%
     ),
+    url('/img/slv-banner.svg') center/contain no-repeat,
     linear-gradient(
       135deg,
       var(--slv-titanium-dark) 0%,
@@ -23,6 +25,9 @@
   text-align: center;
   overflow: hidden;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Add animated ruby glow */
@@ -36,8 +41,8 @@
   background: 
     radial-gradient(
       circle at 50% 50%,
-      rgba(157, 58, 79, 0.12) 0%,
-      rgba(157, 58, 79, 0.08) 25%,
+      rgba(157, 58, 79, 0.04) 0%,
+      rgba(157, 58, 79, 0.02) 25%,
       transparent 50%
     );
   animation: rotateGlow 20s linear infinite;
@@ -57,14 +62,15 @@
   background: 
     radial-gradient(
       ellipse at 30% 50%,
-      rgba(196, 90, 111, 0.35) 0%,
+      rgba(196, 90, 111, 0.125) 0%,
       transparent 50%
     ),
     radial-gradient(
       ellipse at 70% 50%,
-      rgba(157, 58, 79, 0.25) 0%,
+      rgba(157, 58, 79, 0.075) 0%,
       transparent 50%
     ),
+    url('/img/slv-banner.svg') center/contain no-repeat,
     linear-gradient(
       135deg,
       var(--slv-titanium-deepest) 0%,
@@ -78,9 +84,25 @@
   background: 
     radial-gradient(
       circle at 50% 50%,
-      rgba(196, 90, 111, 0.18) 0%,
-      rgba(196, 90, 111, 0.12) 25%,
+      rgba(196, 90, 111, 0.06) 0%,
+      rgba(196, 90, 111, 0.03) 25%,
       transparent 50%
+    );
+}
+
+/* CTA Section below banner */
+.ctaSection {
+  padding: 3rem 2rem;
+  background-color: var(--ifm-background-surface-color);
+  text-align: center;
+}
+
+[data-theme='dark'] .ctaSection {
+  background: 
+    linear-gradient(
+      180deg,
+      var(--slv-titanium-darkest) 0%,
+      var(--ifm-background-surface-color) 50%
     );
 }
 
@@ -97,18 +119,19 @@
 
 /* Hero Subtitle with animation */
 .heroSubtitle {
-  margin-top: 1rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
   font-size: 1.5rem;
   opacity: 0;
   animation: fadeInUp 1s ease forwards;
-  animation-delay: 0.5s;
+  animation-delay: 0.3s;
   position: relative;
   z-index: 1;
 }
 
 /* Buttons container */
 .buttons {
-  margin-top: 3rem;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -124,7 +147,7 @@
   font-weight: 600;
   opacity: 0;
   animation: fadeInUp 1s ease forwards;
-  animation-delay: 0.8s;
+  animation-delay: 0.6s;
   transition: all 0.3s ease;
 }
 

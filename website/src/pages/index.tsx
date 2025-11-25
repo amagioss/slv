@@ -56,23 +56,30 @@ import styles from './index.module.css';
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div className="container text--center">
-        <Heading as="h1" className={clsx('hero__title', styles.heroTitle)}>
-          {siteConfig.title}
-        </Heading>
-        <p className={clsx('hero__subtitle', styles.heroSubtitle)}>
-          {siteConfig.tagline}
-        </p>
-        <div className={styles.buttons}>
-          <Link
-            className={clsx('button', 'button--secondary', styles.getStartedButton)}
-            to="/docs/overview">
-            Get Started
-          </Link>
+    <>
+      {/* Banner with just the logo/image */}
+      <header className={clsx('hero hero--primary', styles.heroBanner)}>
+        <div className="container text--center">
+          {/* Empty container - banner image visible */}
         </div>
-      </div>
-    </header>
+      </header>
+      
+      {/* Tagline and CTA section below banner */}
+      <section className={styles.ctaSection}>
+        <div className="container text--center">
+          <p className={clsx('hero__subtitle', styles.heroSubtitle)}>
+            {siteConfig.tagline}
+          </p>
+          <div className={styles.buttons}>
+            <Link
+              className={clsx('button', 'button--secondary', styles.getStartedButton)}
+              to="/docs/overview">
+              Get Started
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
 
