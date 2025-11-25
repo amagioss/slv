@@ -26,8 +26,9 @@
   --slv-ruby-darkest: #8c3143;
   --slv-ruby-deepest: #5f212e;
 
-  /* Light mode - Titanium based */
-  --ifm-background-color: #f5f6f7;
+  /* Light mode - Titanium based with subtle gradients */
+  --ifm-background-color: #f8f9fa;
+  --ifm-background-surface-color: #ffffff;
   --ifm-color-primary: #4f5559; /* Titanium mid */
   --ifm-color-primary-dark: #3e4245;
   --ifm-color-primary-darker: #2c3135; /* Titanium dark */
@@ -39,6 +40,17 @@
 
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(107, 116, 120, 0.1);
+}
+
+/* Add subtle gradient background for light theme */
+[data-theme='light'] {
+  background: linear-gradient(
+    180deg,
+    #f8f9fa 0%,
+    #f0f2f4 50%,
+    #e8eaec 100%
+  );
+  background-attachment: fixed;
 }
 
 /* Dark mode settings - Darker Titanium with Ruby accents */

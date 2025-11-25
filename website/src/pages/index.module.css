@@ -5,21 +5,22 @@
   background: 
     radial-gradient(
       ellipse at 30% 50%,
-      rgba(157, 58, 79, 0.075) 0%,
+      rgba(157, 58, 79, 0.08) 0%,
       transparent 50%
     ),
     radial-gradient(
       ellipse at 70% 50%,
-      rgba(196, 90, 111, 0.05) 0%,
+      rgba(196, 90, 111, 0.06) 0%,
       transparent 50%
     ),
     url('/img/slv-banner.svg') center/contain no-repeat,
     linear-gradient(
       135deg,
-      var(--slv-titanium-dark) 0%,
-      var(--slv-titanium-mid) 30%,
-      var(--slv-titanium-light) 70%,
-      var(--slv-titanium-mid) 100%
+      #e8ecf0 0%,
+      #f0f4f8 25%,
+      #f8fafc 50%,
+      #f0f4f8 75%,
+      #e8ecf0 100%
     );
   color: white;
   text-align: center;
@@ -28,6 +29,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* Add animated ruby glow */
@@ -93,16 +97,31 @@
 /* CTA Section below banner */
 .ctaSection {
   padding: 3rem 2rem;
-  background-color: var(--ifm-background-surface-color);
+  background: 
+    linear-gradient(
+      180deg,
+      rgba(240, 244, 248, 0.9) 0%,
+      rgba(248, 250, 252, 0.7) 50%,
+      rgba(255, 255, 255, 0.5) 100%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(157, 58, 79, 0.01) 10px,
+      rgba(157, 58, 79, 0.01) 20px
+    );
   text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 [data-theme='dark'] .ctaSection {
   background: 
     linear-gradient(
       180deg,
-      var(--slv-titanium-darkest) 0%,
-      var(--ifm-background-surface-color) 50%
+      rgba(44, 49, 53, 0.7) 0%,
+      rgba(31, 35, 38, 0.5) 50%,
+      var(--ifm-background-surface-color) 100%
     );
 }
 
@@ -151,8 +170,23 @@
   transition: all 0.3s ease;
 }
 
-/* Subtle hover effect for Get Started button */
-.getStartedButton:hover {
+/* Light theme: inverted colors for Get Started button */
+[data-theme='light'] .getStartedButton {
+  background: linear-gradient(135deg, #1a1d20 0%, #2c3135 50%, #3e4245 100%) !important;
+  color: #ffffff !important;
+  border-color: #2c3135 !important;
+}
+
+[data-theme='light'] .getStartedButton:hover {
+  background: linear-gradient(135deg, var(--slv-ruby-mid), var(--slv-ruby-dark)) !important;
+  border-color: var(--slv-ruby-dark) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(157, 58, 79, 0.3);
+}
+
+/* Dark theme: keep default secondary button styling */
+[data-theme='dark'] .getStartedButton:hover {
   opacity: 0.9;
   transform: translateY(-1px);
 }
@@ -160,12 +194,24 @@
 /* Features Section Wrapper */
 .featuresSection {
   padding: 4rem 0;
+  background: 
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(248, 250, 252, 0.3) 100%
+    );
 }
 
 /* Optional: Secondary Section Background */
 .secondarySection {
   padding: 4rem 0;
-  background-color: var(--ifm-background-surface-color);
+  background: 
+    linear-gradient(
+      135deg,
+      rgba(248, 250, 252, 0.8) 0%,
+      rgba(240, 244, 248, 0.6) 50%,
+      rgba(232, 236, 240, 0.4) 100%
+    );
 }
 
 /* Common Animation: Fade In Up */
