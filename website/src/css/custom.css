@@ -46,9 +46,9 @@
 [data-theme='light'] {
   background: linear-gradient(
     180deg,
-    #f8f9fa 0%,
-    #f0f2f4 50%,
-    #e8eaec 100%
+    #e8eaed 0%,
+    #e0e3e6 50%,
+    #d8dce0 100%
   );
   background-attachment: fixed;
 }

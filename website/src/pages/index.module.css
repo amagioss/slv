@@ -16,11 +16,11 @@
     url('/img/slv-banner.svg') center/contain no-repeat,
     linear-gradient(
       135deg,
-      #e8ecf0 0%,
-      #f0f4f8 25%,
-      #f8fafc 50%,
-      #f0f4f8 75%,
-      #e8ecf0 100%
+      #d8dce0 0%,
+      #e0e4e8 25%,
+      #e8ecf0 50%,
+      #e0e4e8 75%,
+      #d8dce0 100%
     );
   color: white;
   text-align: center;
@@ -100,9 +100,9 @@
   background: 
     linear-gradient(
       180deg,
-      rgba(240, 244, 248, 0.9) 0%,
-      rgba(248, 250, 252, 0.7) 50%,
-      rgba(255, 255, 255, 0.5) 100%
+      rgba(224, 228, 232, 0.9) 0%,
+      rgba(232, 236, 240, 0.7) 50%,
+      rgba(240, 244, 248, 0.5) 100%
     ),
     repeating-linear-gradient(
       45deg,
