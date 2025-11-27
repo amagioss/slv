@@ -3,17 +3,17 @@
   padding: 4rem 2rem;
   min-height: 400px;
   background: 
-    radial-gradient(
-      ellipse at 30% 50%,
-      rgba(157, 58, 79, 0.08) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 70% 50%,
-      rgba(196, 90, 111, 0.06) 0%,
-      transparent 50%
-    ),
     url('/img/slv-banner.svg') center/contain no-repeat,
+    radial-gradient(
+      ellipse at 20% 50%,
+      rgba(157, 58, 79, 0.04) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 80% 50%,
+      rgba(196, 90, 111, 0.03) 0%,
+      transparent 45%
+    ),
     linear-gradient(
       135deg,
       #d8dce0 0%,
@@ -29,9 +29,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* Add animated ruby glow */
@@ -64,23 +61,22 @@
 
 [data-theme='dark'] .heroBanner {
   background: 
-    radial-gradient(
-      ellipse at 30% 50%,
-      rgba(196, 90, 111, 0.125) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 70% 50%,
-      rgba(157, 58, 79, 0.075) 0%,
-      transparent 50%
-    ),
     url('/img/slv-banner.svg') center/contain no-repeat,
+    radial-gradient(
+      ellipse at 20% 50%,
+      rgba(196, 90, 111, 0.08) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 80% 50%,
+      rgba(157, 58, 79, 0.05) 0%,
+      transparent 45%
+    ),
     linear-gradient(
-      135deg,
-      var(--slv-titanium-deepest) 0%,
-      var(--slv-titanium-darkest) 30%,
-      var(--slv-titanium-dark) 70%,
-      var(--slv-titanium-darkest) 100%
+      to top,
+      #111111 0%,
+      #222222 50%,
+      #333333 100%
     );
 }
 
@@ -112,16 +108,15 @@
       rgba(157, 58, 79, 0.01) 20px
     );
   text-align: center;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 [data-theme='dark'] .ctaSection {
   background: 
     linear-gradient(
       180deg,
-      rgba(44, 49, 53, 0.7) 0%,
-      rgba(31, 35, 38, 0.5) 50%,
-      var(--ifm-background-surface-color) 100%
+      #333333 0%,
+      #2a2a2a 50%,
+      #222222 100%
     );
 }
 
