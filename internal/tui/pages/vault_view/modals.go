@@ -27,13 +27,17 @@ func (vvp *VaultViewPage) showEditSecretItemModal() {
 	}
 
 	form := vvp.createEditItemForm(itemKey, itemValue, isEncrypted)
+
+	// Get the TextArea and ensure it can handle paste properly
+	valueTextArea := form.GetFormItem(1).(*tview.TextArea)
+
 	vvp.GetTUI().ShowModalForm("Edit Item", form, "Edit", "Cancel", func() {
 		nameField := form.GetFormItem(0).(*tview.InputField)
-		valueField := form.GetFormItem(1).(*tview.InputField)
+		valueTextArea := form.GetFormItem(1).(*tview.TextArea)
 		encryptedCheckbox := form.GetFormItem(2).(*tview.Checkbox)
 
 		name := nameField.GetText()
-		value := valueField.GetText()
+		value := valueTextArea.GetText()
 		encrypted := encryptedCheckbox.IsChecked()
 
 		if err := vvp.vault.Put(name, []byte(value), encrypted); err != nil {
@@ -50,7 +54,8 @@ func (vvp *VaultViewPage) showEditSecretItemModal() {
 	}, func() {
 		vvp.GetTUI().GetApplication().SetFocus(vvp.itemsTable)
 	}, func() {
-		// Restore focus callback - focus will be handled by the new page
+		// Set focus to TextArea when modal opens to ensure paste works
+		vvp.GetTUI().GetApplication().SetFocus(valueTextArea)
 	})
 }
 
@@ -58,16 +63,20 @@ func (vvp *VaultViewPage) showEditSecretItemModal() {
 func (fn *FormNavigation) showAddItemModal() {
 	// Create the form with larger input fields
 	form := fn.vvp.createAddItemForm()
+
+	// Get the TextArea and ensure it can handle paste properly
+	valueTextArea := form.GetFormItem(1).(*tview.TextArea)
+
 	// Show the modal form
 	fn.vvp.GetTUI().ShowModalForm("Add New Item", form, "Add", "Cancel", func() {
 		// Confirm callback - TODO: implement item addition logic
 		// Get form values
 		nameField := form.GetFormItem(0).(*tview.InputField)
-		valueField := form.GetFormItem(1).(*tview.InputField)
+		valueTextArea := form.GetFormItem(1).(*tview.TextArea)
 		encryptedCheckbox := form.GetFormItem(2).(*tview.Checkbox)
 
 		name := nameField.GetText()
-		value := valueField.GetText()
+		value := valueTextArea.GetText()
 		encrypted := encryptedCheckbox.IsChecked()
 
 		if name == "" || value == "" {
@@ -88,7 +97,7 @@ func (fn *FormNavigation) showAddItemModal() {
 		// Cancel callback - do nothing
 		fn.vvp.GetTUI().GetApplication().SetFocus(fn.vvp.itemsTable)
 	}, func() {
-		// Restore focus to items table
-		fn.vvp.GetTUI().GetApplication().SetFocus(fn.vvp.itemsTable)
+		// Set focus to TextArea when modal opens to ensure paste works
+		fn.vvp.GetTUI().GetApplication().SetFocus(valueTextArea)
 	})
 }

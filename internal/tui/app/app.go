@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/rivo/tview"
+	"golang.design/x/clipboard"
 	"slv.sh/slv/internal/core/vaults"
 	"slv.sh/slv/internal/tui/components"
 	"slv.sh/slv/internal/tui/core"
@@ -43,6 +44,11 @@ func NewTUI() *TUI {
 }
 
 func (t *TUI) setup() {
+	// Initialize clipboard
+	if err := clipboard.Init(); err != nil {
+		log.Printf("Failed to initialize clipboard: %v", err)
+	}
+
 	t.app.GetTheme().ApplyTheme(t.app.GetApplication())
 	t.app.GetRouter().GetPages().SetBackgroundColor(t.app.GetTheme().GetBackground())
 
