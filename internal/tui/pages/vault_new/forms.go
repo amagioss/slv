@@ -11,7 +11,7 @@ func (vnp *VaultNewPage) createVaultConfigForm() *tview.Form {
 	vaultConfigForm := tview.NewForm()
 
 	// Vault Metadata Section
-	vaultConfigForm.AddInputField("Vault Name", "", 30, nil, func(text string) {
+	vaultConfigForm.AddInputField("Vault Name", "", 40, nil, func(text string) {
 		// Auto-update file name based on vault name
 		if text != "" {
 			fileName := text + ".slv.yaml"
@@ -22,7 +22,7 @@ func (vnp *VaultNewPage) createVaultConfigForm() *tview.Form {
 		vnp.SetTitle(fmt.Sprintf("New Vault at %s/%s.slv.yaml", vnp.currentDir, text))
 	}).
 		AddInputField("File Name", "", 40, nil, nil).
-		AddInputField("K8s Namespace (optional)", "", 30, nil, nil)
+		AddInputField("K8s Namespace (optional)", "", 40, nil, nil)
 
 	// Attach paste handler to all input fields
 	for i := 0; i < vaultConfigForm.GetFormItemCount(); i++ {

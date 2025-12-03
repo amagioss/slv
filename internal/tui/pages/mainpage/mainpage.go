@@ -65,7 +65,8 @@ func (mp *MainPage) Create() tview.Primitive {
 	mp.list.SetSelectedTextColor(colors.ListSelectedText).
 		SetSelectedBackgroundColor(colors.ListSelectedBg).
 		SetSecondaryTextColor(colors.ListSecondaryText).
-		SetMainTextColor(colors.ListMainText)
+		SetMainTextColor(colors.ListMainText).
+		SetWrapAround(false) // Disable looping behavior
 
 	// Create a centered layout using grid
 	content := tview.NewGrid().

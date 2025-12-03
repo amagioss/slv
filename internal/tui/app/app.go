@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"golang.design/x/clipboard"
 	"slv.sh/slv/internal/core/vaults"
@@ -321,6 +322,36 @@ func (t *TUI) ShowModalForm(title string, form *tview.Form, confirmButtonText st
 
 	// Add modal to the main content pages
 	t.components.GetMainContentPages().AddPage("modal-form", modalContainer, true, true)
+}
+
+// ShowModal shows a generic modal with any content
+func (t *TUI) ShowModal(title string, content tview.Primitive, restoreFocus func()) {
+	// Create a centered modal-like container
+	modalContainer := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false). // Top spacer
+		AddItem(tview.NewFlex().
+			SetDirection(tview.FlexColumn).
+			AddItem(nil, 0, 1, false).    // Left spacer
+			AddItem(content, 0, 1, true). // Content in center
+			AddItem(nil, 0, 1, false),    // Right spacer
+						0, 1, true). // Content row - let content determine its own height
+		AddItem(nil, 0, 1, false) // Bottom spacer
+
+	// Handle Escape key to close modal
+	modalContainer.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc {
+			t.components.GetMainContentPages().RemovePage("modal")
+			if restoreFocus != nil {
+				restoreFocus()
+			}
+			return nil
+		}
+		return event
+	})
+
+	// Add modal to the main content pages
+	t.components.GetMainContentPages().AddPage("modal", modalContainer, true, true)
 }
 
 // LogError logs an error

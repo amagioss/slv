@@ -1,8 +1,11 @@
 package vault_view
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"golang.design/x/clipboard"
 )
 
 type FormNavigation struct {
@@ -43,6 +46,7 @@ func (fn *FormNavigation) SetupNavigation() {
 	fn.focusGroup[fn.currentFocus].(*tview.Table).SetSelectable(true, false)
 	fn.vvp.mainFlex.SetInputCapture(fn.handleInputCapture)
 	fn.vvp.itemsTable.SetInputCapture(fn.handleSecretItemsInputCapture)
+	fn.vvp.accessorsTable.SetInputCapture(fn.handleAccessorsInputCapture)
 
 	// Set initial help text
 	fn.updateHelpText()
@@ -92,16 +96,17 @@ func (fn *FormNavigation) handleInputCapture(event *tcell.EventKey) *tcell.Event
 				fn.vvp.ClearNavigationState()
 				fn.vvp.GetTUI().GetNavigation().ShowVaults(false)
 				return nil
-			case 'u', 'U':
-				// Unlock vault
+			case 'x', 'X':
+				// Toggle vault lock state
 				if fn.vvp.filePath != "" {
-					fn.vvp.unlockVault()
-				}
-				return nil
-			case 'l', 'L':
-				// Lock vault
-				if fn.vvp.filePath != "" {
-					fn.vvp.lockVault()
+					if fn.vvp.vault.IsLocked() {
+						fn.vvp.unlockVault()
+					} else {
+						fn.vvp.lockVault()
+					}
+					// Update help texts after state change
+					fn.setupHelpTexts()
+					fn.updateHelpText()
 				}
 				return nil
 			case 'r', 'R':
@@ -140,22 +145,125 @@ func (fn *FormNavigation) handleSecretItemsInputCapture(event *tcell.EventKey) *
 		case tcell.KeyCtrlE:
 			fn.vvp.showEditSecretItemModal()
 			return nil
+		case tcell.KeyEnter:
+			// Show item details modal
+			row, _ := fn.vvp.itemsTable.GetSelection()
+			if row >= 1 { // Skip header
+				nameCell := fn.vvp.itemsTable.GetCell(row, 0)
+				if nameCell != nil {
+					itemName := nameCell.Text
+					// Get item from vault to verify access
+					item, err := fn.vvp.vault.Get(itemName)
+					if err == nil {
+						// Check if we can access the value (unlocked or plaintext)
+						if !fn.vvp.vault.IsLocked() || item.IsPlaintext() {
+							value, err := item.ValueString()
+							if err == nil {
+								itemType := "Secret"
+								if item.IsPlaintext() {
+									itemType = "Plaintext"
+								}
+								fn.vvp.showItemDetailsModal(itemName, itemType, value)
+							} else {
+								fn.vvp.ShowError(fmt.Sprintf("Error getting value: %v", err))
+							}
+						} else {
+							fn.vvp.ShowError("Cannot view secret value while vault is locked")
+						}
+					}
+				}
+			}
+			return nil
 		case tcell.KeyEsc:
 			// Clear state when going back to vault browse
 			fn.vvp.ClearNavigationState()
 			fn.vvp.GetTUI().GetNavigation().ShowVaults(false)
 			return event
+		case tcell.KeyRune:
+			switch event.Rune() {
+			case 'c', 'C':
+				// Copy value to clipboard
+				row, _ := fn.vvp.itemsTable.GetSelection()
+				if row >= 1 { // Skip header
+					nameCell := fn.vvp.itemsTable.GetCell(row, 0)
+					if nameCell != nil {
+						itemName := nameCell.Text
+						// Get item from vault to verify access
+						item, err := fn.vvp.vault.Get(itemName)
+						if err == nil {
+							// Check if we can access the value (unlocked or plaintext)
+							if !fn.vvp.vault.IsLocked() || item.IsPlaintext() {
+								value, err := item.ValueString()
+								if err == nil {
+									clipboard.Write(clipboard.FmtText, []byte(value))
+									fn.vvp.GetTUI().UpdateStatusBar(fmt.Sprintf("Copied value of '%s' to clipboard", itemName))
+								} else {
+									fn.vvp.ShowError(fmt.Sprintf("Error getting value: %v", err))
+								}
+							} else {
+								fn.vvp.ShowError("Cannot copy secret value while vault is locked")
+							}
+						}
+					}
+				}
+				return nil
+			}
 		}
 
 		return event
 	}
 }
 
+// handleAccessorsInputCapture handles input for the accessors table
+func (fn *FormNavigation) handleAccessorsInputCapture(event *tcell.EventKey) *tcell.EventKey {
+	if event == nil {
+		return event
+	}
+
+	switch event.Key() {
+	case tcell.KeyEnter:
+		// Show accessor details modal
+		row, _ := fn.vvp.accessorsTable.GetSelection()
+		if row >= 1 { // Skip header
+			typeCell := fn.vvp.accessorsTable.GetCell(row, 0)
+			nameCell := fn.vvp.accessorsTable.GetCell(row, 1)
+			emailCell := fn.vvp.accessorsTable.GetCell(row, 2)
+			publicKeyCell := fn.vvp.accessorsTable.GetCell(row, 3)
+
+			if publicKeyCell != nil {
+				accessorType := ""
+				if typeCell != nil {
+					accessorType = typeCell.Text
+				}
+				name := ""
+				if nameCell != nil {
+					name = nameCell.Text
+				}
+				email := ""
+				if emailCell != nil {
+					email = emailCell.Text
+				}
+				publicKey := publicKeyCell.Text
+
+				fn.vvp.showAccessorDetailsModal(accessorType, name, email, publicKey)
+			}
+		}
+		return nil
+	}
+
+	return event
+}
+
 // setupHelpTexts sets up help text for each component
 func (fn *FormNavigation) setupHelpTexts() {
-	fn.helpTexts[fn.vvp.vaultDetailsTable] = "Vault Details: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload | Ctrl+E: Edit vault"
-	fn.helpTexts[fn.vvp.accessorsTable] = "Accessors: ↑/↓: Navigate rows | Tab: Next table | u: Unlock | l: Lock | r: Reload | Ctrl+E: Edit vault"
-	fn.helpTexts[fn.vvp.itemsTable] = "Items: ↑/↓: Navigate rows | Tab: Next table | u/l: Unlock/Lock | r: Reload | Ctrl+D: Delete | Ctrl+N: Add | Ctrl+E: Edit"
+	lockAction := "Lock"
+	if fn.vvp.vault.IsLocked() {
+		lockAction = "Unlock"
+	}
+
+	fn.helpTexts[fn.vvp.vaultDetailsTable] = fmt.Sprintf("Vault Details: ↑/↓: Navigate rows | Tab: Next table | x: %s | r: Reload | Ctrl+E: Edit vault", lockAction)
+	fn.helpTexts[fn.vvp.accessorsTable] = fmt.Sprintf("Accessors: ↑/↓: Navigate rows | Tab: Next table | Enter: View Details | x: %s | r: Reload | Ctrl+E: Edit vault", lockAction)
+	fn.helpTexts[fn.vvp.itemsTable] = fmt.Sprintf("Items: ↑/↓: Navigate rows | Tab: Next table | Enter: View Details | c: Copy value | x: %s | r: Reload | Ctrl+D: Delete | Ctrl+N: Add | Ctrl+E: Edit", lockAction)
 }
 
 // updateHelpText updates the status bar with help text for the currently focused component

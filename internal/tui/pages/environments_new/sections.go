@@ -138,6 +138,7 @@ func (nep *NewEnvironmentPage) showProviderSelection() {
 		SetTitleAlign(tview.AlignLeft).
 		SetBorderColor(colors.Border).
 		SetBackgroundColor(colors.Background)
+	nep.providerList.SetWrapAround(false) // Disable looping behavior
 
 	// Create a flex with cancel button
 	nep.providerCancelForm = tview.NewForm().
