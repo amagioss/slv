@@ -48,12 +48,17 @@ func ColorizedArt() string {
 	return *colorizedArt
 }
 
+// Art returns the plain ASCII art without color codes
+func Art() string {
+	return art
+}
+
 var (
 	Version    = "v" + version
 	version    = "777.77.77"
-	fullCommit = ""
-	commitDate = ""
-	releaseURL = ""
+	FullCommit = ""
+	CommitDate = ""
+	ReleaseURL = ""
 	appInfo    *string
 
 	appDataDir *string

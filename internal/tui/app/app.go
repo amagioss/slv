@@ -3,10 +3,13 @@ package app
 import (
 	"context"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"golang.design/x/clipboard"
+	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/vaults"
 	"slv.sh/slv/internal/tui/components"
 	"slv.sh/slv/internal/tui/core"
@@ -30,6 +33,7 @@ type TUI struct {
 	app        *core.Application
 	navigation *navigation.Navigation
 	components *components.ComponentManager
+	rootLayout tview.Primitive // Store root layout for splash screen transition
 }
 
 // NewTUI creates a new TUI instance
@@ -67,10 +71,13 @@ func (t *TUI) setup() {
 	t.app.GetLayoutManager().SetInfoBar(t.components.GetInfoBar())
 	t.app.GetLayoutManager().SetContent(t.components.GetMainContent())
 	t.app.GetLayoutManager().SetStatusBar(t.components.GetStatusBar())
-	rootLayout := t.app.GetLayoutManager().BuildLayout()
 
-	t.app.GetApplication().SetRoot(rootLayout, true)
-	t.navigation.ShowMainMenu(false)
+	// Build the root layout now so it's ready when we need it
+	t.rootLayout = t.app.GetLayoutManager().BuildLayout()
+
+	// Show splash screen first, then main menu after delay
+	// The splash screen will set itself as root, then transition to main menu
+	t.showSplashScreen()
 }
 
 // setNavigator initializes the navigation after theme is applied
@@ -375,4 +382,90 @@ func (t *TUI) UpdateStatusBar(helpText string) {
 func (t *TUI) ClearStatusBar() {
 	// Use the component manager to clear status bar
 	t.components.ClearStatusBar()
+}
+
+// showSplashScreen displays the SLV logo for a couple of seconds before showing the main menu
+func (t *TUI) showSplashScreen() {
+	colors := theme.GetCurrentPalette()
+
+	art := config.Art()
+	coloredArt := strings.ReplaceAll(art, "▓", "[#9d3a4f]▓[-]")
+	coloredArt = strings.ReplaceAll(coloredArt, "░", "[#4f5559]░[-]")
+	coloredArt = strings.ReplaceAll(coloredArt, "▒", "[#4f5559]▒[-]")
+	displayArt := coloredArt
+
+	// Determine art dimensions to size the splash grid appropriately.
+	artLines := strings.Split(art, "\n")
+	artHeight := len(artLines)
+	maxWidth := 0
+	for _, line := range artLines {
+		if len(line) > maxWidth {
+			maxWidth = len(line)
+		}
+	}
+
+	logoText := tview.NewTextView()
+	logoText.SetText(displayArt)
+	logoText.SetDynamicColors(true)
+	logoText.SetTextAlign(tview.AlignCenter)
+	logoText.SetWrap(false)
+	logoText.SetTextColor(colors.Primary)
+	logoText.SetBackgroundColor(colors.Background)
+
+	subtitleText := tview.NewTextView()
+	subtitleText.SetText("[#f2f2f2]Secure Local Vault[-]")
+	subtitleText.SetDynamicColors(true)
+	subtitleText.SetTextAlign(tview.AlignCenter)
+	subtitleText.SetTextColor(colors.Primary)
+	subtitleText.SetBackgroundColor(colors.Background)
+
+	// Use a grid layout to center the logo both horizontally and vertically.
+	// Rows/columns with size 0 grow to fill remaining space, while the middle
+	// row/column reserves enough space for the logo itself.
+	splashGrid := tview.NewGrid()
+	splashGrid.SetRows(0, artHeight+2, 1, 0)
+	splashGrid.SetColumns(0, maxWidth+4, 0)
+	splashGrid.SetBorder(true)
+	splashGrid.SetBorderColor(colors.Border)
+	splashGrid.SetBackgroundColor(colors.Background)
+
+	splashGrid.AddItem(logoText, 1, 1, 1, 1, artHeight+2, maxWidth+4, false)
+	splashGrid.AddItem(subtitleText, 2, 1, 1, 1, 1, maxWidth+4, false)
+
+	app := t.app.GetApplication()
+
+	// Set application background to ensure full screen background
+	// tview.Styles.PrimitiveBackgroundColor = colors.Background
+
+	// Fill the entire screen with black before every draw while splash is active.
+	app.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
+		style := tcell.StyleDefault.Background(colors.Background)
+		screen.Fill(' ', style)
+		return false
+	})
+
+	// Helper to transition from splash to main menu.
+	finishSplash := func() {
+		app.SetBeforeDrawFunc(nil)
+		if t.rootLayout == nil {
+			t.rootLayout = t.app.GetLayoutManager().BuildLayout()
+		}
+		app.SetRoot(t.rootLayout, true)
+		t.navigation.ShowMainMenu(false)
+	}
+
+	// 1) Set splash as root
+	app.SetRoot(splashGrid, true)
+
+	// 2) After 1 second, switch to main layout via QueueUpdateDraw
+	go func() {
+		time.Sleep(1 * time.Second)
+		app.QueueUpdateDraw(finishSplash)
+	}()
+
+	// 3) Allow any key to skip splash immediately
+	splashGrid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		app.QueueUpdateDraw(finishSplash)
+		return nil // consume key
+	})
 }
