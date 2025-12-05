@@ -1,0 +1,45 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g id="Chip-Frame">
+        <path d="M448 128V384L384 448H128L64 384V128L128 64H384L448 128Z" stroke="#000000" stroke-width="12" stroke-linejoin="round" fill="none"/>
+        
+        <rect x="128" y="128" width="256" height="256" rx="20" stroke="#000000" stroke-width="8" fill="none"/>
+        
+        <path d="M160 64V128" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M256 64V128" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M352 64V128" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M160 384V448" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M256 384V448" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M352 384V448" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M64 160H128" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M64 256H128" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M64 352H128" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M384 160H448" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M384 256H448" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+        <path d="M384 352H448" stroke="#000000" stroke-width="8" stroke-linecap="round"/>
+         <circle cx="128" cy="128" r="8" fill="#000000"/>
+        <circle cx="384" cy="128" r="8" fill="#000000"/>
+        <circle cx="128" cy="384" r="8" fill="#000000"/>
+        <circle cx="384" cy="384" r="8" fill="#000000"/>
+    </g>
+
+    <g id="Quantum-Core">
+         <circle cx="256" cy="256" r="60" fill="#000000"/>
+        
+        <g stroke="#ffffff" stroke-width="4" stroke-linecap="round">
+            <path d="M230 256H282"/>
+            <path d="M256 230V282"/>
+            <circle cx="256" cy="256" r="10" fill="#ffffff" stroke="none"/>
+            <circle cx="230" cy="256" r="4" fill="#ffffff" stroke="none"/>
+            <circle cx="282" cy="256" r="4" fill="#ffffff" stroke="none"/>
+            <circle cx="256" cy="230" r="4" fill="#ffffff" stroke="none"/>
+            <circle cx="256" cy="282" r="4" fill="#ffffff" stroke="none"/>
+        </g>
+
+        <ellipse cx="256" cy="256" rx="110" ry="40" stroke="#000000" stroke-width="6" fill="none" transform="rotate(-30 256 256)"/>
+        <ellipse cx="256" cy="256" rx="110" ry="40" stroke="#000000" stroke-width="6" fill="none" transform="rotate(60 256 256)"/>
+        
+        <circle cx="355" cy="198" r="10" fill="#000000"/>
+        <circle cx="156" cy="314" r="8" fill="#000000"/>
+        <circle cx="200" cy="158" r="8" fill="#000000"/>
+    </g>
+</svg>

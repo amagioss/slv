@@ -1,41 +1,38 @@
-/* HERO SECTION STYLING */
-.heroBanner {
-  padding: 4rem 2rem;
-  min-height: 400px;
+/* Fixed background that stays static while scrolling */
+.fixedBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
   background: 
     radial-gradient(
-      ellipse at 30% 50%,
-      rgba(157, 58, 79, 0.08) 0%,
+      ellipse at 20% 30%,
+      rgba(157, 58, 79, 0.12) 0%,
       transparent 50%
     ),
     radial-gradient(
-      ellipse at 70% 50%,
-      rgba(196, 90, 111, 0.06) 0%,
+      ellipse at 80% 70%,
+      rgba(196, 90, 111, 0.10) 0%,
       transparent 50%
     ),
-    url('/img/slv-banner.svg') center/contain no-repeat,
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(157, 58, 79, 0.05) 0%,
+      transparent 60%
+    ),
     linear-gradient(
       135deg,
-      #d8dce0 0%,
-      #e0e4e8 25%,
-      #e8ecf0 50%,
-      #e0e4e8 75%,
-      #d8dce0 100%
+      #2c3135 0%,
+      #3e4245 25%,
+      #4a5054 50%,
+      #3e4245 75%,
+      #2c3135 100%
     );
-  color: white;
-  text-align: center;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* Add animated ruby glow */
-.heroBanner::before {
+.fixedBackground::before {
   content: '';
   position: absolute;
   top: -50%;
@@ -43,17 +40,112 @@
   width: 200%;
   height: 200%;
   background: 
+    conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgba(157, 58, 79, 0.1) 90deg,
+      transparent 180deg,
+      rgba(196, 90, 111, 0.08) 270deg,
+      transparent 360deg
+    );
+  pointer-events: none;
+  animation: rotateGradient 20s linear infinite;
+}
+
+[data-theme='dark'] .fixedBackground {
+  background: 
+    radial-gradient(
+      ellipse at 20% 30%,
+      rgba(196, 90, 111, 0.08) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 80% 70%,
+      rgba(157, 58, 79, 0.06) 0%,
+      transparent 50%
+    ),
     radial-gradient(
       circle at 50% 50%,
-      rgba(157, 58, 79, 0.04) 0%,
-      rgba(157, 58, 79, 0.02) 25%,
-      transparent 50%
+      rgba(196, 90, 111, 0.04) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      #0a0c0d 0%,
+      #0f1113 20%,
+      #141618 40%,
+      #1a1d20 60%,
+      #141618 80%,
+      #0a0c0d 100%
     );
-  animation: rotateGlow 20s linear infinite;
+}
+
+[data-theme='dark'] .fixedBackground::before {
+  background: 
+    conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgba(196, 90, 111, 0.12) 90deg,
+      transparent 180deg,
+      rgba(157, 58, 79, 0.10) 270deg,
+      transparent 360deg
+    );
+}
+
+/* Scroll container with snap scrolling */
+.scrollContainer {
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
+  /* Improve touch scrolling on mobile */
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+}
+
+/* Landing section - first snap point */
+.landingSection {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  background: transparent;
+}
+
+/* Features section - second snap point */
+.featuresSection {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  background: transparent;
+  margin-bottom: 0; /* Ensure no margin between sections */
+}
+
+/* Hide features content until section is visible */
+.featuresSection:not([data-features-visible="true"]) .features {
+  opacity: 0;
   pointer-events: none;
 }
 
-@keyframes rotateGlow {
+/* Removed ::before pseudo-elements from sections - background is now fixed */
+
+@keyframes rotateGradient {
   0% {
     transform: rotate(0deg);
   }
@@ -62,160 +154,31 @@
   }
 }
 
-[data-theme='dark'] .heroBanner {
-  background: 
-    radial-gradient(
-      ellipse at 30% 50%,
-      rgba(196, 90, 111, 0.125) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 70% 50%,
-      rgba(157, 58, 79, 0.075) 0%,
-      transparent 50%
-    ),
-    url('/img/slv-banner.svg') center/contain no-repeat,
-    linear-gradient(
-      135deg,
-      var(--slv-titanium-deepest) 0%,
-      var(--slv-titanium-darkest) 30%,
-      var(--slv-titanium-dark) 70%,
-      var(--slv-titanium-darkest) 100%
-    );
-}
-
-[data-theme='dark'] .heroBanner::before {
-  background: 
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(196, 90, 111, 0.06) 0%,
-      rgba(196, 90, 111, 0.03) 25%,
-      transparent 50%
-    );
-}
-
-/* CTA Section below banner */
-.ctaSection {
-  padding: 3rem 2rem;
-  background: 
-    linear-gradient(
-      180deg,
-      rgba(224, 228, 232, 0.9) 0%,
-      rgba(232, 236, 240, 0.7) 50%,
-      rgba(240, 244, 248, 0.5) 100%
-    ),
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 10px,
-      rgba(157, 58, 79, 0.01) 10px,
-      rgba(157, 58, 79, 0.01) 20px
-    );
-  text-align: center;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-[data-theme='dark'] .ctaSection {
-  background: 
-    linear-gradient(
-      180deg,
-      rgba(44, 49, 53, 0.7) 0%,
-      rgba(31, 35, 38, 0.5) 50%,
-      var(--ifm-background-surface-color) 100%
-    );
-}
-
-/* Hero Title with animation */
-.heroTitle {
-  font-size: 3.5rem;
-  font-weight: bold;
-  opacity: 0;
-  animation: fadeInUp 1s ease forwards;
-  animation-delay: 0.2s;
+.landingSection > *,
+.featuresSection > * {
   position: relative;
   z-index: 1;
 }
 
-/* Hero Subtitle with animation */
-.heroSubtitle {
-  margin-top: 0;
-  margin-bottom: 2rem;
-  font-size: 1.5rem;
-  opacity: 0;
-  animation: fadeInUp 1s ease forwards;
-  animation-delay: 0.3s;
-  position: relative;
-  z-index: 1;
-}
-
-/* Buttons container */
-.buttons {
-  margin-top: 0;
+.bannerSection {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  position: relative;
-  z-index: 1;
+  gap: 2rem;
 }
 
-/* Get Started Button */
-.getStartedButton {
-  font-size: 1.3rem;
-  padding: 1.2rem 3rem;
-  font-weight: 600;
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: buttonsFadeIn 1s ease-out 0.6s forwards;
   opacity: 0;
-  animation: fadeInUp 1s ease forwards;
-  animation-delay: 0.6s;
-  transition: all 0.3s ease;
+  transform: translateY(20px);
 }
 
-/* Light theme: inverted colors for Get Started button */
-[data-theme='light'] .getStartedButton {
-  background: linear-gradient(135deg, #1a1d20 0%, #2c3135 50%, #3e4245 100%) !important;
-  color: #ffffff !important;
-  border-color: #2c3135 !important;
-}
-
-[data-theme='light'] .getStartedButton:hover {
-  background: linear-gradient(135deg, var(--slv-ruby-mid), var(--slv-ruby-dark)) !important;
-  border-color: var(--slv-ruby-dark) !important;
-  color: #ffffff !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(157, 58, 79, 0.3);
-}
-
-/* Dark theme: keep default secondary button styling */
-[data-theme='dark'] .getStartedButton:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* Features Section Wrapper */
-.featuresSection {
-  padding: 4rem 0;
-  background: 
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.5) 0%,
-      rgba(248, 250, 252, 0.3) 100%
-    );
-}
-
-/* Optional: Secondary Section Background */
-.secondarySection {
-  padding: 4rem 0;
-  background: 
-    linear-gradient(
-      135deg,
-      rgba(248, 250, 252, 0.8) 0%,
-      rgba(240, 244, 248, 0.6) 50%,
-      rgba(232, 236, 240, 0.4) 100%
-    );
-}
-
-/* Common Animation: Fade In Up */
-@keyframes fadeInUp {
+@keyframes buttonsFadeIn {
   0% {
     opacity: 0;
     transform: translateY(20px);
@@ -225,3 +188,362 @@
     transform: translateY(0);
   }
 }
+
+.bannerLogo {
+  max-width: 100%;
+  max-height: 27vh;
+  height: 27vh;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(157, 58, 79, 0.3));
+  transition: filter 0.3s ease;
+  animation: logoFadeIn 1s ease-out forwards;
+  opacity: 0;
+  transform: translateY(-30px) scale(0.95);
+}
+
+.bannerLogo:hover {
+  filter: drop-shadow(0 0 30px rgba(157, 58, 79, 0.5));
+}
+
+@keyframes logoFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.subtitle {
+  font-size: 1.4rem;
+  color: var(--ifm-color-content);
+  margin: 0;
+  max-width: 800px;
+  animation: subtitleFadeIn 1s ease-out 0.3s forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes subtitleFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.getStartedButton {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #9d3a4f 0%, #6e2736 100%);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(157, 58, 79, 0.3);
+}
+
+.getStartedButton:hover {
+  background: linear-gradient(135deg, #b34b60 0%, #8c3143 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(157, 58, 79, 0.6);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.githubButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: var(--ifm-color-content);
+  border: 2px solid var(--ifm-color-content);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.githubButton:hover {
+  background: var(--ifm-color-content);
+  color: var(--ifm-background-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+}
+
+.githubButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Scroll indicator */
+.scrollIndicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ifm-color-content);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 2;
+  padding: 0.5rem;
+  animation: scrollIndicatorFadeIn 1s ease-out 0.9s forwards;
+}
+
+.scrollIndicator[data-animation-complete="true"] {
+  visibility: visible;
+}
+
+@keyframes scrollIndicatorFadeIn {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(10px);
+  }
+  100% {
+    opacity: 0.7;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.scrollIndicator:hover,
+.scrollIndicator:active {
+  opacity: 1;
+  transform: translateX(-50%) translateY(4px) !important;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 768px) {
+  .scrollIndicator,
+  .featuresScrollIndicator {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+}
+
+.scrollText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ifm-color-content);
+}
+
+.scrollArrow {
+  animation: bounceArrow 2s ease-in-out infinite;
+  color: var(--ifm-color-content);
+}
+
+@keyframes bounceArrow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+/* Features section scroll indicator */
+.featuresScrollIndicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ifm-color-content);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 2;
+  padding: 0.5rem;
+}
+
+.featuresSection[data-features-visible="true"] .featuresScrollIndicator {
+  visibility: visible;
+  animation: featuresScrollIndicatorFadeIn 0.8s ease-out 0.5s forwards;
+}
+
+@keyframes featuresScrollIndicatorFadeIn {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(10px);
+  }
+  100% {
+    opacity: 0.7;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.featuresScrollIndicator:hover,
+.featuresScrollIndicator:active {
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(4px) !important;
+}
+
+/* Open source section */
+.openSourceSection {
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  background: transparent;
+  margin-top: 0; /* Ensure no margin between sections */
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  /* Optimize animations for mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .landingSection {
+    padding: 1.5rem 1rem;
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .bannerSection {
+    gap: 1.5rem;
+  }
+
+  .bannerLogo {
+    max-height: 20vh;
+    height: 20vh;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    width: 100%;
+    max-width: 280px;
+    gap: 0.75rem;
+  }
+
+  .getStartedButton,
+  .githubButton {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+    justify-content: center;
+  }
+
+  .scrollIndicator {
+    bottom: 1.5rem;
+    padding: 0.75rem;
+  }
+
+  .scrollText {
+    font-size: 0.75rem;
+  }
+
+  .scrollArrow {
+    width: 20px;
+    height: 20px;
+  }
+
+  .featuresSection {
+    padding: 1.5rem 1rem;
+    min-height: 100vh;
+    height: auto;
+    padding-bottom: 4rem; /* Extra space to prevent overlap */
+    margin-bottom: 0;
+  }
+
+  .featuresScrollIndicator {
+    bottom: 1.5rem;
+    padding: 0.75rem;
+  }
+
+  .openSourceSection {
+    min-height: 100vh;
+    height: auto;
+    padding-top: 3rem; /* Extra space at top to prevent overlap */
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .landingSection {
+    padding: 1rem 0.75rem;
+  }
+
+  .bannerLogo {
+    max-height: 18vh;
+    height: 18vh;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    padding: 0 0.75rem;
+  }
+
+  .buttonGroup {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .getStartedButton,
+  .githubButton {
+    font-size: 0.9rem;
+    padding: 0.75rem 1.25rem;
+    justify-content: center;
+  }
+
+  .scrollIndicator,
+  .featuresScrollIndicator {
+    bottom: 1rem;
+    padding: 0.5rem;
+  }
+
+  .scrollText {
+    font-size: 0.7rem;
+  }
+
+  .featuresSection {
+    padding: 1rem 0.75rem;
+    padding-bottom: 4rem; /* Extra space to prevent overlap */
+  }
+
+  .openSourceSection {
+    padding-top: 3rem; /* Extra space at top to prevent overlap */
+  }
+}
+
