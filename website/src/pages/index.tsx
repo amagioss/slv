@@ -88,7 +88,8 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title={`${siteConfig.title}`}
-      description="Secure, reliable, and scalable vault management for Kubernetes and beyond.">
+      description="Secure, reliable, and scalable vault management for Kubernetes and beyond."
+      noFooter={true}>
       
       {/* Hero section */}
       <HomepageHeader />
