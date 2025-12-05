@@ -7,7 +7,6 @@
   height: 100%;
   z-index: -1;
   background: 
-    url('/img/slv-banner.svg') center/contain no-repeat,
     radial-gradient(
       ellipse at 20% 30%,
       rgba(157, 58, 79, 0.12) 0%,
@@ -55,7 +54,6 @@
 
 [data-theme='dark'] .fixedBackground {
   background: 
-    url('/img/slv-banner.svg') center/contain no-repeat,
     radial-gradient(
       ellipse at 20% 30%,
       rgba(196, 90, 111, 0.08) 0%,
