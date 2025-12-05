@@ -392,7 +392,8 @@ func (t *TUI) showSplashScreen() {
 	coloredArt := strings.ReplaceAll(art, "▓", "[#9d3a4f]▓[-]")
 	coloredArt = strings.ReplaceAll(coloredArt, "░", "[#4f5559]░[-]")
 	coloredArt = strings.ReplaceAll(coloredArt, "▒", "[#4f5559]▒[-]")
-	displayArt := coloredArt
+	// Split colored art into lines for animation
+	coloredArtLines := strings.Split(coloredArt, "\n")
 
 	// Determine art dimensions to size the splash grid appropriately.
 	artLines := strings.Split(art, "\n")
@@ -405,7 +406,7 @@ func (t *TUI) showSplashScreen() {
 	}
 
 	logoText := tview.NewTextView()
-	logoText.SetText(displayArt)
+	logoText.SetText("") // Start empty for animation
 	logoText.SetDynamicColors(true)
 	logoText.SetTextAlign(tview.AlignCenter)
 	logoText.SetWrap(false)
@@ -457,9 +458,25 @@ func (t *TUI) showSplashScreen() {
 	// 1) Set splash as root
 	app.SetRoot(splashGrid, true)
 
-	// 2) After 1 second, switch to main layout via QueueUpdateDraw
+	// 2) Animate logo line by line, then switch to main layout
 	go func() {
-		time.Sleep(1 * time.Second)
+		// Animation duration
+		lineDelay := 40 * time.Millisecond
+		currentText := ""
+
+		for _, line := range coloredArtLines {
+			time.Sleep(lineDelay)
+			currentText += line + "\n"
+
+			// Capture current text for the closure
+			textToUpdate := currentText
+			app.QueueUpdateDraw(func() {
+				logoText.SetText(textToUpdate)
+			})
+		}
+
+		// Hold for a bit after animation completes
+		time.Sleep(500 * time.Millisecond)
 		app.QueueUpdateDraw(finishSplash)
 	}()
 

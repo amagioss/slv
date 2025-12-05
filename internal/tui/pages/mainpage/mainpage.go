@@ -109,8 +109,8 @@ func createLogoPanel(colors theme.ColorPalette) (tview.Primitive, int) {
 		SetWrap(false)
 		// SetBackgroundColor(colors.Background)
 
-	infoLines := "[#9d3a4f]Made with ❤️  from 🇮🇳  For a secure decentralized future.[-]"
-	footerLen := len("Made with ❤️  from 🇮🇳  For a secure decentralized future.") + 4 // +4 for emoji width correction/padding
+	infoLines := "[#9d3a4f]Made with ❤️  from 🇮🇳  for a secure decentralized future.[-]"
+	footerLen := len("Made with ❤️  from 🇮🇳  for a secure decentralized future.") + 4 // +4 for emoji width correction/padding
 
 	infoView := tview.NewTextView().
 		SetDynamicColors(true).
