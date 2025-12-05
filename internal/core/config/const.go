@@ -56,12 +56,28 @@ func Art() string {
 var (
 	Version    = "v" + version
 	version    = "777.77.77"
-	FullCommit = ""
-	CommitDate = ""
-	ReleaseURL = ""
+	fullCommit = ""
+	commitDate = ""
+	releaseURL = ""
 	appInfo    *string
 
 	appDataDir *string
 
 	colorizedArt *string
 )
+
+func GetVersion() string {
+	return version
+}
+
+func GetFullCommit() string {
+	return fullCommit
+}
+
+func GetCommitDate() string {
+	return commitDate
+}
+
+func GetReleaseURL() string {
+	return releaseURL
+}

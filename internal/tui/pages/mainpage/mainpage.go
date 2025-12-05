@@ -121,7 +121,7 @@ func createLogoPanel(colors theme.ColorPalette) (tview.Primitive, int) {
 
 	// Add dynamic version info
 	var committedAt string
-	if builtAtTime, err := time.Parse(time.RFC3339, config.CommitDate); err == nil {
+	if builtAtTime, err := time.Parse(time.RFC3339, config.GetCommitDate()); err == nil {
 		builtAtLocalTime := builtAtTime.Local()
 		committedAt = builtAtLocalTime.Format("02 Jan 2006 03:04:05 PM MST")
 	}
@@ -139,10 +139,10 @@ func createLogoPanel(colors theme.ColorPalette) (tview.Primitive, int) {
 			SetAlign(tview.AlignLeft))
 	}
 
-	addVersionRow("SLV Version", config.Version)
+	addVersionRow("SLV Version", config.GetVersion())
 	addVersionRow("Built At", committedAt)
-	addVersionRow("Release", config.ReleaseURL)
-	addVersionRow("Git Commit", config.FullCommit)
+	addVersionRow("Release", config.GetReleaseURL())
+	addVersionRow("Git Commit", config.GetFullCommit())
 	addVersionRow("Web", "https://slv.sh")
 	addVersionRow("Platform", runtime.GOOS+"/"+runtime.GOARCH)
 	addVersionRow("Go Version", runtime.Version())
