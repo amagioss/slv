@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"golang.design/x/clipboard"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/environments/envproviders"
 	"slv.sh/slv/internal/core/profiles"
 	"slv.sh/slv/internal/tui/theme"
+	"slv.sh/slv/internal/tui/utils"
 )
 
 // showMetadataForm shows the metadata form
@@ -61,6 +62,13 @@ func (nep *NewEnvironmentPage) showMetadataForm() {
 		AddButton("Cancel", func() {
 			nep.GetTUI().GetNavigation().GoBack()
 		})
+
+	// Attach paste handler to input fields
+	for i := 0; i < nep.metadataForm.GetFormItemCount(); i++ {
+		if inputField, ok := nep.metadataForm.GetFormItem(i).(*tview.InputField); ok {
+			utils.AttachPasteHandler(inputField)
+		}
+	}
 
 	nep.metadataForm.SetButtonsAlign(tview.AlignCenter).
 		SetBorder(true).
@@ -130,6 +138,7 @@ func (nep *NewEnvironmentPage) showProviderSelection() {
 		SetTitleAlign(tview.AlignLeft).
 		SetBorderColor(colors.Border).
 		SetBackgroundColor(colors.Background)
+	nep.providerList.SetWrapAround(false) // Disable looping behavior
 
 	// Create a flex with cancel button
 	nep.providerCancelForm = tview.NewForm().
@@ -221,6 +230,14 @@ func (nep *NewEnvironmentPage) showProviderConfig() {
 			nep.providerForm.AddInputField(label, existingValue, 40, nil, func(text string) {
 				nep.providerInputs[argId] = text
 			})
+
+			// Attach paste handler
+			if formItemCount := nep.providerForm.GetFormItemCount(); formItemCount > 0 {
+				formItem := nep.providerForm.GetFormItem(formItemCount - 1)
+				if inputField, ok := formItem.(*tview.InputField); ok {
+					utils.AttachPasteHandler(inputField)
+				}
+			}
 
 			// Set description as placeholder if available
 			if argDesc != "" {
@@ -383,9 +400,8 @@ func (nep *NewEnvironmentPage) showResult() {
 	eds, err := nep.createdEnv.ToDefStr(false)
 	edsCopied := false
 	if err == nil && eds != "" {
-		if err := clipboard.WriteAll(eds); err == nil {
-			edsCopied = true
-		}
+		clipboard.Write(clipboard.FmtText, []byte(eds))
+		edsCopied = true
 	}
 
 	// Create info text for important messages

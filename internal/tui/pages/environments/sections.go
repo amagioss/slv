@@ -177,15 +177,8 @@ func (ep *EnvironmentsPage) createSearchBox(colors theme.ColorPalette) *tview.In
 		if text != "" {
 			ep.searchEnvironments(text)
 		} else {
-			// Clear results when input is empty - show list view
-			ep.browseEnvsEDSTable = nil
-			ep.browseEnvsSection.Clear()
-			ep.browseEnvsSection.SetTitle("Browse Environments").SetTitleAlign(tview.AlignLeft)
-			ep.browseEnvsSection.AddItem(ep.browseEnvsSearch, 3, 0, true)
-			ep.browseEnvsSection.AddItem(ep.browseEnvsList, 0, 1, true)
-			ep.browseEnvsList.Clear()
-			ep.browseEnvsList.AddItem("No environments found", "Use the search box above to find environments", 0, nil)
-			ep.navigation.updateFocusGroupForSearch()
+			// When input is empty, show all environments
+			ep.loadAllEnvironments()
 		}
 	})
 
@@ -201,7 +194,8 @@ func (ep *EnvironmentsPage) createResultsList(colors theme.ColorPalette) *tview.
 	list.SetSelectedTextColor(colors.ListSelectedText).
 		SetSelectedBackgroundColor(colors.ListSelectedBg).
 		SetSecondaryTextColor(colors.ListSecondaryText).
-		SetMainTextColor(colors.ListMainText)
+		SetMainTextColor(colors.ListMainText).
+		SetWrapAround(false) // Disable looping behavior
 
 	// Add placeholder item
 	list.AddItem("No environments found", "Use the search box above to find environments", 0, nil)
@@ -219,6 +213,9 @@ func (ep *EnvironmentsPage) showSearchView() {
 	ep.browseEnvsSection.SetTitle("Browse Environments").SetTitleAlign(tview.AlignLeft)
 	ep.browseEnvsSection.AddItem(ep.browseEnvsSearch, 3, 0, true) // Fixed size: 3 rows
 	ep.browseEnvsSection.AddItem(ep.browseEnvsList, 0, 1, true)   // Flexible: takes remaining space
+
+	// Load all environments by default
+	ep.loadAllEnvironments()
 }
 
 // showDetailsView shows the environment details table

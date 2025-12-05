@@ -3,8 +3,13 @@ package app
 import (
 	"context"
 	"log"
+	"strings"
+	"time"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"golang.design/x/clipboard"
+	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/vaults"
 	"slv.sh/slv/internal/tui/components"
 	"slv.sh/slv/internal/tui/core"
@@ -28,6 +33,7 @@ type TUI struct {
 	app        *core.Application
 	navigation *navigation.Navigation
 	components *components.ComponentManager
+	rootLayout tview.Primitive // Store root layout for splash screen transition
 }
 
 // NewTUI creates a new TUI instance
@@ -43,6 +49,11 @@ func NewTUI() *TUI {
 }
 
 func (t *TUI) setup() {
+	// Initialize clipboard
+	if err := clipboard.Init(); err != nil {
+		log.Printf("Failed to initialize clipboard: %v", err)
+	}
+
 	t.app.GetTheme().ApplyTheme(t.app.GetApplication())
 	t.app.GetRouter().GetPages().SetBackgroundColor(t.app.GetTheme().GetBackground())
 
@@ -60,10 +71,13 @@ func (t *TUI) setup() {
 	t.app.GetLayoutManager().SetInfoBar(t.components.GetInfoBar())
 	t.app.GetLayoutManager().SetContent(t.components.GetMainContent())
 	t.app.GetLayoutManager().SetStatusBar(t.components.GetStatusBar())
-	rootLayout := t.app.GetLayoutManager().BuildLayout()
 
-	t.app.GetApplication().SetRoot(rootLayout, true)
-	t.navigation.ShowMainMenu(false)
+	// Build the root layout now so it's ready when we need it
+	t.rootLayout = t.app.GetLayoutManager().BuildLayout()
+
+	// Show splash screen first, then main menu after delay
+	// The splash screen will set itself as root, then transition to main menu
+	t.showSplashScreen()
 }
 
 // setNavigator initializes the navigation after theme is applied
@@ -317,6 +331,36 @@ func (t *TUI) ShowModalForm(title string, form *tview.Form, confirmButtonText st
 	t.components.GetMainContentPages().AddPage("modal-form", modalContainer, true, true)
 }
 
+// ShowModal shows a generic modal with any content
+func (t *TUI) ShowModal(title string, content tview.Primitive, restoreFocus func()) {
+	// Create a centered modal-like container
+	modalContainer := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false). // Top spacer
+		AddItem(tview.NewFlex().
+			SetDirection(tview.FlexColumn).
+			AddItem(nil, 0, 1, false).    // Left spacer
+			AddItem(content, 0, 1, true). // Content in center
+			AddItem(nil, 0, 1, false),    // Right spacer
+						0, 1, true). // Content row - let content determine its own height
+		AddItem(nil, 0, 1, false) // Bottom spacer
+
+	// Handle Escape key to close modal
+	modalContainer.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc {
+			t.components.GetMainContentPages().RemovePage("modal")
+			if restoreFocus != nil {
+				restoreFocus()
+			}
+			return nil
+		}
+		return event
+	})
+
+	// Add modal to the main content pages
+	t.components.GetMainContentPages().AddPage("modal", modalContainer, true, true)
+}
+
 // LogError logs an error
 func (t *TUI) LogError(err error, showToUser bool) {
 	log.Printf("TUI Error: %v", err)
@@ -338,4 +382,107 @@ func (t *TUI) UpdateStatusBar(helpText string) {
 func (t *TUI) ClearStatusBar() {
 	// Use the component manager to clear status bar
 	t.components.ClearStatusBar()
+}
+
+// showSplashScreen displays the SLV logo for a couple of seconds before showing the main menu
+func (t *TUI) showSplashScreen() {
+	colors := theme.GetCurrentPalette()
+
+	art := config.Art()
+	coloredArt := strings.ReplaceAll(art, "▓", "[#9d3a4f]▓[-]")
+	coloredArt = strings.ReplaceAll(coloredArt, "░", "[#4f5559]░[-]")
+	coloredArt = strings.ReplaceAll(coloredArt, "▒", "[#4f5559]▒[-]")
+	// Split colored art into lines for animation
+	coloredArtLines := strings.Split(coloredArt, "\n")
+
+	// Determine art dimensions to size the splash grid appropriately.
+	artLines := strings.Split(art, "\n")
+	artHeight := len(artLines)
+	maxWidth := 0
+	for _, line := range artLines {
+		if len(line) > maxWidth {
+			maxWidth = len(line)
+		}
+	}
+
+	logoText := tview.NewTextView()
+	logoText.SetText("") // Start empty for animation
+	logoText.SetDynamicColors(true)
+	logoText.SetTextAlign(tview.AlignCenter)
+	logoText.SetWrap(false)
+	logoText.SetTextColor(colors.Primary)
+	logoText.SetBackgroundColor(colors.Background)
+
+	subtitleText := tview.NewTextView()
+	subtitleText.SetText("[#f2f2f2]Secure Local Vault[-]")
+	subtitleText.SetDynamicColors(true)
+	subtitleText.SetTextAlign(tview.AlignCenter)
+	subtitleText.SetTextColor(colors.Primary)
+	subtitleText.SetBackgroundColor(colors.Background)
+
+	// Use a grid layout to center the logo both horizontally and vertically.
+	// Rows/columns with size 0 grow to fill remaining space, while the middle
+	// row/column reserves enough space for the logo itself.
+	splashGrid := tview.NewGrid()
+	splashGrid.SetRows(0, artHeight+2, 1, 0)
+	splashGrid.SetColumns(0, maxWidth+4, 0)
+	splashGrid.SetBorder(true)
+	splashGrid.SetBorderColor(colors.Border)
+	splashGrid.SetBackgroundColor(colors.Background)
+
+	splashGrid.AddItem(logoText, 1, 1, 1, 1, artHeight+2, maxWidth+4, false)
+	splashGrid.AddItem(subtitleText, 2, 1, 1, 1, 1, maxWidth+4, false)
+
+	app := t.app.GetApplication()
+
+	// Set application background to ensure full screen background
+	// tview.Styles.PrimitiveBackgroundColor = colors.Background
+
+	// Fill the entire screen with black before every draw while splash is active.
+	app.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
+		style := tcell.StyleDefault.Background(colors.Background)
+		screen.Fill(' ', style)
+		return false
+	})
+
+	// Helper to transition from splash to main menu.
+	finishSplash := func() {
+		app.SetBeforeDrawFunc(nil)
+		if t.rootLayout == nil {
+			t.rootLayout = t.app.GetLayoutManager().BuildLayout()
+		}
+		app.SetRoot(t.rootLayout, true)
+		t.navigation.ShowMainMenu(false)
+	}
+
+	// 1) Set splash as root
+	app.SetRoot(splashGrid, true)
+
+	// 2) Animate logo line by line, then switch to main layout
+	go func() {
+		// Animation duration
+		lineDelay := 40 * time.Millisecond
+		currentText := ""
+
+		for _, line := range coloredArtLines {
+			time.Sleep(lineDelay)
+			currentText += line + "\n"
+
+			// Capture current text for the closure
+			textToUpdate := currentText
+			app.QueueUpdateDraw(func() {
+				logoText.SetText(textToUpdate)
+			})
+		}
+
+		// Hold for a bit after animation completes
+		time.Sleep(500 * time.Millisecond)
+		app.QueueUpdateDraw(finishSplash)
+	}()
+
+	// 3) Allow any key to skip splash immediately
+	splashGrid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		app.QueueUpdateDraw(finishSplash)
+		return nil // consume key
+	})
 }

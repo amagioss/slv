@@ -37,18 +37,11 @@ func (ib *InfoBar) createComponents() {
 	ib.infoTable.SetSelectable(false, false)
 
 	// Create logo view
-	logoContent := ` ____  _ __     __
-/ ___|| |\ \   / /
-\___ \| | \ \ / / 
- ___) | |__\ V /  
-|____/|_____\_/   
-`
-
 	ib.logoView = tview.NewTextView().
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true).
 		SetWrap(false).
-		SetText(logoContent).
+		SetText("").
 		SetTextColor(colors.InfobarASCIIArt)
 
 	// Create flex container
