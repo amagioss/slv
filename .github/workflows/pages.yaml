@@ -27,6 +27,69 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Fetch GitHub Stats
+        run: |
+          set -e
+          
+          # Fetch stars count
+          echo "Fetching GitHub stars..."
+          REPO_RESPONSE=$(curl -s -w "\n%{http_code}" "https://api.github.com/repos/${{ github.repository }}")
+          HTTP_CODE=$(echo "$REPO_RESPONSE" | tail -n1)
+          REPO_DATA=$(echo "$REPO_RESPONSE" | sed '$d')
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            STARS=$(echo "$REPO_DATA" | jq -r '.stargazers_count // 0')
+          else
+            echo "Warning: Failed to fetch stars (HTTP $HTTP_CODE), using 0"
+            STARS=0
+          fi
+          
+          # Fetch contributors count (handle pagination)
+          echo "Fetching GitHub contributors..."
+          CONTRIBUTORS=0
+          PAGE=1
+          MAX_PAGES=10
+          
+          while [ $PAGE -le $MAX_PAGES ]; do
+            CONTRIB_RESPONSE=$(curl -s -w "\n%{http_code}" "https://api.github.com/repos/${{ github.repository }}/contributors?per_page=100&page=$PAGE")
+            CONTRIB_HTTP_CODE=$(echo "$CONTRIB_RESPONSE" | tail -n1)
+            CONTRIB_DATA=$(echo "$CONTRIB_RESPONSE" | sed '$d')
+            
+            if [ "$CONTRIB_HTTP_CODE" != "200" ]; then
+              echo "Warning: Failed to fetch contributors page $PAGE (HTTP $CONTRIB_HTTP_CODE)"
+              break
+            fi
+            
+            CONTRIBUTORS_PAGE=$(echo "$CONTRIB_DATA" | jq 'length')
+            if [ "$CONTRIBUTORS_PAGE" -eq 0 ]; then
+              break
+            fi
+            
+            CONTRIBUTORS=$((CONTRIBUTORS + CONTRIBUTORS_PAGE))
+            
+            # Check if there are more pages by checking if we got a full page
+            if [ "$CONTRIBUTORS_PAGE" -lt 100 ]; then
+              break
+            fi
+            
+            PAGE=$((PAGE + 1))
+          done
+          
+          # Update githubStats.ts file
+          cat > website/src/components/OpenSourceSection/githubStats.ts << EOF
+          /**
+           * GitHub statistics fetched at build time
+           * These values are automatically updated during the build process
+           * Last updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+           */
+          export const GITHUB_STATS = {
+            stars: ${STARS}, // Fetched from GitHub API at build time
+            contributors: ${CONTRIBUTORS}, // Fetched from GitHub API at build time
+          } as const;
+          EOF
+          
+          echo "✅ Updated GitHub stats: Stars=$STARS, Contributors=$CONTRIBUTORS"
+        shell: bash
       - name: Building Website
         run: |
           npm -C website ci

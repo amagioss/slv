@@ -24,6 +24,7 @@ type TUIInterface interface {
 	ShowConfirmation(message string, onConfirm func(), onCancel func())
 	ShowConfirmationWithFocus(message string, confirmButtonText string, cancelButtonText string, onConfirm func(), onCancel func(), restoreFocus func())
 	ShowModalForm(title string, form *tview.Form, confirmButtonText string, cancelButtonText string, onConfirm func(), onCancel func(), restoreFocus func())
+	ShowModal(title string, content tview.Primitive, restoreFocus func())
 
 	// Application control
 	Quit()

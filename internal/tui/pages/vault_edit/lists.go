@@ -18,6 +18,7 @@ func (vep *VaultEditPage) createSearchResultsList() *tview.List {
 	}
 
 	searchResults.SetTitle(title).SetTitleAlign(tview.AlignLeft)
+	searchResults.SetWrapAround(false) // Disable looping behavior
 	vep.searchResults = searchResults
 	return searchResults
 }
@@ -35,6 +36,7 @@ func (vep *VaultEditPage) createGrantedAccessList() *tview.List {
 	}
 
 	grantedAccess.SetTitle(title).SetTitleAlign(tview.AlignLeft)
+	grantedAccess.SetWrapAround(false) // Disable looping behavior
 	vep.grantedAccess = grantedAccess
 	return grantedAccess
 }

@@ -48,6 +48,11 @@ func ColorizedArt() string {
 	return *colorizedArt
 }
 
+// Art returns the plain ASCII art without color codes
+func Art() string {
+	return art
+}
+
 var (
 	Version    = "v" + version
 	version    = "777.77.77"
@@ -60,3 +65,19 @@ var (
 
 	colorizedArt *string
 )
+
+func GetVersion() string {
+	return version
+}
+
+func GetFullCommit() string {
+	return fullCommit
+}
+
+func GetCommitDate() string {
+	return commitDate
+}
+
+func GetReleaseURL() string {
+	return releaseURL
+}

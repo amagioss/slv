@@ -9,6 +9,7 @@ import (
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/profiles"
 	"slv.sh/slv/internal/tui/theme"
+	"slv.sh/slv/internal/tui/utils"
 )
 
 // showEditForm shows a form below the details table for editing a field
@@ -45,6 +46,11 @@ func (ep *EnvironmentsPage) showEditForm(fieldName string, row int) {
 
 	// Add input field
 	form.AddInputField(fieldName+":", currentValue, 50, nil, nil)
+
+	// Attach paste handler
+	if inputField, ok := form.GetFormItem(0).(*tview.InputField); ok {
+		utils.AttachPasteHandler(inputField)
+	}
 
 	// Add buttons
 	form.AddButton("Cancel", func() {

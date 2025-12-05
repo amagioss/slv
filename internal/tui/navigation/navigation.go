@@ -20,14 +20,14 @@ type Navigation struct {
 // NewNavigation creates a new navigation controller
 func NewNavigation(app interfaces.TUIInterface) *Navigation {
 	// Get user's home directory
-	homeDir, err := os.UserHomeDir()
+	currentDir, err := os.Getwd()
 	if err != nil {
-		homeDir = "."
+		currentDir = "."
 	}
 
 	nav := &Navigation{
 		app:           app,
-		vaultDir:      homeDir,
+		vaultDir:      currentDir,
 		pageInstances: make(map[string]interfaces.Page),
 		pageStates:    make(map[string]map[string]interface{}),
 	}
