@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"golang.design/x/clipboard"
 	"slv.sh/slv/internal/core/environments"
 )
 
@@ -263,17 +263,14 @@ func (fn *FormNavigation) setupEnvironmentTableInputCapture(table *tview.Table, 
 					if valueCell != nil {
 						value := valueCell.Text
 						if value != "" {
-							if err := clipboard.WriteAll(value); err == nil {
-								// Get the field name from column 0
-								labelCell := table.GetCell(row, 0)
-								fieldName := "field"
-								if labelCell != nil {
-									fieldName = strings.TrimSuffix(labelCell.Text, ":")
-								}
-								fn.ep.UpdateStatus(fmt.Sprintf("Copied %s to clipboard", fieldName))
-							} else {
-								fn.ep.ShowError(fmt.Sprintf("Failed to copy to clipboard: %v", err))
+							clipboard.Write(clipboard.FmtText, []byte(value))
+							// Get the field name from column 0
+							labelCell := table.GetCell(row, 0)
+							fieldName := "field"
+							if labelCell != nil {
+								fieldName = strings.TrimSuffix(labelCell.Text, ":")
 							}
+							fn.ep.UpdateStatus(fmt.Sprintf("Copied %s to clipboard", fieldName))
 						} else {
 							fn.ep.ShowError("No value to copy")
 						}
@@ -396,17 +393,14 @@ func (fn *FormNavigation) setupDetailsTableInputCapture() {
 					if valueCell != nil {
 						value := valueCell.Text
 						if value != "" {
-							if err := clipboard.WriteAll(value); err == nil {
-								// Get the field name from column 0
-								labelCell := fn.ep.browseEnvsDetails.GetCell(row, 0)
-								fieldName := "field"
-								if labelCell != nil {
-									fieldName = strings.TrimSuffix(labelCell.Text, ":")
-								}
-								fn.ep.UpdateStatus(fmt.Sprintf("Copied %s to clipboard", fieldName))
-							} else {
-								fn.ep.ShowError(fmt.Sprintf("Failed to copy to clipboard: %v", err))
+							clipboard.Write(clipboard.FmtText, []byte(value))
+							// Get the field name from column 0
+							labelCell := fn.ep.browseEnvsDetails.GetCell(row, 0)
+							fieldName := "field"
+							if labelCell != nil {
+								fieldName = strings.TrimSuffix(labelCell.Text, ":")
 							}
+							fn.ep.UpdateStatus(fmt.Sprintf("Copied %s to clipboard", fieldName))
 						} else {
 							fn.ep.ShowError("No value to copy")
 						}
@@ -552,17 +546,14 @@ func (fn *FormNavigation) setupEDSTableInputCapture() {
 					if valueCell != nil {
 						value := valueCell.Text
 						if value != "" {
-							if err := clipboard.WriteAll(value); err == nil {
-								// Get the field name from column 0
-								labelCell := fn.ep.browseEnvsEDSTable.GetCell(row, 0)
-								fieldName := "field"
-								if labelCell != nil {
-									fieldName = strings.TrimSuffix(labelCell.Text, ":")
-								}
-								fn.ep.UpdateStatus(fmt.Sprintf("Copied %s to clipboard", fieldName))
-							} else {
-								fn.ep.ShowError(fmt.Sprintf("Failed to copy to clipboard: %v", err))
+							clipboard.Write(clipboard.FmtText, []byte(value))
+							// Get the field name from column 0
+							labelCell := fn.ep.browseEnvsEDSTable.GetCell(row, 0)
+							fieldName := "field"
+							if labelCell != nil {
+								fieldName = strings.TrimSuffix(labelCell.Text, ":")
 							}
+							fn.ep.UpdateStatus(fmt.Sprintf("Copied %s to clipboard", fieldName))
 						} else {
 							fn.ep.ShowError("No value to copy")
 						}

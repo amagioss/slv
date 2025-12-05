@@ -8,8 +8,9 @@ import (
 func tuiCommand() *cobra.Command {
 	if tuiCmd == nil {
 		tuiCmd = &cobra.Command{
-			Use:   "tui",
-			Short: "Starts the SLV TUI",
+			Use:     "tui",
+			Aliases: []string{"ui", "interactive", "menu", "dashboard"},
+			Short:   "Starts the SLV TUI",
 			Run: func(cmd *cobra.Command, args []string) {
 				tui.RunTUIWithErrorHandling()
 			},

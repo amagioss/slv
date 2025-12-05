@@ -111,6 +111,7 @@ const config: Config = {
     footer: {
       style: 'dark',
       links: [],
+      copyright: `© ${new Date().getFullYear()} SLV Authors. All rights reserved. Made with ❤️ from 🇮🇳 for a secure decentralized future.`,
     },
     prism: {
       theme: prismThemes.github,

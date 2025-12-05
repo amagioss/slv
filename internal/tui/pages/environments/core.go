@@ -29,6 +29,61 @@ func (ep *EnvironmentsPage) getSelfEnvironment() *environments.Environment {
 	return environments.GetSelf()
 }
 
+// loadAllEnvironments loads and displays all environments from the active profile
+func (ep *EnvironmentsPage) loadAllEnvironments() {
+	// Clear EDS table if it was showing
+	ep.browseEnvsEDSTable = nil
+
+	// Show list view
+	ep.browseEnvsSection.Clear()
+	ep.browseEnvsSection.SetTitle("Browse Environments").SetTitleAlign(tview.AlignLeft)
+	ep.browseEnvsSection.AddItem(ep.browseEnvsSearch, 3, 0, true) // Fixed size: 3 rows
+	ep.browseEnvsSection.AddItem(ep.browseEnvsList, 0, 1, true)   // Flexible: takes remaining space
+
+	ep.browseEnvsList.Clear()
+	ep.searchEnvMap = make(map[string]*environments.Environment) // Clear previous search results
+
+	profile, err := profiles.GetActiveProfile()
+	if err != nil {
+		ep.ShowError(fmt.Sprintf("Error getting active profile: %v", err))
+		ep.browseEnvsList.AddItem("❌ Error", "Failed to get active profile", 0, nil)
+		return
+	}
+
+	// Get all environments
+	envs, err := profile.ListEnvs()
+	if err != nil {
+		ep.ShowError(fmt.Sprintf("Error listing environments: %v", err))
+		ep.browseEnvsList.AddItem("❌ Error", "Failed to list environments", 0, nil)
+		return
+	}
+
+	// Sort environments by name for consistent display order
+	sort.Slice(envs, func(i, j int) bool {
+		return envs[i].Name < envs[j].Name
+	})
+
+	// Display sorted environments
+	for _, env := range envs {
+		// Store environment in map for modal display
+		ep.searchEnvMap[env.Name] = env
+		// Format with proper spacing
+		mainText := fmt.Sprintf("🔍 %s", env.Name)
+		secondaryText := fmt.Sprintf("Type: %s | Email: %s", string(env.EnvType), env.Email)
+		ep.browseEnvsList.AddItem(mainText, secondaryText, 0, nil)
+	}
+
+	// If no environments found
+	if len(envs) == 0 {
+		ep.browseEnvsList.AddItem("No environments found", "No environments in active profile", 0, nil)
+	}
+
+	// Update navigation to use list view (only if navigation is initialized)
+	if ep.navigation != nil {
+		ep.navigation.updateFocusGroupForSearch()
+	}
+}
+
 // searchEnvironments searches for environments based on query string
 func (ep *EnvironmentsPage) searchEnvironments(query string) {
 	ep.currentQuery = query // Store the current query for refreshing

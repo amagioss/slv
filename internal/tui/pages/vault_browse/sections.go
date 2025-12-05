@@ -19,7 +19,8 @@ func (vbp *VaultBrowsePage) createMainSection() *tview.Grid {
 	vbp.directoryList.SetSelectedTextColor(colors.ListSelectedText).
 		SetSelectedBackgroundColor(colors.ListSelectedBg).
 		SetSecondaryTextColor(colors.ListSecondaryText).
-		SetMainTextColor(colors.ListMainText)
+		SetMainTextColor(colors.ListMainText).
+		SetWrapAround(false) // Disable looping behavior
 
 	// Create the file list (right column)
 	vbp.fileList = tview.NewList()
@@ -30,7 +31,8 @@ func (vbp *VaultBrowsePage) createMainSection() *tview.Grid {
 	vbp.fileList.SetSelectedTextColor(colors.ListSelectedText).
 		SetSelectedBackgroundColor(colors.ListSelectedBg).
 		SetSecondaryTextColor(colors.ListSecondaryText).
-		SetMainTextColor(colors.ListMainText)
+		SetMainTextColor(colors.ListMainText).
+		SetWrapAround(false) // Disable looping behavior
 
 	// Create a two-column layout using grid
 	mainContent := tview.NewGrid().

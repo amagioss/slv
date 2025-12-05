@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/rivo/tview"
+	"slv.sh/slv/internal/tui/utils"
 )
 
 func (vnp *VaultNewPage) createVaultConfigForm() *tview.Form {
 	vaultConfigForm := tview.NewForm()
 
 	// Vault Metadata Section
-	vaultConfigForm.AddInputField("Vault Name", "", 30, nil, func(text string) {
+	vaultConfigForm.AddInputField("Vault Name", "", 40, nil, func(text string) {
 		// Auto-update file name based on vault name
 		if text != "" {
 			fileName := text + ".slv.yaml"
@@ -21,7 +22,14 @@ func (vnp *VaultNewPage) createVaultConfigForm() *tview.Form {
 		vnp.SetTitle(fmt.Sprintf("New Vault at %s/%s.slv.yaml", vnp.currentDir, text))
 	}).
 		AddInputField("File Name", "", 40, nil, nil).
-		AddInputField("K8s Namespace (optional)", "", 30, nil, nil)
+		AddInputField("K8s Namespace (optional)", "", 40, nil, nil)
+
+	// Attach paste handler to all input fields
+	for i := 0; i < vaultConfigForm.GetFormItemCount(); i++ {
+		if inputField, ok := vaultConfigForm.GetFormItem(i).(*tview.InputField); ok {
+			utils.AttachPasteHandler(inputField)
+		}
+	}
 
 	vaultConfigForm.SetBorder(true).
 		SetTitle("Vault Configuration").
@@ -65,6 +73,12 @@ func (vnp *VaultNewPage) createVaultGrantAccessForm() *tview.Form {
 			vnp.searchResults.AddItem("", "", 0, nil)
 		}
 	})
+
+	// Attach paste handler to the input field
+	if inputField, ok := grantAccessForm.GetFormItem(0).(*tview.InputField); ok {
+		utils.AttachPasteHandler(inputField)
+	}
+
 	grantAccessForm.SetBorder(true).SetTitle("Grant Access").SetTitleAlign(tview.AlignLeft)
 	vnp.grantAccessForm = grantAccessForm
 	return grantAccessForm

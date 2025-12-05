@@ -172,8 +172,14 @@ func (vvp *VaultViewPage) createVaultItemsTable() tview.Primitive {
 				encryptedStatus = "Plaintext"
 			}
 		}
-		if !vvp.vault.IsLocked() {
-			// Vault is unlocked - show actual item details
+		// Determine if we should show the value
+		showValue := !vvp.vault.IsLocked()
+		if err == nil && item.IsPlaintext() {
+			showValue = true
+		}
+
+		if showValue {
+			// Vault is unlocked OR item is plaintext - show actual item details
 			if err == nil {
 				table.SetCell(row, 1, tview.NewTableCell(encryptedStatus).SetTextColor(colors.TableType).SetMaxWidth(12))
 
@@ -187,7 +193,7 @@ func (vvp *VaultViewPage) createVaultItemsTable() tview.Primitive {
 				table.SetCell(row, 2, tview.NewTableCell("Error loading item").SetTextColor(colors.TableError))
 			}
 		} else {
-			// Vault is locked - show masked value
+			// Vault is locked AND item is secret - show masked value
 			table.SetCell(row, 1, tview.NewTableCell(encryptedStatus).SetTextColor(colors.TableType).SetMaxWidth(12))
 			table.SetCell(row, 2, tview.NewTableCell("***").SetTextColor(colors.TableMasked))
 		}

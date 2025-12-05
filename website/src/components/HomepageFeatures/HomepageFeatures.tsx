@@ -36,11 +36,20 @@ const FeatureList: FeatureItem[] = [
       </>
     ),
   },
+  {
+    title: 'Quantum Resistant',
+    Svg: require('@site/static/img/qc.svg').default,
+    description: (
+      <>
+        Built with future-proof cryptography that resists quantum computing attacks, ensuring your secrets remain secure even as technology evolves.
+      </>
+    ),
+  },
 ];
 
 function Feature({ title, Svg, description }: FeatureItem) {
   return (
-    <div className={clsx('col col--4', styles.feature)}>
+    <div className={styles.feature}>
       <div className="text--center">
         <Svg className={styles.featureSvg} role="img" />
       </div>
@@ -55,12 +64,10 @@ function Feature({ title, Svg, description }: FeatureItem) {
 export default function HomepageFeatures(): JSX.Element {
   return (
     <section className={styles.features}>
-      <div className="container">
-        <div className="row">
-          {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
-          ))}
-        </div>
+      <div className={styles.featuresGrid}>
+        {FeatureList.map((props, idx) => (
+          <Feature key={idx} {...props} />
+        ))}
       </div>
     </section>
   );

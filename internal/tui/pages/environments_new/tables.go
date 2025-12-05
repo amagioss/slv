@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"golang.design/x/clipboard"
 	"slv.sh/slv/internal/tui/theme"
 )
 
@@ -92,10 +92,9 @@ func (nep *NewEnvironmentPage) createResultTable() *tview.Table {
 					if cell != nil {
 						value := cell.Text
 						if value != "" {
-							if err := clipboard.WriteAll(value); err == nil {
-								fieldName := table.GetCell(selectedRow, 0).Text
-								nep.UpdateStatus(fmt.Sprintf("Copied %s to clipboard", fieldName))
-							}
+							clipboard.Write(clipboard.FmtText, []byte(value))
+							fieldName := table.GetCell(selectedRow, 0).Text
+							nep.UpdateStatus(fmt.Sprintf("Copied %s to clipboard", fieldName))
 						}
 					}
 				}
