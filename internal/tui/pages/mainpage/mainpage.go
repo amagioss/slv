@@ -1,10 +1,7 @@
 package mainpage
 
 import (
-	"fmt"
-	"runtime"
 	"strings"
-	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -62,13 +59,13 @@ func (mp *MainPage) Create() tview.Primitive {
 		SetWrapAround(false) // Disable looping behavior
 	listRow := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
-		AddItem(nil, 20, 0, false).
+		AddItem(nil, 10, 0, false).
 		AddItem(mp.list, 0, 1, true).
 		AddItem(nil, 4, 0, false)
 
 	// Center the list vertically in the right panel
 	rightPanel.AddItem(nil, 0, 1, false).
-		AddItem(listRow, 0, 2, true).
+		AddItem(listRow, 10, 0, true).
 		AddItem(nil, 0, 1, false)
 
 	rightPanel.SetBorder(true).
@@ -119,63 +116,11 @@ func createLogoPanel(colors theme.ColorPalette) (tview.Primitive, int) {
 		SetTextColor(colors.TextPrimary)
 	// SetBackgroundColor(colors.Background)
 
-	// Add dynamic version info
-	var committedAt string
-	if builtAtTime, err := time.Parse(time.RFC3339, config.GetCommitDate()); err == nil {
-		builtAtLocalTime := builtAtTime.Local()
-		committedAt = builtAtLocalTime.Format("02 Jan 2006 03:04:05 PM MST")
-	}
-
-	versionTable := tview.NewTable().
-		SetBorders(false)
-
-	addVersionRow := func(label, value string) {
-		row := versionTable.GetRowCount()
-		versionTable.SetCell(row, 0, tview.NewTableCell(label).
-			SetTextColor(colors.TextSecondary).
-			SetAlign(tview.AlignLeft))
-		versionTable.SetCell(row, 1, tview.NewTableCell(" : "+value).
-			SetTextColor(colors.TextPrimary).
-			SetAlign(tview.AlignLeft))
-	}
-
-	addVersionRow("SLV Version", config.GetVersion())
-	addVersionRow("Built At", committedAt)
-	addVersionRow("Release", config.GetReleaseURL())
-	addVersionRow("Git Commit", config.GetFullCommit())
-	addVersionRow("Web", "https://slv.sh")
-	addVersionRow("Platform", runtime.GOOS+"/"+runtime.GOARCH)
-	addVersionRow("Go Version", runtime.Version())
-
-	// Description above the table
-	descriptionText := fmt.Sprintf(`[#f2f2f2]%s (Secure Local Vault)[-] : Securely store, share, and access secrets alongside the codebase.`, config.AppNameUpperCase)
-	descriptionView := tview.NewTextView().
-		SetDynamicColors(true).
-		SetTextAlign(tview.AlignCenter).
-		SetText(descriptionText).
-		SetTextColor(colors.TextPrimary).
-		SetWrap(true)
-
-	// Combine description and table in a vertical flex
-	// Use a horizontal flex to center the table horizontally
-	tableFlex := tview.NewFlex().
-		SetDirection(tview.FlexColumn).
-		AddItem(nil, 30, 0, false).
-		AddItem(versionTable, 0, 8, false). // Give table 80% width relative to spacers
-		AddItem(nil, 0, 1, false)
-
-	infoFlex := tview.NewFlex().
-		SetDirection(tview.FlexRow).
-		AddItem(descriptionView, 3, 1, false). // Fixed height for description
-		AddItem(tview.NewBox(), 1, 0, false).  // Spacer
-		AddItem(tableFlex, 0, 1, false)        // Table centered horizontally takes remaining vertical space
-
 	// Use a flex container to center the logo vertically
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(nil, 0, 1, false).
 		AddItem(logoText, len(artLines)+2, 0, false). // Fixed height for art
-		AddItem(infoFlex, 12, 0, false).              // Flexible height for version info
 		AddItem(nil, 4, 0, false).                    // Spacer
 		AddItem(infoView, 2, 0, false).               // Made with... footer
 		AddItem(nil, 0, 1, false)
