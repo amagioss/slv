@@ -106,8 +106,17 @@ func createLogoPanel(colors theme.ColorPalette) (tview.Primitive, int) {
 		SetWrap(false)
 		// SetBackgroundColor(colors.Background)
 
-	infoLines := "[#9d3a4f]Made with ❤️  from 🇮🇳  for a secure decentralized future.[-]"
+	// Add "Secure Local Vault" text below the logo
+	titleText := "[#9d3a4f]Secure Local Vault[-]"
+	titleView := tview.NewTextView().
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignCenter).
+		SetText(titleText).
+		SetTextColor(colors.TextPrimary)
+
+	infoLines := "[#858a8e]Made with ❤️  from 🇮🇳  for a secure decentralized future.[-]"
 	footerLen := len("Made with ❤️  from 🇮🇳  for a secure decentralized future.") + 4 // +4 for emoji width correction/padding
+	titleLen := len("Secure Local Vault") + 4                                         // +4 for padding
 
 	infoView := tview.NewTextView().
 		SetDynamicColors(true).
@@ -120,8 +129,10 @@ func createLogoPanel(colors theme.ColorPalette) (tview.Primitive, int) {
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(nil, 0, 1, false).
-		AddItem(logoText, len(artLines)+2, 0, false). // Fixed height for art
-		AddItem(nil, 4, 0, false).                    // Spacer
+		AddItem(logoText, len(artLines)+1, 0, false). // Fixed height for art
+		AddItem(nil, 1, 0, false).                    // Minimal spacer between logo and title
+		AddItem(titleView, 1, 0, false).              // "Secure Local Vault" title
+		AddItem(nil, 1, 0, false).                    // Minimal spacer between title and footer
 		AddItem(infoView, 2, 0, false).               // Made with... footer
 		AddItem(nil, 0, 1, false)
 
@@ -133,6 +144,9 @@ func createLogoPanel(colors theme.ColorPalette) (tview.Primitive, int) {
 	finalWidth := maxWidth
 	if footerLen > finalWidth {
 		finalWidth = footerLen
+	}
+	if titleLen > finalWidth {
+		finalWidth = titleLen
 	}
 
 	// Return flex and calculated width (content width + padding + border)
