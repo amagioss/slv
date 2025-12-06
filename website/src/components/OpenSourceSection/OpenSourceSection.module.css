@@ -11,6 +11,16 @@
   background: transparent;
 }
 
+/* On mobile, allow scrolling past the section */
+@media (max-width: 768px) {
+  .openSourceSection {
+    scroll-snap-stop: normal;
+    min-height: 100vh;
+    height: auto;
+    padding-bottom: 4rem; /* Extra space at bottom to ensure GitHub button is accessible */
+  }
+}
+
 .content {
   max-width: 900px;
   width: 100%;
@@ -205,8 +215,11 @@
     padding: 2rem 1rem;
     min-height: 100vh;
     height: auto;
-    padding-top: 3rem; /* Extra space at top to prevent overlap */
-    padding-bottom: 2rem; /* Extra space at bottom */
+    padding-top: 2rem; /* Ensure top content is visible when snapped */
+    padding-bottom: 8rem; /* Extra space at bottom to ensure GitHub button is fully visible */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
   }
 
   .content {

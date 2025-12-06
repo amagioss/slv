@@ -105,7 +105,18 @@
   /* Improve touch scrolling on mobile */
   touch-action: pan-y;
   overscroll-behavior-y: contain;
+  /* Add scroll padding to ensure bottom content is visible when snapping */
+  scroll-padding-bottom: 2rem;
 }
+
+/* On mobile, increase scroll padding to account for more content */
+@media (max-width: 768px) {
+  .scrollContainer {
+    scroll-padding-bottom: 4rem;
+  }
+}
+
+/* Scroll-snap remains mandatory on all screen sizes */
 
 /* Landing section - first snap point */
 .landingSection {
@@ -483,8 +494,12 @@
     padding: 1.5rem 1rem;
     min-height: 100vh;
     height: auto;
-    padding-bottom: 4rem; /* Extra space to prevent overlap */
+    padding-top: 2rem; /* Ensure top content is visible when snapped */
+    padding-bottom: 6rem; /* Extra space at bottom to ensure all content is visible */
     margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
   }
 
   .featuresScrollIndicator {
@@ -495,14 +510,20 @@
   .openSourceSection {
     min-height: 100vh;
     height: auto;
-    padding-top: 3rem; /* Extra space at top to prevent overlap */
+    padding-top: 2rem; /* Ensure top content is visible when snapped */
+    padding-bottom: 8rem; /* Extra space at bottom to ensure GitHub button is fully visible */
     margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
   }
 }
 
 @media (max-width: 480px) {
   .landingSection {
     padding: 1rem 0.75rem;
+    min-height: 100vh;
+    height: auto;
   }
 
   .bannerLogo {
@@ -539,11 +560,17 @@
 
   .featuresSection {
     padding: 1rem 0.75rem;
-    padding-bottom: 4rem; /* Extra space to prevent overlap */
+    padding-top: 2rem; /* Ensure top content is visible when snapped */
+    padding-bottom: 6rem; /* Extra space at bottom to ensure all content is visible */
+    min-height: 100vh;
+    height: auto;
   }
 
   .openSourceSection {
-    padding-top: 3rem; /* Extra space at top to prevent overlap */
+    padding-top: 2rem; /* Ensure top content is visible when snapped */
+    padding-bottom: 8rem; /* Extra space at bottom to ensure GitHub button is fully visible */
+    min-height: 100vh;
+    height: auto;
   }
 }
 

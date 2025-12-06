@@ -180,10 +180,12 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
     padding: 1.5rem 1rem;
+    padding-bottom: 2rem; /* Extra space at bottom for readability */
   }
   
   .feature {
     padding: 2rem 1.5rem;
+    margin-bottom: 1rem; /* Extra space between features for readability */
   }
 
   .featureSvg {
@@ -195,11 +197,19 @@
   .feature h3 {
     font-size: 1.25rem;
     margin-top: 0.75rem;
+    margin-bottom: 0.5rem; /* Ensure spacing for text readability */
   }
 
   .feature p {
     font-size: 0.9rem;
     margin-top: 0.5rem;
+    line-height: 1.6; /* Better line height for readability */
+  }
+
+  /* Extra padding for the last feature (quantum) to ensure text is comfortably readable */
+  .feature:last-child {
+    padding-bottom: 3rem;
+    margin-bottom: 2rem;
   }
 }
 
@@ -230,5 +240,11 @@
   .feature::before {
     width: 100px;
     height: 100px;
+  }
+
+  /* Extra padding for the last feature (quantum) on very small screens */
+  .feature:last-child {
+    padding-bottom: 3.5rem;
+    margin-bottom: 2.5rem;
   }
 }
