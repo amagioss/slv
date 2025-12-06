@@ -1,7 +1,11 @@
 package components
 
 import (
+	"runtime"
+	"time"
+
 	"github.com/rivo/tview"
+	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/environments"
 	"slv.sh/slv/internal/core/profiles"
 	"slv.sh/slv/internal/core/session"
@@ -11,10 +15,10 @@ import (
 
 // InfoBar represents the info bar component
 type InfoBar struct {
-	tui       interfaces.TUIInterface
-	primitive tview.Primitive
-	infoTable *tview.Table
-	logoView  *tview.TextView
+	tui          interfaces.TUIInterface
+	primitive    tview.Primitive
+	infoTable    *tview.Table
+	versionTable *tview.Table
 }
 
 // NewInfoBar creates a new InfoBar component
@@ -36,19 +40,17 @@ func (ib *InfoBar) createComponents() {
 	ib.infoTable.SetBorders(false)
 	ib.infoTable.SetSelectable(false, false)
 
-	// Create logo view
-	ib.logoView = tview.NewTextView().
-		SetTextAlign(tview.AlignCenter).
-		SetDynamicColors(true).
-		SetWrap(false).
-		SetText("").
-		SetTextColor(colors.InfobarASCIIArt)
+	// Create version info table
+	var versionTableWidth int
+	ib.versionTable, versionTableWidth = createVersionTable(colors)
 
 	// Create flex container
+	// Add a spacer to push version table to the right, then add version table with fixed width
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
 		AddItem(ib.infoTable, 0, 1, false).
-		AddItem(ib.logoView, 30, 0, false)
+		// AddItem(nil, 0, 1, false).                            // Spacer to push version table to the right
+		AddItem(ib.versionTable, versionTableWidth, 0, false) // Fixed width, pinned to right
 
 	flex.SetBorder(true).
 		SetBorderColor(colors.InfobarBorder).
@@ -158,4 +160,61 @@ func (ib *InfoBar) getProfileName() string {
 		return "No Profile"
 	}
 	return profile.Name()
+}
+
+// createVersionTable creates a table with version information
+// Returns the table and its calculated fixed width
+func createVersionTable(colors theme.ColorPalette) (*tview.Table, int) {
+	var committedAt string
+	if builtAtTime, err := time.Parse(time.RFC3339, config.GetCommitDate()); err == nil {
+		builtAtLocalTime := builtAtTime.Local()
+		committedAt = builtAtLocalTime.Format("02 Jan 2006 03:04:05 PM MST")
+	}
+
+	versionTable := tview.NewTable().
+		SetBorders(false)
+
+	// Calculate maximum width needed for the table
+	// Format: "Label : Value"
+	maxWidth := 0
+	rows := []struct {
+		label string
+		value string
+	}{
+		{"SLV Version", config.GetVersion()},
+		{"Built At", committedAt},
+		{"Release", config.GetReleaseURL()},
+		{"Git Commit", config.GetFullCommit()},
+		{"Web", "https://slv.sh"},
+		{"Platform", runtime.GOOS + "/" + runtime.GOARCH},
+		{"Go Version", runtime.Version()},
+	}
+
+	for _, row := range rows {
+		// Calculate width: label + " : " + value
+		width := len(row.label) + 3 + len(row.value)
+		if width > maxWidth {
+			maxWidth = width
+		}
+	}
+
+	// Add padding for borders and spacing (typically 4-6 characters)
+	// The Git Commit hash is usually the longest, so we ensure enough space
+	fixedWidth := maxWidth + 6
+
+	addVersionRow := func(label, value string) {
+		row := versionTable.GetRowCount()
+		versionTable.SetCell(row, 0, tview.NewTableCell(label).
+			SetTextColor(colors.TextSecondary).
+			SetAlign(tview.AlignLeft))
+		versionTable.SetCell(row, 1, tview.NewTableCell(" : "+value).
+			SetTextColor(colors.TextPrimary).
+			SetAlign(tview.AlignLeft))
+	}
+
+	for _, row := range rows {
+		addVersionRow(row.label, row.value)
+	}
+
+	return versionTable, fixedWidth
 }
