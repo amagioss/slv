@@ -27,7 +27,7 @@
   --slv-ruby-deepest: #5f212e;
 
   /* Light mode - Titanium based with subtle gradients */
-  --ifm-background-color: #f8f9fa;
+  --ifm-background-color: #ffffff; /* Pure white instead of gray */
   --ifm-background-surface-color: #ffffff;
   --ifm-color-primary: #4f5559; /* Titanium mid */
   --ifm-color-primary-dark: #3e4245;
@@ -46,9 +46,9 @@
 [data-theme='light'] {
   background: linear-gradient(
     180deg,
-    #e8eaed 0%,
-    #e0e3e6 50%,
-    #d8dce0 100%
+    #ffffff 0%,
+    #fafafa 50%,
+    #f5f5f5 100%
   );
   background-attachment: fixed;
 }
@@ -154,14 +154,13 @@ pre::selection {
 }
 
 /* Ruby accent for cards and containers on hover */
-.card:hover,
-article:hover {
+/* Removed hover effects on articles to prevent silhouette effect in documentation */
+.card:hover {
   box-shadow: 0 0 20px rgba(157, 58, 79, 0.15);
   transition: box-shadow 0.3s ease;
 }
 
-[data-theme='dark'] .card:hover,
-[data-theme='dark'] article:hover {
+[data-theme='dark'] .card:hover {
   box-shadow: 0 0 20px rgba(196, 90, 111, 0.2);
 }
 

@@ -27,27 +27,6 @@ export default function Home(): ReactNode {
   useEffect(() => {
     // Add class to body for home page styling
     document.body.classList.add('home-page');
-    
-    // Function to hide navbar
-    const hideNavbar = () => {
-      const navbar = document.querySelector('nav.navbar') as HTMLElement;
-      if (navbar) {
-        navbar.style.display = 'none';
-      }
-    };
-    
-    // Hide navbar immediately
-    hideNavbar();
-    
-    // Also try after a short delay in case navbar loads late
-    const timeoutId = setTimeout(hideNavbar, 100);
-    
-    // Use MutationObserver to catch dynamically added navbar
-    const observer = new MutationObserver(hideNavbar);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
 
     // Wait for initial animation to complete before allowing JS control
     // Animation delay (0.9s) + duration (1s) = 1.9s
@@ -144,9 +123,7 @@ export default function Home(): ReactNode {
     setupIntersectionObservers();
     
     return () => {
-      clearTimeout(timeoutId);
       clearTimeout(animationCompleteTimeout);
-      observer.disconnect();
       if (featuresIntersectionObserver) {
         featuresIntersectionObserver.disconnect();
       }
@@ -154,10 +131,6 @@ export default function Home(): ReactNode {
         openSourceIntersectionObserver.disconnect();
       }
       document.body.classList.remove('home-page');
-      const navbar = document.querySelector('nav.navbar') as HTMLElement;
-      if (navbar) {
-        navbar.style.display = '';
-      }
     };
   }, []);
 
