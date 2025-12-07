@@ -69,6 +69,26 @@ const config: Config = {
 
   themes: ['@docusaurus/theme-mermaid'],
   
+  plugins: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      {
+        // Options for local search
+        indexBlog: true, // Index blog posts at /blog path
+        indexPages: true, // Set to true if you want to index pages
+        docsRouteBasePath: '/docs', // Base path for docs
+        blogRouteBasePath: '/blog', // Base path for blog
+        language: ['en'], // Languages to index
+        hashed: true, // Use hashed file names for better caching
+        highlightSearchTermsOnTargetPage: true, // Highlight search terms on the target page
+        searchResultLimits: 8, // Maximum number of search results to display
+        searchResultContextMaxLength: 50, // Maximum length of context around search terms
+        // Disable search page - only use modal search
+        explicitSearchResultPath: false,
+      },
+    ],
+  ],
+  
   themeConfig: {
     // Replace with your project's social card
     image: 'img/slv-social-card.jpg',
