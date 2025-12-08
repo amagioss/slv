@@ -148,14 +148,14 @@ export default function OpenSourceSection(): React.JSX.Element {
             Quick Start
           </Link>
           <a
-            href="https://slv.sh/contributing"
+            href="https://slv.sh/docs/contributing"
             className={styles.actionButton}
             target="_blank"
             rel="noopener noreferrer">
             Contribution Guide
           </a>
           <a
-            href="/blog"
+            href="#"
             className={styles.actionButton}>
             Blog
           </a>
