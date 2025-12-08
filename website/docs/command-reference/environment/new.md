@@ -133,14 +133,6 @@ TBA
 
 ---
 
-## See Also
-
-- [List Environments](/docs/command-reference/environment/list) - View all available environments
-- [Show Environment](/docs/command-reference/environment/show) - View environment details
-- [Add Environment](/docs/command-reference/environment/add) - Add an existing environment
-- [Environment Component](/docs/components/environment) - Learn more about environments
-- [Quick Start Guide](/docs/quick-start) - Get started with SLV
-
 ### Creating AWS KMS based service environments
 #### General Usage:
 ```bash
@@ -168,14 +160,6 @@ TBA
 ```
 
 ---
-
-## See Also
-
-- [List Environments](/docs/command-reference/environment/list) - View all available environments
-- [Show Environment](/docs/command-reference/environment/show) - View environment details
-- [Add Environment](/docs/command-reference/environment/add) - Add an existing environment
-- [Environment Component](/docs/components/environment) - Learn more about environments
-- [Quick Start Guide](/docs/quick-start) - Get started with SLV
 
 ### Creating Azure KMS based service environments
 #### General Usage:
