@@ -40,6 +40,7 @@ System reset successful
 
 ## See Also
 
+- [Interactive Mode (TUI)](/docs/interactive-mode) - Use the interactive TUI to manage SLV
 - [Create a New Environment](/docs/command-reference/environment/new) - Create a new environment after reset
 - [Quick Start Guide](/docs/quick-start) - Get started with SLV
 - [Overview](/docs/overview) - Learn about SLV

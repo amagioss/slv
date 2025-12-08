@@ -39,7 +39,7 @@ $v="v0.16.3"; irm https://slv.sh/scripts/install.ps1 | iex
 ---
 
 ## Verify Installation
-Once installed, you can verify if SLV was installed correctlt by entering 
+Once installed, you can verify if SLV was installed correctly by entering 
 ```bash
 slv --version
 ```

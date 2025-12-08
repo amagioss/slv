@@ -79,6 +79,7 @@ is_pawsome
 
 Now that you've completed the quick start, explore these resources:
 
+- **[Interactive Mode (TUI)](/docs/interactive-mode)** - Try the interactive TUI for managing vaults
 - **[Vault Component](/docs/components/vault)** - Learn more about how vaults work
 - **[Profile Component](/docs/components/profile)** - Understand profiles for team collaboration
 - **[Environment Component](/docs/components/environment)** - Learn about environments

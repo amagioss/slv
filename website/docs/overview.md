@@ -31,3 +31,4 @@ This approach ensures that SLV remains secure, auditable, and easy to use.
 - **[Installation](/docs/installation)** - Install SLV on your system
 - **[Components](/docs/components/vault)** - Learn about vaults, profiles, and environments
 - **[Command Reference](/docs/command-reference/vault/get)** - Explore all available commands
+- **[Contributing](/docs/contributing)** - Contribute to SLV development
