@@ -144,6 +144,7 @@ func VaultCommand() *cobra.Command {
 		if err := vaultCmd.RegisterFlagCompletionFunc(vaultFileFlag.Name, vaultFilePathCompletion); err != nil {
 			utils.ExitOnError(err)
 		}
+		vaultCmd.AddCommand(vaultListCommand())
 		vaultCmd.AddCommand(vaultNewCommand())
 		vaultCmd.AddCommand(vaultUpdateCommand())
 		vaultCmd.AddCommand(vaultPutCommand())

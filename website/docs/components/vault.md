@@ -31,6 +31,7 @@ This makes SLV particularly powerful in collaborative workflows.
 
 ## Related Topics
 
+- [List Vaults](/docs/command-reference/vault/list) - Discover and list all vaults in your project
 - [Create a New Vault](/docs/command-reference/vault/new) - Learn how to create vaults
 - [Put a Secret](/docs/command-reference/vault/put) - Add secrets to your vault
 - [Get a Secret](/docs/command-reference/vault/get) - Retrieve secrets from your vault
