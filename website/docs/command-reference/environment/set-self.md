@@ -34,3 +34,12 @@ Secret Binding:  SLV_ESB_AF4JYBGA2FXKUMAYADQHP6LPPMJM6JQDILREKS3KIHUQJWRZZKO5FQK
 Env Definition:  SLV_EDS_AF4JYNGKIFF4GMAYQ7Y674R7A4HTH5MQSOUUJMWFNHLDJW2EUTCPQMQCJEOJWKYW6G5UWQMPB7H66G7W6KLFGNBUIHAD23AHMXGSBFPUIZFCSW5P23HG46F3LIXHO2ZHZW67O6574W6X5MWXVLJYXZXOTHV25YN3IWR722WT3XWA2GA6IMQQRBE4EKAUDFMQ6J757USXFDDUYV7RUPGK7DX5OSOPLZKME4YPJYLQQZ4MCHY3VCHHQZLQCRH7JWNG7KPOUAIC7D4Q2AAA77745LZ2FQ
 Successfully registered self environment
 ```
+
+---
+
+## See Also
+
+- [Show Environment](/docs/command-reference/environment/show) - View environment details
+- [List Environments](/docs/command-reference/environment/list) - View all available environments
+- [Create a New Environment](/docs/command-reference/environment/new) - Create a new environment
+- [Environment Component](/docs/components/environment) - Learn more about environments

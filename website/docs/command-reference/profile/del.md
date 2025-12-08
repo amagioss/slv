@@ -22,3 +22,12 @@ slv profile rm --name <PROFILE_NAME>
 $ slv profile rm --name my_org
 Deleted profile:  my_org
 ```
+
+---
+
+## See Also
+
+- [List Profiles](/docs/command-reference/profile/list) - View all available profiles
+- [New Profile](/docs/command-reference/profile/new) - Create a new profile
+- [Set Active Profile](/docs/command-reference/profile/set-active) - Switch between profiles
+- [Profile Component](/docs/components/profile) - Learn more about profiles

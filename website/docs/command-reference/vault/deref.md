@@ -53,3 +53,11 @@ Dereferenced secret.txt with the vault test.slv.yaml
 $ cat secret.txt 
 The username is johndoe and the password is super_secret_password
 ```
+
+---
+
+## See Also
+
+- [Referencing](/docs/command-reference/vault/ref) - Replace secrets with references
+- [Get a Secret](/docs/command-reference/vault/get) - Retrieve secrets from your vault
+- [Vault Component](/docs/components/vault) - Learn more about vaults

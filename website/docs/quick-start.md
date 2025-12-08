@@ -4,7 +4,7 @@ sidebar_position: 3
 # Quick Start
 
 ### Create a new environment
-An environment represents an accessing entity, which can be either a `user` or a `service`. For now, we’ll create an environment associated with the current user and register it to the development machine that is in use.
+An [environment](/docs/components/environment) represents an accessing entity, which can be either a `user` or a `service`. For now, we'll create an environment associated with the current user and register it to the development machine that is in use.
 
 > You’ll be prompted to create and confirm a password. This password will be required to access the environment later, so be sure to remember it.
 ```bash
@@ -25,7 +25,7 @@ It is required to access your registered environment.
 ```
 
 ### Create a new vault
-A vault stores secrets in encrypted format in SLV. Let’s quickly create one that’s accessible to the environment we just set up.
+A [vault](/docs/components/vault) stores secrets in encrypted format in SLV. Let's quickly create one that's accessible to the environment we just set up.
 ```bash
 slv vault new --vault test.slv.yaml --env-self
 ```
@@ -72,3 +72,15 @@ echo $my_cat
 ```
 is_pawsome
 ```
+
+---
+
+## Next Steps
+
+Now that you've completed the quick start, explore these resources:
+
+- **[Vault Component](/docs/components/vault)** - Learn more about how vaults work
+- **[Profile Component](/docs/components/profile)** - Understand profiles for team collaboration
+- **[Environment Component](/docs/components/environment)** - Learn about environments
+- **[Command Reference](/docs/command-reference/vault/get)** - Explore all available commands
+- **[Kubernetes Integration](/docs/extensions/slv-in-kubernetes/operator)** - Use SLV in Kubernetes

@@ -4,6 +4,8 @@ sidebar_position: 4
 
 # Get a Secret 
 Retrieve one or all items in a vault.
+
+> **Before you begin:** You need to have a vault with secrets and an environment with access to that vault. If you haven't set this up yet, see [Create a New Vault](/docs/command-reference/vault/new) and [Create a New Environment](/docs/command-reference/environment/new), or follow the [Quick Start Guide](/docs/quick-start).
 #### General Usage:
 ```bash
 slv vault --vault <PATH_TO_VAULT> get [flags]
@@ -80,3 +82,13 @@ username:
     secret: true
     updatedAt: "2025-04-25T14:55:45+05:30"
 ```
+
+---
+
+## See Also
+
+- [Put a Secret](/docs/command-reference/vault/put) - Add secrets to your vault
+- [Create a New Vault](/docs/command-reference/vault/new) - Create a new vault
+- [Vault Component](/docs/components/vault) - Learn more about vaults
+- [Load Vault as Environment Variables](/docs/command-reference/vault/run) - Use the vault secrets as environment variables
+- [Dereference Secrets](/docs/command-reference/vault/deref) - Replace references with actual values

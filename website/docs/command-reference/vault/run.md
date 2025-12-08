@@ -35,3 +35,11 @@ $ exit
 exit
 Command [bash] ended successfully
 ```
+
+---
+
+## See Also
+
+- [Get a Secret](/docs/command-reference/vault/get) - Retrieve secrets from your vault
+- [Vault Component](/docs/components/vault) - Learn more about vaults
+- [GitHub Actions Integration](/docs/extensions/slv-in-github-actions) - Use SLV in CI/CD pipelines

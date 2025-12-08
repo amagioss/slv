@@ -28,3 +28,12 @@ slv vault --vault test.slv.yaml update --name <NEW_VAULT_NAME> --k8s-namespace <
 $ slv vault --vault test.slv.yaml update --name new_vault --k8s-namespace slv
 Vault test.slv.yaml transformed to K8s resource new_vault
 ```
+
+---
+
+## See Also
+
+- [Create a New Vault](/docs/command-reference/vault/new) - Create a new vault
+- [Put a Secret](/docs/command-reference/vault/put) - Add secrets to your vault
+- [Kubernetes Operator](/docs/extensions/slv-in-kubernetes/operator) - Use SLV with Kubernetes
+- [Vault Component](/docs/components/vault) - Learn more about vaults

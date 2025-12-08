@@ -23,3 +23,11 @@ slv profile activate --name <SLV_PROFILE_NAME>
 $ slv profile activate --name my_other_profile
 Successfully set my_other_profile as active profile
 ```
+
+---
+
+## See Also
+
+- [List Profiles](/docs/command-reference/profile/list) - View all available profiles
+- [New Profile](/docs/command-reference/profile/new) - Create a new profile
+- [Profile Component](/docs/components/profile) - Learn more about profiles

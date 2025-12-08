@@ -35,3 +35,12 @@ $ cat secrets.yaml
 password: '{{SLV.test.password}}'
 username: '{{SLV.test.username}}'
 ```
+
+---
+
+## See Also
+
+- [Dereferencing](/docs/command-reference/vault/deref) - Replace references with actual secrets
+- [Put a Secret](/docs/command-reference/vault/put) - Add secrets to your vault
+- [Get a Secret](/docs/command-reference/vault/get) - Retrieve secrets from your vault
+- [Vault Component](/docs/components/vault) - Learn more about vaults

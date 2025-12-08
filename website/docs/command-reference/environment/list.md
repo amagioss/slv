@@ -46,3 +46,12 @@ Email:           alice@example.com
 Tags:            [example_env]
 Secret Binding:  SLV_ESB_AF4JYBGA2FXKUMAYADQHP6LPPMJM6JQDILREKS3KIHUQJWRZZKO5FQKCM4FHIRGR7DXPWHRQIACMHSNZVOOTJ7EDBGRAOODHEABHYIYY5O4Q23WD7TOZWSKIF66XVPZPLNXNTHJVNLVG3DH4N3237LZ7QMOJLGKSHHS6F7JQKOWCW3QLCYXLDYBBZFJ5ZRGVCEXXZVZYLR2ER33X3JLNJNHYICODVMPQ5VREN5GDSLSDLENJ6PUMFXKHZ5EHGOIGIT4TEW6LOYW6XMYR452BRPZSKKXLM5ZT7KHAVL64LPKNK45R3HAPH6IXAAAP772O3VBWC
 ```
+
+---
+
+## See Also
+
+- [Create a New Environment](/docs/command-reference/environment/new) - Create a new environment
+- [Show Environment](/docs/command-reference/environment/show) - View environment details
+- [Add Environment](/docs/command-reference/environment/add) - Add an existing environment
+- [Environment Component](/docs/components/environment) - Learn more about environments

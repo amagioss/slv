@@ -58,3 +58,13 @@ slv profile new http [flags]
 $ slv profile new http -n test --url https://example.com/slvprofile/
 Created profile test from remote (http)
 ```
+
+---
+
+## See Also
+
+- [List Profiles](/docs/command-reference/profile/list) - View all available profiles
+- [Set Active Profile](/docs/command-reference/profile/set-active) - Switch between profiles
+- [Sync Profile](/docs/command-reference/profile/sync) - Sync profile with remote
+- [Profile Component](/docs/components/profile) - Learn more about profiles
+- [Git Profile Integration](/docs/integration-guide/git-profile) - Use profiles with Git repositories

@@ -22,3 +22,12 @@ Secrets such as API keys and tokens are often scattered across Git repositories,
 - **Each environment is treated as a distinct entity**, with the ability to access secrets distributed across multiple vaults.
 
 This approach ensures that SLV remains secure, auditable, and easy to use.
+
+---
+
+## Next Steps
+
+- **[Quick Start Guide](/docs/quick-start)** - Get up and running with SLV in minutes
+- **[Installation](/docs/installation)** - Install SLV on your system
+- **[Components](/docs/components/vault)** - Learn about vaults, profiles, and environments
+- **[Command Reference](/docs/command-reference/vault/get)** - Explore all available commands

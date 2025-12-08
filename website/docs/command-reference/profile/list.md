@@ -25,3 +25,11 @@ my_org_slv_profile
 my_local_slv_profile
 ```
 The active profile is shown in a different color.
+
+---
+
+## See Also
+
+- [New Profile](/docs/command-reference/profile/new) - Create a new profile
+- [Set Active Profile](/docs/command-reference/profile/set-active) - Switch between profiles
+- [Profile Component](/docs/components/profile) - Learn more about profiles

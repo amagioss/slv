@@ -3,7 +3,9 @@ sidebar_position: 1
 ---
 # Create a New Vault
 
-Create a new vault file. 
+Create a new vault file.
+
+> **Before you begin:** You need to have at least one environment set up. If you haven't created an environment yet, see [Create a New Environment](/docs/command-reference/environment/new) or follow the [Quick Start Guide](/docs/quick-start). 
 #### General Usage:
 ```bash
 slv vault --vault <PATH_TO_VAULT> new [flags]
@@ -67,3 +69,12 @@ Input the k8s secret object as yaml/json:
 Created vault: /tmp/vault.slv.yaml
 ```
 In the above example, SLV was directed to read the secret object from `stdin`.
+
+---
+
+## See Also
+
+- [Put a Secret](/docs/command-reference/vault/put) - Add secrets to your vault
+- [Get a Secret](/docs/command-reference/vault/get) - Retrieve secrets from your vault
+- [Vault Component](/docs/components/vault) - Learn more about vaults
+- [Quick Start Guide](/docs/quick-start) - Get started with SLV

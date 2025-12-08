@@ -4,6 +4,8 @@ sidebar_position: 2
 
 # Put a Secret
 Add a secret into a vault
+
+> **Before you begin:** You need to have a vault created. If you haven't created a vault yet, see [Create a New Vault](/docs/command-reference/vault/new).
 #### General Usage:
 ```bash
 slv vault --vault <PATH_TO_VAULT> put [flags]
@@ -93,3 +95,12 @@ spec:
         password: SLV_VSS_AFLGQC2VDEACMAIBKYAAAAFQPXWKDETMGD7DZBINAY6DPULYHSXMF2WXSQBNEB6JA6GJQI76B4AABSJBUHNYKE7ZVGJNO7RYOU5QWZSDL6HHI5FRDLL7X4NNCXNXXGAY6DPZQXAI22MEHKVETI52QMGSXR7H4LPUVDLIAOIBJMCVLTUSJLIHUFUWYM74YGX74M5XY2RZZO4YJPC2WMKTAG5NVPLCJO3T6OISM66UGWCJNJVPKUCDR5Q
         username: SLV_VSS_AFLGQC2VDEACMAIBKYAAAAFQPXWKDETMGD7DZBINAY6DPULYHSXMF2WXSQBNEB6JA6GJQI76B4AABSJBUHNYKE7ZVGJNO7RYOU5QWZSDL6HHI5FRDLL7X4NNCXNXXGAYGG5V7TC5BALTGYZAKVZDDHDMPKIL2QLOTPSNGJABTB64AP33Z6ZX5VIND67BFLP2WZKIENPAC5FB6LIRSIGGJZJLFJ2L47IP
 ```
+
+---
+
+## See Also
+
+- [Get a Secret](/docs/command-reference/vault/get) - Retrieve secrets from your vault
+- [Update a Secret](/docs/command-reference/vault/update) - Update existing secrets
+- [Create a New Vault](/docs/command-reference/vault/new) - Create a new vault
+- [Vault Component](/docs/components/vault) - Learn more about vaults

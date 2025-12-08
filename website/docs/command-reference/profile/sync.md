@@ -20,3 +20,11 @@ slv profile sync
 $ slv profile sync
 Profile test is updated from remote successfully
 ```
+
+---
+
+## See Also
+
+- [New Profile](/docs/command-reference/profile/new) - Create a new profile
+- [List Profiles](/docs/command-reference/profile/list) - View all available profiles
+- [Profile Component](/docs/components/profile) - Learn more about profiles

@@ -3,7 +3,10 @@ sidebar_position: 6
 ---
 
 # Manage Vault Access
-Add or Remove access to the vault.\
+Add or Remove access to the vault.
+
+> **Before you begin:** You need to have a vault created and an environment with access to that vault. The environment managing access to a vault must be able to access the vault in the first place.
+
 **Important Condition:** The environment managing access to a vault must be able to access the vault in the first place.
 
 #### General Usage:
@@ -44,3 +47,12 @@ slv vault --vault <PATH_TO_VAULT> access --env-search <SEARCH_STRING> remove
 $ slv vault --vault test.slv.yaml access --env-search bob@example.com remove
 Shared vault: test.slv.yaml
 ```
+
+---
+
+## See Also
+
+- [Create a New Vault](/docs/command-reference/vault/new) - Create a new vault
+- [Get a Secret](/docs/command-reference/vault/get) - Retrieve secrets from your vault
+- [Environment Component](/docs/components/environment) - Learn about environments
+- [Vault Component](/docs/components/vault) - Learn more about vaults

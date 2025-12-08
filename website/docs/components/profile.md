@@ -5,7 +5,7 @@ sidebar_position: 2
 
 ## What is an SLV Profile?
 
-An **SLV profile** is a foundational concept that brings together a group of environments under a single logical unit. It defines **who** can access secrets by associating multiple environments that are intended to work together — such as teams, deployment stages, or organizational boundaries.
+An **SLV profile** is a foundational concept that brings together a group of [environments](/docs/components/environment) under a single logical unit. To create a profile, see [New Profile](/docs/command-reference/profile/new). It defines **who** can access secrets by associating multiple environments that are intended to work together — such as teams, deployment stages, or organizational boundaries.
 
 Profiles are designed to support scalable and secure secret sharing across individual developers, automation workflows, and infrastructure environments — while keeping access isolated and auditable.
 
@@ -40,3 +40,13 @@ The root environment serves as a secure fallback, ensuring that secrets are not 
 - A **developer team** working on a project can be grouped into a single profile, with each developer having their own environment key.
 - A **CI/CD pipeline** and associated preview environments can be added to a profile for shared access to build-time secrets.
 - A **production infrastructure** profile may include both automation environments and secure operator access, with a root environment acting as a recovery path.
+
+---
+
+## Related Topics
+
+- [Create a New Profile](/docs/command-reference/profile/new) - Learn how to create profiles
+- [List Profiles](/docs/command-reference/profile/list) - View all available profiles
+- [Set Active Profile](/docs/command-reference/profile/set-active) - Switch between profiles
+- [Environment Component](/docs/components/environment) - Learn about environments
+- [Git Profile Integration](/docs/integration-guide/git-profile) - Use profiles with Git repositories
