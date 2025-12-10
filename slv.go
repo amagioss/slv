@@ -48,7 +48,7 @@ func PutVaultItem(vaultFile, secretName string, secretValue []byte, encrypt bool
 	return vault.Put(secretName, secretValue, encrypt)
 }
 
-func CreateVault(vaultFile, name, k8sNamespace string, enableHash, pq bool, pkStrList []string) (*vaults.Vault, error) {
+func NewVault(vaultFile, name, k8sNamespace string, enableHash, pq bool, pkStrList []string) (*vaults.Vault, error) {
 	var pubKeys []*crypto.PublicKey
 	for _, pkStr := range pkStrList {
 		pubKey, err := crypto.PublicKeyFromString(pkStr)
