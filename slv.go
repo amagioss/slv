@@ -1,6 +1,7 @@
 package slv
 
 import (
+	"slv.sh/slv/internal/core/crypto"
 	"slv.sh/slv/internal/core/session"
 	"slv.sh/slv/internal/core/vaults"
 )
@@ -45,4 +46,16 @@ func PutVaultItem(vaultFile, secretName string, secretValue []byte, encrypt bool
 		return err
 	}
 	return vault.Put(secretName, secretValue, encrypt)
+}
+
+func CreateVault(vaultFile, name, k8sNamespace string, enableHash, pq bool, pkStrList []string) (*vaults.Vault, error) {
+	var pubKeys []*crypto.PublicKey
+	for _, pkStr := range pkStrList {
+		pubKey, err := crypto.PublicKeyFromString(pkStr)
+		if err != nil {
+			return nil, err
+		}
+		pubKeys = append(pubKeys, pubKey)
+	}
+	return vaults.New(vaultFile, name, k8sNamespace, enableHash, pq, pubKeys...)
 }
