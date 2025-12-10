@@ -102,11 +102,11 @@ Found 5 vault(s):
 ┌──────────────────────────┬───────────┬───────────┬─────────┬───────────┐
 │ VAULT FILE               │ NAME      │ NAMESPACE │ SECRETS │ ACCESSORS │
 ├──────────────────────────┼───────────┼───────────┼─────────┼───────────┤
-│ dev.slv.yaml             │ dev-env   │ default   │ 12      │ 3         │
-│ prod.slv.yaml            │ prod-env  │ prod      │ 8       │ 2         │
-│ team/backend.slv.yaml    │ backend   │ team      │ 15      │ 5         │
-│ team/frontend.slv.yaml   │ frontend  │ team      │ 10      │ 4         │
-│ secrets/api-keys.slv.yaml│ api-keys  │ -         │ 6       │ 2         │
+│ dev.slv.yaml             │ dev-env   │ default   │      12 │         3 │
+│ prod.slv.yaml            │ prod-env  │ prod      │       8 │         2 │
+│ team/backend.slv.yaml    │ backend   │ team      │      15 │         5 │
+│ team/frontend.slv.yaml   │ frontend  │ team      │      10 │         4 │
+│ secrets/api-keys.slv.yaml│ api-keys  │ -         │       6 │         2 │
 └──────────────────────────┴───────────┴───────────┴─────────┴───────────┘
 ```
 
@@ -157,13 +157,13 @@ slv vault list -r -l
 ```
 Found 3 vault(s):
 
-┌──────────────────────────────┬──────────┬───────────┬─────────┬───────────┐
-│ VAULT FILE                   │ NAME     │ NAMESPACE │ SECRETS │ ACCESSORS │
-├──────────────────────────────┼──────────┼───────────┼─────────┼───────────┤
-│ config/dev.slv.yaml          │ dev      │ default   │ 25      │ 8         │
-│ config/prod.slv.yaml         │ prod     │ prod      │ 12      │ 3         │
-│ infrastructure/secrets.slv...│ infra    │ -         │ 5       │ 2         │
-└──────────────────────────────┴──────────┴───────────┴─────────┴───────────┘
+┌─────────────────────────┬──────────┬───────────┬─────────┬───────────┐
+│ VAULT FILE              │ NAME     │ NAMESPACE │ SECRETS │ ACCESSORS │
+├─────────────────────────┼──────────┼───────────┼─────────┼───────────┤
+│ config/dev.slv.yaml     │ dev      │ default   │      25 │         8 │
+│ config/prod.slv.yaml    │ prod     │ prod      │      12 │         3 │
+│ infrastructure/secrets..│ infra    │ -         │       5 │         2 │
+└─────────────────────────┴──────────┴───────────┴─────────┴───────────┘
 ```
 
 The output shows:
