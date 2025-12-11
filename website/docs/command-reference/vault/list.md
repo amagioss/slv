@@ -110,6 +110,13 @@ Found 5 vault(s):
 └──────────────────────────┴───────────┴───────────┴─────────┴───────────┘
 ```
 
+:::tip
+To view the list of accessors for a specific vault, use:
+```bash
+slv vault -v /path/to/vault.slv.yaml
+```
+:::
+
 ### Specify Directory
 
 List vaults in a specific directory:
@@ -170,6 +177,11 @@ The output shows:
 - 25 secrets in dev vault, accessible by 8 environments
 - 12 secrets in prod vault, accessible by 3 environments
 - 5 secrets in infrastructure vault, accessible by 2 environments
+
+:::tip
+The **ACCESSORS** column shows the count of environments/profiles that can decrypt this vault.
+To see the actual accessor public keys, use `slv vault -v /path/to/vault.slv.yaml`
+:::
 
 ### Example 3: Search Specific Directory
 
