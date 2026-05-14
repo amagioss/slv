@@ -1,13 +1,16 @@
-const exec = require('@actions/exec');
-const os = require('os');
-const core = require('@actions/core');
-const tc = require('@actions/tool-cache');
-const { Octokit } = require("@octokit/rest");
+import { fileURLToPath } from 'node:url';
+import process from 'node:process';
+import * as os from 'node:os';
+import * as exec from '@actions/exec';
+import * as core from '@actions/core';
+import * as tc from '@actions/tool-cache';
+import { Octokit } from '@octokit/rest';
+import { createTokenAuth } from '@octokit/auth-token';
+
 let octokit;
 const token = core.getInput('github-token');
 const userAgent = 'setup-slv';
 if (token) {
-  const { createTokenAuth } = "@octokit/auth-token";
   octokit = new Octokit({
     authStrategy: createTokenAuth,
     auth: token,
@@ -233,8 +236,9 @@ async function run() {
   }
 }
 
-module.exports = run
+export default run;
 
-if (require.main === module) {
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+if (isMain) {
   run();
 }
