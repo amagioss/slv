@@ -18,12 +18,9 @@ package v1
 
 import (
 	"context"
-	"fmt"
 
-	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/crypto"
@@ -35,9 +32,8 @@ var slvlog = logf.Log.WithName(config.AppNameLowerCase)
 
 // SetupWebhookWithManager will setup the manager to manage the webhooks
 func (r *SLV) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
+	return ctrl.NewWebhookManagedBy(mgr, r).
 		WithValidator(r).
-		For(r).
 		Complete()
 }
 
@@ -46,7 +42,7 @@ func (r *SLV) SetupWebhookWithManager(mgr ctrl.Manager) error {
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 //+kubebuilder:webhook:path=/validate,mutating=false,failurePolicy=fail,sideEffects=None,groups=slv.sh,resources=slvs,verbs=create;update,versions=v1,name=validate-slv,admissionReviewVersions=v1
 
-var _ webhook.CustomValidator = &SLV{}
+var _ admission.Validator[*SLV] = &SLV{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (r *SLV) Default() {
@@ -72,27 +68,19 @@ func (r *SLV) validateSLV() (err error) {
 	return nil
 }
 
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *SLV) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	slv, ok := obj.(*SLV)
-	if !ok {
-		return nil, fmt.Errorf("expected *SLV but got %T", obj)
-	}
-	slvlog.Info("Validating create", "name", slv.GetName())
-	return nil, slv.validateSLV()
+// ValidateCreate implements admission.Validator so a webhook will be registered for the type
+func (r *SLV) ValidateCreate(ctx context.Context, obj *SLV) (admission.Warnings, error) {
+	slvlog.Info("Validating create", "name", obj.GetName())
+	return nil, obj.validateSLV()
 }
 
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *SLV) ValidateUpdate(ctx context.Context, old runtime.Object, obj runtime.Object) (admission.Warnings, error) {
-	slv, ok := obj.(*SLV)
-	if !ok {
-		return nil, fmt.Errorf("expected *SLV but got %T", obj)
-	}
-	slvlog.Info("Validating update", "name", slv.GetName())
-	return nil, slv.validateSLV()
+// ValidateUpdate implements admission.Validator so a webhook will be registered for the type
+func (r *SLV) ValidateUpdate(ctx context.Context, oldObj, newObj *SLV) (admission.Warnings, error) {
+	slvlog.Info("Validating update", "name", newObj.GetName())
+	return nil, newObj.validateSLV()
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *SLV) ValidateDelete(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
+// ValidateDelete implements admission.Validator so a webhook will be registered for the type
+func (r *SLV) ValidateDelete(ctx context.Context, obj *SLV) (admission.Warnings, error) {
 	return nil, nil
 }
