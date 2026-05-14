@@ -19,7 +19,7 @@ jobs:
       - name: Setting SLV Version
         run: echo "SLV_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Login to GitHub Container Registry
