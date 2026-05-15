@@ -41,6 +41,8 @@ jobs:
       run: |
         latest_release_tag=$(gh release view --repo ${{ github.repository }} --json tagName -q .tagName)
         echo "version=$latest_release_tag" >> $GITHUB_OUTPUT
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Show SLV Version
       run: |
         echo "$(slv --version | grep "SLV Version")"
