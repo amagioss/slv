@@ -28,15 +28,24 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download llvm-mingw latest version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ASSET_NAME=$(gh release view --repo mstorsjo/llvm-mingw --json assets -q '.assets[].name | select(test("ucrt-ubuntu.*x86_64\\.tar\\.xz$"))')
+          gh release download --repo mstorsjo/llvm-mingw --pattern "$ASSET_NAME" --dir "$RUNNER_TEMP"
+          mkdir -p "$RUNNER_TEMP/llvm-mingw"
+          tar -xf "$RUNNER_TEMP/$ASSET_NAME" --strip-components=1 -C "$RUNNER_TEMP/llvm-mingw"
       - name: Releasing SLV
         run: |
           docker run --rm \
           -w /workspace \
           -v $PWD:/workspace \
+          -v $RUNNER_TEMP/llvm-mingw:/llvm-mingw \
           -e GITHUB_TOKEN \
           -e HOMEBREW_SSH_KEY \
-          ghcr.io/goreleaser/goreleaser-cross:v1.25.1 release \
-          --clean
+          ghcr.io/goreleaser/goreleaser-cross:latest \
+          release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_SSH_KEY: ${{ secrets.HOMEBREW_SSH_KEY }}
