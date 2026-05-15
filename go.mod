@@ -165,7 +165,7 @@ require (
 	golang.org/x/arch v0.27.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20260508232706-74f9aab9d74a // indirect
 	golang.org/x/image v0.40.0 // indirect
-	golang.org/x/mobile v0.0.0-20260508232728-bebd421c7fa8 // indirect
+	golang.org/x/mobile v0.0.0-20260514233045-7de0a8fa7f4d // indirect
 	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
@@ -179,7 +179,7 @@ require (
 	google.golang.org/genproto v0.0.0-20260511170946-3700d4141b60 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260511170946-3700d4141b60 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260511170946-3700d4141b60 // indirect
-	google.golang.org/grpc v1.81.0 // indirect
+	google.golang.org/grpc v1.81.1 // indirect
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect

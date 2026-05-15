@@ -62,6 +62,7 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:${{ env.SLV_VERSION }}
             ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:latest
       - name: Setup Helm
         uses: azure/setup-helm@v5
       - name: Helm Release Charts
