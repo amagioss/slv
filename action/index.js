@@ -5,22 +5,14 @@ import * as exec from '@actions/exec';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import { Octokit } from '@octokit/rest';
-import { createTokenAuth } from '@octokit/auth-token';
 
-let octokit;
 const token = core.getInput('github-token');
 const userAgent = 'setup-slv';
+const octokitOptions = { userAgent };
 if (token) {
-  octokit = new Octokit({
-    authStrategy: createTokenAuth,
-    auth: token,
-    userAgent: userAgent,
-  });
-} else {
-  octokit = new Octokit({
-    userAgent: userAgent,
-  });
+  octokitOptions.auth = token;
 }
+const octokit = new Octokit(octokitOptions);
 
 const owner = 'amagioss';
 const repo = 'slv';

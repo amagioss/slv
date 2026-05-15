@@ -38688,21 +38688,13 @@ const dist_src_Octokit = Octokit.plugin(requestLog, legacyRestEndpointMethods, p
 
 
 
-
-let octokit;
 const token = getInput('github-token');
 const index_userAgent = 'setup-slv';
+const octokitOptions = { userAgent: index_userAgent };
 if (token) {
-  octokit = new dist_src_Octokit({
-    authStrategy: createTokenAuth,
-    auth: token,
-    userAgent: index_userAgent,
-  });
-} else {
-  octokit = new dist_src_Octokit({
-    userAgent: index_userAgent,
-  });
+  octokitOptions.auth = token;
 }
+const octokit = new dist_src_Octokit(octokitOptions);
 
 const owner = 'amagioss';
 const repo = 'slv';
