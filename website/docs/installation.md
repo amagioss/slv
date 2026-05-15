@@ -8,7 +8,7 @@ sidebar_position: 2
 ### MacOS (Homebrew)
 You can install SLV in mac using [homebrew](https://brew.sh/), the package manager for MacOS.
 ```bash
-brew install amagioss/slv/slv
+brew install --cask amagioss/slv/slv
 ```
 
 ### Linux

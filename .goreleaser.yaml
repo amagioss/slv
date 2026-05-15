@@ -236,14 +236,29 @@ nfpms:
       - deb
       - rpm
 
-brews:
+homebrew_casks:
   - ids:
       - slv
     name: slv
-    install: |
-      bin.install "{{ .Binary }}"
-      generate_completions_from_executable(bin/"{{ .Binary }}","completion")
+    binaries:
+      - slv
     homepage: https://slv.sh
+    description: "SLV (Secure Local Vault) - Securely store, share, and access secrets alongside your codebase with modern encryption techniques."
+    license: "MIT"
+    url:
+      verified: "github.com/amagioss/slv/"
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/slv"]
+          end
+          system_command "/bin/mkdir", args: ["-p", "#{HOMEBREW_PREFIX}/etc/bash_completion.d"]
+          system_command "/bin/mkdir", args: ["-p", "#{HOMEBREW_PREFIX}/share/zsh/site-functions"]
+          system_command "/bin/mkdir", args: ["-p", "#{HOMEBREW_PREFIX}/share/fish/vendor_completions.d"]
+          system_command "/bin/bash", args: ["-c", "#{staged_path}/slv completion bash > #{HOMEBREW_PREFIX}/etc/bash_completion.d/slv"]
+          system_command "/bin/bash", args: ["-c", "#{staged_path}/slv completion zsh > #{HOMEBREW_PREFIX}/share/zsh/site-functions/_slv"]
+          system_command "/bin/bash", args: ["-c", "#{staged_path}/slv completion fish > #{HOMEBREW_PREFIX}/share/fish/vendor_completions.d/slv.fish"]
     commit_author:
       name: Shibly Meeran
       email: shibme@shib.me
