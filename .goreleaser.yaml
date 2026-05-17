@@ -6,6 +6,10 @@ env:
   - GO111MODULE=on
   - CGO_ENABLED=1
 
+before:
+  hooks:
+    - sh -c '{ command -v apt-get >/dev/null 2>&1 && HOST_ARCH=$(dpkg --print-architecture) && for a in amd64 arm64 armhf; do [ "$a" = "$HOST_ARCH" ] || dpkg --add-architecture "$a"; done && apt-get update && apt-get install -y --no-install-recommends libx11-dev:amd64 libx11-dev:arm64 libx11-dev:armhf; } || true'
+
 builds:
 
 # Builds for SLV App
@@ -147,7 +151,8 @@ builds:
     goarm:
       - "7"
     env:
-      - CGO_ENABLED=0
+      - CC=arm-linux-gnueabihf-gcc
+      - CXX=arm-linux-gnueabihf-g++
     flags:
       - -trimpath
       - -mod=readonly
@@ -359,7 +364,9 @@ changelog:
 
 nfpms:
   - ids:
-      - slv
+      - slv-app-linux-amd64
+      - slv-app-linux-arm64
+      - slv-app-linux-armv7
     file_name_template: '{{ .PackageName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     vendor: SLV
     homepage: https://slv.sh
