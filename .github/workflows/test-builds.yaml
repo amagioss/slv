@@ -1,0 +1,59 @@
+name: Test Builds
+
+on:
+  push:
+    paths:
+    - '**/*.go'
+    - 'go.mod'
+    - 'go.sum'
+    - '.goreleaser.yaml'
+    - 'Dockerfile'
+    - '.github/workflows/test-builds.yaml'
+    branches:
+    - main
+  pull_request:
+    paths:
+    - '**/*.go'
+    - 'go.mod'
+    - 'go.sum'
+    - '.goreleaser.yaml'
+    - 'Dockerfile'
+    - '.github/workflows/test-builds.yaml'
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+
+  test-builds:
+    name: Test Builds
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+    - name: Free Disk Space (Ubuntu Runner)
+      uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v4
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Download llvm-mingw latest version
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        ASSET_NAME=$(gh release view --repo mstorsjo/llvm-mingw --json assets -q '.assets[].name | select(test("ucrt-ubuntu.*x86_64\\.tar\\.xz$"))')
+        gh release download --repo mstorsjo/llvm-mingw --pattern "$ASSET_NAME" --dir "$RUNNER_TEMP"
+        mkdir -p "$RUNNER_TEMP/llvm-mingw"
+        tar -xf "$RUNNER_TEMP/$ASSET_NAME" --strip-components=1 -C "$RUNNER_TEMP/llvm-mingw"
+    - name: Testing SLV Builds
+      run: |
+        docker run --rm \
+        -w /workspace \
+        -v $PWD:/workspace \
+        -v $RUNNER_TEMP/llvm-mingw:/llvm-mingw \
+        ghcr.io/goreleaser/goreleaser-cross:latest \
+        build --clean --snapshot

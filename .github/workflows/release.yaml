@@ -105,8 +105,7 @@ jobs:
   test:
     name: Test Action
     needs: release
-    uses: ./.github/workflows/test.yaml
+    uses: ./.github/workflows/test-action.yaml
     permissions:
       contents: read
-      packages: read
     secrets: inherit
