@@ -148,8 +148,6 @@ builds:
       - "7"
     env:
       - CGO_ENABLED=0
-      - CC=arm-linux-gnueabihf-gcc
-      - CXX=arm-linux-gnueabihf-g++
     flags:
       - -trimpath
       - -mod=readonly
