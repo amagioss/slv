@@ -119,26 +119,6 @@ builds:
       - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
       - -extldflags "-lc -lrt -lpthread"
 
-  - id: slv-app-linux-static-amd64
-    binary: slv
-    main: ./internal/app
-    goos:
-      - linux
-    goarch:
-      - amd64
-    env:
-      - CGO_ENABLED=0
-    flags:
-      - -trimpath
-      - -mod=readonly
-    ldflags:
-      - -s
-      - -w
-      - -X slv.sh/slv/internal/core/config.version={{.Version}}
-      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
-
   - id: slv-app-linux-arm64
     binary: slv
     main: ./internal/app
@@ -160,26 +140,6 @@ builds:
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
       - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
       - -extldflags "-lc -lrt -lpthread"
-
-  - id: slv-app-linux-static-arm64
-    binary: slv
-    main: ./internal/app
-    goos:
-      - linux
-    goarch:
-      - arm64
-    env:
-      - CGO_ENABLED=0
-    flags:
-      - -trimpath
-      - -mod=readonly
-    ldflags:
-      - -s
-      - -w
-      - -X slv.sh/slv/internal/core/config.version={{.Version}}
-      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
 
   - id: slv-app-linux-armv7
     binary: slv
@@ -375,9 +335,7 @@ archives:
       - slv-app-windows-amd64
       - slv-app-windows-arm64
       - slv-app-linux-amd64
-      - slv-app-linux-static-amd64
       - slv-app-linux-arm64
-      - slv-app-linux-static-arm64
       - slv-app-linux-armv7
   - id: slv-shared-lib
     name_template: "{{ .ProjectName }}-shared-lib_{{ .Os }}_{{ .Arch }}"
