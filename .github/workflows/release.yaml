@@ -108,4 +108,5 @@ jobs:
     uses: ./.github/workflows/test.yaml
     permissions:
       contents: read
+      packages: read
     secrets: inherit
