@@ -25,11 +25,28 @@ on:
 jobs:
 
   test-builds:
-    name: Test Builds
+    name: Test Build - ${{ matrix.goreleaser-id }} on Ubuntu Runner
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
+    strategy:
+      matrix:
+        goreleaser-id:
+          - slv-app-darwin-amd64
+          - slv-app-darwin-arm64
+          - slv-app-windows-amd64
+          - slv-app-windows-arm64
+          - slv-app-linux-amd64
+          - slv-app-linux-arm64
+          - slv-app-linux-armv7
+          - slv-shared-lib-darwin-amd64
+          - slv-shared-lib-darwin-arm64
+          - slv-shared-lib-windows-amd64
+          - slv-shared-lib-windows-arm64
+          - slv-shared-lib-linux-amd64
+          - slv-shared-lib-linux-arm64
+          - slv-shared-lib-linux-armv7
     steps:
     - name: Free Disk Space (Ubuntu Runner)
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -56,4 +73,4 @@ jobs:
         -v $PWD:/workspace \
         -v $RUNNER_TEMP/llvm-mingw:/llvm-mingw \
         ghcr.io/goreleaser/goreleaser-cross:latest \
-        build --clean --snapshot
+        build --clean --snapshot --id ${{ matrix.goreleaser-id }}

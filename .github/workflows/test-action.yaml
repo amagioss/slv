@@ -29,7 +29,7 @@ on:
 jobs:
 
   test-action:
-    name: Test Action
+    name: Test Action - ${{ matrix.version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -38,8 +38,13 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-        version: ['0.16.0', 'latest']
+        os:
+          - macos-latest
+          - windows-latest
+          - ubuntu-latest
+        version:
+          - '0.16.0'
+          - 'latest'
     steps:
     - name: Checkout
       uses: actions/checkout@v6
