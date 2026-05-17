@@ -25,7 +25,7 @@ on:
 jobs:
 
   test-builds:
-    name: Test Build - ${{ matrix.goreleaser-id }} on Ubuntu Runner
+    name: Test Build - ${{ matrix.goreleaser-id }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
