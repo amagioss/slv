@@ -9,6 +9,7 @@ require (
 	cloud.google.com/go/kms v1.31.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
 	github.com/Azure/azure-sdk-for-go/sdk/security/keyvault/azkeys v1.4.0
+	github.com/atotto/clipboard v0.1.4
 	github.com/aws/aws-sdk-go-v2 v1.41.7
 	github.com/aws/aws-sdk-go-v2/config v1.32.17
 	github.com/aws/aws-sdk-go-v2/service/kms v1.51.1
@@ -21,13 +22,12 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jedib0t/go-pretty/v6 v6.7.10
 	github.com/joho/godotenv v1.5.1
-	github.com/onsi/ginkgo/v2 v2.28.3
+	github.com/onsi/ginkgo/v2 v2.29.0
 	github.com/onsi/gomega v1.40.0
 	github.com/open-policy-agent/cert-controller v0.16.0
 	github.com/rivo/tview v0.42.0
 	github.com/spf13/cobra v1.10.2
 	github.com/zalando/go-keyring v0.2.8
-	golang.design/x/clipboard v0.7.1
 	golang.org/x/crypto v0.51.0
 	golang.org/x/term v0.43.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -163,9 +163,6 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.27.0 // indirect
-	golang.org/x/exp/shiny v0.0.0-20260508232706-74f9aab9d74a // indirect
-	golang.org/x/image v0.40.0 // indirect
-	golang.org/x/mobile v0.0.0-20260514233045-7de0a8fa7f4d // indirect
 	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect

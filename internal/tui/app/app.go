@@ -8,7 +8,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"golang.design/x/clipboard"
+	"slv.sh/slv/internal/tui/clipboard"
 	"slv.sh/slv/internal/core/config"
 	"slv.sh/slv/internal/core/vaults"
 	"slv.sh/slv/internal/tui/components"

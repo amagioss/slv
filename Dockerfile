@@ -1,6 +1,6 @@
-FROM cgr.dev/chainguard/glibc-dynamic:latest
+FROM cgr.dev/chainguard/static:latest
 ARG TARGETARCH
-COPY ./dist/slv-app-linux-${TARGETARCH}*/slv /bin/
+COPY ./dist/slv_linux_${TARGETARCH}*/slv /bin/
 WORKDIR /workspace
 USER 65532:65532
 ENV GODEBUG=madvdontneed=1

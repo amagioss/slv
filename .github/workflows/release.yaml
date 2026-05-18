@@ -14,8 +14,16 @@ jobs:
       contents: write
       packages: write
     steps:
-      - name: Free Disk Space (Ubuntu Runner)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet \
+                      /usr/local/lib/android \
+                      /opt/ghc \
+                      /opt/hostedtoolcache/CodeQL \
+                      /usr/local/share/boost \
+                      "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune --all --force >/dev/null
+          df -h /
       - name: Setting SLV Version
         run: echo "SLV_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
       - name: Checkout Code
