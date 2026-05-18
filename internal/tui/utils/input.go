@@ -3,7 +3,7 @@ package utils
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"golang.design/x/clipboard"
+	"slv.sh/slv/internal/tui/clipboard"
 )
 
 // AttachPasteHandler attaches a Ctrl+V paste handler to a tview component (InputField or TextArea)

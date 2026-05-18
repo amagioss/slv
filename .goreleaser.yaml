@@ -6,23 +6,22 @@ env:
   - GO111MODULE=on
   - CGO_ENABLED=1
 
-before:
-  hooks:
-    - sh -c '{ command -v apt-get >/dev/null 2>&1 && HOST_ARCH=$(dpkg --print-architecture) && for a in amd64 arm64 armhf; do [ "$a" = "$HOST_ARCH" ] || dpkg --add-architecture "$a"; done && apt-get update && apt-get install -y --no-install-recommends libx11-dev:amd64 libx11-dev:arm64 libx11-dev:armhf; } || true'
-
 builds:
 
-# Builds for SLV App
-  - id: slv-app-darwin-amd64
+# Builds for App
+  - id: slv
     binary: slv
     main: ./internal/app
-    goos:
-      - darwin
-    goarch:
-      - amd64
+    targets:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+      - linux_arm
+      - windows_amd64
+      - windows_arm64
     env:
-      - CC=o64-clang
-      - CXX=o64-clang++
+      - CGO_ENABLED=0
     flags:
       - -trimpath
       - -mod=readonly
@@ -33,137 +32,6 @@ builds:
       - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
       - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
       - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
-
-  - id: slv-app-darwin-arm64
-    binary: slv
-    main: ./internal/app
-    goos:
-      - darwin
-    goarch:
-      - arm64
-    env:
-      - CC=oa64-clang
-      - CXX=oa64-clang++
-    flags:
-      - -trimpath
-      - -mod=readonly
-    ldflags:
-      - -s
-      - -w
-      - -X slv.sh/slv/internal/core/config.version={{.Version}}
-      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
-
-  - id: slv-app-windows-amd64
-    binary: slv
-    main: ./internal/app
-    goos:
-      - windows
-    goarch:
-      - amd64
-    env:
-      - CC=x86_64-w64-mingw32-gcc
-      - CXX=x86_64-w64-mingw32-g++
-    flags:
-      - -trimpath
-      - -mod=readonly
-    ldflags:
-      - -s
-      - -w
-      - -X slv.sh/slv/internal/core/config.version={{.Version}}
-      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
-
-  - id: slv-app-windows-arm64
-    binary: slv
-    main: ./internal/app
-    goos:
-      - windows
-    goarch:
-      - arm64
-    env:
-      - CC=/llvm-mingw/bin/aarch64-w64-mingw32-gcc
-      - CXX=/llvm-mingw/bin/aarch64-w64-mingw32-g++
-    flags:
-      - -trimpath
-      - -mod=readonly
-    ldflags:
-      - -s
-      - -w
-      - -X slv.sh/slv/internal/core/config.version={{.Version}}
-      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
-
-  - id: slv-app-linux-amd64
-    binary: slv
-    main: ./internal/app
-    goos:
-      - linux
-    goarch:
-      - amd64
-    env:
-      - CC=x86_64-linux-gnu-gcc
-      - CXX=x86_64-linux-gnu-g++
-    flags:
-      - -trimpath
-      - -mod=readonly
-    ldflags:
-      - -s
-      - -w
-      - -X slv.sh/slv/internal/core/config.version={{.Version}}
-      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
-      - -extldflags "-lc -lrt -lpthread"
-
-  - id: slv-app-linux-arm64
-    binary: slv
-    main: ./internal/app
-    goos:
-      - linux
-    goarch:
-      - arm64
-    env:
-      - CC=aarch64-linux-gnu-gcc
-      - CXX=aarch64-linux-gnu-g++
-    flags:
-      - -trimpath
-      - -mod=readonly
-    ldflags:
-      - -s
-      - -w
-      - -X slv.sh/slv/internal/core/config.version={{.Version}}
-      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
-      - -extldflags "-lc -lrt -lpthread"
-
-  - id: slv-app-linux-armv7
-    binary: slv
-    main: ./internal/app
-    goos:
-      - linux
-    goarch:
-      - arm
-    goarm:
-      - "7"
-    env:
-      - CC=arm-linux-gnueabihf-gcc
-      - CXX=arm-linux-gnueabihf-g++
-    flags:
-      - -trimpath
-      - -mod=readonly
-    ldflags:
-      - -s
-      - -w
-      - -X slv.sh/slv/internal/core/config.version={{.Version}}
-      - -X slv.sh/slv/internal/core/config.commitDate={{.CommitDate}}
-      - -X slv.sh/slv/internal/core/config.fullCommit={{.FullCommit}}
-      - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
-      - -extldflags "-lc -lrt -lpthread"
 
 # Builds for Shared Library
   - id: slv-shared-lib-darwin-amd64
@@ -300,7 +168,7 @@ builds:
       - -X slv.sh/slv/internal/core/config.releaseURL={{.ReleaseURL}}
       - -extldflags "-lc -lrt -lpthread"
 
-  - id: slv-shared-lib-linux-armv7
+  - id: slv-shared-lib-linux-arm
     binary: slv
     main: ./internal/sharedlib
     buildmode: c-shared
@@ -330,13 +198,7 @@ archives:
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     formats: [ 'zip' ]
     ids:
-      - slv-app-darwin-amd64
-      - slv-app-darwin-arm64
-      - slv-app-windows-amd64
-      - slv-app-windows-arm64
-      - slv-app-linux-amd64
-      - slv-app-linux-arm64
-      - slv-app-linux-armv7
+      - slv
   - id: slv-shared-lib
     name_template: "{{ .ProjectName }}-shared-lib_{{ .Os }}_{{ .Arch }}"
     formats: [ 'zip' ]
@@ -347,7 +209,7 @@ archives:
       - slv-shared-lib-windows-arm64
       - slv-shared-lib-linux-amd64
       - slv-shared-lib-linux-arm64
-      - slv-shared-lib-linux-armv7
+      - slv-shared-lib-linux-arm
 
 checksum:
   name_template: "{{ .ProjectName }}_checksums.txt"
@@ -364,9 +226,7 @@ changelog:
 
 nfpms:
   - ids:
-      - slv-app-linux-amd64
-      - slv-app-linux-arm64
-      - slv-app-linux-armv7
+      - slv
     file_name_template: '{{ .PackageName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     vendor: SLV
     homepage: https://slv.sh
