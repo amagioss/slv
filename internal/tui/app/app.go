@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -445,14 +446,25 @@ func (t *TUI) showSplashScreen() {
 		return false
 	})
 
-	// Helper to transition from splash to main menu.
+	// done signals the animation goroutine to stop when the splash is
+	// finished (either naturally or because the user skipped it).
+	done := make(chan struct{})
+	var finishOnce sync.Once
+
+	// finishSplash transitions from the splash screen to the main menu.
+	// It must only run once and must run on the tview event loop goroutine
+	// (either directly from an input capture, or via QueueUpdateDraw from
+	// a background goroutine).
 	finishSplash := func() {
-		app.SetBeforeDrawFunc(nil)
-		if t.rootLayout == nil {
-			t.rootLayout = t.app.GetLayoutManager().BuildLayout()
-		}
-		app.SetRoot(t.rootLayout, true)
-		t.navigation.ShowMainMenu(false)
+		finishOnce.Do(func() {
+			close(done)
+			app.SetBeforeDrawFunc(nil)
+			if t.rootLayout == nil {
+				t.rootLayout = t.app.GetLayoutManager().BuildLayout()
+			}
+			app.SetRoot(t.rootLayout, true)
+			t.navigation.ShowMainMenu(false)
+		})
 	}
 
 	// 1) Set splash as root
@@ -460,12 +472,15 @@ func (t *TUI) showSplashScreen() {
 
 	// 2) Animate logo line by line, then switch to main layout
 	go func() {
-		// Animation duration
 		lineDelay := 40 * time.Millisecond
 		currentText := ""
 
 		for _, line := range coloredArtLines {
-			time.Sleep(lineDelay)
+			select {
+			case <-done:
+				return
+			case <-time.After(lineDelay):
+			}
 			currentText += line + "\n"
 
 			// Capture current text for the closure
@@ -476,13 +491,25 @@ func (t *TUI) showSplashScreen() {
 		}
 
 		// Hold for a bit after animation completes
-		time.Sleep(500 * time.Millisecond)
+		select {
+		case <-done:
+			return
+		case <-time.After(500 * time.Millisecond):
+		}
 		app.QueueUpdateDraw(finishSplash)
 	}()
 
-	// 3) Allow any key to skip splash immediately
+	// 3) Allow any key to skip splash immediately.
+	//
+	// IMPORTANT: this callback runs on tview's main event loop goroutine.
+	// We must NOT call QueueUpdate/QueueUpdateDraw here — that would block
+	// waiting for the event loop to drain the updates channel, but the
+	// event loop is the goroutine we're running on, causing a self-deadlock
+	// that freezes the entire TUI. Calling finishSplash directly is safe
+	// because primitive mutations on the event loop goroutine don't race,
+	// and tview will redraw automatically once we return nil.
 	splashGrid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		app.QueueUpdateDraw(finishSplash)
+		finishSplash()
 		return nil // consume key
 	})
 }
