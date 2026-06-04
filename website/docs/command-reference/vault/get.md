@@ -33,7 +33,7 @@ Do you want to save the password in keyring? (y/n): y
 Vault ID:  SLV_VPK_AEAVMAAAACYH33FBSJWDB7R4QUGQMPBX2F4DZLWC5LLZIAWSA7EQPDEYEP7A6
 Vault Data:
 +-----------+-------------------------+--------+----------------------+
-|   NAME    |          VALUE          |  TYPE  |      UPDATED AT      |
+|   NAME    |          VALUE          |  TYPE  |     ENCRYPTED AT     |
 +-----------+-------------------------+--------+----------------------+
 | my_secret | this_is_super_sensitive | Secret | 25-Apr-2025 14:52:42 |
 | password  | super_secret_password   | Secret | 25-Apr-2025 14:55:45 |
@@ -71,16 +71,13 @@ slv vault --vault <PATH_TO_VAULT> get --format [yaml/json] --with-metadata
 $ slv vault --vault test.slv.yaml get --format yaml --with-metadata
 my_secret:
     value: this_is_super_sensitive
-    secret: true
-    updatedAt: "2025-04-25T14:52:42+05:30"
+    encryptedAt: "2025-04-25T14:52:42+05:30"
 password:
     value: super_secret_password
-    secret: true
-    updatedAt: "2025-04-25T14:55:45+05:30"
+    encryptedAt: "2025-04-25T14:55:45+05:30"
 username:
     value: johndoe
-    secret: true
-    updatedAt: "2025-04-25T14:55:45+05:30"
+    encryptedAt: "2025-04-25T14:55:45+05:30"
 ```
 
 ---

@@ -14,6 +14,7 @@ slv env show [command]
 #### Flags:
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- |
+| --env-def | String | True | None | The `EDS` of the environment to show (not required when using a subcommand) |
 | --help | None | NA | NA| Help text for `slv env show` |
 
 #### Commands:
@@ -73,7 +74,7 @@ Env Definition:  SLV_EDS_AF4JYRGM35FMGMA4YXYXOOOXYGFS2U6ISUEWMZUJWMS52H4HJCE7DRY
 ```
 ---
 ## Show K8S Environment
-Print details about the environment present in the cluster corresponding to the current kubernete context. The current context can be found by running the command `kubectl config get-contexts`.
+Print details about the environment present in the cluster corresponding to the current kubernetes context. The current context can be found by running the command `kubectl config get-contexts`.
 #### General Usage:
 ```bash
 slv env show k8s [flags]

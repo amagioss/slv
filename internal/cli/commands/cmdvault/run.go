@@ -107,7 +107,7 @@ func vaultRunCommand() *cobra.Command {
 	if vaultRunCmd == nil {
 		vaultRunCmd = &cobra.Command{
 			Use:     "run",
-			Aliases: []string{"shell", "session", "venv", "vitualenv"},
+			Aliases: []string{"shell", "session", "venv", "virtualenv"},
 			Short:   "Runs the given command or opens a shell with the vault items loaded as environment variables",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()

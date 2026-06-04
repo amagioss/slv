@@ -16,7 +16,7 @@ func systemResetCommand() *cobra.Command {
 	if systemResetCmd == nil {
 		systemResetCmd = &cobra.Command{
 			Use:     "reset",
-			Aliases: []string{"reset", "pruge", "prune", "clean", "clear"},
+			Aliases: []string{"purge", "prune", "clean", "clear"},
 			Short:   "Reset the system",
 			Long:    `Cleans all existing profiles and any other data`,
 			Run: func(cmd *cobra.Command, args []string) {

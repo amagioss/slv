@@ -34,7 +34,7 @@ slv vault --vault <PATH_TO_VAULT> access --env-search <SEARCH_STRING> add
 #### Example:
 ```bash
 $ slv vault --vault test.slv.yaml access --env-search alice add
-Shared vault: test.slv.yaml
+Added vault access: test.slv.yaml
 ```
 ---
 ## Remove Access to a Vault
@@ -45,7 +45,7 @@ slv vault --vault <PATH_TO_VAULT> access --env-search <SEARCH_STRING> remove
 #### Example:
 ```bash
 $ slv vault --vault test.slv.yaml access --env-search bob@example.com remove
-Shared vault: test.slv.yaml
+Revoked vault access: test.slv.yaml
 ```
 
 ---

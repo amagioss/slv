@@ -24,7 +24,7 @@ slv vault --vault <PATH_TO_VAULT> run -c <COMMAND_TO_RUN>
 #### Example:
 ```bash
 $ slv vault --vault test.slv.yaml run -c bash --prefix SLV_ENV_VAR_
-Running command [bash] with secrets loaded into environment variables from the vault test.slv.yaml...
+Running command [bash] with secrets loaded as environment variables from the vault test.slv.yaml.
 Please note that the secret names are prefixed with SLV_ENV_VAR_
 
 $ env | grep SLV_ENV_VAR

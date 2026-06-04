@@ -21,7 +21,7 @@ slv profile activate --name <SLV_PROFILE_NAME>
 #### Example:
 ```bash
 $ slv profile activate --name my_other_profile
-Successfully set my_other_profile as active profile
+Successfully set my_other_profile as the active profile
 ```
 
 ---

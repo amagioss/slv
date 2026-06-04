@@ -32,7 +32,7 @@ slv vault --vault <PATH_TO_VAULT> new [flags]
 ```bash
 slv vault --vault <PATH_TO_VAULT> new [--env-self/--env-k8s/--env-pubkey/--env-search]
 ```
-Note that you must atleast give one of the above 4 flags.
+Note that you must give at least one of the above 4 flags.
 #### Example:
 ```bash
 $ slv vault --vault test.slv.yaml new --env-self
