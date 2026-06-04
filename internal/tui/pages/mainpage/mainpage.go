@@ -41,7 +41,7 @@ func (mp *MainPage) Create() tview.Primitive {
 		AddItem("Vaults", "Manage and organize your vaults", 'v', func() {
 			mp.NavigateTo("vaults", false)
 		}).
-		AddItem("Profiles", "View Profile settings and Environments", 'p', func() {
+		AddItem("Profiles", "View profile settings and environments", 'p', func() {
 			mp.NavigateTo("profiles", false)
 		}).
 		AddItem("Environments", "Manage Environments", 'e', func() {

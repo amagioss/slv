@@ -2,7 +2,7 @@
 sidebar_position: 9
 ---
 
-# Load Vault to Environment Variables
+# Load Vault Secrets as Environment Variables
 Launch a shell or run a command with the secrets loaded as Environment Variables in it.
 #### General Usage:
 ```bash

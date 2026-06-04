@@ -15,7 +15,7 @@ func envSetSelfCommand() *cobra.Command {
 		envSetSelfSCmd = &cobra.Command{
 			Use:     "set-self",
 			Aliases: []string{"self-set", "register-self", "self-register", "register"},
-			Short:   "Registers an environment in the current host as self",
+			Short:   "Register an existing user environment on this machine as self",
 			Run: func(cmd *cobra.Command, args []string) {
 				envDef := cmd.Flag(envDefFlag.Name).Value.String()
 				env, err := environments.FromDefStr(envDef)

@@ -14,7 +14,7 @@ func vaultDerefCommand() *cobra.Command {
 	if vaultDerefCmd == nil {
 		vaultDerefCmd = &cobra.Command{
 			Use:   "deref",
-			Short: "Dereferences and updates values from a vault to a given file with vault references",
+			Short: "Replace SLV references in a file with the actual values from the vault",
 			Run: func(cmd *cobra.Command, args []string) {
 				envSecretKey, err := session.GetSecretKey()
 				if err != nil {

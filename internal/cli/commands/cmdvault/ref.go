@@ -42,7 +42,7 @@ func vaultRefCommand() *cobra.Command {
 		vaultRefCmd = &cobra.Command{
 			Use:     "ref",
 			Aliases: []string{"reference"},
-			Short:   "References and updates secrets to a vault from a given yaml, json or the whole file content",
+			Short:   "Move secrets from a YAML/JSON/text file into a vault and replace them with references",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 				vault, err := vaults.Get(vaultFile)

@@ -15,7 +15,7 @@ func profileNewCommand() *cobra.Command {
 		profileNewCmd = &cobra.Command{
 			Use:     "new",
 			Aliases: []string{"setup"},
-			Short:   "Sets up a new profile from a given remote",
+			Short:   "Set up a new profile from a remote source",
 			Run: func(cmd *cobra.Command, args []string) {
 				cmd.Help()
 			},
@@ -31,7 +31,7 @@ func getRemoteProfileCommand(remoteType string) *cobra.Command {
 	remoteArgs := profiles.GetRemoteTypeArgs(remoteType)
 	remoteProfileCommand := &cobra.Command{
 		Use:   remoteType,
-		Short: "Sets up a profile based on a remote profile (" + remoteType + ")",
+		Short: "Set up a new profile backed by a " + remoteType + " remote",
 		Run: func(cmd *cobra.Command, args []string) {
 			name, _ := cmd.Flags().GetString(profileNameFlag.Name)
 			updateInterval, err := cmd.Flags().GetDuration(profileSyncInterval.Name)

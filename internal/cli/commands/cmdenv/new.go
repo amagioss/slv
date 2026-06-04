@@ -33,7 +33,7 @@ func envNewServiceCommand() *cobra.Command {
 	if envNewServiceCmd == nil {
 		envNewServiceCmd = &cobra.Command{
 			Use:   "service",
-			Short: "Creates a new service environment",
+			Short: "Create a new service environment",
 			Run: func(cmd *cobra.Command, args []string) {
 				cmd.Help()
 			},
@@ -58,7 +58,7 @@ func envNewDirectServiceCommand() *cobra.Command {
 		envNewDirectServicetextCmd = &cobra.Command{
 			Use:     "direct",
 			Aliases: []string{"self-managed", "unmanaged"},
-			Short:   "Creates a new service environment and returns the secret key as plaintext (self-managed)",
+			Short:   "Create a self-managed service environment and return its secret key as plaintext",
 			Run: func(cmd *cobra.Command, args []string) {
 				name, _ := cmd.Flags().GetString(envNameFlag.Name)
 				email, _ := cmd.Flags().GetString(envEmailFlag.Name)
@@ -107,7 +107,7 @@ func envNewUserCommand() *cobra.Command {
 		envNewUserCmd = &cobra.Command{
 			Use:     "self",
 			Aliases: []string{"user", "usr", "u"},
-			Short:   "Register as a new user environment",
+			Short:   "Create and register a new user environment on this machine",
 			Run: func(cmd *cobra.Command, args []string) {
 				selfEnv := environments.GetSelf()
 				if selfEnv != nil {
@@ -167,8 +167,7 @@ func envNewUserCommand() *cobra.Command {
 				}
 				fmt.Println(color.GreenString("Successfully registered as self environment"))
 				if secretBinding != "" {
-					fmt.Println(color.YellowString("Please note down the \"Secret Binding\" somewhere safe so that you don't lose it.\n" +
-						"It is required to access your registered environment."))
+					fmt.Println(color.YellowString("Please save the Secret Binding somewhere safe — it is required to access this environment and cannot be recovered if lost."))
 				}
 				utils.SafeExit()
 			},

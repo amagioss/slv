@@ -7,8 +7,6 @@ Add or Remove access to the vault.
 
 > **Before you begin:** You need to have a vault created and an environment with access to that vault. The environment managing access to a vault must be able to access the vault in the first place.
 
-**Important Condition:** The environment managing access to a vault must be able to access the vault in the first place.
-
 #### General Usage:
 ```bash
 slv vault --vault <PATH_TO_VAULT> access [flags]
@@ -26,25 +24,27 @@ slv vault --vault <PATH_TO_VAULT> access [flags] [command]
 | --help | None | NA | NA | Help text for `slv vault access` |
 
 ---
-## Add Access to a Vault
+## Grant Access to a Vault
+The canonical command is `grant` (aliases: `add`, `allow`, `share`).
 #### Usage:
 ```bash
-slv vault --vault <PATH_TO_VAULT> access --env-search <SEARCH_STRING> add
+slv vault --vault <PATH_TO_VAULT> access --env-search <SEARCH_STRING> grant
 ```
 #### Example:
 ```bash
-$ slv vault --vault test.slv.yaml access --env-search alice add
+$ slv vault --vault test.slv.yaml access --env-search alice grant
 Added vault access: test.slv.yaml
 ```
 ---
-## Remove Access to a Vault
+## Revoke Access to a Vault
+The canonical command is `rm` (aliases: `remove`, `revoke`, `deny`, `del`, `delete`).
 #### Usage:
 ```bash
-slv vault --vault <PATH_TO_VAULT> access --env-search <SEARCH_STRING> remove
+slv vault --vault <PATH_TO_VAULT> access --env-search <SEARCH_STRING> rm
 ```
 #### Example:
 ```bash
-$ slv vault --vault test.slv.yaml access --env-search bob@example.com remove
+$ slv vault --vault test.slv.yaml access --env-search bob@example.com rm
 Revoked vault access: test.slv.yaml
 ```
 

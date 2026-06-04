@@ -32,9 +32,9 @@ func vaultUpdateCommand() *cobra.Command {
 						strings.HasSuffix(k8sSecret, ".json") {
 						data, err = os.ReadFile(k8sSecret)
 					} else if k8sSecret == "-" {
-						data, err = input.ReadBufferFromStdin("Input the k8s secret object as yaml/json: ")
+						data, err = input.ReadBufferFromStdin("Enter the Kubernetes Secret as YAML/JSON: ")
 					} else {
-						utils.ExitOnErrorWithMessage("invalid k8s secret resource file")
+						utils.ExitOnErrorWithMessage("invalid Kubernetes Secret resource file (expected .yaml/.yml/.json or '-')")
 					}
 					if err != nil {
 						utils.ExitOnError(err)

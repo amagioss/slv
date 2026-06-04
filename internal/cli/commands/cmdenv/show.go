@@ -38,7 +38,7 @@ func envShowCommand() *cobra.Command {
 		envShowCmd = &cobra.Command{
 			Use:     "show",
 			Aliases: []string{"describe", "view", "display"},
-			Short:   "Shows the requested environment",
+			Short:   "Show details of an environment from its EDS",
 			Run: func(cmd *cobra.Command, args []string) {
 				envdef, _ := cmd.Flags().GetString(envDefFlag.Name)
 				if env, err := environments.FromDefStr(envdef); err == nil {
@@ -61,7 +61,7 @@ func envShowRootCommand() *cobra.Command {
 	if envShowRootCmd == nil {
 		envShowRootCmd = &cobra.Command{
 			Use:   "root",
-			Short: "Shows the root environment from the active profile",
+			Short: "Show the root environment of the active profile",
 			Run: func(cmd *cobra.Command, args []string) {
 				profile, err := profiles.GetActiveProfile()
 				if err != nil {
@@ -87,7 +87,7 @@ func envShowSelfCommand() *cobra.Command {
 		envShowSelfCmd = &cobra.Command{
 			Use:     "self",
 			Aliases: []string{"me"},
-			Short:   "Shows the current user environment if registered in the host",
+			Short:   "Show the user environment registered on this machine (self)",
 			Run: func(cmd *cobra.Command, args []string) {
 				env := environments.GetSelf()
 				if env == nil {
@@ -106,7 +106,7 @@ func envShowK8sCommand() *cobra.Command {
 		envShowK8sCmd = &cobra.Command{
 			Use:     "k8s",
 			Aliases: []string{"k8s-cluster"},
-			Short:   "Shows the environment registered with the accessible k8s cluster",
+			Short:   "Show the environment registered with the current Kubernetes cluster",
 			Run: func(cmd *cobra.Command, args []string) {
 				name, address, user, err := session.GetK8sClusterInfo()
 				if err != nil {

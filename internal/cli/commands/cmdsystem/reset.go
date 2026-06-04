@@ -17,14 +17,14 @@ func systemResetCommand() *cobra.Command {
 		systemResetCmd = &cobra.Command{
 			Use:     "reset",
 			Aliases: []string{"purge", "prune", "clean", "clear"},
-			Short:   "Reset the system",
-			Long:    `Cleans all existing profiles and any other data`,
+			Short:   "Reset the local SLV installation",
+			Long:    `Removes all profiles, environments, and locally stored SLV data. Remote profile data is not affected.`,
 			Run: func(cmd *cobra.Command, args []string) {
 				selfEnv := environments.GetSelf()
 				confirm, _ := cmd.Flags().GetBool(yesFlag.Name)
 				if !confirm || selfEnv != nil {
 					if selfEnv != nil {
-						fmt.Println(color.YellowString("You have a configured environment which you might have to consider backing up:"))
+						fmt.Println(color.YellowString("You have a registered environment. Consider backing it up before continuing:"))
 						cmdenv.ShowEnv(*selfEnv, true, true)
 					}
 					var err error

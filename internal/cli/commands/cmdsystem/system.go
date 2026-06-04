@@ -9,8 +9,8 @@ func SystemCommand() *cobra.Command {
 		systemCmd = &cobra.Command{
 			Use:     "system",
 			Aliases: []string{"systems"},
-			Short:   "System level commands",
-			Long:    `System level operations can be carried out using this command`,
+			Short:   "Manage SLV system-level settings",
+			Long:    `System-level operations such as resetting the local SLV installation.`,
 			Run: func(cmd *cobra.Command, args []string) {
 				cmd.Help()
 			},

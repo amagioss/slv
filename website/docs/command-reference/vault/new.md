@@ -20,7 +20,7 @@ slv vault --vault <PATH_TO_VAULT> new [flags]
 | --k8s-namespace | String | False | None | The kubernetes namespace to set for vault CR |
 | --k8s-secret | String | False | None | Construct a vault file based on a K8S secret (Use `-` to read from `stdin`)|
 | --quantum-safe | None | NA | NA | Use Quantum Resistant Cryptography (Kyber1024) |
-| --name | String | False | None | Name of the vault CR - If not set, it will be set as the stripped filename |
+| --name | String | False | None | Name of the vault — defaults to the file's base name |
 | --hash | None | NA | NA | Enables hashing by preserving a partial hash of the actual secret for the purpose of validating secret rotation [Not recommended, though it might be difficult to brute-force] |
 | --vault | String | True | NA | Path to the SLV Vault file |
 | --help | None | NA | NA | Help text for `slv vault new` |

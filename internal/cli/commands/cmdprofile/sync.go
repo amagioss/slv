@@ -14,7 +14,7 @@ func profileSyncCommand() *cobra.Command {
 		profileSyncCmd = &cobra.Command{
 			Use:     "sync",
 			Aliases: []string{"pull"},
-			Short:   "Update the active profile from remote",
+			Short:   "Sync the active profile with its remote source",
 			Run: func(cmd *cobra.Command, args []string) {
 				profile, err := profiles.GetActiveProfile()
 				if err != nil {

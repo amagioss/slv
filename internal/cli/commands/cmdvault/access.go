@@ -17,7 +17,7 @@ func vaultAccessCommand() *cobra.Command {
 		vaultAccessCmd = &cobra.Command{
 			Use:     "access",
 			Aliases: []string{"rights", "privilege", "permission", "permissions"},
-			Short:   "Managing access to a vault",
+			Short:   "Manage access to a vault",
 			Run: func(cmd *cobra.Command, args []string) {
 				cmd.Help()
 			},

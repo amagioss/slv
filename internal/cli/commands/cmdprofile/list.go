@@ -14,7 +14,7 @@ func profileListCommand() *cobra.Command {
 		profileListCmd = &cobra.Command{
 			Use:     "list",
 			Aliases: []string{"ls"},
-			Short:   "Lists all profiles",
+			Short:   "List all local profiles (the active profile is highlighted)",
 			Run: func(cmd *cobra.Command, args []string) {
 				profileNames, err := profiles.List()
 				if err != nil {

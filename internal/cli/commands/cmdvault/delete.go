@@ -14,7 +14,7 @@ func vaultDeleteCommand() *cobra.Command {
 		vaultDeleteCmd = &cobra.Command{
 			Use:     "rm",
 			Aliases: []string{"del", "remove", "delete", "destroy", "erase"},
-			Short:   "Removes one or more items from the vault",
+			Short:   "Remove one or more secrets from a vault",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 				vault, err := vaults.Get(vaultFile)
@@ -28,7 +28,7 @@ func vaultDeleteCommand() *cobra.Command {
 				if err = vault.DeleteItems(secretNames); err != nil {
 					utils.ExitOnError(err)
 				}
-				fmt.Printf(color.GreenString("Successfully deleted the secrets: %v from the vault: %s\n"), secretNames, vaultFile)
+				fmt.Printf(color.GreenString("Successfully deleted secrets %v from vault %s\n"), secretNames, vaultFile)
 			},
 		}
 		vaultDeleteCmd.Flags().StringSliceP(itemNameFlag.Name, itemNameFlag.Shorthand, []string{}, itemNameFlag.Usage)

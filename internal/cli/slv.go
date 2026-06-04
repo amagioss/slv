@@ -21,7 +21,7 @@ var (
 	versionFlag = utils.FlagDef{
 		Name:      "version",
 		Shorthand: "v",
-		Usage:     "Shows version info",
+		Usage:     "Show version information",
 	}
 )
 
@@ -29,7 +29,7 @@ func slvCommand() *cobra.Command {
 	if slvCmd == nil {
 		slvCmd = &cobra.Command{
 			Use:   "slv",
-			Short: "SLV is a tool to encrypt secrets locally",
+			Short: "SLV — Secure Local Vault: encrypt and share secrets alongside your code",
 			Run: func(cmd *cobra.Command, args []string) {
 				version, _ := cmd.Flags().GetBool(versionFlag.Name)
 				if version {

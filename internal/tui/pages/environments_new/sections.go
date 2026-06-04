@@ -110,7 +110,7 @@ func (nep *NewEnvironmentPage) showProviderSelection() {
 	})
 
 	// Add Direct service provider
-	nep.providerList.AddItem("Direct (Service)", "Self-managed service environment (returns plain secret key)", 'd', func() {
+	nep.providerList.AddItem("Direct (Service)", "Self-managed service environment (secret key is returned in plaintext)", 'd', func() {
 		nep.selectedProvider = "direct"
 		nep.selectedType = environments.SERVICE
 		nep.showMetadataForm()

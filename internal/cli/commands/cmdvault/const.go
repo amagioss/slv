@@ -31,7 +31,7 @@ var (
 
 	vaultEnableHashingFlag = utils.FlagDef{
 		Name:  "hash",
-		Usage: "Enables hashing by preserving a partial hash of the actual secret for the purpose of validating secret rotation [Not recommended, though it might be difficult to brute-force]",
+		Usage: "Store a partial hash of each secret to enable rotation detection (not recommended — leaks information about secrets)",
 	}
 
 	vaultNameFlag = utils.FlagDef{
@@ -56,7 +56,7 @@ var (
 
 	varNamePrefixFlag = utils.FlagDef{
 		Name:  "prefix",
-		Usage: "Prefix to set to the secret name while setting it as the environment variable",
+		Usage: "Prefix to prepend to each secret name when exporting as an environment variable",
 	}
 
 	vaultShellCommandFlag = utils.FlagDef{
@@ -88,17 +88,17 @@ var (
 
 	plaintextValueFlag = utils.FlagDef{
 		Name:  "plaintext",
-		Usage: "Indicates that the value will be stored as plaintext (use only for config values that are not sensitive)",
+		Usage: "Store the value as plaintext (use only for non-sensitive config values)",
 	}
 
 	secretForceUpdateFlag = utils.FlagDef{
 		Name:  "force",
-		Usage: "Replaces the secret if it exists already",
+		Usage: "Overwrite the secret if it already exists",
 	}
 
 	vaultExportFormatFlag = utils.FlagDef{
 		Name:  "format",
-		Usage: "List secrets as one of [json, yaml, envar]",
+		Usage: "Output format: json, yaml, or envar",
 	}
 
 	valueWithMetadata = utils.FlagDef{
@@ -118,6 +118,6 @@ var (
 
 	secretSubstitutionPreviewOnlyFlag = utils.FlagDef{
 		Name:  "preview",
-		Usage: "Enables preview mode (shows the substitution result without writing to the file)",
+		Usage: "Show the substitution result without writing to the file",
 	}
 )

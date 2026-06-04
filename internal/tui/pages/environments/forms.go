@@ -114,7 +114,7 @@ func (ep *EnvironmentsPage) showEditForm(fieldName string, row int) {
 	ep.GetTUI().GetApplication().SetFocus(form)
 
 	// Update help text
-	ep.UpdateStatus(fmt.Sprintf("Editing %s | Tab: Navigate | Cancel: Cancel | Push to Profile: Save permanently | Temporary Local: Save locally", fieldName))
+	ep.UpdateStatus(fmt.Sprintf("Editing %s | Tab: Navigate | Cancel: Cancel | Push to Profile: Save to remote profile | Save Locally: Save in this session only", fieldName))
 }
 
 // hideEditForm hides the edit form and shows only the details table

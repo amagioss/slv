@@ -24,7 +24,7 @@ func NewProfilesPage(tui interfaces.TUIInterface) *ProfilesPage {
 func (pp *ProfilesPage) Create() tview.Primitive {
 	// Create content
 	text := tview.NewTextView().
-		SetText("Profiles Page\n\nThis page will show profile management options.").
+		SetText("Profile management is coming soon.\n\nFor now, use the 'slv profile' CLI commands.").
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true)
 
@@ -33,7 +33,7 @@ func (pp *ProfilesPage) Create() tview.Primitive {
 	text.SetTextColor(colors.TextPrimary)
 
 	// Update status bar
-	pp.UpdateStatus("Profiles management - Coming soon")
+	pp.UpdateStatus("Profiles - Coming soon (use 'slv profile' on the CLI)")
 
 	// Create layout using BasePage method
 	return pp.CreateLayout(text)

@@ -14,7 +14,7 @@ func envDeleteCommand() *cobra.Command {
 		envDeleteCmd = &cobra.Command{
 			Use:     "rm",
 			Aliases: []string{"remove", "delete", "del"},
-			Short:   "Removes an environment from active profile",
+			Short:   "Remove an environment from the active profile",
 			Run: func(cmd *cobra.Command, args []string) {
 				profile, err := profiles.GetActiveProfile()
 				if err != nil {
@@ -36,7 +36,7 @@ func envDeleteCommand() *cobra.Command {
 						ShowEnv(*env, false, false)
 						fmt.Println()
 					}
-					confirm, err := input.GetConfirmation("Are you sure you wish to delete the above environment(s) [yes/no]: ", "yes")
+					confirm, err := input.GetConfirmation("Delete the above environment(s)? (yes/no): ", "yes")
 					if err != nil {
 						utils.ExitOnError(err)
 					}

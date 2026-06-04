@@ -8,7 +8,7 @@ sidebar_position: 3
 
 A **vault** in SLV is a container for storing a secret. To create a vault, see [Create a New Vault](/docs/command-reference/vault/new).
 
-As the name suggests, a vault represents a secure space where sensitive data — such as tokens, credentials, or API keys — can be stored and shared with specific environments. It holds the secret value, as well as a list of environments it is shared with.
+As the name suggests, a vault represents a secure space where sensitive data — such as tokens, credentials, or API keys — can be stored and shared with specific environments. It holds secret values, as well as a list of environments it is shared with.
 
 Each vault can be shared with multiple environments. These environments are identified by their public keys, which are used to determine who can access the secret.
 

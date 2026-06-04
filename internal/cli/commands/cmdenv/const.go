@@ -42,28 +42,28 @@ var (
 
 	envAddFlag = utils.FlagDef{
 		Name:  "add",
-		Usage: "Adds environment to active profile",
+		Usage: "Add the environment to the active profile after creation",
 	}
 
 	envSetRootFlag = utils.FlagDef{
 		Name:  "root",
-		Usage: "Set the given environment as root",
+		Usage: "Set the environment as the root environment of the active profile",
 	}
 
 	EnvSearchFlag = utils.FlagDef{
 		Name:      "env-search",
 		Shorthand: "s",
-		Usage:     "Searches query to filter environments",
+		Usage:     "Search query to filter environments by name, email, or tag",
 	}
 
 	showEnvDefFlag = utils.FlagDef{
 		Name:  "show-env-def",
-		Usage: "Shows the environment definition in the output",
+		Usage: "Include the Environment Definition String (EDS) in the output",
 	}
 
 	EnvSelfFlag = utils.FlagDef{
 		Name:  "env-self",
-		Usage: "References to the self environment (the local environment where the command is executed)",
+		Usage: "Use the self environment (the one registered on this machine)",
 	}
 
 	envDefFlag = utils.FlagDef{
@@ -75,11 +75,11 @@ var (
 	EnvPublicKeysFlag = utils.FlagDef{
 		Name:      "env-pubkey",
 		Shorthand: "k",
-		Usage:     "Public keys of environments that can access the vault",
+		Usage:     "Public key(s) of environments to grant access to",
 	}
 
 	EnvK8sFlag = utils.FlagDef{
 		Name:  "env-k8s",
-		Usage: "Shares vault access with the accessible k8s cluster",
+		Usage: "Use the environment registered with the current Kubernetes cluster",
 	}
 )

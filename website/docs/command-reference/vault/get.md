@@ -15,7 +15,7 @@ slv vault --vault <PATH_TO_VAULT> get [flags]
 | -- | -- | -- | -- | -- |
 | --name | String | False | None | Name of the item (key) |
 | --format | String | False | None | List secrets as one of [`json`, `yaml`, `envar`] |
-| --with-metadata | None | NA | NA | Print metadata of items when using `--format` |
+| --with-metadata | None | NA | NA | Include metadata for each item in the output |
 | --base64 | None | NA | NA | Encode the item values as base64 |
 | --vault | String | True | NA | Path to the SLV Vault file or Vault URL|
 | --help | None | NA | NA | Help text for `slv vault get` |
@@ -30,7 +30,7 @@ slv vault --vault <PATH_TO_VAULT> get
 slv vault --vault test.slv.yaml get
 Enter Password: 
 Do you want to save the password in keyring? (y/n): y
-Vault ID:  SLV_VPK_AEAVMAAAACYH33FBSJWDB7R4QUGQMPBX2F4DZLWC5LLZIAWSA7EQPDEYEP7A6
+Vault Name: test
 Vault Data:
 +-----------+-------------------------+--------+----------------------+
 |   NAME    |          VALUE          |  TYPE  |     ENCRYPTED AT     |

@@ -10,7 +10,7 @@ func tuiCommand() *cobra.Command {
 		tuiCmd = &cobra.Command{
 			Use:     "tui",
 			Aliases: []string{"ui", "interactive", "menu", "dashboard"},
-			Short:   "Starts the SLV TUI",
+			Short:   "Start the SLV interactive TUI",
 			Run: func(cmd *cobra.Command, args []string) {
 				tui.RunTUIWithErrorHandling()
 			},

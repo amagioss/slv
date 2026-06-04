@@ -14,6 +14,6 @@ var (
 	yesFlag = utils.FlagDef{
 		Name:      "yes",
 		Shorthand: "y",
-		Usage:     "Confirm action",
+		Usage:     "Skip confirmation prompt",
 	}
 )

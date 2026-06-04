@@ -11,7 +11,7 @@ slv profile rm [flags]
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- |
 | --name | String | True | NA | Name of the profile to delete |
-| --help | None | NA | NA|Help text for `slv profile delete` |
+| --help | None | NA | NA|Help text for `slv profile rm` |
 
 #### Usage:
 ```bash

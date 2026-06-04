@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # List Environments
 
-Used to list all the profiles that are present in the active profile. The command can also be used to filter down results or search based on name, tag and email.
+List all the environments present in the active profile. The command can also be used to filter results or search based on name, tag, or email.
 
 #### General usage:
 ```bash
@@ -15,7 +15,7 @@ slv env list [flags]
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- |
 | --env-search | String(s) | False | None | Search for environments based on `tag`/`email`/`name` |
-| --help | None | NA | NA| Help text for `slv env get` |
+| --help | None | NA | NA| Help text for `slv env list` |
 
 #### Usage:
 ```bash

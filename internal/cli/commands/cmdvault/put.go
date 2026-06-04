@@ -16,7 +16,7 @@ func vaultPutCommand() *cobra.Command {
 		vaultPutCmd = &cobra.Command{
 			Use:     "put",
 			Aliases: []string{"add", "set", "create", "load", "import"},
-			Short:   "Adds, updates or imports secrets to the vault",
+			Short:   "Add, update, or import secrets into a vault",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 				itemName := cmd.Flag(itemNameFlag.Name).Value.String()
@@ -63,7 +63,7 @@ func vaultPutCommand() *cobra.Command {
 				if importFile != "" || itemName == "" {
 					var importData []byte
 					if importFile == "" {
-						importData, err = input.GetMultiLineHiddenInput("Enter the YAML/JSON/ENV format data to be imported: ")
+						importData, err = input.GetMultiLineHiddenInput("Enter the YAML/JSON/ENV data to import: ")
 					} else {
 						importData, err = os.ReadFile(importFile)
 					}

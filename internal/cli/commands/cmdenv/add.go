@@ -15,7 +15,7 @@ func envAddCommand() *cobra.Command {
 		envAddCmd = &cobra.Command{
 			Use:     "add",
 			Aliases: []string{"put"},
-			Short:   "Adds/updates an environment into the active profile",
+			Short:   "Add or update an environment in the active profile",
 			Run: func(cmd *cobra.Command, args []string) {
 				profile, err := profiles.GetActiveProfile()
 				if err != nil {

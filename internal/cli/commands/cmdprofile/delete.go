@@ -14,7 +14,7 @@ func profileDeleteCommand() *cobra.Command {
 		profileDelCmd = &cobra.Command{
 			Use:     "rm",
 			Aliases: []string{"remove", "del", "delete"},
-			Short:   "Removes a profile",
+			Short:   "Remove a local profile",
 			Run: func(cmd *cobra.Command, args []string) {
 				name, _ := cmd.Flags().GetString(profileNameFlag.Name)
 				if err := profiles.Delete(name); err != nil {

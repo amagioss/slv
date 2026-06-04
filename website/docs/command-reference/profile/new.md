@@ -14,7 +14,7 @@ slv profile new [command]
 - [`http`](#creating-a-http-url-based-profile)
 
 ## Creating a Git Based Profile
-Use a remote git reposioty to maintain the profile. 
+Use a remote git repository to maintain the profile. 
 #### Usage:
 ```bash
 slv profile new git [flags] 

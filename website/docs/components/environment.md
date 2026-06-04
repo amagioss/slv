@@ -5,7 +5,6 @@ sidebar_position: 1
 # Environment
 
 ## What is an Environment in SLV?
-## Environment
 
 In SLV, an **environment** is treated as a unique **identity**.
 
@@ -60,7 +59,7 @@ In this case, SLV generates a **secret key** directly, which acts as the identit
 While managing the raw secret key works, it may not always be convenient or secure in automation-heavy workflows. To address this, SLV supports integration with external **Key Management Services (KMS)** such as AWS KMS, Google Cloud KMS, or others.
 
 By leveraging KMS:
-- The secret key can be binded by the cloud provider.
+- The secret key can be bound by the cloud provider.
 - SLV can retrieve the secret binding and unbind the key at runtime, reducing the need for manual secret management.
 
 This setup makes the service environment both secure and automation-friendly — ideal for integrating SLV into production pipelines and infrastructure.

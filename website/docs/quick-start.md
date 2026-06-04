@@ -58,7 +58,7 @@ is_pawsome
 
 > Alternatively, you can inject the secret into your environment variables. This approach is particularly useful when you want to access secrets in your code locally during testing.
 ```bash
-slv vault shell --vault test.slv.yaml
+slv vault run --vault test.slv.yaml
 ```
 #### Output
 ```

@@ -89,7 +89,7 @@ func vaultGetCommand() *cobra.Command {
 		vaultGetCmd = &cobra.Command{
 			Use:     "get",
 			Aliases: []string{"show", "view", "read", "export", "dump"},
-			Short:   "Get one or more values or list the vault in desired format",
+			Short:   "Get one or more secrets from a vault, or export the vault in a chosen format",
 			Run: func(cmd *cobra.Command, args []string) {
 				vaultFile := cmd.Flag(vaultFileFlag.Name).Value.String()
 				itemName := cmd.Flag(itemNameFlag.Name).Value.String()

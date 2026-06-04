@@ -27,7 +27,7 @@ slv env new self [flags]
 #### Flags:
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- |
-| --email | String | True | None | Email Address for the environment being created |
+| --email | String | False | None | Email address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
 | --help | None | NA | NA| Help text for `slv env new self` |
@@ -59,7 +59,7 @@ It is required to access your registered environment.
 ```
 ---
 ## Create a new service environment
-Used to create a new service environment for production kubernetes clusters, Github Actions, CI Pipelines.
+Used to create a new service environment for non-interactive systems such as Kubernetes clusters, GitHub Actions, and CI/CD pipelines.
 #### General Usage:
 ```bash
 slv env new service [command] 
@@ -68,7 +68,7 @@ slv env new service [flags]
 #### Flags:
 | Flag | Arguments | Required | Default | Description |
 | -- | -- | -- | -- | -- |
-| --email | String | True | None | Email Address for the environment being created |
+| --email | String | False | None | Email address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
 | --help | None | NA | NA| Help text for `slv env new service` |
@@ -79,11 +79,11 @@ slv env new service [flags]
 - [`gcp`](#creating-gcp-kms-based-service-environments)
 - [`azure`](#creating-azure-kms-based-service-environments)
 
-4 types Environemts can be created
+Four types of environments can be created
 - [Regular Service](#creating-regular-service-environments) - Uses a conventional secret key (not recommended)
 - [AWS KMS](#creating-aws-kms-based-service-environments) - Uses AWS KMS for secret key
 - [GCP KMS](#creating-gcp-kms-based-service-environments) - Uses GCP KMS for secret key
-- [Azure KMS](#creating-azure-kms-based-service-environments) - Uses GCP KMS for secret key
+- [Azure KMS](#creating-azure-kms-based-service-environments) - Uses Azure Key Vault for secret key
 
 
 ### Creating regular service environments
@@ -116,7 +116,7 @@ slv env new service gcp [flags]
 | -- | -- | -- | -- | -- |
 | --resource-name | String | True | None | GCP KMS resource name |
 | --rsa-pubkey | String | True | None | KMS public key [RSA 4096] as pem file (Recommended to perform offline access binding) |
-| --email | String | True | None | Email Address for the environment being created |
+| --email | String | False | None | Email address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
 | --help | None | NA | NA| Help text for `slv env new service gcp` |
@@ -144,7 +144,7 @@ slv env new service aws [flags]
 | -- | -- | -- | -- | -- |
 | --arn | String | True | None | AWS KMS arn |
 | --rsa-pubkey | String | True | None | KMS public key [RSA 4096] as pem file (Recommended to perform offline access binding) |
-| --email | String | True | None | Email Address for the environment being created |
+| --email | String | False | None | Email address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
 | --help | None | NA | NA| Help text for `slv env new service aws` |
@@ -174,7 +174,7 @@ slv env new service azure [flags]
 | --key-name | String | True | None | Name of the key in Azure Key Vault to use |
 | --key-version | String | False | None |  Version of the key in Azure Key Vault to use (optional, latest version will be used if not specified) |
 | --rsa-pubkey | String | True | None | KMS public key [RSA 4096] as pem file (Recommended to perform offline access binding) |
-| --email | String | True | None | Email Address for the environment being created |
+| --email | String | False | None | Email address for the environment being created |
 | --name | String | True | None | Name of the environment to be created |
 | --tags | String(s) | False | None | Tags to be set for the environment |
 | --help | None | NA | NA| Help text for `slv env new service azure` |
