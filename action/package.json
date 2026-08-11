@@ -29,8 +29,12 @@
     "@octokit/rest": "^22.0.1"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38.4",
-    "eslint": "^10.4.1",
+    "@vercel/ncc": "^0.44.1",
+    "eslint": "^10.8.1",
     "jest": "^30.4.2"
+  },
+  "allowScripts": {
+    "fsevents@2.3.3": true,
+    "unrs-resolver@1.11.1": true
   }
 }
