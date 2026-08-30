@@ -74,5 +74,9 @@
   },
   "engines": {
     "node": ">=24.0"
+  },
+  "allowScripts": {
+    "core-js@3.45.0": true,
+    "fsevents@2.3.3": true
   }
 }
