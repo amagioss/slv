@@ -7,11 +7,11 @@ on:
 
 jobs:
 
-  release:
-    name: SLV Release
+  release-binary:
+    name: SLV Binary Release
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       packages: write
     steps:
       - name: Free disk space
@@ -24,12 +24,8 @@ jobs:
                       "$AGENT_TOOLSDIRECTORY"
           sudo docker image prune --all --force >/dev/null
           df -h /
-      - name: Setting SLV Version
-        run: echo "SLV_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
       - name: Checkout Code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v7
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
         with:
@@ -57,10 +53,62 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_SSH_KEY: ${{ secrets.HOMEBREW_SSH_KEY }}
+
+  major-version-tag:
+    name: Major Version Tag
+    runs-on: ubuntu-latest
+    needs: release-binary
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Force Tagging Major Version
+        run: |
+          FULL_VER_TAG=${{ github.ref_name }}
+          MAJOR_VER_TAG=$(echo "$FULL_VER_TAG" | grep -oE '^v[0-9]+')
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git tag -f "$MAJOR_VER_TAG"
+          git push origin "$MAJOR_VER_TAG" --force
+
+  release-container-images:
+    name: SLV Container Images Release
+    runs-on: ubuntu-latest
+    needs: release-binary
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+      - name: Set SLV Version Environment Variable
+        run: echo "SLV_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+      - name: Download SLV Binaries
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          for arch in amd64 arm64; do
+            gh release download ${{ github.ref_name }} --repo ${{ github.repository }} \
+              --pattern "slv_linux_${arch}.zip" --dir "$RUNNER_TEMP"
+            mkdir -p "dist/slv_linux_${arch}"
+            unzip -o "$RUNNER_TEMP/slv_linux_${arch}.zip" slv -d "dist/slv_linux_${arch}"
+            chmod +x "dist/slv_linux_${arch}/slv"
+          done
+          ls -lh dist/slv_linux_*/slv
       - name: Release SLV Image
         uses: docker/build-push-action@v7
         with:
@@ -71,6 +119,25 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ env.SLV_VERSION }}
             ghcr.io/${{ github.repository }}:${{ github.ref_name }}
             ghcr.io/${{ github.repository }}:latest
+
+  release-helm-charts:
+    name: SLV Helm Charts Release
+    runs-on: ubuntu-latest
+    needs: release-container-images
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+      - name: Set SLV Version Environment Variable
+        run: echo "SLV_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Helm
         uses: azure/setup-helm@v5
       - name: Helm Release Charts
@@ -90,30 +157,22 @@ jobs:
           helm package ./internal/k8s/charts/slv-job --version ${{ env.SLV_VERSION }} --destination .
           helm push ./slv-operator-${{ env.SLV_VERSION }}.tgz oci://ghcr.io/${{ github.repository }}/charts
           helm push ./slv-job-${{ env.SLV_VERSION }}.tgz oci://ghcr.io/${{ github.repository }}/charts
-      - name: Force Tagging Major Version
-        run: |
-          FULL_VER_TAG=${{ github.ref_name }}
-          MAJOR_VER_TAG=$(echo "$FULL_VER_TAG" | grep -oE '^v[0-9]+')
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git tag -f "$MAJOR_VER_TAG"
-          git push origin "$MAJOR_VER_TAG" --force
 
-  pages:
+  test-action:
+    name: Test Action
+    needs: release-binary
+    uses: ./.github/workflows/test-action.yaml
+    permissions:
+      contents: read
+    secrets: inherit
+
+  publish-pages:
     name: Publish Pages
-    needs: release
+    needs: release-helm-charts
     uses: ./.github/workflows/pages.yaml
     permissions:
       contents: read
       packages: read
       pages: write
       id-token: write
-    secrets: inherit
-
-  test:
-    name: Test Action
-    needs: release
-    uses: ./.github/workflows/test-action.yaml
-    permissions:
-      contents: read
     secrets: inherit
