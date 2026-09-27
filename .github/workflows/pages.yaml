@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
           node-version: '24'
@@ -90,14 +90,14 @@ jobs:
           
           echo "✅ Updated GitHub stats: Stars=$STARS, Contributors=$CONTRIBUTORS"
         shell: bash
-      - name: Building Website
+      - name: Build website
         run: |
           npm -C website ci
           npm -C website run build
           cp -r website/build/* pages/
       - name: Install oras
         uses: oras-project/setup-oras@v2
-      - name: Setup Helm
+      - name: Set up Helm
         uses: azure/setup-helm@v5
       - name: Login to GHCR
         uses: docker/login-action@v4
@@ -105,7 +105,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup Pages
+      - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v6
       - name: Pull Helm charts
@@ -123,7 +123,7 @@ jobs:
           done
           helm repo index "${HELM_PAGES_DIR}" --url "${{ steps.pages.outputs.base_url }}/charts"
         shell: bash
-      - name: Add static assets
+      - name: Add Kubernetes samples
         run: |
           CHARTS_REPO_BASE="ghcr.io/${{ github.repository }}/charts"
           mkdir -p pages/k8s/samples/deploy
@@ -135,7 +135,7 @@ jobs:
           helm template slv ./.charts/slv-job --namespace slv > pages/k8s/samples/deploy/job.yaml
           cp internal/k8s/config/crd/bases/slv.sh_slvs.yaml pages/k8s/crd.yaml
           cp internal/k8s/config/samples/slv_v1_slv.yaml pages/k8s/samples/pets.slv.yaml
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
           path: pages

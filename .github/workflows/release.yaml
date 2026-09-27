@@ -7,11 +7,11 @@ on:
 
 jobs:
 
-  release-binary:
-    name: SLV Binary Release
+  release-binaries:
+    name: Release Binaries
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - name: Free disk space
@@ -24,15 +24,15 @@ jobs:
                       "$AGENT_TOOLSDIRECTORY"
           sudo docker image prune --all --force >/dev/null
           df -h /
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v7
-      - name: Login to GitHub Container Registry
+      - name: Login to GHCR
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download llvm-mingw latest version
+      - name: Download llvm-mingw
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -40,7 +40,7 @@ jobs:
           gh release download --repo mstorsjo/llvm-mingw --pattern "$ASSET_NAME" --dir "$RUNNER_TEMP"
           mkdir -p "$RUNNER_TEMP/llvm-mingw"
           tar -xf "$RUNNER_TEMP/$ASSET_NAME" --strip-components=1 -C "$RUNNER_TEMP/llvm-mingw"
-      - name: Releasing SLV
+      - name: Release binaries
         run: |
           docker run --rm \
           -w /workspace \
@@ -57,15 +57,15 @@ jobs:
   major-version-tag:
     name: Major Version Tag
     runs-on: ubuntu-latest
-    needs: release-binary
+    needs: release-binaries
     permissions:
       contents: write
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Force Tagging Major Version
+      - name: Update major tag
         run: |
           FULL_VER_TAG=${{ github.ref_name }}
           MAJOR_VER_TAG=$(echo "$FULL_VER_TAG" | grep -oE '^v[0-9]+')
@@ -74,19 +74,19 @@ jobs:
           git tag -f "$MAJOR_VER_TAG"
           git push origin "$MAJOR_VER_TAG" --force
 
-  release-container-images:
-    name: SLV Container Images Release
+  release-packages:
+    name: Release Packages
     runs-on: ubuntu-latest
-    needs: release-binary
+    needs: release-binaries
     permissions:
       contents: read
       packages: write
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v7
-      - name: Set SLV Version Environment Variable
+      - name: Set SLV version
         run: echo "SLV_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
-      - name: Login to GitHub Container Registry
+      - name: Login to GHCR
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
@@ -109,7 +109,7 @@ jobs:
             chmod +x "dist/slv_linux_${arch}/slv"
           done
           ls -lh dist/slv_linux_*/slv
-      - name: Release SLV Image
+      - name: Release Container Images
         uses: docker/build-push-action@v7
         with:
           platforms: linux/amd64,linux/arm64
@@ -119,28 +119,9 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ env.SLV_VERSION }}
             ghcr.io/${{ github.repository }}:${{ github.ref_name }}
             ghcr.io/${{ github.repository }}:latest
-
-  release-helm-charts:
-    name: SLV Helm Charts Release
-    runs-on: ubuntu-latest
-    needs: release-container-images
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v7
-      - name: Set SLV Version Environment Variable
-        run: echo "SLV_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup Helm
+      - name: Set up Helm
         uses: azure/setup-helm@v5
-      - name: Helm Release Charts
+      - name: Release Helm Charts
         run: |
           echo '{{- define "slvlib.crd" -}}' > internal/k8s/charts/slv-lib/templates/_crd.tpl
           cat internal/k8s/config/crd/bases/slv.sh_slvs.yaml >> internal/k8s/charts/slv-lib/templates/_crd.tpl
@@ -160,7 +141,7 @@ jobs:
 
   test-action:
     name: Test Action
-    needs: release-binary
+    needs: release-binaries
     uses: ./.github/workflows/test-action.yaml
     permissions:
       contents: read
@@ -168,7 +149,7 @@ jobs:
 
   publish-pages:
     name: Publish Pages
-    needs: release-helm-charts
+    needs: release-packages
     uses: ./.github/workflows/pages.yaml
     permissions:
       contents: read

@@ -48,24 +48,24 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v7
-    - name: Setup SLV
+    - name: Set up SLV
       uses: ./
       with:
         version: ${{ matrix.version }}
-    - name: Get latest SLV Version
+    - name: Get latest version
       id: slv-latest
       run: |
         latest_release_tag=$(gh release view --repo ${{ github.repository }} --json tagName -q .tagName)
         echo "version=$latest_release_tag" >> $GITHUB_OUTPUT
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Show SLV Version
+    - name: Show version
       run: |
         echo "$(slv --version | grep "SLV Version")"
-    - name: Capture SLV Version Installed
+    - name: Record installed version
       run: |
         echo "SLV_VERSION_INSTALLED=$(slv --version | grep "SLV Version" | awk '{print $4}')" >> $GITHUB_ENV
-    - name: Verify SLV Version
+    - name: Verify version
       shell: python
       env:
         SLV_VERSION_EXPECTED: ${{ matrix.version }}
@@ -76,7 +76,7 @@ jobs:
           sys.exit(0 if os.environ["SLV_VERSION_INSTALLED"] == os.environ["SLV_LATEST_VERSION"] else 1)
         else:
           sys.exit(0 if os.environ["SLV_VERSION_EXPECTED"] in os.environ["SLV_VERSION_INSTALLED"] else 1)
-    - name: Create a new SLV Environment
+    - name: Create environment
       id: new-slv-env
       run: |
         slv_new_env_output=$(slv env new service direct --name test-action)
@@ -84,22 +84,22 @@ jobs:
         secret_key=$(echo "$slv_new_env_output" | sed -n 's/^Secret Key:[[:space:]]*//p')
         echo "public_key=$public_key" >> $GITHUB_OUTPUT
         echo "secret_key=$secret_key" >> $GITHUB_OUTPUT
-    - name: Create a new SLV Vault
+    - name: Create vault
       run: |
         slv vault new -v pets.slv.yml --env-pubkey ${{ steps.new-slv-env.outputs.public_key }}
         cat pets.slv.yml
-    - name: Add a known secret to the vault
+    - name: Add test secret
       run: |
         slv vault put -v pets.slv.yml --name AWESOME_CAT --value "Kuwan"
         cat pets.slv.yml
-    - name: Load SLV Vault to Environment
+    - name: Load vault secrets
       uses: ./
       with:
         version: ${{ matrix.version }}
         vault: pets.slv.yml
         env-secret-key: ${{ steps.new-slv-env.outputs.secret_key }}
         prefix: "MY_"
-    - name: Verify SLV Secrets
+    - name: Verify secrets
       shell: python
       run: |
         import sys, os

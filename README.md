@@ -1,8 +1,5 @@
 # 🚀 SLV - Secure Local Vault
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Go Report Card](https://goreportcard.com/badge/slv.sh/slv)](https://goreportcard.com/report/slv.sh/slv)
-
 Securely store, share, and access secrets alongside your codebase with modern encryption techniques.
 
 ## 📚 **[Get Started at slv.sh →](https://slv.sh)**
